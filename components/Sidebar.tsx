@@ -28,18 +28,29 @@ const Sidebar: React.FC<SidebarProps> = ({
   onUpdateBridge
 }) => {
   const [showSettings, setShowSettings] = useState(false);
-  const [urlInput, setUrlInput] = useState(bridgeUrl);
+  const [urlInput, setUrlInput] = useState(bridgeUrl || "");
+
+  const handleReconnect = () => {
+    onUpdateBridge(urlInput);
+    setShowSettings(false);
+  };
+
+  const useLocal = () => {
+    setUrlInput("");
+    onUpdateBridge("");
+    setShowSettings(false);
+  };
 
   return (
     <aside className="w-80 border-r border-cyan-500/10 bg-[#05070a] flex flex-col">
       <div className="p-6 border-b border-white/5 bg-gradient-to-b from-cyan-900/10 to-transparent">
         <div className="flex justify-between items-center mb-6">
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ghost Interface</span>
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Spectral Interface</span>
           <button 
             onClick={() => setShowSettings(!showSettings)}
             className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${showSettings ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/20' : 'bg-white/5 text-slate-500 hover:text-white'}`}
           >
-            <i className="fas fa-terminal"></i>
+            <i className="fas fa-network-wired"></i>
           </button>
         </div>
 
@@ -55,48 +66,47 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <div className="text-center">
             <span className={`text-[10px] font-black uppercase tracking-[0.3em] block ${engineActive ? 'text-cyan-400' : 'text-rose-400'}`}>
-              {engineActive ? 'SNIPER_CORE_ONLINE' : 'ENGINE_OFFLINE'}
-            </span>
-            <span className="text-[8px] text-slate-500 font-bold uppercase mt-1 block">
-              {engineActive ? 'Railway Cloud Uplink' : 'System Standby'}
+              {engineActive ? 'ENGINE_PULSE_LIVE' : 'ENGINE_OFFLINE'}
             </span>
           </div>
         </button>
       </div>
 
       {showSettings && (
-        <div className="m-4 p-5 bg-[#0a0f18] border border-cyan-500/20 rounded-2xl shadow-2xl space-y-4 animate-in slide-in-from-top-4 duration-300">
+        <div className="m-4 p-5 bg-[#0a0f18] border border-cyan-500/20 rounded-2xl shadow-2xl space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
           <div>
-            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Bridge Gateway (Railway)</p>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Bridge Gateway (Railway/Custom)</p>
             <input 
               type="text" 
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               placeholder="https://..."
-              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all"
+              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
             />
+            <div className="flex space-x-2">
+               <button 
+                onClick={handleReconnect}
+                className="flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[8px] font-black uppercase rounded-lg transition-all"
+              >
+                Sync Remote
+              </button>
+              <button 
+                onClick={useLocal}
+                className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[8px] font-black uppercase rounded-lg transition-all"
+              >
+                Use Local
+              </button>
+            </div>
           </div>
-          <button 
-            onClick={() => onUpdateBridge(urlInput)}
-            className="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white text-[9px] font-black uppercase rounded-xl transition-all shadow-lg shadow-cyan-500/20"
-          >
-            Reconnect Bridge
-          </button>
         </div>
       )}
 
       <div className="px-6 py-4 flex-1 overflow-hidden flex flex-col">
         <div className="flex justify-between items-center mb-6">
-           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Target Assets</span>
-           <span className="text-[8px] font-black text-cyan-500 px-2 py-0.5 rounded bg-cyan-500/10">COINBASE_FEED</span>
+           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Markets</span>
+           <span className="text-[8px] font-black text-emerald-500 px-2 py-0.5 rounded bg-emerald-500/10 tracking-widest">LIVE_FEED</span>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
-          {assets.length === 0 && (
-            <div className="text-center py-20 text-[9px] text-slate-700 font-bold uppercase flex flex-col items-center">
-              <i className="fas fa-search mb-4 text-2xl opacity-20"></i>
-              Syncing Target Nodes...
-            </div>
-          )}
           {assets.map((asset) => (
             <button
               key={asset.id}

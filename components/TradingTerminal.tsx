@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AccountBalance, ActivePosition, TradeSignal, OpenOrder, ExecutionLog, PerformanceStats } from '../types';
+import { API_BASE } from '../services/tradingService';
 
 interface TradingTerminalProps {
   balances: AccountBalance[];
@@ -21,69 +22,73 @@ interface TradingTerminalProps {
 
 const TradingTerminal: React.FC<TradingTerminalProps> = ({ 
   balances, 
-  positions, 
-  logs,
   autoTradeEnabled,
   isEngineActive,
   onToggleEngine,
   onToggleAutoTrade,
-  totalValue,
-  performance,
   thoughtHistory,
   liveActivity,
-  openOrders,
-  diagnostics = [],
   onForceScan
 }) => {
-  const [tab, setTab] = useState<'exposure' | 'orders' | 'logic'>('orders');
+  const [tab, setTab] = useState<'exposure' | 'logic' | 'stats'>('exposure');
+  const [managedAssets, setManagedAssets] = useState<any>({});
   
+  // سینک اطلاعات استراتژیک از بک‌اِند
+  useEffect(() => {
+    const fetchState = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/ghost/state`);
+        const data = await res.json();
+        if (data.managedAssets) setManagedAssets(data.managedAssets);
+      } catch (e) {}
+    };
+    fetchState();
+    const inv = setInterval(fetchState, 5000);
+    return () => clearInterval(inv);
+  }, []);
+
   const cashBalance = balances.find(b => b.currency === 'EUR');
   const eurValue = cashBalance?.total || 0;
-  const cryptoAssets = balances.filter(b => b.currency !== 'EUR' && b.total > 0.0000001);
+  const cryptoHoldings = balances.filter(b => b.currency !== 'EUR' && b.total > 0.0000001);
 
   return (
     <div className="flex flex-col space-y-6 font-mono">
+      {/* Top Header Card */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="md:col-span-2 bg-gradient-to-br from-[#020617] to-black border border-cyan-500/20 p-6 rounded-3xl relative overflow-hidden shadow-2xl">
+        <div className="md:col-span-2 bg-gradient-to-br from-[#050810] to-black border border-cyan-500/20 p-6 rounded-[2rem] relative overflow-hidden shadow-2xl">
            <div className="flex justify-between items-start">
               <div>
-                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Network Liquidity (EUR)</p>
+                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Operational Liquidity (EUR)</p>
                  <h2 className="text-4xl font-black text-white tracking-tighter">
                     €{Number(eurValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                  </h2>
-                 <p className="text-[10px] text-emerald-400 font-bold mt-2 uppercase tracking-widest flex items-center">
-                    <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
-                    {liveActivity || "READY_FOR_COMMAND"}
+                 <p className="text-[10px] text-cyan-400 font-bold mt-2 uppercase tracking-widest flex items-center">
+                    <span className="w-2.5 h-2.5 bg-cyan-500 rounded-full mr-2 animate-pulse shadow-[0_0_8px_#22d3ee]"></span>
+                    {liveActivity || "LINKED_TO_NODE"}
                  </p>
               </div>
-              <button 
-                onClick={onForceScan}
-                className="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center border border-cyan-500/20 hover:bg-cyan-500/20 transition-all text-cyan-400 shadow-lg shadow-cyan-500/5 group"
-                title="Trigger Instant Neural Probe"
-              >
-                 <i className="fas fa-bolt group-hover:scale-125 transition-transform"></i>
+              <button onClick={onForceScan} className="w-12 h-12 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 text-white transition-all">
+                 <i className="fas fa-sync-alt"></i>
               </button>
            </div>
         </div>
-        {[
-          { label: 'Wallet Matrix', val: cryptoAssets.length, sub: 'Active Assets', color: 'text-cyan-400' },
-          { label: 'Strategic Ops', val: positions.length, sub: 'Managed Positions', color: 'text-emerald-400' }
-        ].map((stat, i) => (
-          <div key={i} className="bg-[#020617] border border-white/5 p-6 rounded-3xl flex flex-col justify-center">
-             <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
-             <p className={`text-2xl font-black ${stat.color}`}>{stat.val}</p>
-             <p className="text-[7px] text-slate-600 font-bold uppercase mt-1">{stat.sub}</p>
-          </div>
-        ))}
+        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center">
+           <p className="text-[8px] font-black text-slate-500 uppercase mb-1 tracking-widest">Active Assets</p>
+           <p className="text-3xl font-black text-indigo-400">{cryptoHoldings.length}</p>
+        </div>
+        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center">
+           <p className="text-[8px] font-black text-slate-500 uppercase mb-1 tracking-widest">Neural Analysis</p>
+           <p className="text-3xl font-black text-emerald-400">{Object.keys(managedAssets).length}</p>
+        </div>
       </div>
 
-      <div className="bg-[#020617]/90 backdrop-blur-2xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl min-h-[600px] flex flex-col">
-         <div className="px-8 pt-6 pb-4 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-cyan-950/20 to-transparent">
+      <div className="bg-[#050810]/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl min-h-[600px] flex flex-col">
+         <div className="px-8 pt-8 pb-4 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-indigo-950/20 to-transparent">
             <div className="flex space-x-12">
                {[
-                 { id: 'orders', label: 'Tactical Console', icon: 'fa-crosshairs' },
-                 { id: 'exposure', label: 'Asset Matrix', icon: 'fa-cube' },
-                 { id: 'logic', label: 'Neural Insights', icon: 'fa-brain' }
+                 { id: 'exposure', label: 'Asset Matrix', icon: 'fa-layer-group' },
+                 { id: 'logic', label: 'Neural Log', icon: 'fa-microchip' },
+                 { id: 'stats', label: 'System PnL', icon: 'fa-chart-pie' }
                ].map(t => (
                  <button 
                    key={t.id} 
@@ -98,143 +103,111 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
             </div>
          </div>
 
-         <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+         <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
             {tab === 'exposure' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 {cryptoAssets.length === 0 ? (
-                   <div className="col-span-2 py-32 text-center opacity-20 flex flex-col items-center">
-                     <i className="fas fa-box-open text-5xl mb-4"></i>
-                     <p className="text-xs font-black uppercase tracking-[0.3em]">No Assets Detected in Wallet</p>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                 {cryptoHoldings.length === 0 ? (
+                   <div className="col-span-2 py-40 text-center opacity-10 flex flex-col items-center justify-center grayscale">
+                     <i className="fas fa-database text-6xl mb-6"></i>
+                     <p className="text-sm font-black uppercase tracking-[0.5em]">No Nodes Detected in Portfolio</p>
                    </div>
-                 ) : cryptoAssets.map(b => {
-                   const pos = positions.find(p => p.symbol.startsWith(b.currency));
+                 ) : cryptoHoldings.map(b => {
+                   const aiData = managedAssets[b.currency];
+                   const pnl = aiData && aiData.entryPrice > 0 
+                    ? ((aiData.currentPrice - aiData.entryPrice) / aiData.entryPrice) * 100 
+                    : 0;
+                   
                    return (
-                     <div key={b.currency} className="bg-white/[0.03] border border-white/10 p-6 rounded-2xl hover:border-cyan-500/30 transition-all group">
-                        <div className="flex justify-between items-center mb-6">
-                           <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 font-black text-xs">
+                     <div key={b.currency} className="bg-white/[0.03] border border-white/10 p-7 rounded-[2rem] hover:border-cyan-500/30 transition-all relative overflow-hidden group shadow-lg">
+                        {aiData && (
+                          <div className="absolute top-0 right-0 p-4">
+                             <span className="text-[7px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full uppercase tracking-widest">{aiData.strategy}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-start mb-8">
+                           <div className="flex items-center space-x-4">
+                              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 flex items-center justify-center text-white font-black text-lg border border-white/10 shadow-inner">
                                  {b.currency}
                               </div>
-                              <span className="text-sm font-black text-white">{b.currency} Asset</span>
+                              <div>
+                                 <h4 className="text-base font-black text-white tracking-tight">{b.currency} Asset Node</h4>
+                                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Hold: {b.total.toFixed(6)}</p>
+                              </div>
                            </div>
                            <div className="text-right">
-                              <p className="text-[8px] text-slate-500 font-black uppercase mb-1">Total Held</p>
-                              <span className="text-xs font-black text-slate-200">{Number(b.total || 0).toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
+                              <p className={`text-2xl font-black ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                {aiData && aiData.entryPrice > 0 ? `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}%` : '??.%'}
+                              </p>
+                              <p className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Market Performance</p>
                            </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/5">
-                           <div>
-                              <p className="text-[8px] text-cyan-500 font-black uppercase mb-1">Entry Price Node</p>
-                              <p className="text-[13px] font-black text-white">
-                                {pos?.entryPrice ? `€${Number(pos.entryPrice).toLocaleString()}` : 'CALCULATING...'}
+
+                        <div className="grid grid-cols-3 gap-3 mb-6">
+                           <div className="bg-black/50 p-4 rounded-2xl border border-white/5">
+                              <p className="text-[7px] text-slate-500 font-black uppercase mb-1">Entry Value</p>
+                              <p className="text-[11px] font-black text-white">
+                                {aiData && aiData.entryPrice > 0 ? `€${aiData.entryPrice.toLocaleString()}` : 'Detecting...'}
                               </p>
                            </div>
-                           <div className="text-right">
-                              <p className="text-[8px] text-emerald-500 font-black uppercase mb-1">Current Yield</p>
-                              <p className={`text-[13px] font-black ${pos && pos.pnlPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                {pos ? `${Number(pos.pnlPercent).toFixed(2)}%` : 'FETCHING...'}
+                           <div className="bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/20">
+                              <p className="text-[7px] text-emerald-500 font-black uppercase mb-1">AI Target (TP)</p>
+                              <p className="text-[11px] font-black text-emerald-400">
+                                {aiData ? `€${aiData.tp.toLocaleString()}` : 'Calculating...'}
+                              </p>
+                           </div>
+                           <div className="bg-rose-500/5 p-4 rounded-2xl border border-rose-500/20">
+                              <p className="text-[7px] text-rose-500 font-black uppercase mb-1">Defense (SL)</p>
+                              <p className="text-[11px] font-black text-rose-400">
+                                {aiData ? `€${aiData.sl.toLocaleString()}` : 'Calculating...'}
                               </p>
                            </div>
                         </div>
+
+                        {aiData && (
+                          <div className="mt-2 pt-5 border-t border-white/5">
+                             <div className="flex items-center space-x-3 mb-3">
+                                <span className={`w-2 h-2 rounded-full ${aiData.advice === 'SELL' ? 'bg-rose-500 animate-pulse' : aiData.advice === 'BUY' ? 'bg-emerald-500 animate-pulse' : 'bg-cyan-500'}`}></span>
+                                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">AI Bias: {aiData.advice}</span>
+                             </div>
+                             <p className="text-[11px] text-slate-500 leading-relaxed italic opacity-80">
+                               "{aiData.reason}"
+                             </p>
+                          </div>
+                        )}
                      </div>
                    );
                  })}
               </div>
             )}
 
-            {tab === 'orders' && (
+            {tab === 'logic' && (
               <div className="space-y-4">
-                 {positions.length === 0 ? (
-                    <div className="py-32 text-center opacity-20 flex flex-col items-center">
-                       <i className="fas fa-radar text-6xl mb-6 animate-pulse"></i>
-                       <p className="text-[10px] font-black uppercase tracking-[0.4em]">Listening for Tactical Market Entries...</p>
+                 {thoughtHistory.length === 0 ? (
+                   <div className="py-20 text-center opacity-10 flex flex-col items-center">
+                      <i className="fas fa-brain text-5xl mb-6"></i>
+                      <p className="text-[10px] font-black uppercase tracking-widest">Neural cache empty</p>
+                   </div>
+                 ) : thoughtHistory.map((t, i) => (
+                    <div key={i} className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl hover:border-indigo-500/40 transition-all">
+                       <div className="flex justify-between items-center mb-4">
+                          <span className="text-sm font-black text-white">{t.symbol} Signal</span>
+                          <span className="text-[8px] font-black bg-cyan-600 text-white px-3 py-1 rounded-full uppercase tracking-widest">{t.strategy}</span>
+                       </div>
+                       <p className="text-[12px] text-slate-400 leading-relaxed italic mb-4">"{t.reason}"</p>
+                       <div className="flex space-x-6 text-[10px] font-black">
+                          <span className="text-emerald-400">TP: €{t.tp}</span>
+                          <span className="text-rose-400">SL: €{t.sl}</span>
+                          <span className="text-slate-500">Confidence: {t.confidence}%</span>
+                       </div>
                     </div>
-                 ) : (
-                    positions.map(p => (
-                      <div key={p.id} className="bg-gradient-to-r from-cyan-950/20 to-black/40 border border-cyan-500/20 p-8 rounded-3xl relative overflow-hidden group">
-                         <div className="absolute top-0 right-0 p-4">
-                            <span className="text-[8px] font-black bg-cyan-500 text-black px-3 py-1 rounded uppercase tracking-widest">Live Execution</span>
-                         </div>
-                         <div className="flex justify-between items-center mb-8">
-                            <div>
-                               <h3 className="text-2xl font-black text-white tracking-tighter mb-1">{p.symbol}</h3>
-                               <p className="text-[9px] text-slate-500 font-bold uppercase tracking-[0.2em]">{p.strategyPlan || 'PRO_QUANT_LOGIC'}</p>
-                            </div>
-                            <div className="text-right">
-                               <p className={`text-3xl font-black ${p.pnlPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                 {p.pnlPercent >= 0 ? '+' : ''}{Number(p.pnlPercent || 0).toFixed(2)}%
-                               </p>
-                               <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest">Real-time Floating PnL</p>
-                            </div>
-                         </div>
-                         <div className="grid grid-cols-3 gap-4">
-                            {[
-                              { label: 'Entry Node', val: `€${Number(p.entryPrice || 0).toLocaleString()}`, color: 'text-slate-300' },
-                              { label: 'Profit Target', val: `€${Number(p.tp || 0).toLocaleString()}`, color: 'text-emerald-400' },
-                              { label: 'Protection Stop', val: `€${Number(p.sl || 0).toLocaleString()}`, color: 'text-rose-400' }
-                            ].map((m, i) => (
-                              <div key={i} className="bg-black/60 p-5 rounded-2xl border border-white/5">
-                                 <p className="text-[8px] text-slate-500 font-black uppercase mb-2">{m.label}</p>
-                                 <p className={`text-sm font-black ${m.color}`}>{m.val}</p>
-                              </div>
-                            ))}
-                         </div>
-                      </div>
-                    ))
-                 )}
+                 ))}
               </div>
             )}
-
-            {tab === 'logic' && (
-              <div className="space-y-6">
-                 <div className="bg-black/80 border border-white/5 rounded-3xl p-6 shadow-xl">
-                    <h5 className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-6 flex items-center">
-                       <i className="fas fa-terminal mr-3"></i> Core Diagnostics Feed
-                    </h5>
-                    <div className="space-y-2 font-mono max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                       {diagnostics.length === 0 ? (
-                         <p className="text-[9px] text-slate-700 italic">No diagnostic events recorded...</p>
-                       ) : diagnostics.map((d, i) => (
-                         <div key={i} className="text-[9px] flex items-center space-x-3 py-1 border-b border-white/[0.02]">
-                           <span className="text-cyan-900 font-bold">[{i}]</span>
-                           <span className="text-slate-500">{d}</span>
-                         </div>
-                       ))}
-                    </div>
-                 </div>
-
-                 <div className="space-y-4">
-                    {thoughtHistory.length === 0 ? (
-                       <div className="py-20 text-center opacity-30">
-                          <i className="fas fa-brain text-4xl mb-4 text-cyan-500 animate-pulse"></i>
-                          <p className="text-[10px] font-black uppercase">Synthesizing Market Intelligence...</p>
-                       </div>
-                    ) : (
-                      thoughtHistory.map((t, i) => {
-                         const side = t.side || "NEUTRAL";
-                         const confidence = t.confidence || 0;
-                         const thought = t.thoughtProcess || t.reason || "Analyzing patterns...";
-                         const analysis = t.analysis || "Market probe in progress";
-                         
-                         return (
-                            <div key={i} className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl group hover:border-cyan-500/20 transition-all">
-                               <div className="flex justify-between items-center mb-4">
-                                  <div className="flex items-center space-x-3">
-                                     <span className="text-sm font-black text-white">{t.symbol}</span>
-                                     <span className={`text-[8px] font-black px-2 py-1 rounded ${side === 'BUY' ? 'bg-emerald-500 text-black' : side === 'SELL' ? 'bg-rose-500 text-black' : 'bg-slate-800 text-slate-500'}`}>{side}</span>
-                                  </div>
-                                  <span className="text-[9px] font-black text-cyan-400">Reliability: {confidence}%</span>
-                               </div>
-                               <p className="text-[11px] text-slate-400 leading-relaxed mb-4">{thought}</p>
-                               <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-                                 <p className="text-[8px] text-slate-600 font-black uppercase mb-1">Technical Summary</p>
-                                 <p className="text-[10px] font-bold text-slate-300">{analysis}</p>
-                               </div>
-                            </div>
-                         );
-                      })
-                    )}
-                 </div>
+            
+            {tab === 'stats' && (
+              <div className="py-20 text-center opacity-20">
+                 <i className="fas fa-chart-line text-6xl mb-6"></i>
+                 <p className="text-sm font-black uppercase tracking-[0.4em]">Aggregating Historical PnL Data...</p>
               </div>
             )}
          </div>

@@ -1,48 +1,43 @@
 
 import { TradeSignal, AccountBalance, ExecutionLog, OpenOrder } from "../types.ts";
 
-// تشخیص خودکار آدرس سرور: اگر روی سیستم خودتان هستید به 3001 وصل می‌شود
-export const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:3001'
-  : 'https://nova-trade-analyst-production.up.railway.app'; 
+/**
+ * NovaTrade Tactical Bridge Configuration
+ * If localStorage has a custom bridge, use it. Otherwise, default to relative (Vite proxy).
+ */
+export const getApiBase = () => {
+  return localStorage.getItem('NOVA_BRIDGE_URL') || "";
+};
+
+export const setApiBase = (url: string) => {
+  localStorage.setItem('NOVA_BRIDGE_URL', url);
+};
+
+export const API_BASE = getApiBase();
 
 export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
+  const base = getApiBase();
   try {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), 8000);
 
-    const response = await fetch(`${API_BASE}/api/balances`, {
-      mode: 'cors',
+    const url = `${base}/api/balances`;
+    const response = await fetch(url, {
       signal: controller.signal
     });
     
     clearTimeout(id);
     
-    if (!response.ok) {
-        console.error(`API_ERROR: ${response.status}`);
-        return [];
-    }
-    
+    if (!response.ok) return [];
     const data = await response.json();
     
-    // اطمینان از اینکه داده‌ها با فرمت صحیح (AccountBalance) برمی‌گردند
-    return Array.isArray(data) ? data.map((acc: any) => ({
-      currency: acc.currency,
-      available: parseFloat(acc.total || acc.available || 0),
-      total: parseFloat(acc.total || 0)
-    })) : [];
-  } catch (error: any) {
-    console.warn("BRIDGE_CONNECTION_FAILED: ", error.message);
-    return [];
-  }
-};
+    if (!Array.isArray(data)) return [];
 
-export const fetchOpenOrders = async (): Promise<OpenOrder[]> => {
-  try {
-    const response = await fetch(`${API_BASE}/api/ghost/state`);
-    if (!response.ok) return [];
-    const state = await response.json();
-    return state.openOrders || [];
+    return data.map((acc: any) => ({
+      currency: acc.currency || '?',
+      available: parseFloat(acc.available || acc.total || 0),
+      total: parseFloat(acc.total || 0)
+    }));
   } catch (error: any) {
     return [];
   }
@@ -52,9 +47,10 @@ export const executeAutoTrade = async (
   signal: TradeSignal, 
   amountEur: number
 ): Promise<{ success: boolean; log: ExecutionLog; error?: string }> => {
+  const base = getApiBase();
   const timestamp = new Date().toISOString();
   try {
-    const response = await fetch(`${API_BASE}/api/trade`, {
+    const response = await fetch(`${base}/api/trade`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -62,8 +58,7 @@ export const executeAutoTrade = async (
         side: signal.side,
         amount_eur: amountEur,
         price: signal.entryPrice
-      }),
-      mode: 'cors'
+      })
     });
     
     const data = await response.json();
@@ -77,7 +72,7 @@ export const executeAutoTrade = async (
         price: signal.entryPrice,
         timestamp,
         status: data.success ? 'SUCCESS' : 'FAILED',
-        details: data.success ? `EXECUTED_ON_NOVA_RAILWAY` : data.error
+        details: data.success ? `EXECUTED_ON_NODE` : data.error
       }
     };
   } catch (error: any) {
@@ -85,14 +80,8 @@ export const executeAutoTrade = async (
       success: false,
       error: error.message,
       log: { 
-        id: crypto.randomUUID(), 
-        symbol: signal.symbol, 
-        action: signal.side, 
-        amount: 0, 
-        price: 0, 
-        timestamp, 
-        status: 'FAILED',
-        details: `NOVA_BRIDGE_ERR: ${error.message}`
+        id: crypto.randomUUID(), symbol: signal.symbol, action: signal.side, 
+        amount: 0, price: 0, timestamp, status: 'FAILED'
       }
     };
   }

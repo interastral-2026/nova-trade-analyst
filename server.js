@@ -9,7 +9,6 @@ const app = express();
 app.use(cors({ origin: '*', methods: ['GET', 'POST', 'OPTIONS'], allowedHeaders: ['Content-Type', 'Authorization'] }));
 app.use(express.json());
 
-// CONFIGURATION
 const API_KEY_NAME = "organizations/d90bac52-0e8a-4999-b156-7491091ffb5e/apiKeys/79d55457-7e62-45ad-8656-31e1d96e0571";
 const PRIVATE_KEY = `-----BEGIN EC PRIVATE KEY-----
 MHcCAQEEIADE7F++QawcWU5iZfqmo8iupxBkqfJsFV0KsTaGpRpLoAoGCCqGSM49
@@ -22,16 +21,15 @@ let ghostState = {
   autoPilot: true, 
   signals: [],
   thoughts: [],
-  managedPositions: [], 
-  tradeHistory: [], 
-  currentStatus: "OMEGA_V25_READY",
+  managedAssets: {}, 
+  currentStatus: "NOVA_CORE_STABLE",
   scanIndex: 0,
   lastNeuralSync: null
 };
 
 const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'ADA-EUR', 'LINK-EUR'];
 
-// --- COINBASE AUTH UTILS ---
+// --- AUTHENTICATION ---
 function generateToken(method, path) {
   const header = { alg: 'ES256', kid: API_KEY_NAME, typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
@@ -50,100 +48,117 @@ function generateToken(method, path) {
 
 async function coinbaseCall(method, path, body = null) {
   const token = generateToken(method, path);
+  if (!token) throw new Error("TOKEN_GENERATION_FAILED");
   return await axios({
     method,
     url: `https://api.coinbase.com${path}`,
-    headers: { 'Authorization': `Bearer ${token}` },
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     data: body
   });
 }
 
-// --- NEURAL ANALYSIS ENGINE (24/7) ---
-async function runNeuralInference(symbol, price, candles) {
+// --- AI STRATEGIC BRAIN ---
+async function runStrategicAnalysis(symbol, price, candles, context = "NEW_ENTRY") {
   if (!process.env.API_KEY) return null;
-  
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const model = ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: [{ parts: [{ text: `ANALYZE_MARKET: ${JSON.stringify({ symbol, price, candles: candles.slice(-20) })}` }] }],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          side: { type: Type.STRING, enum: ['BUY', 'SELL', 'NEUTRAL'] },
-          tp: { type: Type.NUMBER },
-          sl: { type: Type.NUMBER },
-          confidence: { type: Type.NUMBER },
-          reason: { type: Type.STRING }
-        },
-        required: ['side', 'tp', 'sl', 'confidence', 'reason']
-      },
-      systemInstruction: "You are GHOST_QUANT_AI. High-frequency scalping mode. Output strict JSON."
-    }
-  });
-
   try {
-    const res = await model;
-    return JSON.parse(res.text);
-  } catch (e) {
-    console.error("AI_INFERENCE_FAIL:", e.message);
-    return null;
-  }
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: [{ parts: [{ text: `TASK: STRATEGIC_POSITION_MANAGEMENT | CONTEXT: ${context} | SYMBOL: ${symbol} | PRICE: ${price} | OHLC_WINDOW: ${JSON.stringify(candles.slice(-15))}` }] }],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            side: { type: Type.STRING, enum: ['BUY', 'SELL', 'HOLD', 'NEUTRAL'] },
+            tp: { type: Type.NUMBER, description: "Logical Take Profit based on resistance/fib" },
+            sl: { type: Type.NUMBER, description: "Stop Loss based on market structure" },
+            confidence: { type: Type.NUMBER },
+            strategy: { type: Type.STRING, description: "Name of strategy (e.g. Mean Reversion, Breakout)" },
+            reason: { type: Type.STRING, description: "Technical justification" }
+          },
+          required: ['side', 'tp', 'sl', 'confidence', 'strategy', 'reason']
+        },
+        systemInstruction: "You are NOVA_QUANT_STRATEGIST. Provide high-accuracy TP/SL levels for crypto assets. Focus on capital preservation. Use SMC logic. Output JSON."
+      }
+    });
+    return JSON.parse(response.text);
+  } catch (e) { return null; }
 }
 
-async function performAutonomousScan() {
+// --- CORE MASTER LOOP ---
+async function masterLoop() {
   if (!ghostState.isEngineActive) return;
 
-  const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
-  ghostState.scanIndex++;
-  ghostState.currentStatus = `ANALYZING_${symbol}`;
-
   try {
-    // 1. Get Data
-    const candleRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol.split('-')[0]}&tsym=EUR&limit=30`);
-    const currentPrice = candleRes.data.Data.Data[candleRes.data.Data.Data.length - 1].close;
+    // 1. استخراج موجودی‌ها و یافتن قیمت ورود از تراکنش‌ها
+    const accountsRes = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
+    const activeHoldings = accountsRes.data.accounts.filter(a => parseFloat(a.available_balance.value) > 0.000001 && a.currency !== 'EUR');
 
-    // 2. AI Analysis
-    const decision = await runNeuralInference(symbol, currentPrice, candleRes.data.Data.Data);
+    for (const acc of activeHoldings) {
+      const symbol = `${acc.currency}-EUR`;
+      try {
+        // دریافت آخرین تراکنش خرید برای پیدا کردن قیمت واقعی ورود
+        const fillsRes = await coinbaseCall('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${symbol}&limit=5`);
+        const buyFills = fillsRes.data.fills?.filter(f => f.side === 'BUY') || [];
+        const entryPrice = buyFills.length > 0 ? parseFloat(buyFills[0].price) : 0;
+        
+        // دریافت داده‌های چارت برای تحلیل TP/SL
+        const candleRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${acc.currency}&tsym=EUR&limit=24`);
+        const history = candleRes.data.Data.Data;
+        const currentPrice = history[history.length - 1].close;
+        
+        const strategy = await runStrategicAnalysis(symbol, currentPrice, history, `MANAGE_EXISTING_POS_AT_${entryPrice}`);
+        
+        if (strategy) {
+          ghostState.managedAssets[acc.currency] = {
+            entryPrice,
+            currentPrice,
+            tp: strategy.tp,
+            sl: strategy.sl,
+            strategy: strategy.strategy,
+            advice: strategy.side,
+            reason: strategy.reason,
+            lastUpdate: new Date().toISOString()
+          };
+        }
+      } catch (err) { console.error(`Error processing ${acc.currency}:`, err.message); }
+    }
+
+    // 2. اسکن واچ‌لیست برای سیگنال‌های جدید
+    const scanSym = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
+    ghostState.scanIndex++;
+    const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${scanSym.split('-')[0]}&tsym=EUR&limit=24`);
+    const hist = res.data.Data.Data;
+    const price = hist[hist.length - 1].close;
+    const decision = await runStrategicAnalysis(scanSym, price, hist);
     
     if (decision) {
-      const signal = {
-        ...decision,
-        symbol,
-        entryPrice: currentPrice,
-        id: crypto.randomUUID(),
-        timestamp: new Date().toISOString()
-      };
-
-      ghostState.thoughts.unshift(signal);
-      if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
-
-      // 3. Auto-Trade Logic
-      if (ghostState.autoPilot && decision.side !== 'NEUTRAL' && decision.confidence > 75) {
-        console.log(`AUTO_TRADE_TRIGGERED: ${symbol} ${decision.side}`);
-        // اینجا کد ارسال سفارش به کوین‌بیس می‌تواند قرار بگیرد
-      }
+      const sig = { ...decision, symbol: scanSym, id: crypto.randomUUID(), timestamp: new Date().toISOString() };
+      ghostState.thoughts.unshift(sig);
+      if (ghostState.thoughts.length > 40) ghostState.thoughts.pop();
     }
-    ghostState.lastNeuralSync = new Date().toISOString();
+
+    ghostState.currentStatus = "SYSTEM_OPTIMIZED";
   } catch (e) {
-    console.error("SCAN_ERROR:", e.message);
+    ghostState.currentStatus = "SYNC_TIMEOUT";
   }
 }
 
-// --- API ROUTES ---
-app.get('/api/ghost/state', (req, res) => res.json(ghostState));
-app.post('/api/ghost/toggle', (req, res) => {
-  const { engine, auto } = req.body;
-  if (engine !== undefined) ghostState.isEngineActive = engine;
-  if (auto !== undefined) ghostState.autoPilot = auto;
-  res.json({ success: true });
-});
+setInterval(masterLoop, 45000);
 
-// --- CORE LOOPS ---
-setInterval(performAutonomousScan, 45000); // اسکن هر ۴۵ ثانیه حتی بدون حضور کاربر
+app.get('/api/ghost/state', (req, res) => res.json(ghostState));
+app.get('/api/balances', async (req, res) => {
+  try {
+    const r = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
+    const bals = r.data.accounts.map(a => ({ 
+      currency: a.currency, 
+      total: parseFloat(a.available_balance.value || 0),
+      available: parseFloat(a.available_balance.value || 0)
+    })).filter(b => b.total > 0.0000001);
+    res.json(bals);
+  } catch (e) { res.json([]); }
+});
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`GHOST_CORE_ACTIVE_ON_PORT_${PORT}`);
-});
+app.listen(PORT, '0.0.0.0', () => console.log(`[NovaServer] Listening on ${PORT}`));
