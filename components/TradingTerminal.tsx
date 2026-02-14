@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { AccountBalance, ActivePosition, TradeSignal, OpenOrder, ExecutionLog, PerformanceStats } from '../types';
-// Fix: Import getApiBase instead of non-existent API_BASE from tradingService
 import { getApiBase } from '../services/tradingService';
 
 interface TradingTerminalProps {
@@ -34,11 +33,9 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
   const [tab, setTab] = useState<'exposure' | 'logic' | 'stats'>('exposure');
   const [managedAssets, setManagedAssets] = useState<any>({});
   
-  // سینک اطلاعات استراتژیک از بک‌اِند
   useEffect(() => {
     const fetchState = async () => {
       try {
-        // Fix: Use getApiBase() utility function to retrieve the current bridge URL
         const urlBase = getApiBase();
         const res = await fetch(`${urlBase}/api/ghost/state`);
         const data = await res.json();
@@ -56,7 +53,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
   return (
     <div className="flex flex-col space-y-6 font-mono">
-      {/* Top Header Card */}
+      {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-2 bg-gradient-to-br from-[#050810] to-black border border-cyan-500/20 p-6 rounded-[2rem] relative overflow-hidden shadow-2xl">
            <div className="flex justify-between items-start">
@@ -66,7 +63,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                     €{Number(eurValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                  </h2>
                  <p className="text-[10px] text-cyan-400 font-bold mt-2 uppercase tracking-widest flex items-center">
-                    <span className="w-2.5 h-2.5 bg-cyan-500 rounded-full mr-2 animate-pulse shadow-[0_0_8px_#22d3ee]"></span>
+                    <span className="w-2.5 h-2.5 bg-cyan-500 rounded-full mr-2 animate-pulse"></span>
                     {liveActivity || "LINKED_TO_NODE"}
                  </p>
               </div>
@@ -75,12 +72,12 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
               </button>
            </div>
         </div>
-        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center">
-           <p className="text-[8px] font-black text-slate-500 uppercase mb-1 tracking-widest">Active Assets</p>
+        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center items-center">
+           <p className="text-[8px] font-black text-slate-500 uppercase mb-1 tracking-widest">Active Nodes</p>
            <p className="text-3xl font-black text-indigo-400">{cryptoHoldings.length}</p>
         </div>
-        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center">
-           <p className="text-[8px] font-black text-slate-500 uppercase mb-1 tracking-widest">Neural Analysis</p>
+        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center items-center">
+           <p className="text-[8px] font-black text-slate-500 uppercase mb-1 tracking-widest">AI Oversight</p>
            <p className="text-3xl font-black text-emerald-400">{Object.keys(managedAssets).length}</p>
         </div>
       </div>
@@ -90,8 +87,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
             <div className="flex space-x-12">
                {[
                  { id: 'exposure', label: 'Asset Matrix', icon: 'fa-layer-group' },
-                 { id: 'logic', label: 'Neural Log', icon: 'fa-microchip' },
-                 { id: 'stats', label: 'System PnL', icon: 'fa-chart-pie' }
+                 { id: 'logic', label: 'Neural Log', icon: 'fa-microchip' }
                ].map(t => (
                  <button 
                    key={t.id} 
@@ -109,76 +105,74 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
          <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
             {tab === 'exposure' && (
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                 {cryptoHoldings.length === 0 ? (
-                   <div className="col-span-2 py-40 text-center opacity-10 flex flex-col items-center justify-center grayscale">
-                     <i className="fas fa-database text-6xl mb-6"></i>
-                     <p className="text-sm font-black uppercase tracking-[0.5em]">No Nodes Detected in Portfolio</p>
-                   </div>
-                 ) : cryptoHoldings.map(b => {
+                 {cryptoHoldings.map(b => {
                    const aiData = managedAssets[b.currency];
-                   const pnl = aiData && aiData.entryPrice > 0 
+                   const pnl = (aiData && aiData.entryPrice > 0) 
                     ? ((aiData.currentPrice - aiData.entryPrice) / aiData.entryPrice) * 100 
                     : 0;
                    
                    return (
-                     <div key={b.currency} className="bg-white/[0.03] border border-white/10 p-7 rounded-[2rem] hover:border-cyan-500/30 transition-all relative overflow-hidden group shadow-lg">
-                        {aiData && aiData.strategy && (
+                     <div key={b.currency} className="bg-white/[0.03] border border-white/10 p-7 rounded-[2rem] hover:border-cyan-500/30 transition-all relative overflow-hidden group">
+                        {aiData?.strategy && (
                           <div className="absolute top-0 right-0 p-4">
                              <span className="text-[7px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full uppercase tracking-widest">{aiData.strategy}</span>
                           </div>
                         )}
                         <div className="flex justify-between items-start mb-8">
                            <div className="flex items-center space-x-4">
-                              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 flex items-center justify-center text-white font-black text-lg border border-white/10 shadow-inner">
+                              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 flex items-center justify-center text-white font-black text-lg border border-white/10">
                                  {b.currency}
                               </div>
                               <div>
-                                 <h4 className="text-base font-black text-white tracking-tight">{b.currency} Asset Node</h4>
-                                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Hold: {b.total.toFixed(6)}</p>
+                                 <h4 className="text-base font-black text-white tracking-tight">{b.currency} Node</h4>
+                                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Balance: {b.total.toFixed(4)}</p>
                               </div>
                            </div>
                            <div className="text-right">
                               <p className={`text-2xl font-black ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                {aiData && aiData.entryPrice > 0 ? `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}%` : '0.00%'}
+                                {aiData ? `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}%` : '---%'}
                               </p>
-                              <p className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Market Performance</p>
+                              <p className="text-[8px] text-slate-500 font-black uppercase">Net Performance</p>
                            </div>
                         </div>
 
                         <div className="grid grid-cols-3 gap-3 mb-6">
-                           <div className="bg-black/50 p-4 rounded-2xl border border-white/5">
-                              <p className="text-[7px] text-slate-500 font-black uppercase mb-1">Entry Value</p>
+                           <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+                              <p className="text-[7px] text-slate-500 font-black uppercase mb-1">Entry Ref</p>
                               <p className="text-[11px] font-black text-white">
-                                {aiData && aiData.entryPrice > 0 ? `€${aiData.entryPrice.toLocaleString()}` : '€---'}
+                                {aiData ? `€${aiData.entryPrice.toLocaleString()}` : 'Detecting...'}
                               </p>
                            </div>
                            <div className="bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/20">
                               <p className="text-[7px] text-emerald-500 font-black uppercase mb-1">AI Target (TP)</p>
                               <p className="text-[11px] font-black text-emerald-400">
-                                {aiData && aiData.tp ? `€${aiData.tp.toLocaleString()}` : 'Awaiting...'}
+                                {aiData?.tp ? `€${aiData.tp.toLocaleString()}` : 'Calculating...'}
                               </p>
                            </div>
                            <div className="bg-rose-500/5 p-4 rounded-2xl border border-rose-500/20">
-                              <p className="text-[7px] text-rose-500 font-black uppercase mb-1">Defense (SL)</p>
+                              <p className="text-[7px] text-rose-500 font-black uppercase mb-1">Safety (SL)</p>
                               <p className="text-[11px] font-black text-rose-400">
-                                {aiData && aiData.sl ? `€${aiData.sl.toLocaleString()}` : 'Awaiting...'}
+                                {aiData?.sl ? `€${aiData.sl.toLocaleString()}` : 'Calculating...'}
                               </p>
                            </div>
                         </div>
 
-                        {aiData && aiData.advice ? (
+                        {aiData?.advice ? (
                           <div className="mt-2 pt-5 border-t border-white/5">
-                             <div className="flex items-center space-x-3 mb-3">
-                                <span className={`w-2 h-2 rounded-full ${aiData.advice === 'SELL' ? 'bg-rose-500 animate-pulse' : aiData.advice === 'BUY' ? 'bg-emerald-500 animate-pulse' : 'bg-cyan-500'}`}></span>
-                                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">AI Bias: {aiData.advice}</span>
+                             <div className="flex items-center space-x-3 mb-2">
+                                <span className={`w-2 h-2 rounded-full ${aiData.advice === 'SELL' ? 'bg-rose-500' : 'bg-emerald-500'} animate-pulse`}></span>
+                                <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">AI Bias: {aiData.advice}</span>
                              </div>
-                             <p className="text-[11px] text-slate-500 leading-relaxed italic opacity-80">
+                             <p className="text-[10px] text-slate-500 leading-relaxed italic">
                                "{aiData.reason}"
                              </p>
                           </div>
                         ) : (
-                          <div className="mt-2 pt-5 border-t border-white/5 opacity-40">
-                             <p className="text-[10px] text-center font-black uppercase tracking-widest animate-pulse">Neural Scan in Progress...</p>
+                          <div className="mt-2 pt-5 border-t border-white/5 flex flex-col items-center">
+                             <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-cyan-500/40 animate-progress origin-left"></div>
+                             </div>
+                             <p className="text-[8px] font-black text-cyan-500 uppercase mt-2 animate-pulse">Neural Scan In Progress...</p>
                           </div>
                         )}
                      </div>
@@ -189,32 +183,20 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
             {tab === 'logic' && (
               <div className="space-y-4">
-                 {thoughtHistory.length === 0 ? (
-                   <div className="py-20 text-center opacity-10 flex flex-col items-center">
-                      <i className="fas fa-brain text-5xl mb-6"></i>
-                      <p className="text-[10px] font-black uppercase tracking-widest">Neural cache empty</p>
-                   </div>
-                 ) : thoughtHistory.map((t, i) => (
-                    <div key={i} className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl hover:border-indigo-500/40 transition-all">
+                 {thoughtHistory.map((t, i) => (
+                    <div key={i} className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl">
                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-sm font-black text-white">{t.symbol} Signal</span>
-                          <span className="text-[8px] font-black bg-cyan-600 text-white px-3 py-1 rounded-full uppercase tracking-widest">{t.strategy}</span>
+                          <span className="text-sm font-black text-white">{t.symbol} Market Scan</span>
+                          <span className="text-[8px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full uppercase">{t.strategy}</span>
                        </div>
-                       <p className="text-[12px] text-slate-400 leading-relaxed italic mb-4">"{t.reason}"</p>
-                       <div className="flex space-x-6 text-[10px] font-black">
-                          <span className="text-emerald-400">TP: €{t.tp}</span>
-                          <span className="text-rose-400">SL: €{t.sl}</span>
-                          <span className="text-slate-500">Confidence: {t.confidence}%</span>
+                       <p className="text-[11px] text-slate-400 italic mb-4">"{t.reason}"</p>
+                       <div className="flex space-x-6 text-[9px] font-black uppercase">
+                          <span className="text-emerald-400">Target: €{t.tp}</span>
+                          <span className="text-rose-400">Stop: €{t.sl}</span>
+                          <span className="text-cyan-400">Confidence: {t.confidence}%</span>
                        </div>
                     </div>
                  ))}
-              </div>
-            )}
-            
-            {tab === 'stats' && (
-              <div className="py-20 text-center opacity-20">
-                 <i className="fas fa-chart-line text-6xl mb-6"></i>
-                 <p className="text-sm font-black uppercase tracking-[0.4em]">Aggregating Historical PnL Data...</p>
               </div>
             )}
          </div>
