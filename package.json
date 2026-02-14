@@ -1,21 +1,33 @@
 
 {
-  "name": "novatrade-ai",
+  "name": "novatrade-ai-suite",
   "version": "1.0.0",
-  "description": "NovaTrade AI Professional Trading Suite",
+  "description": "Professional AI Trading System",
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "dev:server": "node server.js",
+    "dev:client": "vite",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "axios": "^1.6.2",
     "@google/genai": "^1.40.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "concurrently": "^8.2.2",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
   }
 }

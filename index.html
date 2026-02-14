@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spectral Overlord V17.6 | Anti-Trap AI</title>
+    <title>NovaTrade AI | Professional Analyst</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,39 +19,28 @@
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: #1e1e2e; border-radius: 2px; }
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .scan-line {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #22d3ee, transparent);
-            position: absolute;
-            width: 100%;
-            animation: scan 3s linear infinite;
-        }
-        @keyframes scan {
-            0% { top: 0; opacity: 0; }
-            50% { opacity: 0.5; }
-            100% { top: 100%; opacity: 0; }
-        }
     </style>
 <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@19.0.0",
-    "react-dom": "https://esm.sh/react-dom@19.0.0",
-    "react-dom/": "https://esm.sh/react-dom@19.0.0/",
-    "@google/genai": "https://esm.sh/@google/genai@1.40.0",
-    "recharts": "https://esm.sh/recharts@2.12.7",
+    "@google/genai": "https://esm.sh/@google/genai@^1.41.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/",
-    "express": "https://esm.sh/express@^5.2.1",
+    "react": "https://esm.sh/react@^19.2.4",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "axios": "https://esm.sh/axios@^1.13.5",
     "crypto": "https://esm.sh/crypto@^1.0.1",
-    "axios": "https://esm.sh/axios@^1.13.4",
+    "express": "https://esm.sh/express@^5.2.1",
     "cors": "https://esm.sh/cors@^2.8.6"
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
 <body>
     <div id="root"></div>
+    <!-- Vite به صورت خودکار TSX را در اینجا پردازش می‌کند -->
     <script type="module" src="/index.tsx"></script>
 </body>
 </html>
