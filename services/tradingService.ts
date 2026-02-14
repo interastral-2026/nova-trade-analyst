@@ -1,8 +1,10 @@
 
 import { TradeSignal, AccountBalance, ExecutionLog, OpenOrder } from "../types.ts";
 
-// آدرس جدید شما در Railway
-export const API_BASE = 'https://nova-trade-analyst-production.up.railway.app'; 
+// تشخیص خودکار آدرس سرور: اگر روی سیستم خودتان هستید به 3001 وصل می‌شود
+export const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3001'
+  : 'https://nova-trade-analyst-production.up.railway.app'; 
 
 export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
   try {
@@ -16,31 +18,28 @@ export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
     
     clearTimeout(id);
     
-    if (!response.ok) return [];
+    if (!response.ok) {
+        console.error(`API_ERROR: ${response.status}`);
+        return [];
+    }
+    
     const data = await response.json();
     
+    // اطمینان از اینکه داده‌ها با فرمت صحیح (AccountBalance) برمی‌گردند
     return Array.isArray(data) ? data.map((acc: any) => ({
       currency: acc.currency,
-      available: parseFloat(acc.total || 0),
+      available: parseFloat(acc.total || acc.available || 0),
       total: parseFloat(acc.total || 0)
     })) : [];
   } catch (error: any) {
-    console.warn("BRIDGE_CONNECTION_TIMEOUT: Check if Railway is awake.");
+    console.warn("BRIDGE_CONNECTION_FAILED: ", error.message);
     return [];
   }
 };
 
 export const fetchOpenOrders = async (): Promise<OpenOrder[]> => {
   try {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 8000);
-
-    const response = await fetch(`${API_BASE}/api/ghost/state`, {
-      mode: 'cors',
-      signal: controller.signal
-    });
-    
-    clearTimeout(id);
+    const response = await fetch(`${API_BASE}/api/ghost/state`);
     if (!response.ok) return [];
     const state = await response.json();
     return state.openOrders || [];

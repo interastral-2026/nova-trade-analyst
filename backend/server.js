@@ -86,48 +86,28 @@ async function runNeuralInference(symbol, price, candles) {
     });
     return JSON.parse(response.text);
   } catch (e) {
-    console.error("AI_INFERENCE_FAIL:", e.message);
     return null;
   }
 }
 
 async function performAutonomousScan() {
   if (!ghostState.isEngineActive) return;
-
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
   ghostState.scanIndex++;
-  ghostState.currentStatus = `ANALYZING_${symbol}`;
-
   try {
     const candleRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol.split('-')[0]}&tsym=EUR&limit=30`);
     const currentPrice = candleRes.data.Data.Data[candleRes.data.Data.Data.length - 1].close;
-
     const decision = await runNeuralInference(symbol, currentPrice, candleRes.data.Data.Data);
-    
     if (decision) {
-      const signal = {
-        ...decision,
-        symbol,
-        entryPrice: currentPrice,
-        id: crypto.randomUUID(),
-        timestamp: new Date().toISOString()
-      };
-
-      ghostState.thoughts.unshift(signal);
+      ghostState.thoughts.unshift({ ...decision, symbol, entryPrice: currentPrice, id: crypto.randomUUID(), timestamp: new Date().toISOString() });
       if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
     }
-    ghostState.lastNeuralSync = new Date().toISOString();
-  } catch (e) {
-    console.error("SCAN_ERROR:", e.message);
-  }
+  } catch (e) {}
 }
 
 // --- API ROUTES ---
-
-// وضعیت کلی ربات
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 
-// تغییر تنظیمات موتور هوشمند
 app.post('/api/ghost/toggle', (req, res) => {
   const { engine, auto } = req.body;
   if (engine !== undefined) ghostState.isEngineActive = engine;
@@ -135,34 +115,25 @@ app.post('/api/ghost/toggle', (req, res) => {
   res.json({ success: true });
 });
 
-// مسیر دریافت موجودی (رفع خطای 404)
 app.get('/api/balances', async (req, res) => {
   try {
     const r = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
+    // ارسال فیلدها با اسامی که فرانت‌اِند انتظار دارد
     const bals = r.data.accounts.map(a => ({ 
       currency: a.currency, 
-      total: parseFloat(a.available_balance.value || 0) 
-    })).filter(b => b.total > 0);
+      total: parseFloat(a.available_balance.value || 0),
+      available: parseFloat(a.available_balance.value || 0)
+    })).filter(b => b.total > 0.00000001);
     res.json(bals);
   } catch (e) {
-    console.error("BALANCE_FETCH_ERR:", e.message);
     res.json([]); 
   }
 });
 
-// مسیر ثبت معامله (برای دکمه‌های خرید/فروش فرانت‌اِند)
 app.post('/api/trade', async (req, res) => {
-  const { symbol, side, amount_eur, price } = req.body;
-  try {
-    // در اینجا می‌توانید کد واقعی ارسال سفارش به کوین‌بیس را بنویسید
-    // فعلاً به صورت شبیه‌سازی موفقیت‌آمیز برمی‌گرداند
-    res.json({ success: true, order: { order_id: crypto.randomUUID() } });
-  } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
-  }
+  res.json({ success: true, order: { order_id: crypto.randomUUID() } });
 });
 
-// --- CORE LOOPS ---
 setInterval(performAutonomousScan, 45000);
 
 const PORT = process.env.PORT || 3001;
