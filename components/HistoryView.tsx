@@ -3,17 +3,18 @@ import React, { useState } from 'react';
 import { TradeSignal } from '../types';
 
 interface HistoryViewProps {
-  signals: TradeSignal[];
+  signals: any[];
   onClear: () => void;
 }
 
 const HistoryView: React.FC<HistoryViewProps> = ({ signals, onClear }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredSignals = signals.filter(s => 
-    s.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.side.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.analysis.toLowerCase().includes(searchTerm.toLowerCase())
+  const safeSignals = Array.isArray(signals) ? signals : [];
+  const filteredSignals = safeSignals.filter(s => 
+    s.symbol?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.side?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.analysis || s.reason || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -69,57 +70,64 @@ const HistoryView: React.FC<HistoryViewProps> = ({ signals, onClear }) => {
                   </td>
                 </tr>
               ) : (
-                filteredSignals.map((signal) => (
-                  <tr key={signal.id} className="hover:bg-indigo-500/5 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="text-xs font-mono text-slate-300">
-                        {new Date(signal.timestamp).toLocaleDateString()}<br/>
-                        <span className="text-slate-500">{new Date(signal.timestamp).toLocaleTimeString()}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-6 h-6 rounded bg-slate-800 flex items-center justify-center text-[10px] font-bold text-indigo-400">
-                          {signal.symbol[0]}
+                filteredSignals.map((signal) => {
+                  const tp = signal.takeProfit || signal.tp || 0;
+                  const sl = signal.stopLoss || signal.sl || 0;
+                  const entry = signal.entryPrice || signal.price || 0;
+                  const analysis = signal.analysis || signal.reason || "N/A";
+
+                  return (
+                    <tr key={signal.id} className="hover:bg-indigo-500/5 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="text-xs font-mono text-slate-300">
+                          {signal.timestamp ? new Date(signal.timestamp).toLocaleDateString() : 'N/A'}<br/>
+                          <span className="text-slate-500">{signal.timestamp ? new Date(signal.timestamp).toLocaleTimeString() : ''}</span>
                         </div>
-                        <span className="text-sm font-bold text-white tracking-tight">{signal.symbol}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`text-[10px] px-2 py-1 rounded font-black uppercase ${
-                        signal.side === 'BUY' ? 'bg-emerald-500/10 text-emerald-400' : 
-                        signal.side === 'SELL' ? 'bg-rose-500/10 text-rose-400' : 'bg-slate-700 text-slate-400'
-                      }`}>
-                        {signal.side}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-1 h-1.5 w-12 bg-slate-800 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-indigo-500" 
-                            style={{ width: `${signal.confidence}%` }}
-                          ></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-6 h-6 rounded bg-slate-800 flex items-center justify-center text-[10px] font-bold text-indigo-400">
+                            {signal.symbol?.[0] || '?'}
+                          </div>
+                          <span className="text-sm font-bold text-white tracking-tight">{signal.symbol}</span>
                         </div>
-                        <span className="text-xs font-mono font-bold text-indigo-400">{signal.confidence}%</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-sm text-slate-300">
-                      ${signal.entryPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-[10px] font-mono">
-                        <span className="text-emerald-500 font-bold">T: ${signal.takeProfit.toLocaleString()}</span><br/>
-                        <span className="text-rose-500 font-bold">S: ${signal.stopLoss.toLocaleString()}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="max-w-xs overflow-hidden text-ellipsis whitespace-nowrap text-xs text-slate-500 group-hover:whitespace-normal group-hover:text-slate-400 transition-all">
-                        {signal.analysis}
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`text-[10px] px-2 py-1 rounded font-black uppercase ${
+                          signal.side === 'BUY' ? 'bg-emerald-500/10 text-emerald-400' : 
+                          signal.side === 'SELL' ? 'bg-rose-500/10 text-rose-400' : 'bg-slate-700 text-slate-400'
+                        }`}>
+                          {signal.side}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex-1 h-1.5 w-12 bg-slate-800 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-indigo-500" 
+                              style={{ width: `${signal.confidence || 0}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs font-mono font-bold text-indigo-400">{signal.confidence || 0}%</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-sm text-slate-300">
+                        €{Number(entry).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-[10px] font-mono">
+                          <span className="text-emerald-500 font-bold">T: €{Number(tp).toLocaleString()}</span><br/>
+                          <span className="text-rose-500 font-bold">S: €{Number(sl).toLocaleString()}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs overflow-hidden text-ellipsis whitespace-nowrap text-xs text-slate-500 group-hover:whitespace-normal group-hover:text-slate-400 transition-all">
+                          {analysis}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

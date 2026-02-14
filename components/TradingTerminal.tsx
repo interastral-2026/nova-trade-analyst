@@ -12,15 +12,13 @@ interface TradingTerminalProps {
   onToggleAutoTrade: () => void;
   totalValue: number;
   performance: PerformanceStats;
-  thoughtHistory: TradeSignal[];
+  thoughtHistory: any[];
   liveActivity?: string;
   openOrders: OpenOrder[];
   diagnostics?: string[];
   onForceScan?: () => void;
 }
 
-// @google/genai rule: Ensure components use most recent context if needed, 
-// but here we are primarily fixing TypeScript interface mismatch.
 const TradingTerminal: React.FC<TradingTerminalProps> = ({ 
   balances, 
   positions, 
@@ -41,19 +39,17 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
   
   const cashBalance = balances.find(b => b.currency === 'EUR');
   const eurValue = cashBalance?.total || 0;
-  // فیلتر کردن ارزهایی که موجودی معنادار دارند
   const cryptoAssets = balances.filter(b => b.currency !== 'EUR' && b.total > 0.0000001);
 
   return (
     <div className="flex flex-col space-y-6 font-mono">
-      {/* Portfolio Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-2 bg-gradient-to-br from-[#020617] to-black border border-cyan-500/20 p-6 rounded-3xl relative overflow-hidden shadow-2xl">
            <div className="flex justify-between items-start">
               <div>
                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Network Liquidity (EUR)</p>
                  <h2 className="text-4xl font-black text-white tracking-tighter">
-                    €{eurValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    €{Number(eurValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                  </h2>
                  <p className="text-[10px] text-emerald-400 font-bold mt-2 uppercase tracking-widest flex items-center">
                     <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
@@ -123,20 +119,20 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                            </div>
                            <div className="text-right">
                               <p className="text-[8px] text-slate-500 font-black uppercase mb-1">Total Held</p>
-                              <span className="text-xs font-black text-slate-200">{b.total.toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
+                              <span className="text-xs font-black text-slate-200">{Number(b.total || 0).toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/5">
                            <div>
                               <p className="text-[8px] text-cyan-500 font-black uppercase mb-1">Entry Price Node</p>
                               <p className="text-[13px] font-black text-white">
-                                {pos?.entryPrice ? `€${pos.entryPrice.toLocaleString()}` : 'CALCULATING...'}
+                                {pos?.entryPrice ? `€${Number(pos.entryPrice).toLocaleString()}` : 'CALCULATING...'}
                               </p>
                            </div>
                            <div className="text-right">
                               <p className="text-[8px] text-emerald-500 font-black uppercase mb-1">Current Yield</p>
                               <p className={`text-[13px] font-black ${pos && pos.pnlPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                {pos ? `${pos.pnlPercent.toFixed(2)}%` : 'FETCHING...'}
+                                {pos ? `${Number(pos.pnlPercent).toFixed(2)}%` : 'FETCHING...'}
                               </p>
                            </div>
                         </div>
@@ -166,16 +162,16 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                             </div>
                             <div className="text-right">
                                <p className={`text-3xl font-black ${p.pnlPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                 {p.pnlPercent >= 0 ? '+' : ''}{p.pnlPercent.toFixed(2)}%
+                                 {p.pnlPercent >= 0 ? '+' : ''}{Number(p.pnlPercent || 0).toFixed(2)}%
                                </p>
                                <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest">Real-time Floating PnL</p>
                             </div>
                          </div>
                          <div className="grid grid-cols-3 gap-4">
                             {[
-                              { label: 'Entry Node', val: `€${p.entryPrice.toLocaleString()}`, color: 'text-slate-300' },
-                              { label: 'Profit Target', val: `€${p.tp.toLocaleString()}`, color: 'text-emerald-400' },
-                              { label: 'Protection Stop', val: `€${p.sl.toLocaleString()}`, color: 'text-rose-400' }
+                              { label: 'Entry Node', val: `€${Number(p.entryPrice || 0).toLocaleString()}`, color: 'text-slate-300' },
+                              { label: 'Profit Target', val: `€${Number(p.tp || 0).toLocaleString()}`, color: 'text-emerald-400' },
+                              { label: 'Protection Stop', val: `€${Number(p.sl || 0).toLocaleString()}`, color: 'text-rose-400' }
                             ].map((m, i) => (
                               <div key={i} className="bg-black/60 p-5 rounded-2xl border border-white/5">
                                  <p className="text-[8px] text-slate-500 font-black uppercase mb-2">{m.label}</p>
@@ -191,7 +187,6 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
             {tab === 'logic' && (
               <div className="space-y-6">
-                 {/* Diagnostics Engine Output */}
                  <div className="bg-black/80 border border-white/5 rounded-3xl p-6 shadow-xl">
                     <h5 className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-6 flex items-center">
                        <i className="fas fa-terminal mr-3"></i> Core Diagnostics Feed
@@ -215,22 +210,29 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                           <p className="text-[10px] font-black uppercase">Synthesizing Market Intelligence...</p>
                        </div>
                     ) : (
-                      thoughtHistory.map((t, i) => (
-                        <div key={i} className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl group hover:border-cyan-500/20 transition-all">
-                           <div className="flex justify-between items-center mb-4">
-                              <div className="flex items-center space-x-3">
-                                 <span className="text-sm font-black text-white">{t.symbol}</span>
-                                 <span className={`text-[8px] font-black px-2 py-1 rounded ${t.side === 'BUY' ? 'bg-emerald-500 text-black' : t.side === 'SELL' ? 'bg-rose-500 text-black' : 'bg-slate-800 text-slate-500'}`}>{t.side}</span>
-                              </div>
-                              <span className="text-[9px] font-black text-cyan-400">Reliability: {t.confidence}%</span>
-                           </div>
-                           <p className="text-[11px] text-slate-400 leading-relaxed mb-4">{t.thoughtProcess}</p>
-                           <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-                             <p className="text-[8px] text-slate-600 font-black uppercase mb-1">Technical Summary</p>
-                             <p className="text-[10px] font-bold text-slate-300">{t.analysis}</p>
-                           </div>
-                        </div>
-                      ))
+                      thoughtHistory.map((t, i) => {
+                         const side = t.side || "NEUTRAL";
+                         const confidence = t.confidence || 0;
+                         const thought = t.thoughtProcess || t.reason || "Analyzing patterns...";
+                         const analysis = t.analysis || "Market probe in progress";
+                         
+                         return (
+                            <div key={i} className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl group hover:border-cyan-500/20 transition-all">
+                               <div className="flex justify-between items-center mb-4">
+                                  <div className="flex items-center space-x-3">
+                                     <span className="text-sm font-black text-white">{t.symbol}</span>
+                                     <span className={`text-[8px] font-black px-2 py-1 rounded ${side === 'BUY' ? 'bg-emerald-500 text-black' : side === 'SELL' ? 'bg-rose-500 text-black' : 'bg-slate-800 text-slate-500'}`}>{side}</span>
+                                  </div>
+                                  <span className="text-[9px] font-black text-cyan-400">Reliability: {confidence}%</span>
+                               </div>
+                               <p className="text-[11px] text-slate-400 leading-relaxed mb-4">{thought}</p>
+                               <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                                 <p className="text-[8px] text-slate-600 font-black uppercase mb-1">Technical Summary</p>
+                                 <p className="text-[10px] font-bold text-slate-300">{analysis}</p>
+                               </div>
+                            </div>
+                         );
+                      })
                     )}
                  </div>
               </div>

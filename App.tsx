@@ -19,7 +19,7 @@ const App: React.FC = () => {
   const [balances, setBalances] = useState<AccountBalance[]>([]);
   const [isEngineActive, setIsEngineActive] = useState<boolean>(true);
   const [autoTradeEnabled, setAutoTradeEnabled] = useState<boolean>(true);
-  const [liveActivity, setLiveActivity] = useState<string>("SYNCING_WITH_CLOUD_BRAIN");
+  const [liveActivity, setLiveActivity] = useState<string>("LINKING_TO_NOVA_CLOUD...");
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [diagnostics, setDiagnostics] = useState<string[]>([]);
   const [dataFeedOnline, setDataFeedOnline] = useState<boolean>(true);
@@ -32,45 +32,49 @@ const App: React.FC = () => {
         setThoughtHistory(stateRes.thoughts || []);
         setIsEngineActive(stateRes.isEngineActive);
         setAutoTradeEnabled(stateRes.autoPilot);
-        setLiveActivity(stateRes.currentStatus);
+        setLiveActivity(stateRes.currentStatus || "SYSTEM_ACTIVE");
         setBridgeOnline(true);
       }
 
       const bals = await fetchAccountBalance();
-      if (bals) setBalances(bals);
+      if (bals && bals.length > 0) setBalances(bals);
 
     } catch (e) {
       setBridgeOnline(false);
-      setLiveActivity("CLOUD_CONNECTION_LOST");
+      setLiveActivity("NOVA_UPLINK_OFFLINE");
     }
   }, []);
 
   const toggleEngine = async () => {
-    await fetch(`${API_BASE}/api/ghost/toggle`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ engine: !isEngineActive })
-    });
-    syncAll();
+    try {
+      await fetch(`${API_BASE}/api/ghost/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ engine: !isEngineActive })
+      });
+      syncAll();
+    } catch (e) { console.error("Toggle Failed"); }
   };
 
   const toggleAuto = async () => {
-    await fetch(`${API_BASE}/api/ghost/toggle`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ auto: !autoTradeEnabled })
-    });
-    syncAll();
+    try {
+      await fetch(`${API_BASE}/api/ghost/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ auto: !autoTradeEnabled })
+      });
+      syncAll();
+    } catch (e) { console.error("Toggle Auto Failed"); }
   };
 
   useEffect(() => {
     syncAll();
-    const interval = setInterval(syncAll, 5000); // مانیتورینگ وضعیت سرور هر ۵ ثانیه
+    const interval = setInterval(syncAll, 5000); 
     
     const statsInterval = setInterval(() => {
       WATCHLIST.forEach(id => fetchProductStats(id).then(info => {
         setAssets(prev => [...prev.filter(a => a.id !== id), info]);
-      }));
+      }).catch(() => setDataFeedOnline(false)));
     }, 15000);
 
     return () => {
@@ -85,14 +89,15 @@ const App: React.FC = () => {
       <div className="flex-1 flex overflow-hidden relative">
         <Sidebar assets={assets} selected={selectedAsset} onSelect={setSelectedAsset} autoPilot={autoTradeEnabled} onToggleAuto={toggleAuto} engineActive={isEngineActive} onToggleEngine={toggleEngine} viewMode={'terminal'} onViewChange={() => {}} bridgeUrl={API_BASE} onUpdateBridge={syncAll} />
         <main className="flex-1 p-4 lg:p-8 overflow-y-auto bg-[radial-gradient(ellipse_at_top,_#042f2e_0%,_#000_100%)]">
+          
           <div className="max-w-[1800px] mx-auto mb-6 flex space-x-4">
              <div className="px-4 py-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[9px] font-black uppercase tracking-widest flex items-center">
                <span className="w-1.5 h-1.5 rounded-full mr-2 bg-emerald-500 animate-pulse"></span>
-               CLOUD_CORE: ONLINE (24/7)
+               NOVA_CLOUD_STATION: {bridgeOnline ? 'SYNC_OK' : 'DISCONNECTED'}
              </div>
              <div className={`px-4 py-2 rounded-xl border ${bridgeOnline ? 'border-cyan-500/20 bg-cyan-500/5 text-cyan-400' : 'border-rose-500/20 bg-rose-500/5 text-rose-400'} text-[9px] font-black uppercase tracking-widest flex items-center`}>
                <span className={`w-1.5 h-1.5 rounded-full mr-2 ${bridgeOnline ? 'bg-cyan-500' : 'bg-rose-500'}`}></span>
-               UPLINK: {bridgeOnline ? 'STABLE' : 'INTERRUPTED'}
+               UPLINK: {API_BASE.replace('https://', '')}
              </div>
           </div>
 

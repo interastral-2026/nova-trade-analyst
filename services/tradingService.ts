@@ -1,7 +1,8 @@
 
 import { TradeSignal, AccountBalance, ExecutionLog, OpenOrder } from "../types.ts";
 
-export const API_BASE = 'https://robot-production-9206.up.railway.app'; 
+// آدرس جدید شما در Railway
+export const API_BASE = 'https://nova-trade-analyst-production.up.railway.app'; 
 
 export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
   try {
@@ -24,7 +25,7 @@ export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
       total: parseFloat(acc.total || 0)
     })) : [];
   } catch (error: any) {
-    console.warn("BRIDGE_CONNECTION_TIMEOUT");
+    console.warn("BRIDGE_CONNECTION_TIMEOUT: Check if Railway is awake.");
     return [];
   }
 };
@@ -77,7 +78,7 @@ export const executeAutoTrade = async (
         price: signal.entryPrice,
         timestamp,
         status: data.success ? 'SUCCESS' : 'FAILED',
-        details: data.success ? `EXECUTED_AT_BRIDGE` : data.error
+        details: data.success ? `EXECUTED_ON_NOVA_RAILWAY` : data.error
       }
     };
   } catch (error: any) {
@@ -92,7 +93,7 @@ export const executeAutoTrade = async (
         price: 0, 
         timestamp, 
         status: 'FAILED',
-        details: `BRIDGE_ERROR: ${error.message}`
+        details: `NOVA_BRIDGE_ERR: ${error.message}`
       }
     };
   }
