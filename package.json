@@ -1,0 +1,21 @@
+
+{
+  "name": "novatrade-ai",
+  "version": "1.0.0",
+  "description": "NovaTrade AI Professional Trading Suite",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.2",
+    "@google/genai": "^1.40.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "recharts": "^2.12.7"
+  }
+}
