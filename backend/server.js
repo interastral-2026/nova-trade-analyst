@@ -24,7 +24,7 @@ let ghostState = {
   signals: [],
   thoughts: [],
   managedAssets: {}, 
-  currentStatus: "CORE_READY",
+  currentStatus: "SYSTEM_ONLINE",
   scanIndex: 0
 };
 
@@ -56,14 +56,14 @@ async function coinbaseCall(method, path, body = null) {
   });
 }
 
-// --- AI CORE ---
-async function runStrategicAnalysis(symbol, price, candles, context) {
+// --- AI ANALYZER ---
+async function runStrategicAnalysis(symbol, price, history, context) {
   if (!process.env.API_KEY) return null;
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `STRATEGY_REQUEST: ${symbol} | PRICE: ${price} | DATA_SLICE: ${JSON.stringify(candles.slice(-10))} | CONTEXT: ${context}` }] }],
+      contents: [{ parts: [{ text: `CORE_ANALYSIS_TASK: ${symbol} @ ${price} | HISTORY: ${JSON.stringify(history.slice(-8))} | CONTEXT: ${context}` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -78,111 +78,123 @@ async function runStrategicAnalysis(symbol, price, candles, context) {
           },
           required: ['side', 'tp', 'sl', 'confidence', 'strategy', 'reason']
         },
-        systemInstruction: "You are NOVA_STRATEGIST. Return precise JSON exit/hold analysis. Be bold but data-driven."
+        systemInstruction: "You are NOVA_CORE_ANALYST. Output strict JSON only. Be accurate with TP/SL targets based on price action."
       }
     });
     return JSON.parse(response.text);
   } catch (e) { return null; }
 }
 
-// --- ASSET PROCESSOR ---
+// --- ROBUST ASSET PROCESSOR ---
 async function processAsset(acc) {
   const curr = acc.currency;
-  const symbol = `${curr}-EUR`;
-  
-  try {
-    // 1. Get Market Price (With better failover)
-    let priceData = await axios.get(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${curr}&tsyms=EUR`).catch(() => null);
-    let currentPrice = priceData?.data?.RAW?.[curr]?.['EUR']?.PRICE || 0;
+  const amount = parseFloat(acc.available_balance.value);
+  if (amount < 0.00000001) return;
 
-    // Fallback to USD if EUR pair fails
-    if (currentPrice === 0) {
-        let usdPriceData = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${curr}&tsyms=USD,EUR`).catch(() => null);
-        currentPrice = usdPriceData?.data?.EUR || usdPriceData?.data?.USD || 0;
+  try {
+    // 1. Unified Price Fetching (EUR with USD Fallback)
+    let currentPrice = 0;
+    try {
+      const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${curr}&tsyms=EUR,USD`);
+      currentPrice = pRes.data.EUR || (pRes.data.USD ? pRes.data.USD * 0.93 : 0);
+    } catch (e) {
+      console.error(`Price fetch failed for ${curr}`);
     }
 
-    // 2. Fetch Entry Reference (Fills)
-    const fillsRes = await coinbaseCall('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${symbol}&limit=3`).catch(() => null);
-    const buyFills = fillsRes?.data?.fills?.filter(f => f.side === 'BUY') || [];
-    const entryPrice = buyFills.length > 0 ? parseFloat(buyFills[0].price) : currentPrice;
+    if (currentPrice === 0) return;
 
-    // 3. Populate basic info IMMEDIATELY
+    // 2. Entry Price Detection (with immediate fallback)
+    let entryPrice = 0;
+    try {
+      const symbol = `${curr}-EUR`;
+      const fills = await coinbaseCall('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${symbol}&limit=1`);
+      if (fills.data?.fills?.length > 0) {
+        entryPrice = parseFloat(fills.data.fills[0].price);
+      }
+    } catch (e) {}
+    
+    // If no fill found, or it's a stablecoin, use market price as ref
+    if (entryPrice <= 0) entryPrice = currentPrice;
+
+    // 3. Update State IMMEDIATELY to avoid "Detecting"
     ghostState.managedAssets[curr] = {
-        ...ghostState.managedAssets[curr],
-        currency: curr,
-        entryPrice: entryPrice || 1, // Avoid 0
-        currentPrice: currentPrice || 1,
-        amount: parseFloat(acc.available_balance.value),
-        lastSync: new Date().toISOString()
+      ...ghostState.managedAssets[curr],
+      currency: curr,
+      amount: amount,
+      currentPrice: currentPrice,
+      entryPrice: entryPrice,
+      lastSync: new Date().toISOString()
     };
 
     // 4. Analysis Logic
     if (STABLECOINS.includes(curr)) {
+      // Automatic targets for stablecoins to avoid "Calculating"
+      ghostState.managedAssets[curr] = {
+        ...ghostState.managedAssets[curr],
+        tp: currentPrice * 1.002,
+        sl: currentPrice * 0.998,
+        strategy: "STABLE_PEG_MONITOR",
+        advice: "HOLD",
+        reason: "Stablecoin node. Maintaining liquidity and capital safety."
+      };
+    } else {
+      // Async AI Analysis for Volatile Assets
+      const histRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${curr}&tsym=EUR&limit=12`).catch(() => null);
+      const history = histRes?.data?.Data?.Data || [];
+      
+      const analysis = await runStrategicAnalysis(curr, currentPrice, history, "PORTFOLIO_HUNT");
+      if (analysis) {
         ghostState.managedAssets[curr] = {
-            ...ghostState.managedAssets[curr],
-            tp: currentPrice * 1.002,
-            sl: currentPrice * 0.998,
-            strategy: "LIQUID_SHIELD",
-            advice: "HOLD",
-            reason: "Stable asset node. Maintaining peg and liquidity."
+          ...ghostState.managedAssets[curr],
+          tp: analysis.tp,
+          sl: analysis.sl,
+          strategy: analysis.strategy,
+          advice: analysis.side,
+          reason: analysis.reason
         };
-    } else if (currentPrice > 0) {
-        // AI analysis in background for volatile assets
-        const historyRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${curr}&tsym=EUR&limit=10`).catch(() => null);
-        const history = historyRes?.data?.Data?.Data || [];
-        
-        const strategy = await runStrategicAnalysis(symbol, currentPrice, history, `WALLET_ANALYSIS_${curr}`);
-        if (strategy) {
-            ghostState.managedAssets[curr] = {
-                ...ghostState.managedAssets[curr],
-                tp: strategy.tp,
-                sl: strategy.sl,
-                strategy: strategy.strategy,
-                advice: strategy.side,
-                reason: strategy.reason
-            };
-        }
+      }
     }
-  } catch (e) {
-    console.error(`Asset Processor Error [${curr}]:`, e.message);
+  } catch (err) {
+    console.error(`Error processing ${curr}:`, err.message);
   }
 }
 
-// --- MASTER LOOP (PARALLEL) ---
+// --- MAIN CONTROL LOOP ---
 async function masterLoop() {
   if (!ghostState.isEngineActive) return;
 
   try {
-    const accountsRes = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
-    const allAccounts = accountsRes.data.accounts || [];
-    const activeAccounts = allAccounts.filter(a => parseFloat(a.available_balance.value) > 0.00000001 && a.currency !== 'EUR');
+    const accs = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
+    const active = accs.data.accounts.filter(a => parseFloat(a.available_balance.value) > 0 && a.currency !== 'EUR');
 
-    ghostState.currentStatus = `UPDATING_${activeAccounts.length}_NODES`;
+    ghostState.currentStatus = `ANALYZING_${active.length}_NODES`;
 
-    // Process all assets in parallel to avoid one asset blocking others
-    await Promise.allSettled(activeAccounts.map(acc => processAsset(acc)));
-
-    // Watchlist scanning for ideas
-    const scanTarget = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
-    ghostState.scanIndex++;
-    const scanPrice = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${scanTarget.split('-')[0]}&tsyms=EUR`).catch(() => null);
-    if (scanPrice?.data?.EUR) {
-        const decision = await runStrategicAnalysis(scanTarget, scanPrice.data.EUR, [], "WATCHLIST_OPPORTUNITY");
-        if (decision && decision.side !== 'NEUTRAL') {
-            ghostState.thoughts.unshift({ ...decision, symbol: scanTarget, timestamp: new Date().toISOString(), id: crypto.randomUUID() });
-            if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
-        }
+    // Process each asset
+    for (const acc of active) {
+      await processAsset(acc);
     }
 
-    ghostState.currentStatus = "PULSE_SYNC_STABLE";
+    // Occasional watchlist scanning for insights
+    const target = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
+    ghostState.scanIndex++;
+    const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${target.split('-')[0]}&tsyms=EUR`).catch(() => null);
+    if (pRes?.data?.EUR) {
+      const insight = await runStrategicAnalysis(target, pRes.data.EUR, [], "MARKET_WATCH");
+      if (insight && insight.side !== 'NEUTRAL') {
+        ghostState.thoughts.unshift({ ...insight, symbol: target, timestamp: new Date().toISOString(), id: crypto.randomUUID() });
+        if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
+      }
+    }
+
+    ghostState.currentStatus = "PULSE_STABLE";
   } catch (e) {
-    console.error("Master Loop Master Error:", e.message);
-    ghostState.currentStatus = "BRIDGE_ERROR";
+    console.error("Master Loop Failed:", e.message);
+    ghostState.currentStatus = "SYNC_ERR_RETRYING";
   }
 }
 
-// Faster interval for core price updates, AI analysis happens within
-setInterval(masterLoop, 25000);
+// Faster refresh rate for responsive UI
+setInterval(masterLoop, 20000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.get('/api/balances', async (req, res) => {
@@ -190,8 +202,7 @@ app.get('/api/balances', async (req, res) => {
     const r = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
     res.json(r.data.accounts.map(a => ({ 
       currency: a.currency, 
-      total: parseFloat(a.available_balance.value || 0),
-      available: parseFloat(a.available_balance.value || 0)
+      total: parseFloat(a.available_balance.value || 0)
     })).filter(b => b.total > 0.00000001));
   } catch (e) { res.json([]); }
 });
@@ -204,4 +215,4 @@ app.post('/api/ghost/toggle', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`SYSTEM_CORE_UP_${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`SYSTEM_READY_ON_${PORT}`));
