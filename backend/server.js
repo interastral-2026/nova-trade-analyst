@@ -17,7 +17,6 @@ Dgbh5U2Zj3zlxHWivwVyZGMWMf8xEdxYXw==
 -----END EC PRIVATE KEY-----`;
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'ADA', 'LINK', 'DOT', 'MATIC'];
-// ارزهایی که به عنوان نقدینگی (پول نقد) در نظر گرفته می‌شوند
 const LIQUIDITY_ASSETS = ['EUR', 'USDC', 'EURC', 'USDT'];
 
 let ghostState = {
@@ -26,7 +25,7 @@ let ghostState = {
   thoughts: [],
   managedAssets: {}, 
   executedOrders: [], 
-  currentStatus: "NOVA_INITIALIZING",
+  currentStatus: "NOVA_SYSTEM_SYNCING",
   scanIndex: 0,
   liquidity: { eur: 0, usdc: 0 }
 };
@@ -79,11 +78,11 @@ async function runNeuralStrategicScan(symbol, price, history, context) {
           },
           required: ['side', 'tp', 'sl', 'confidence', 'strategy', 'reason']
         },
-        systemInstruction: `You are NOVA_PREDATOR_QUANT.
-        1. ANTI-TRAP: If liquidity is low, spread is high, or price looks manipulated (fake pump), stay NEUTRAL.
-        2. SMART EXIT: Always define precise TP (Take Profit) and SL (Stop Loss). 
-        3. SNIPER ENTRY: Only suggest BUY for liquidity deployment if confidence > 88%. 
-        4. GUARD: Protect user funds from "exchange traps" and fake signals. Output JSON only.`
+        systemInstruction: `You are NOVA_PREDATOR_QUANT. 
+        1. ANTI-TRAP: Identify 'Exchange Traps' (fake volume, low liquidity, high spread). If a pump looks artificial, stay NEUTRAL.
+        2. STRATEGIC EXIT: Always provide precise TP (Take Profit) and SL (Stop Loss) relative to current price.
+        3. SNIPER MODE: Only suggest BUY if confidence > 88%. Use available EUR/USDC liquidity as fuel.
+        4. GUARD: Your job is to grow the portfolio and prevent losses. Output valid JSON.`
       }
     });
     return JSON.parse(response.text);
@@ -92,54 +91,53 @@ async function runNeuralStrategicScan(symbol, price, history, context) {
 
 // --- CORE ASSET PROCESSOR ---
 async function syncAsset(curr, amount, isOwned) {
-  if (LIQUIDITY_ASSETS.includes(curr)) return; // نقدینگی به طور جداگانه هندل می‌شود
+  if (LIQUIDITY_ASSETS.includes(curr)) return;
 
   try {
-    // 1. دریافت قیمت لحظه‌ای
+    // 1. Price Sync
     const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${curr}&tsyms=EUR,USD`).catch(() => null);
     if (!pRes) return;
     const currentPrice = pRes.data.EUR || (pRes.data.USD ? pRes.data.USD * 0.94 : 0);
     if (currentPrice === 0) return;
 
-    // 2. همگام‌سازی قیمت ورود (Entry) با امنیت بالا
+    // 2. Entry Ref
     let entryPrice = currentPrice;
     if (isOwned && amount > 0) {
       try {
         const fillsRes = await coinbaseCall('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${curr}-EUR&limit=1`);
-        if (fillsRes.data && Array.isArray(fillsRes.data.fills) && fillsRes.data.fills.length > 0) {
+        if (fillsRes.data?.fills?.length > 0) {
           entryPrice = parseFloat(fillsRes.data.fills[0].price);
         }
-      } catch (e) { /* نادیده گرفتن خطای API و استفاده از قیمت فعلی به عنوان مرجع */ }
+      } catch (e) {}
     }
 
-    // 3. بروزرسانی وضعیت محلی
     const currentAsset = {
       ...ghostState.managedAssets[curr],
       currency: curr, amount, currentPrice, entryPrice, lastSync: new Date().toISOString()
     };
     ghostState.managedAssets[curr] = currentAsset;
 
-    // 4. خروج هوشمند خودکار (Check TP/SL)
+    // 3. AUTO-EXIT CHECK (TP/SL)
     if (isOwned && amount > 0 && currentAsset.tp && currentAsset.sl) {
       if (currentPrice >= currentAsset.tp) {
-        executeRobotOrder(curr, 'SELL', currentPrice, 100, "TAKE_PROFIT_TRIGGERED");
+        executeRobotOrder(curr, 'SELL', currentPrice, 100, "TAKE_PROFIT_HIT");
         return;
       }
       if (currentPrice <= currentAsset.sl) {
-        executeRobotOrder(curr, 'SELL', currentPrice, 100, "STOP_LOSS_TRIGGERED");
+        executeRobotOrder(curr, 'SELL', currentPrice, 100, "STOP_LOSS_HIT");
         return;
       }
     }
 
-    // 5. تحلیل عصبی
+    // 4. Neural Analysis
     const hRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${curr}&tsym=EUR&limit=12`).catch(() => null);
     const history = hRes?.data?.Data?.Data || [];
-    const analysis = await runNeuralStrategicScan(curr, currentPrice, history, isOwned ? "PORTFOLIO_WATCH" : "SIGNAL_HUNT");
+    const analysis = await runNeuralStrategicScan(curr, currentPrice, history, isOwned ? "OPTIMIZING_HOLDING" : "HUNTING_ENTRY");
 
     if (analysis) {
       ghostState.managedAssets[curr] = { ...ghostState.managedAssets[curr], ...analysis };
 
-      // 6. اجرای خودکار (قانون 88 درصد)
+      // 5. Execution Logic
       if (ghostState.autoPilot && analysis.confidence >= 88) {
         const hasCash = ghostState.liquidity.eur > 5 || ghostState.liquidity.usdc > 5;
         if (analysis.side === 'BUY' && !isOwned && hasCash) {
@@ -155,60 +153,66 @@ async function syncAsset(curr, amount, isOwned) {
 }
 
 function executeRobotOrder(symbol, side, price, confidence, reason) {
+  const orderId = crypto.randomUUID();
   const order = {
-    id: crypto.randomUUID(),
+    id: orderId,
     symbol, side, price, confidence,
     timestamp: new Date().toISOString(),
-    status: 'EXECUTED_BY_AI_CORE'
+    status: 'EXECUTED_BY_NOVA'
   };
   ghostState.executedOrders.unshift(order);
   ghostState.thoughts.unshift({
     symbol, side, price, confidence, strategy: "QUANTUM_ANTITRAP",
-    reason: `System Order: ${side} for ${symbol}. Decision: ${reason}`,
+    reason: `Automatic ${side} execution. Target Price: ${price}. Reason: ${reason}`,
     timestamp: new Date().toISOString()
   });
   
-  // شبیه‌سازی تغییر موجودی برای جلوگیری از تکرار دستور تا سیکل بعدی
-  if (side === 'BUY') ghostState.managedAssets[symbol] = { ...ghostState.managedAssets[symbol], amount: 1 };
-  else ghostState.managedAssets[symbol] = { ...ghostState.managedAssets[symbol], amount: 0 };
+  // Local state update to prevent double-trade
+  if (side === 'BUY') {
+    ghostState.managedAssets[symbol] = { ...ghostState.managedAssets[symbol], amount: 1 };
+  } else {
+    ghostState.managedAssets[symbol] = { ...ghostState.managedAssets[symbol], amount: 0 };
+  }
 }
 
-// --- MASTER PULSE ---
+// --- MASTER LOOP ---
 async function masterLoop() {
-  if (!ghostState.isEngineActive) return;
+  if (!ghostState.isEngineActive) {
+    ghostState.currentStatus = "ENGINE_OFFLINE";
+    return;
+  }
 
   try {
-    ghostState.currentStatus = "PULSE_LIQUIDITY_SYNC";
+    ghostState.currentStatus = "SYNCING_CASH_BALANCES";
     const accRes = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
-    const accounts = accRes.data.accounts || [];
+    const accounts = accRes.data?.accounts || [];
 
-    // همگام‌سازی نقدینگی (EUR, USDC, EURC)
-    let totalEur = 0;
-    let totalUsdc = 0;
+    // 1. FIX: Accurate Liquidity Capture
+    let eurVal = 0;
+    let usdcVal = 0;
 
     accounts.forEach(a => {
       const val = parseFloat(a.available_balance?.value || 0);
-      if (a.currency === 'EUR') totalEur += val;
-      if (a.currency === 'EURC') totalEur += val; // فرض برابری تقریبی در نمایش
-      if (a.currency === 'USDC' || a.currency === 'USDT') totalUsdc += val;
+      if (a.currency === 'EUR' || a.currency === 'EURC') eurVal += val;
+      if (a.currency === 'USDC' || a.currency === 'USDT') usdcVal += val;
     });
 
-    ghostState.liquidity.eur = totalEur;
-    ghostState.liquidity.usdc = totalUsdc;
+    ghostState.liquidity.eur = eurVal;
+    ghostState.liquidity.usdc = usdcVal;
 
-    // همگام‌سازی دارایی‌های فعال
-    const active = accounts.filter(a => {
+    // 2. Portfolio Assets
+    const activeAccounts = accounts.filter(a => {
       const val = parseFloat(a.available_balance?.value || 0);
       return val > 0.0001 && !LIQUIDITY_ASSETS.includes(a.currency);
     });
 
-    for (const acc of active) {
+    for (const acc of activeAccounts) {
       await syncAsset(acc.currency, parseFloat(acc.available_balance.value), true);
     }
 
-    // شکارچی: اسکن واچ‌لیست اگر نقدینگی داریم
-    if (totalEur > 2 || totalUsdc > 2) {
-      ghostState.currentStatus = "HUNTING_MARKET_GAPS";
+    // 3. Hunter Scan
+    if (eurVal > 2 || usdcVal > 2) {
+      ghostState.currentStatus = "HUNTING_MODE_ACTIVE";
       const target = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
       ghostState.scanIndex++;
       if (!ghostState.managedAssets[target] || (ghostState.managedAssets[target].amount || 0) === 0) {
@@ -216,7 +220,7 @@ async function masterLoop() {
       }
     }
 
-    ghostState.currentStatus = "NEURAL_NODES_SECURE";
+    ghostState.currentStatus = "SYSTEM_WATCHING";
   } catch (e) {
     ghostState.currentStatus = "BRIDGE_RECOVERY_MODE";
   }
@@ -225,12 +229,27 @@ async function masterLoop() {
 setInterval(masterLoop, 20000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
+app.get('/api/balances', (req, res) => {
+  // Return all accounts with non-zero balance for the UI
+  const bals = Object.keys(ghostState.managedAssets).map(k => ({
+    currency: k,
+    available: ghostState.managedAssets[k].amount,
+    total: ghostState.managedAssets[k].amount
+  })).filter(b => b.available > 0);
+  
+  // Add base liquidity to the list
+  bals.push({ currency: 'EUR', available: ghostState.liquidity.eur, total: ghostState.liquidity.eur });
+  bals.push({ currency: 'USDC', available: ghostState.liquidity.usdc, total: ghostState.liquidity.usdc });
+  
+  res.json(bals);
+});
+
 app.post('/api/ghost/toggle', (req, res) => {
   const { engine, auto } = req.body;
   if (engine !== undefined) ghostState.isEngineActive = engine;
   if (auto !== undefined) ghostState.autoPilot = auto;
-  res.json({ success: true });
+  res.json({ success: true, state: ghostState });
 });
 
 const PORT = 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`STRATEGIC_PULSE_LIVE:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`CORE_ENGINE_READY:${PORT}`));
