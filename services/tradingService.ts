@@ -13,8 +13,6 @@ export const setApiBase = (url: string) => {
   localStorage.setItem('NOVA_BRIDGE_URL', url);
 };
 
-export const API_BASE = getApiBase();
-
 export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
   const base = getApiBase();
   try {

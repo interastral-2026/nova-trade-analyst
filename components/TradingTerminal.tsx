@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { AccountBalance, ActivePosition, TradeSignal, OpenOrder, ExecutionLog, PerformanceStats } from '../types';
-import { API_BASE } from '../services/tradingService';
+// Fix: Import getApiBase instead of non-existent API_BASE from tradingService
+import { getApiBase } from '../services/tradingService';
 
 interface TradingTerminalProps {
   balances: AccountBalance[];
@@ -37,7 +38,9 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
   useEffect(() => {
     const fetchState = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/ghost/state`);
+        // Fix: Use getApiBase() utility function to retrieve the current bridge URL
+        const urlBase = getApiBase();
+        const res = await fetch(`${urlBase}/api/ghost/state`);
         const data = await res.json();
         if (data.managedAssets) setManagedAssets(data.managedAssets);
       } catch (e) {}
@@ -119,7 +122,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                    
                    return (
                      <div key={b.currency} className="bg-white/[0.03] border border-white/10 p-7 rounded-[2rem] hover:border-cyan-500/30 transition-all relative overflow-hidden group shadow-lg">
-                        {aiData && (
+                        {aiData && aiData.strategy && (
                           <div className="absolute top-0 right-0 p-4">
                              <span className="text-[7px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full uppercase tracking-widest">{aiData.strategy}</span>
                           </div>
@@ -136,7 +139,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                            </div>
                            <div className="text-right">
                               <p className={`text-2xl font-black ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                {aiData && aiData.entryPrice > 0 ? `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}%` : '??.%'}
+                                {aiData && aiData.entryPrice > 0 ? `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}%` : '0.00%'}
                               </p>
                               <p className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Market Performance</p>
                            </div>
@@ -146,24 +149,24 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                            <div className="bg-black/50 p-4 rounded-2xl border border-white/5">
                               <p className="text-[7px] text-slate-500 font-black uppercase mb-1">Entry Value</p>
                               <p className="text-[11px] font-black text-white">
-                                {aiData && aiData.entryPrice > 0 ? `€${aiData.entryPrice.toLocaleString()}` : 'Detecting...'}
+                                {aiData && aiData.entryPrice > 0 ? `€${aiData.entryPrice.toLocaleString()}` : '€---'}
                               </p>
                            </div>
                            <div className="bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/20">
                               <p className="text-[7px] text-emerald-500 font-black uppercase mb-1">AI Target (TP)</p>
                               <p className="text-[11px] font-black text-emerald-400">
-                                {aiData ? `€${aiData.tp.toLocaleString()}` : 'Calculating...'}
+                                {aiData && aiData.tp ? `€${aiData.tp.toLocaleString()}` : 'Awaiting...'}
                               </p>
                            </div>
                            <div className="bg-rose-500/5 p-4 rounded-2xl border border-rose-500/20">
                               <p className="text-[7px] text-rose-500 font-black uppercase mb-1">Defense (SL)</p>
                               <p className="text-[11px] font-black text-rose-400">
-                                {aiData ? `€${aiData.sl.toLocaleString()}` : 'Calculating...'}
+                                {aiData && aiData.sl ? `€${aiData.sl.toLocaleString()}` : 'Awaiting...'}
                               </p>
                            </div>
                         </div>
 
-                        {aiData && (
+                        {aiData && aiData.advice ? (
                           <div className="mt-2 pt-5 border-t border-white/5">
                              <div className="flex items-center space-x-3 mb-3">
                                 <span className={`w-2 h-2 rounded-full ${aiData.advice === 'SELL' ? 'bg-rose-500 animate-pulse' : aiData.advice === 'BUY' ? 'bg-emerald-500 animate-pulse' : 'bg-cyan-500'}`}></span>
@@ -172,6 +175,10 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                              <p className="text-[11px] text-slate-500 leading-relaxed italic opacity-80">
                                "{aiData.reason}"
                              </p>
+                          </div>
+                        ) : (
+                          <div className="mt-2 pt-5 border-t border-white/5 opacity-40">
+                             <p className="text-[10px] text-center font-black uppercase tracking-widest animate-pulse">Neural Scan in Progress...</p>
                           </div>
                         )}
                      </div>
