@@ -53,56 +53,62 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
   const activeAssets = Object.keys(managedAssets)
     .map(key => managedAssets[key])
-    .filter(asset => asset.amount > 0 || asset.confidence >= 80);
+    .filter(asset => (asset.amount || 0) > 0 || asset.confidence >= 80);
 
   return (
     <div className="flex flex-col space-y-6 font-mono">
-      {/* Real-time Liquidity Hub */}
+      {/* Liquidity Matrix */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="md:col-span-2 bg-gradient-to-br from-[#0a0f18] to-black border border-cyan-500/30 p-6 rounded-[2rem] relative overflow-hidden shadow-2xl">
-           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 blur-[80px] rounded-full"></div>
+        <div className="md:col-span-2 bg-gradient-to-br from-[#080c14] to-black border border-cyan-500/40 p-6 rounded-[2rem] relative overflow-hidden shadow-2xl">
+           <div className="absolute -top-10 -right-10 w-40 h-40 bg-cyan-500/10 blur-[100px] rounded-full"></div>
            <div className="flex justify-between items-start relative z-10">
               <div>
-                 <p className="text-[9px] font-black text-cyan-500 uppercase tracking-[0.3em] mb-3">Trading Fuel Nodes</p>
-                 <div className="flex items-baseline space-x-4">
-                    <h2 className="text-4xl font-black text-white tracking-tighter">
-                       €{liquidity.eur.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </h2>
-                    <span className="text-slate-600 font-bold">/</span>
-                    <h2 className="text-2xl font-black text-indigo-400 opacity-80">
-                       ${liquidity.usdc.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </h2>
+                 <p className="text-[9px] font-black text-cyan-400 uppercase tracking-[0.3em] mb-3">Neural Liquidity Nodes</p>
+                 <div className="flex items-baseline space-x-6">
+                    <div>
+                       <span className="text-[8px] text-slate-500 block uppercase mb-1">Total EUR/C</span>
+                       <h2 className="text-4xl font-black text-white tracking-tighter">
+                          €{liquidity.eur.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                       </h2>
+                    </div>
+                    <div className="w-[1px] h-10 bg-white/5"></div>
+                    <div>
+                       <span className="text-[8px] text-slate-500 block uppercase mb-1">Total USDC/T</span>
+                       <h2 className="text-2xl font-black text-indigo-400">
+                          ${liquidity.usdc.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                       </h2>
+                    </div>
                  </div>
-                 <p className="text-[10px] text-emerald-400 font-bold mt-3 uppercase tracking-widest flex items-center">
+                 <p className="text-[10px] text-emerald-400 font-bold mt-4 uppercase tracking-widest flex items-center">
                     <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse shadow-[0_0_10px_#10b981]"></span>
-                    {liveActivity || "NEURAL_MONITORING"}
+                    {liveActivity || "SYSTEM_SCANNING"}
                  </p>
               </div>
-              <button onClick={onForceScan} className="w-12 h-12 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 text-white transition-all active:scale-95 group">
-                 <i className="fas fa-satellite group-hover:animate-spin"></i>
+              <button onClick={onForceScan} className="w-12 h-12 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 text-white transition-all shadow-lg active:scale-95 group">
+                 <i className="fas fa-radar group-hover:rotate-180 transition-transform duration-1000"></i>
               </button>
            </div>
         </div>
-        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center items-center shadow-lg group hover:border-indigo-500/30 transition-all">
-           <p className="text-[8px] font-black text-slate-500 uppercase mb-1 tracking-widest">Active Matrix</p>
+        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center items-center shadow-lg group hover:border-indigo-500/20 transition-all">
+           <p className="text-[8px] font-black text-slate-500 uppercase mb-1 tracking-widest">Active Assets</p>
            <p className="text-3xl font-black text-indigo-400 group-hover:scale-110 transition-transform">{activeAssets.length}</p>
         </div>
-        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center items-center shadow-lg group hover:border-emerald-500/30 transition-all">
-           <p className="text-[8px] font-black text-slate-500 uppercase mb-1 tracking-widest">Auto-Sniper 88%</p>
+        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center items-center shadow-lg group hover:border-emerald-500/20 transition-all">
+           <p className="text-[8px] font-black text-slate-500 uppercase mb-1 tracking-widest">Sniper Status</p>
            <p className={`text-2xl font-black ${autoTradeEnabled ? 'text-emerald-400' : 'text-slate-600'}`}>
-            {autoTradeEnabled ? 'ACTIVE' : 'STANDBY'}
+            {autoTradeEnabled ? 'ON_88%' : 'OFF'}
            </p>
         </div>
       </div>
 
       <div className="bg-[#050810]/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl min-h-[600px] flex flex-col">
-         {/* Custom Tabs */}
-         <div className="px-8 pt-8 pb-4 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-indigo-950/20 to-transparent">
+         {/* Navigation */}
+         <div className="px-8 pt-8 pb-4 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-cyan-950/20 to-transparent">
             <div className="flex space-x-12">
                {[
-                 { id: 'exposure', label: 'Neural Assets', icon: 'fa-microchip' },
-                 { id: 'logic', label: 'Strategy Log', icon: 'fa-brain' },
-                 { id: 'orders', label: 'Robot History', icon: 'fa-history' }
+                 { id: 'exposure', label: 'Neural Matrix', icon: 'fa-stream' },
+                 { id: 'logic', label: 'Strategic Thought', icon: 'fa-brain' },
+                 { id: 'orders', label: 'Order History', icon: 'fa-history' }
                ].map(t => (
                  <button 
                    key={t.id} 
@@ -128,44 +134,49 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                    const isHunting = amount <= 0;
                    
                    return (
-                     <div key={asset.currency} className={`bg-white/[0.03] border border-white/10 p-7 rounded-[2rem] hover:border-cyan-500/30 transition-all relative overflow-hidden group shadow-lg ${isHunting ? 'opacity-60 grayscale-[0.5]' : 'border-l-4 border-l-cyan-500'}`}>
+                     <div key={asset.currency} className={`bg-white/[0.03] border border-white/10 p-7 rounded-[2rem] hover:border-cyan-500/30 transition-all relative overflow-hidden group shadow-lg ${isHunting ? 'opacity-60 grayscale-[0.3]' : 'border-l-4 border-l-cyan-500 shadow-cyan-500/5'}`}>
+                        {asset.confidence >= 88 && (
+                          <div className="absolute top-0 right-0 p-4">
+                             <span className="text-[7px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full uppercase tracking-widest shadow-lg animate-pulse">NOVA_TARGET_ACQUIRED</span>
+                          </div>
+                        )}
                         <div className="flex justify-between items-start mb-8">
                            <div className="flex items-center space-x-4">
-                              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-lg border border-white/10 shadow-inner ${isHunting ? 'bg-slate-800' : 'bg-gradient-to-br from-cyan-500/20 to-indigo-500/20'}`}>
+                              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-lg border border-white/10 shadow-inner ${isHunting ? 'bg-slate-800' : 'bg-gradient-to-br from-cyan-600/30 to-indigo-600/30'}`}>
                                  {asset.currency}
                               </div>
                               <div>
                                  <h4 className="text-base font-black text-white tracking-tight">{asset.currency} Node</h4>
                                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                    {isHunting ? 'Hunting Matrix...' : `Balance: ${amount.toFixed(4)}`}
+                                    {isHunting ? 'Scanning Matrix...' : `Balance: ${amount.toFixed(4)}`}
                                  </p>
                               </div>
                            </div>
                            <div className="text-right">
                               <p className={`text-2xl font-black ${isHunting ? 'text-slate-600' : (pnl >= 0 ? 'text-emerald-400' : 'text-rose-400')}`}>
-                                {isHunting ? '---' : `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}%`}
+                                {isHunting ? 'HUNTING' : `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}%`}
                               </p>
-                              <p className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Current ROI</p>
+                              <p className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Live Performance</p>
                            </div>
                         </div>
 
                         <div className="grid grid-cols-3 gap-3 mb-6">
                            <div className="bg-black/50 p-4 rounded-2xl border border-white/5 shadow-inner">
-                              <p className="text-[7px] text-slate-500 font-black uppercase mb-1">{isHunting ? 'Spot Price' : 'Entry Price'}</p>
+                              <p className="text-[7px] text-slate-500 font-black uppercase mb-1">{isHunting ? 'Spot Price' : 'Entry Point'}</p>
                               <p className="text-[11px] font-black text-white">
                                 €{current.toLocaleString(undefined, { minimumFractionDigits: current < 1 ? 4 : 2 })}
                               </p>
                            </div>
-                           <div className={`p-4 rounded-2xl border ${!isHunting && current >= (asset.tp || 0) * 0.98 ? 'bg-emerald-500/20 border-emerald-500 animate-pulse' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
+                           <div className={`p-4 rounded-2xl border transition-all ${!isHunting && current >= (asset.tp || 0) * 0.98 ? 'bg-emerald-500/20 border-emerald-500 animate-pulse' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
                               <p className="text-[7px] text-emerald-500 font-black uppercase mb-1">Target (TP)</p>
                               <p className="text-[11px] font-black text-emerald-400">
-                                {asset.tp ? `€${asset.tp.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : 'Calculating...'}
+                                {asset.tp ? `€${asset.tp.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : 'Analyzing...'}
                               </p>
                            </div>
-                           <div className="bg-rose-500/5 p-4 rounded-2xl border border-rose-500/20">
+                           <div className={`p-4 rounded-2xl border transition-all ${!isHunting && current <= (asset.sl || 0) * 1.02 ? 'bg-rose-500/20 border-rose-500 animate-bounce' : 'bg-rose-500/5 border-rose-500/20'}`}>
                               <p className="text-[7px] text-rose-500 font-black uppercase mb-1">Safety (SL)</p>
                               <p className="text-[11px] font-black text-rose-400">
-                                {asset.sl ? `€${asset.sl.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : 'Calculating...'}
+                                {asset.sl ? `€${asset.sl.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : 'Analyzing...'}
                               </p>
                            </div>
                         </div>
@@ -174,9 +185,9 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                           <div className="mt-2 pt-5 border-t border-white/5">
                              <div className="flex items-center space-x-3 mb-3">
                                 <span className={`w-2 h-2 rounded-full ${asset.side === 'SELL' ? 'bg-rose-500' : asset.side === 'BUY' ? 'bg-emerald-500' : 'bg-cyan-500'} animate-pulse shadow-[0_0_8px_currentColor]`}></span>
-                                <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Bias: {asset.side || 'NEUTRAL'} ({asset.confidence || 0}%)</span>
+                                <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Neural Bias: {asset.side || 'WAIT'} ({asset.confidence || 0}%)</span>
                              </div>
-                             <p className="text-[10px] text-slate-500 leading-relaxed italic line-clamp-2">
+                             <p className="text-[10px] text-slate-500 leading-relaxed italic line-clamp-2 group-hover:line-clamp-none transition-all">
                                "{asset.reason}"
                              </p>
                           </div>
@@ -185,7 +196,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mb-2">
                                 <div className="h-full bg-cyan-500/40 animate-progress origin-left"></div>
                              </div>
-                             <p className="text-[7px] text-slate-600 font-black uppercase tracking-widest">Scanning Neural Channels...</p>
+                             <p className="text-[7px] text-slate-600 font-black uppercase tracking-widest">Awaiting Neural Confirmation...</p>
                           </div>
                         )}
                      </div>
@@ -199,45 +210,45 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                  {thoughtHistory.length > 0 ? thoughtHistory.map((t, i) => (
                     <div key={i} className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl hover:border-indigo-500/30 transition-all group">
                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-sm font-black text-white group-hover:text-cyan-400 transition-colors">{t.symbol} Market Insight</span>
-                          <span className="text-[8px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full uppercase tracking-widest">{t.strategy || 'NOVA_BRAIN'}</span>
+                          <span className="text-sm font-black text-white group-hover:text-cyan-400 transition-colors uppercase tracking-tight">{t.symbol} Market Insight</span>
+                          <span className="text-[8px] font-black bg-indigo-600/50 text-indigo-200 border border-indigo-500/20 px-3 py-1 rounded-full uppercase tracking-widest">QUANT_BRAIN_V3</span>
                        </div>
                        <p className="text-[11px] text-slate-400 leading-relaxed italic mb-4">"{t.reason || t.analysis}"</p>
-                       <div className="flex space-x-6 text-[9px] font-black uppercase tracking-widest">
-                          <span className="text-emerald-400">TP: €{t.tp}</span>
-                          <span className="text-rose-400">SL: €{t.sl}</span>
-                          <span className="text-cyan-400">Neural Sync: {t.confidence}%</span>
+                       <div className="flex space-x-8 text-[9px] font-black uppercase tracking-widest border-t border-white/5 pt-4">
+                          <div className="flex flex-col"><span className="text-slate-600 mb-1">Target</span><span className="text-emerald-400">€{t.tp}</span></div>
+                          <div className="flex flex-col"><span className="text-slate-600 mb-1">Safety</span><span className="text-rose-400">€{t.sl}</span></div>
+                          <div className="flex flex-col ml-auto"><span className="text-slate-600 mb-1">Confidence</span><span className="text-cyan-400">{t.confidence}%</span></div>
                        </div>
                     </div>
                  )) : (
                     <div className="py-40 text-center opacity-10 flex flex-col items-center justify-center grayscale">
-                       <i className="fas fa-brain text-5xl mb-6"></i>
-                       <p className="text-[10px] font-black uppercase tracking-[0.5em]">Neural pathways clear</p>
+                       <i className="fas fa-microchip text-5xl mb-6"></i>
+                       <p className="text-[10px] font-black uppercase tracking-[0.5em]">No logical insights processed.</p>
                     </div>
                  )}
               </div>
             )}
 
             {tab === 'orders' && (
-              <div className="bg-black/30 border border-white/5 rounded-3xl overflow-hidden">
+              <div className="bg-black/30 border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
                 <table className="w-full text-left">
                   <thead className="bg-white/5 text-[9px] font-black text-slate-500 uppercase tracking-widest">
                     <tr>
-                      <th className="px-6 py-4">Time</th>
-                      <th className="px-6 py-4">Node</th>
+                      <th className="px-6 py-4">Execution Time</th>
+                      <th className="px-6 py-4">Asset</th>
                       <th className="px-6 py-4">Action</th>
-                      <th className="px-6 py-4">Price</th>
+                      <th className="px-6 py-4">Price Point</th>
                       <th className="px-6 py-4">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {executedOrders.length > 0 ? executedOrders.map((o) => (
                       <tr key={o.id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="px-6 py-4 text-[10px] text-slate-400">{new Date(o.timestamp).toLocaleTimeString()}</td>
+                        <td className="px-6 py-4 text-[10px] text-slate-400">{new Date(o.timestamp).toLocaleString()}</td>
                         <td className="px-6 py-4 text-xs font-black text-white">{o.symbol}</td>
                         <td className="px-6 py-4">
                           <span className={`text-[9px] font-black px-2 py-0.5 rounded ${o.side === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-                            {o.side} @ {o.confidence}%
+                            {o.side} (AI {o.confidence}%)
                           </span>
                         </td>
                         <td className="px-6 py-4 text-[10px] text-slate-300">€{o.price.toLocaleString()}</td>
@@ -245,7 +256,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                       </tr>
                     )) : (
                       <tr>
-                        <td colSpan={5} className="px-6 py-20 text-center opacity-20 text-[10px] uppercase font-black tracking-widest">Matrix awaiting execution commands...</td>
+                        <td colSpan={5} className="px-6 py-20 text-center opacity-20 text-[10px] uppercase font-black tracking-widest">No robot orders recorded. Scanning for high-confidence entries...</td>
                       </tr>
                     )}
                   </tbody>
