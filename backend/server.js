@@ -17,6 +17,7 @@ Dgbh5U2Zj3zlxHWivwVyZGMWMf8xEdxYXw==
 -----END EC PRIVATE KEY-----`;
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'ADA', 'LINK', 'DOT', 'MATIC'];
+// ارزهایی که فقط به عنوان نقدینگی (سوخت) استفاده می‌شوند
 const LIQUIDITY_ASSETS = ['EUR', 'USDC', 'EURC', 'USDT'];
 
 let ghostState = {
@@ -25,7 +26,7 @@ let ghostState = {
   thoughts: [],
   managedAssets: {}, 
   executedOrders: [], 
-  currentStatus: "NOVA_SYSTEM_SYNCING",
+  currentStatus: "NOVA_IDLE",
   scanIndex: 0,
   liquidity: { eur: 0, usdc: 0 }
 };
@@ -56,14 +57,14 @@ async function coinbaseCall(method, path, body = null) {
   });
 }
 
-// --- AI BRAIN: ANTI-TRAP & STRATEGIC EXIT ---
+// --- AI BRAIN ---
 async function runNeuralStrategicScan(symbol, price, history, context) {
   if (!process.env.API_KEY) return null;
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `NODE_ID: ${symbol} | PRICE: ${price} | CONTEXT: ${context} | MARKET_DATA: ${JSON.stringify(history.slice(-12))}` }] }],
+      contents: [{ parts: [{ text: `NODE_INTEL: ${symbol} | PRICE: ${price} | CONTEXT: ${context}` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -78,19 +79,16 @@ async function runNeuralStrategicScan(symbol, price, history, context) {
           },
           required: ['side', 'tp', 'sl', 'confidence', 'strategy', 'reason']
         },
-        systemInstruction: `You are NOVA_PREDATOR_QUANT. 
-        1. ANTI-TRAP: Identify 'Exchange Traps'. If volume looks artificial, stay NEUTRAL.
-        2. STRATEGIC EXIT: Always provide precise TP/SL.
-        3. SNIPER MODE: Only BUY if confidence > 88%. Use available EUR/USDC.
-        Output valid JSON.`
+        systemInstruction: `You are NOVA_ELITE_QUANT. Provide precise market analysis with TP/SL. Return JSON only.`
       }
     });
     return JSON.parse(response.text);
   } catch (e) { return null; }
 }
 
-// --- CORE ASSET PROCESSOR ---
+// --- ASSET PROCESSOR ---
 async function syncAsset(curr, amount, isOwned) {
+  // فوق‌العاده مهم: ارزهای نقد نباید وارد چرخه تحلیل تکنیکال شوند
   if (!curr || LIQUIDITY_ASSETS.includes(curr.toUpperCase())) return;
 
   try {
@@ -103,7 +101,8 @@ async function syncAsset(curr, amount, isOwned) {
     if (isOwned && amount > 0) {
       try {
         const fillsRes = await coinbaseCall('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${curr}-EUR&limit=1`);
-        if (fillsRes.data?.fills?.length > 0) {
+        // دفاع در برابر خطای Length با بررسی دقیق وجود داده
+        if (fillsRes.data && fillsRes.data.fills && Array.isArray(fillsRes.data.fills) && fillsRes.data.fills.length > 0) {
           entryPrice = parseFloat(fillsRes.data.fills[0].price);
         }
       } catch (e) {}
@@ -115,124 +114,85 @@ async function syncAsset(curr, amount, isOwned) {
     };
     ghostState.managedAssets[curr] = currentAsset;
 
-    // AUTO-EXIT CHECK
-    if (isOwned && amount > 0 && currentAsset.tp && currentAsset.sl) {
-      if (currentPrice >= currentAsset.tp) {
-        executeRobotOrder(curr, 'SELL', currentPrice, 100, "TP_HIT");
-        return;
-      }
-      if (currentPrice <= currentAsset.sl) {
-        executeRobotOrder(curr, 'SELL', currentPrice, 100, "SL_HIT");
-        return;
-      }
-    }
-
-    const hRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${curr}&tsym=EUR&limit=12`).catch(() => null);
-    const history = hRes?.data?.Data?.Data || [];
-    const analysis = await runNeuralStrategicScan(curr, currentPrice, history, isOwned ? "OPTIMIZING" : "HUNTING");
-
+    // تحلیل زنده برای ارزهای تحت نظر یا موجود
+    const analysis = await runNeuralStrategicScan(curr, currentPrice, [], isOwned ? "PORTFOLIO" : "WATCHLIST");
     if (analysis) {
       ghostState.managedAssets[curr] = { ...ghostState.managedAssets[curr], ...analysis };
-      if (ghostState.autoPilot && analysis.confidence >= 88) {
-        const totalCash = ghostState.liquidity.eur + ghostState.liquidity.usdc;
-        if (analysis.side === 'BUY' && !isOwned && totalCash > 2) {
-          executeRobotOrder(curr, 'BUY', currentPrice, analysis.confidence, analysis.reason);
-        } else if (analysis.side === 'SELL' && isOwned && amount > 0) {
-          executeRobotOrder(curr, 'SELL', currentPrice, analysis.confidence, analysis.reason);
-        }
-      }
     }
   } catch (e) {
-    console.error(`Error processing ${curr}:`, e.message);
+    console.error(`[SYSTEM] Skip logic for ${curr}: ${e.message}`);
   }
 }
 
-function executeRobotOrder(symbol, side, price, confidence, reason) {
-  const order = {
-    id: crypto.randomUUID(),
-    symbol, side, price, confidence,
-    timestamp: new Date().toISOString(),
-    status: 'EXECUTED_BY_NOVA'
-  };
-  ghostState.executedOrders.unshift(order);
-  ghostState.thoughts.unshift({
-    symbol, side, price, confidence, strategy: "QUANTUM_SECURE",
-    reason: `Automatic ${side} execution. Target Price: ${price}. Reason: ${reason}`,
-    timestamp: new Date().toISOString()
-  });
-  
-  if (side === 'BUY') {
-    ghostState.managedAssets[symbol] = { ...ghostState.managedAssets[symbol], amount: 1 };
-  } else {
-    ghostState.managedAssets[symbol] = { ...ghostState.managedAssets[symbol], amount: 0 };
-  }
-}
-
-// --- MASTER LOOP: FIX FOR REAL-TIME BALANCE SYNC ---
+// --- MASTER LOOP: رفع مشکل همگام‌سازی موجودی ---
 async function masterLoop() {
   if (!ghostState.isEngineActive) return;
 
   try {
-    ghostState.currentStatus = "SYNCING_CASH_BALANCES";
+    ghostState.currentStatus = "SCANNING_COINBASE_VAULT";
     const accRes = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
     
-    // Support both direct list and wrapped object responses
+    // شناسایی خودکار ساختار پاسخ (آرایه مستقیم یا شیء محصور)
     const accounts = accRes.data?.accounts || (Array.isArray(accRes.data) ? accRes.data : []);
 
-    let eurTotal = 0;
-    let usdcTotal = 0;
-    const portfolioHoldings = [];
+    let totalEur = 0;
+    let totalUsdc = 0;
+    const cryptoToSync = [];
 
-    accounts.forEach(a => {
-      const balance = parseFloat(a.available_balance?.value || a.balance?.value || 0);
-      const currency = a.currency?.toUpperCase();
+    if (Array.isArray(accounts)) {
+      accounts.forEach(a => {
+        // استخراج امن موجودی برای جلوگیری از خطای NaN
+        const val = parseFloat(a.available_balance?.value || a.balance?.value || 0) || 0;
+        const cur = (a.currency || "").toUpperCase();
 
-      if (currency === 'EUR' || currency === 'EURC') {
-        eurTotal += balance;
-      } else if (currency === 'USDC' || currency === 'USDT') {
-        usdcTotal += balance;
-      } else if (balance > 0.0001) {
-        portfolioHoldings.push({ currency, balance });
-      }
-    });
-
-    // Update global liquidity state
-    ghostState.liquidity.eur = eurTotal;
-    ghostState.liquidity.usdc = usdcTotal;
-
-    // Process each active crypto holding
-    for (const hold of portfolioHoldings) {
-      await syncAsset(hold.currency, hold.balance, true);
+        if (cur === 'EUR' || cur === 'EURC') {
+          totalEur += val;
+        } else if (cur === 'USDC' || cur === 'USDT') {
+          totalUsdc += val;
+        } else if (val > 0.0001) {
+          cryptoToSync.push({ cur, val });
+        }
+      });
     }
 
-    // Hunter Scan for potential entries
-    if (eurTotal > 1 || usdcTotal > 1) {
-      ghostState.currentStatus = "NOVA_SNIPER_ACTIVE";
+    // به‌روزرسانی نقدینگی جهانی
+    ghostState.liquidity.eur = totalEur;
+    ghostState.liquidity.usdc = totalUsdc;
+
+    // همگام‌سازی ارزهای دیجیتال موجود
+    for (const item of cryptoToSync) {
+      await syncAsset(item.cur, item.val, true);
+    }
+
+    // پایش لیست پیگیری (Watchlist) اگر نقدینگی وجود داشته باشد
+    if (totalEur > 1 || totalUsdc > 1) {
+      ghostState.currentStatus = "NOVA_SNIPER_HUNTING";
       const target = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
       ghostState.scanIndex++;
-      if (!ghostState.managedAssets[target] || (ghostState.managedAssets[target].amount || 0) <= 0) {
+      if (!ghostState.managedAssets[target] || (ghostState.managedAssets[target].amount || 0) === 0) {
         await syncAsset(target, 0, false);
       }
     }
 
-    ghostState.currentStatus = "SYSTEM_WATCHING";
+    ghostState.currentStatus = "SYSTEM_LIVE_PROTECTED";
   } catch (e) {
-    console.error("Master Sync Failure:", e.message);
-    ghostState.currentStatus = "BRIDGE_ERROR_RECOVERY";
+    console.error("[CRITICAL] Master Pulse Failure:", e.message);
+    ghostState.currentStatus = "RECOVERY_MODE";
   }
 }
 
-setInterval(masterLoop, 15000);
+// فواصل زمانی کوتاه‌تر برای همگام‌سازی سریع‌تر موجودی
+setInterval(masterLoop, 10000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.get('/api/balances', (req, res) => {
-  const bals = Object.keys(ghostState.managedAssets)
+  const holdings = Object.keys(ghostState.managedAssets)
     .map(k => ({ currency: k, available: ghostState.managedAssets[k].amount, total: ghostState.managedAssets[k].amount }))
     .filter(b => b.available > 0);
   
-  bals.push({ currency: 'EUR', available: ghostState.liquidity.eur, total: ghostState.liquidity.eur });
-  bals.push({ currency: 'USDC', available: ghostState.liquidity.usdc, total: ghostState.liquidity.usdc });
-  res.json(bals);
+  holdings.push({ currency: 'EUR', available: ghostState.liquidity.eur, total: ghostState.liquidity.eur });
+  holdings.push({ currency: 'USDC', available: ghostState.liquidity.usdc, total: ghostState.liquidity.usdc });
+  res.json(holdings);
 });
 
 app.post('/api/ghost/toggle', (req, res) => {
@@ -243,4 +203,4 @@ app.post('/api/ghost/toggle', (req, res) => {
 });
 
 const PORT = 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`CORE_READY:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`[NOVA_CORE] Tactical Bridge operational on port ${PORT}`));
