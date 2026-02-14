@@ -6,7 +6,16 @@ import cors from 'cors';
 import { GoogleGenAI, Type } from "@google/genai";
 
 const app = express();
-app.use(cors({ origin: '*', methods: ['GET', 'POST', 'OPTIONS'], allowedHeaders: ['Content-Type', 'Authorization'] }));
+
+// تنظیمات بسیار منعطف CORS برای حل مشکل مرورگر
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
+
 app.use(express.json());
 
 const API_KEY_NAME = "organizations/d90bac52-0e8a-4999-b156-7491091ffb5e/apiKeys/79d55457-7e62-45ad-8656-31e1d96e0571";
@@ -25,7 +34,7 @@ let ghostState = {
   thoughts: [],
   managedAssets: {}, 
   executedOrders: [], 
-  currentStatus: "NOVA_READY",
+  currentStatus: "NOVA_ACTIVE",
   scanIndex: 0,
   liquidity: { eur: 0, usdc: 0 }
 };
@@ -43,7 +52,10 @@ function generateToken(method, path) {
     const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
     const tokenData = `${encodedHeader}.${encodedPayload}`;
     return `${tokenData}.${crypto.sign("sha256", Buffer.from(tokenData), { key: PRIVATE_KEY, dsaEncoding: "ieee-p1363" }).toString('base64url')}`;
-  } catch (e) { return null; }
+  } catch (e) { 
+    console.error("Token Auth Error:", e.message);
+    return null; 
+  }
 }
 
 async function coinbaseCall(method, path, body = null) {
@@ -52,8 +64,13 @@ async function coinbaseCall(method, path, body = null) {
   return await axios({
     method,
     url: `https://api.coinbase.com${path}`,
-    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-    data: body
+    headers: { 
+      'Authorization': `Bearer ${token}`, 
+      'Content-Type': 'application/json',
+      'User-Agent': 'NovaTrade-AI-Analyst/1.0.0'
+    },
+    data: body,
+    timeout: 10000
   });
 }
 
@@ -64,7 +81,7 @@ async function runNeuralStrategicScan(symbol, price, history, context) {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `SCAN_REQ: ${symbol} | PRICE: ${price} | MODE: ${context}` }] }],
+      contents: [{ parts: [{ text: `ANALYZE_ASSET: ${symbol} | PRICE: ${price} | MODE: ${context}` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -79,7 +96,7 @@ async function runNeuralStrategicScan(symbol, price, history, context) {
           },
           required: ['side', 'tp', 'sl', 'confidence', 'strategy', 'reason']
         },
-        systemInstruction: "You are NOVA_ELITE_QUANT. Provide precise market analysis. Output JSON only."
+        systemInstruction: "You are NOVA_ELITE_QUANT. Provide institutional grade analysis. Output JSON only."
       }
     });
     return JSON.parse(response.text || "{}");
@@ -90,21 +107,18 @@ async function runNeuralStrategicScan(symbol, price, history, context) {
 async function syncAsset(curr, amount, isOwned) {
   if (!curr) return;
   const currencyKey = curr.toUpperCase().trim();
-  
-  // بلاک کردن قطعی ارزهای نقد از چرخه پردازش تکنیکال برای جلوگیری از خطای Length
   if (LIQUIDITY_ASSETS.includes(currencyKey)) return;
 
   try {
-    const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${currencyKey}&tsyms=EUR,USD`).catch(() => null);
-    const currentPrice = pRes?.data?.EUR || (pRes?.data?.USD ? pRes.data.USD * 0.94 : 0);
+    const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${currencyKey}&tsyms=EUR`).catch(() => null);
+    const currentPrice = pRes?.data?.EUR || 0;
     if (!currentPrice || currentPrice === 0) return;
 
     let entryPrice = currentPrice;
     if (isOwned && amount > 0) {
       try {
         const fillsRes = await coinbaseCall('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${currencyKey}-EUR&limit=1`);
-        const fills = fillsRes?.data?.fills;
-        // بررسی ایمن وجود آرایه قبل از دسترسی به ایندکس و طول
+        const fills = fillsRes?.data?.fills || [];
         if (Array.isArray(fills) && fills.length > 0) {
           entryPrice = parseFloat(fills[0].price) || currentPrice;
         }
@@ -117,8 +131,7 @@ async function syncAsset(curr, amount, isOwned) {
     };
     ghostState.managedAssets[currencyKey] = currentAsset;
 
-    // فقط تحلیل اگر واقعاً لازم باشد
-    const analysis = await runNeuralStrategicScan(currencyKey, currentPrice, [], isOwned ? "PORTFOLIO" : "WATCHLIST");
+    const analysis = await runNeuralStrategicScan(currencyKey, currentPrice, [], isOwned ? "HODL" : "WATCH");
     if (analysis) {
       ghostState.managedAssets[currencyKey] = { ...ghostState.managedAssets[currencyKey], ...analysis };
       if (analysis.reason) {
@@ -127,15 +140,13 @@ async function syncAsset(curr, amount, isOwned) {
       }
     }
   } catch (e) {
-    // خطاها فقط در کنسول لاگ می‌شوند و باعث توقف نمی‌شوند
-    console.log(`[LOG] Asset ${currencyKey} skipped or limited data.`);
+    console.log(`[SYNC_SKIP] ${currencyKey}`);
   }
 }
 
 // --- MASTER LOOP ---
 async function masterLoop() {
   if (!ghostState.isEngineActive) return;
-
   try {
     const accRes = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
     const accounts = accRes?.data?.accounts || (Array.isArray(accRes?.data) ? accRes.data : []);
@@ -149,16 +160,11 @@ async function masterLoop() {
         const raw = a.available_balance?.value || a.balance?.value || "0";
         const val = parseFloat(raw) || 0;
         const cur = (a.currency || "").toUpperCase().trim();
-
         if (!cur) return;
 
-        if (cur === 'EUR' || cur === 'EURC') {
-          eTotal += val;
-        } else if (cur === 'USDC' || cur === 'USDT' || cur === 'USD') {
-          uTotal += val;
-        } else if (val > 0.0001) {
-          cryptoItems.push({ cur, val });
-        }
+        if (cur === 'EUR' || cur === 'EURC') eTotal += val;
+        else if (cur === 'USDC' || cur === 'USDT' || cur === 'USD') uTotal += val;
+        else if (val > 0.0001) cryptoItems.push({ cur, val });
       });
     }
 
@@ -169,21 +175,22 @@ async function masterLoop() {
       await syncAsset(item.cur, item.val, true);
     }
 
-    if (eTotal > 1 || uTotal > 1) {
-      const target = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
-      ghostState.scanIndex++;
-      if (!ghostState.managedAssets[target] || (ghostState.managedAssets[target].amount || 0) <= 0) {
-        await syncAsset(target, 0, false);
-      }
+    const target = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
+    ghostState.scanIndex++;
+    if (!ghostState.managedAssets[target] || (ghostState.managedAssets[target].amount || 0) <= 0) {
+      await syncAsset(target, 0, false);
     }
-    ghostState.currentStatus = "NOVA_ACTIVE_STABLE";
+    
+    ghostState.currentStatus = "NOVA_SYSTEM_STABLE";
   } catch (e) {
-    ghostState.currentStatus = "RECONNECTING_VAULT";
+    console.error("Master Loop Error:", e.message);
+    ghostState.currentStatus = "VAULT_SYNC_ERROR";
   }
 }
 
-setInterval(masterLoop, 15000);
+setInterval(masterLoop, 20000);
 
+// API Endpoints
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.get('/api/balances', (req, res) => {
   const holdings = Object.keys(ghostState.managedAssets)
@@ -202,5 +209,8 @@ app.post('/api/ghost/toggle', (req, res) => {
   res.json({ success: true });
 });
 
-const PORT = 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`SYSTEM_BRIDGE_READY:${PORT}`));
+// استفاده از پورت محیطی برای رفع خطای 502 در Railway
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`NOVA_TACTICAL_BRIDGE_RUNNING_ON_PORT:${PORT}`);
+});
