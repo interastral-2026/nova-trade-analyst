@@ -16,39 +16,39 @@ AwEHoUQDQgAEhSKrrlzJxIh6hgr5fT0cZf3NO91/a6kRPkWRNG6kQlLW8FIzJ53Y
 Dgbh5U2Zj3zlxHWivwVyZGMWMf8xEdxYXw==
 -----END EC PRIVATE KEY-----`;
 
+const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'ADA', 'LINK', 'DOT', 'MATIC'];
+const LIQUIDITY_ASSETS = ['EUR', 'USDC', 'EURC', 'USDT', 'USD', 'EURC-EUR', 'USDC-EUR'];
+
 let ghostState = {
   isEngineActive: true,
-  autoPilot: true, 
-  signals: [],
+  autoPilot: true,
   thoughts: [],
   managedAssets: {}, 
-  currentStatus: "NOVA_CORE_STABLE",
+  executedOrders: [], 
+  currentStatus: "NOVA_READY",
   scanIndex: 0,
-  lastNeuralSync: null
+  liquidity: { eur: 0, usdc: 0 }
 };
-
-const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'ADA-EUR', 'LINK-EUR'];
 
 // --- AUTHENTICATION ---
 function generateToken(method, path) {
-  const header = { alg: 'ES256', kid: API_KEY_NAME, typ: 'JWT' };
-  const now = Math.floor(Date.now() / 1000);
-  const payload = { 
-    iss: 'coinbase-cloud', nbf: now, exp: now + 60, sub: API_KEY_NAME, 
-    uri: `${method} api.coinbase.com${path.split('?')[0]}` 
-  };
-  const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
-  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  const tokenData = `${encodedHeader}.${encodedPayload}`;
   try {
-    const signature = crypto.sign("sha256", Buffer.from(tokenData), { key: PRIVATE_KEY, dsaEncoding: "ieee-p1363" });
-    return `${tokenData}.${signature.toString('base64url')}`;
+    const header = { alg: 'ES256', kid: API_KEY_NAME, typ: 'JWT' };
+    const now = Math.floor(Date.now() / 1000);
+    const payload = { 
+      iss: 'coinbase-cloud', nbf: now, exp: now + 60, sub: API_KEY_NAME, 
+      uri: `${method} api.coinbase.com${path.split('?')[0]}` 
+    };
+    const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
+    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
+    const tokenData = `${encodedHeader}.${encodedPayload}`;
+    return `${tokenData}.${crypto.sign("sha256", Buffer.from(tokenData), { key: PRIVATE_KEY, dsaEncoding: "ieee-p1363" }).toString('base64url')}`;
   } catch (e) { return null; }
 }
 
 async function coinbaseCall(method, path, body = null) {
   const token = generateToken(method, path);
-  if (!token) throw new Error("TOKEN_GENERATION_FAILED");
+  if (!token) throw new Error("AUTH_TOKEN_GEN_FAILED");
   return await axios({
     method,
     url: `https://api.coinbase.com${path}`,
@@ -57,108 +57,150 @@ async function coinbaseCall(method, path, body = null) {
   });
 }
 
-// --- AI STRATEGIC BRAIN ---
-async function runStrategicAnalysis(symbol, price, candles, context = "NEW_ENTRY") {
+// --- AI BRAIN ---
+async function runNeuralStrategicScan(symbol, price, history, context) {
   if (!process.env.API_KEY) return null;
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `TASK: STRATEGIC_POSITION_MANAGEMENT | CONTEXT: ${context} | SYMBOL: ${symbol} | PRICE: ${price} | OHLC_WINDOW: ${JSON.stringify(candles.slice(-15))}` }] }],
+      model: 'gemini-3-pro-preview',
+      contents: [{ parts: [{ text: `SCAN_REQ: ${symbol} | PRICE: ${price} | MODE: ${context}` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
             side: { type: Type.STRING, enum: ['BUY', 'SELL', 'HOLD', 'NEUTRAL'] },
-            tp: { type: Type.NUMBER, description: "Logical Take Profit based on resistance/fib" },
-            sl: { type: Type.NUMBER, description: "Stop Loss based on market structure" },
+            tp: { type: Type.NUMBER },
+            sl: { type: Type.NUMBER },
             confidence: { type: Type.NUMBER },
-            strategy: { type: Type.STRING, description: "Name of strategy (e.g. Mean Reversion, Breakout)" },
-            reason: { type: Type.STRING, description: "Technical justification" }
+            strategy: { type: Type.STRING },
+            reason: { type: Type.STRING }
           },
           required: ['side', 'tp', 'sl', 'confidence', 'strategy', 'reason']
         },
-        systemInstruction: "You are NOVA_QUANT_STRATEGIST. Provide high-accuracy TP/SL levels for crypto assets. Focus on capital preservation. Use SMC logic. Output JSON."
+        systemInstruction: "You are NOVA_ELITE_QUANT. Provide precise market analysis. Output JSON only."
       }
     });
-    return JSON.parse(response.text);
+    return JSON.parse(response.text || "{}");
   } catch (e) { return null; }
 }
 
-// --- CORE MASTER LOOP ---
+// --- SECURE ASSET PROCESSOR ---
+async function syncAsset(curr, amount, isOwned) {
+  if (!curr) return;
+  const currencyKey = curr.toUpperCase().trim();
+  
+  // بلاک کردن قطعی ارزهای نقد از چرخه پردازش تکنیکال برای جلوگیری از خطای Length
+  if (LIQUIDITY_ASSETS.includes(currencyKey)) return;
+
+  try {
+    const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${currencyKey}&tsyms=EUR,USD`).catch(() => null);
+    const currentPrice = pRes?.data?.EUR || (pRes?.data?.USD ? pRes.data.USD * 0.94 : 0);
+    if (!currentPrice || currentPrice === 0) return;
+
+    let entryPrice = currentPrice;
+    if (isOwned && amount > 0) {
+      try {
+        const fillsRes = await coinbaseCall('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${currencyKey}-EUR&limit=1`);
+        const fills = fillsRes?.data?.fills;
+        // بررسی ایمن وجود آرایه قبل از دسترسی به ایندکس و طول
+        if (Array.isArray(fills) && fills.length > 0) {
+          entryPrice = parseFloat(fills[0].price) || currentPrice;
+        }
+      } catch (e) {}
+    }
+
+    const currentAsset = {
+      ...ghostState.managedAssets[currencyKey],
+      currency: currencyKey, amount, currentPrice, entryPrice, lastSync: new Date().toISOString()
+    };
+    ghostState.managedAssets[currencyKey] = currentAsset;
+
+    // فقط تحلیل اگر واقعاً لازم باشد
+    const analysis = await runNeuralStrategicScan(currencyKey, currentPrice, [], isOwned ? "PORTFOLIO" : "WATCHLIST");
+    if (analysis) {
+      ghostState.managedAssets[currencyKey] = { ...ghostState.managedAssets[currencyKey], ...analysis };
+      if (analysis.reason) {
+         ghostState.thoughts.unshift({ ...analysis, symbol: currencyKey, timestamp: new Date().toISOString() });
+         ghostState.thoughts = ghostState.thoughts.slice(0, 20);
+      }
+    }
+  } catch (e) {
+    // خطاها فقط در کنسول لاگ می‌شوند و باعث توقف نمی‌شوند
+    console.log(`[LOG] Asset ${currencyKey} skipped or limited data.`);
+  }
+}
+
+// --- MASTER LOOP ---
 async function masterLoop() {
   if (!ghostState.isEngineActive) return;
 
   try {
-    // 1. استخراج موجودی‌ها و یافتن قیمت ورود از تراکنش‌ها
-    const accountsRes = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
-    const activeHoldings = accountsRes.data.accounts.filter(a => parseFloat(a.available_balance.value) > 0.000001 && a.currency !== 'EUR');
+    const accRes = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
+    const accounts = accRes?.data?.accounts || (Array.isArray(accRes?.data) ? accRes.data : []);
 
-    for (const acc of activeHoldings) {
-      const symbol = `${acc.currency}-EUR`;
-      try {
-        // دریافت آخرین تراکنش خرید برای پیدا کردن قیمت واقعی ورود
-        const fillsRes = await coinbaseCall('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${symbol}&limit=5`);
-        const buyFills = fillsRes.data.fills?.filter(f => f.side === 'BUY') || [];
-        const entryPrice = buyFills.length > 0 ? parseFloat(buyFills[0].price) : 0;
-        
-        // دریافت داده‌های چارت برای تحلیل TP/SL
-        const candleRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${acc.currency}&tsym=EUR&limit=24`);
-        const history = candleRes.data.Data.Data;
-        const currentPrice = history[history.length - 1].close;
-        
-        const strategy = await runStrategicAnalysis(symbol, currentPrice, history, `MANAGE_EXISTING_POS_AT_${entryPrice}`);
-        
-        if (strategy) {
-          ghostState.managedAssets[acc.currency] = {
-            entryPrice,
-            currentPrice,
-            tp: strategy.tp,
-            sl: strategy.sl,
-            strategy: strategy.strategy,
-            advice: strategy.side,
-            reason: strategy.reason,
-            lastUpdate: new Date().toISOString()
-          };
+    let eTotal = 0;
+    let uTotal = 0;
+    const cryptoItems = [];
+
+    if (Array.isArray(accounts)) {
+      accounts.forEach(a => {
+        const raw = a.available_balance?.value || a.balance?.value || "0";
+        const val = parseFloat(raw) || 0;
+        const cur = (a.currency || "").toUpperCase().trim();
+
+        if (!cur) return;
+
+        if (cur === 'EUR' || cur === 'EURC') {
+          eTotal += val;
+        } else if (cur === 'USDC' || cur === 'USDT' || cur === 'USD') {
+          uTotal += val;
+        } else if (val > 0.0001) {
+          cryptoItems.push({ cur, val });
         }
-      } catch (err) { console.error(`Error processing ${acc.currency}:`, err.message); }
+      });
     }
 
-    // 2. اسکن واچ‌لیست برای سیگنال‌های جدید
-    const scanSym = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
-    ghostState.scanIndex++;
-    const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${scanSym.split('-')[0]}&tsym=EUR&limit=24`);
-    const hist = res.data.Data.Data;
-    const price = hist[hist.length - 1].close;
-    const decision = await runStrategicAnalysis(scanSym, price, hist);
-    
-    if (decision) {
-      const sig = { ...decision, symbol: scanSym, id: crypto.randomUUID(), timestamp: new Date().toISOString() };
-      ghostState.thoughts.unshift(sig);
-      if (ghostState.thoughts.length > 40) ghostState.thoughts.pop();
+    ghostState.liquidity.eur = eTotal;
+    ghostState.liquidity.usdc = uTotal;
+
+    for (const item of cryptoItems) {
+      await syncAsset(item.cur, item.val, true);
     }
 
-    ghostState.currentStatus = "SYSTEM_OPTIMIZED";
+    if (eTotal > 1 || uTotal > 1) {
+      const target = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
+      ghostState.scanIndex++;
+      if (!ghostState.managedAssets[target] || (ghostState.managedAssets[target].amount || 0) <= 0) {
+        await syncAsset(target, 0, false);
+      }
+    }
+    ghostState.currentStatus = "NOVA_ACTIVE_STABLE";
   } catch (e) {
-    ghostState.currentStatus = "SYNC_TIMEOUT";
+    ghostState.currentStatus = "RECONNECTING_VAULT";
   }
 }
 
-setInterval(masterLoop, 45000);
+setInterval(masterLoop, 15000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
-app.get('/api/balances', async (req, res) => {
-  try {
-    const r = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
-    const bals = r.data.accounts.map(a => ({ 
-      currency: a.currency, 
-      total: parseFloat(a.available_balance.value || 0),
-      available: parseFloat(a.available_balance.value || 0)
-    })).filter(b => b.total > 0.0000001);
-    res.json(bals);
-  } catch (e) { res.json([]); }
+app.get('/api/balances', (req, res) => {
+  const holdings = Object.keys(ghostState.managedAssets)
+    .map(k => ({ currency: k, available: ghostState.managedAssets[k].amount, total: ghostState.managedAssets[k].amount }))
+    .filter(b => b.available > 0);
+  
+  holdings.push({ currency: 'EUR', available: ghostState.liquidity.eur, total: ghostState.liquidity.eur });
+  holdings.push({ currency: 'USDC', available: ghostState.liquidity.usdc, total: ghostState.liquidity.usdc });
+  res.json(holdings);
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`[NovaServer] Listening on ${PORT}`));
+app.post('/api/ghost/toggle', (req, res) => {
+  const { engine, auto } = req.body;
+  if (engine !== undefined) ghostState.isEngineActive = engine;
+  if (auto !== undefined) ghostState.autoPilot = auto;
+  res.json({ success: true });
+});
+
+const PORT = 3001;
+app.listen(PORT, '0.0.0.0', () => console.log(`SYSTEM_BRIDGE_READY:${PORT}`));
