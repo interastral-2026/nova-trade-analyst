@@ -35,17 +35,11 @@ const Sidebar: React.FC<SidebarProps> = ({
     setShowSettings(false);
   };
 
-  const useLocal = () => {
-    setUrlInput("");
-    onUpdateBridge("");
-    setShowSettings(false);
-  };
-
   return (
     <aside className="w-80 border-r border-cyan-500/10 bg-[#05070a] flex flex-col">
       <div className="p-6 border-b border-white/5 bg-gradient-to-b from-cyan-900/10 to-transparent">
         <div className="flex justify-between items-center mb-6">
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Spectral Interface</span>
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Control Interface</span>
           <button 
             onClick={() => setShowSettings(!showSettings)}
             className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${showSettings ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/20' : 'bg-white/5 text-slate-500 hover:text-white'}`}
@@ -54,28 +48,45 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        <button 
-          onClick={onToggleEngine}
-          className={`w-full p-5 rounded-2xl border transition-all flex flex-col items-center justify-center space-y-3 group relative overflow-hidden ${
-            engineActive ? 'border-cyan-500/40 bg-cyan-500/5' : 'border-rose-500/20 bg-rose-500/5 grayscale opacity-50'
-          }`}
-        >
-          {engineActive && <div className="absolute top-0 left-0 w-full h-1 bg-cyan-500/50 animate-pulse"></div>}
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${engineActive ? 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_20px_#22d3ee]' : 'bg-rose-500/20 text-rose-400'}`}>
-            <i className={`fas ${engineActive ? 'fa-satellite-dish animate-bounce' : 'fa-power-off'} text-xl`}></i>
-          </div>
-          <div className="text-center">
-            <span className={`text-[10px] font-black uppercase tracking-[0.3em] block ${engineActive ? 'text-cyan-400' : 'text-rose-400'}`}>
-              {engineActive ? 'ENGINE_PULSE_LIVE' : 'ENGINE_OFFLINE'}
+        <div className="space-y-3">
+          {/* Main Engine Toggle */}
+          <button 
+            onClick={onToggleEngine}
+            className={`w-full p-5 rounded-2xl border transition-all flex flex-col items-center justify-center space-y-3 relative overflow-hidden group ${
+              engineActive ? 'border-cyan-500/40 bg-cyan-500/5' : 'border-rose-500/20 bg-rose-500/5 opacity-60'
+            }`}
+          >
+            {engineActive && <div className="absolute top-0 left-0 w-full h-1 bg-cyan-500/50 animate-pulse"></div>}
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${engineActive ? 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_20px_#22d3ee]' : 'bg-rose-500/20 text-rose-400 shadow-[0_0_20px_#f43f5e33]'}`}>
+              <i className={`fas ${engineActive ? 'fa-satellite-dish animate-bounce' : 'fa-power-off'} text-xl`}></i>
+            </div>
+            <div className="text-center">
+              <span className={`text-[10px] font-black uppercase tracking-[0.3em] block ${engineActive ? 'text-cyan-400' : 'text-rose-400'}`}>
+                {engineActive ? 'SYSTEM_CONNECTED' : 'SYSTEM_OFFLINE'}
+              </span>
+              <p className="text-[8px] text-slate-500 mt-1 font-bold">{engineActive ? 'TAP_TO_SUSPEND' : 'TAP_TO_IGNITE'}</p>
+            </div>
+          </button>
+
+          {/* Auto Trade Toggle */}
+          <button 
+            onClick={onToggleAuto}
+            className={`w-full py-3 rounded-xl border transition-all flex items-center justify-center space-x-3 ${
+              autoPilot && engineActive ? 'border-emerald-500/40 bg-emerald-500/5 text-emerald-400' : 'border-white/5 bg-white/[0.02] text-slate-500'
+            }`}
+          >
+            <i className={`fas ${autoPilot ? 'fa-check-circle' : 'fa-circle'} text-[10px]`}></i>
+            <span className="text-[9px] font-black uppercase tracking-widest">
+              Auto-Trade (88% Mode): {autoPilot ? 'ACTIVE' : 'DISABLED'}
             </span>
-          </div>
-        </button>
+          </button>
+        </div>
       </div>
 
       {showSettings && (
-        <div className="m-4 p-5 bg-[#0a0f18] border border-cyan-500/20 rounded-2xl shadow-2xl space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="m-4 p-5 bg-[#0a0f18] border border-cyan-500/20 rounded-2xl shadow-2xl space-y-4">
           <div>
-            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Bridge Gateway (Railway/Custom)</p>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Bridge API Gateway</p>
             <input 
               type="text" 
               value={urlInput}
@@ -83,40 +94,34 @@ const Sidebar: React.FC<SidebarProps> = ({
               placeholder="https://..."
               className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
             />
-            <div className="flex space-x-2">
-               <button 
-                onClick={handleReconnect}
-                className="flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[8px] font-black uppercase rounded-lg transition-all"
-              >
-                Sync Remote
-              </button>
-              <button 
-                onClick={useLocal}
-                className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[8px] font-black uppercase rounded-lg transition-all"
-              >
-                Use Local
-              </button>
-            </div>
+            <button 
+              onClick={handleReconnect}
+              className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[8px] font-black uppercase rounded-lg transition-all"
+            >
+              Sync Neural Bridge
+            </button>
           </div>
         </div>
       )}
 
       <div className="px-6 py-4 flex-1 overflow-hidden flex flex-col">
         <div className="flex justify-between items-center mb-6">
-           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Markets</span>
-           <span className="text-[8px] font-black text-emerald-500 px-2 py-0.5 rounded bg-emerald-500/10 tracking-widest">LIVE_FEED</span>
+           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Neural Watchlist</span>
+           <span className={`text-[8px] font-black px-2 py-0.5 rounded bg-white/5 tracking-widest ${engineActive ? 'text-emerald-500' : 'text-slate-600'}`}>
+            {engineActive ? 'SCANNING' : 'IDLE'}
+           </span>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
           {assets.map((asset) => (
             <button
               key={asset.id}
               onClick={() => onSelect(asset.id)}
-              className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all border group relative overflow-hidden ${
-                selected === asset.id ? 'bg-cyan-500/10 border-cyan-500/40 shadow-lg shadow-cyan-500/5' : 'bg-white/[0.02] border-white/5 hover:border-white/10'
+              className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all border group ${
+                selected === asset.id ? 'bg-cyan-500/10 border-cyan-500/40 shadow-lg' : 'bg-white/[0.02] border-white/5 hover:border-white/10'
               }`}
             >
               <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[10px] transition-all ${selected === asset.id ? 'bg-cyan-500 text-black' : 'bg-slate-800 text-slate-500 group-hover:bg-slate-700'}`}>
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[10px] transition-all ${selected === asset.id ? 'bg-cyan-500 text-black' : 'bg-slate-800 text-slate-500'}`}>
                   {asset.name[0]}
                 </div>
                 <div className="text-left">

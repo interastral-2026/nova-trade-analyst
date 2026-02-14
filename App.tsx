@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const [balances, setBalances] = useState<AccountBalance[]>([]);
   const [isEngineActive, setIsEngineActive] = useState<boolean>(true);
   const [autoTradeEnabled, setAutoTradeEnabled] = useState<boolean>(true);
-  const [liveActivity, setLiveActivity] = useState<string>("SYNCING_NOVA_CORE...");
+  const [liveActivity, setLiveActivity] = useState<string>("INITIALIZING_SYSTEM...");
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [bridgeUrl, setBridgeUrl] = useState<string>(getApiBase());
   const [bridgeOnline, setBridgeOnline] = useState<boolean>(false);
@@ -51,11 +51,13 @@ const App: React.FC = () => {
 
   const toggleEngine = async () => {
     const base = getApiBase();
+    const newState = !isEngineActive;
+    setIsEngineActive(newState); // Optimistic update
     try {
       await fetch(`${base}/api/ghost/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ engine: !isEngineActive })
+        body: JSON.stringify({ engine: newState })
       });
       syncAll();
     } catch (e) {}
@@ -63,11 +65,13 @@ const App: React.FC = () => {
 
   const toggleAuto = async () => {
     const base = getApiBase();
+    const newState = !autoTradeEnabled;
+    setAutoTradeEnabled(newState); // Optimistic update
     try {
       await fetch(`${base}/api/ghost/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ auto: !autoTradeEnabled })
+        body: JSON.stringify({ auto: newState })
       });
       syncAll();
     } catch (e) {}
@@ -75,13 +79,16 @@ const App: React.FC = () => {
 
   useEffect(() => {
     syncAll();
-    const interval = setInterval(syncAll, 5000); 
+    const interval = setInterval(syncAll, 4000); 
     
     const statsInterval = setInterval(() => {
       WATCHLIST.forEach(id => fetchProductStats(id).then(info => {
-        setAssets(prev => [...prev.filter(a => a.id !== id), info]);
+        setAssets(prev => {
+          const filtered = prev.filter(a => a.id !== id);
+          return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
+        });
       }).catch(() => {}));
-    }, 15000);
+    }, 12000);
 
     return () => {
       clearInterval(interval);
@@ -107,18 +114,6 @@ const App: React.FC = () => {
           onUpdateBridge={handleUpdateBridge} 
         />
         <main className="flex-1 p-4 lg:p-8 overflow-y-auto bg-[radial-gradient(ellipse_at_top,_#042f2e_0%,_#000_100%)]">
-          
-          <div className="max-w-[1800px] mx-auto mb-6 flex space-x-4">
-             <div className="px-4 py-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[9px] font-black uppercase tracking-widest flex items-center">
-               <span className="w-1.5 h-1.5 rounded-full mr-2 bg-emerald-500 animate-pulse"></span>
-               NETWORK_NODE: {bridgeOnline ? 'SYNC_STABLE' : 'LINK_LOST'}
-             </div>
-             <div className={`px-4 py-2 rounded-xl border ${bridgeOnline ? 'border-cyan-500/20 bg-cyan-500/5 text-cyan-400' : 'border-rose-500/20 bg-rose-500/5 text-rose-400'} text-[9px] font-black uppercase tracking-widest flex items-center`}>
-               <span className={`w-1.5 h-1.5 rounded-full mr-2 ${bridgeOnline ? 'bg-cyan-500' : 'bg-rose-500'}`}></span>
-               GATEWAY: {bridgeUrl ? bridgeUrl.replace('https://', '') : 'LOCAL_VITE_PROXY'}
-             </div>
-          </div>
-
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 max-w-[1800px] mx-auto">
             <div className="xl:col-span-8">
               <TradingTerminal 
