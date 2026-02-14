@@ -17,8 +17,7 @@ Dgbh5U2Zj3zlxHWivwVyZGMWMf8xEdxYXw==
 -----END EC PRIVATE KEY-----`;
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'ADA', 'LINK', 'DOT', 'MATIC'];
-// ارزهایی که فقط به عنوان نقدینگی (سوخت) استفاده می‌شوند
-const LIQUIDITY_ASSETS = ['EUR', 'USDC', 'EURC', 'USDT'];
+const LIQUIDITY_ASSETS = ['EUR', 'USDC', 'EURC', 'USDT', 'USD'];
 
 let ghostState = {
   isEngineActive: true,
@@ -26,7 +25,7 @@ let ghostState = {
   thoughts: [],
   managedAssets: {}, 
   executedOrders: [], 
-  currentStatus: "NOVA_IDLE",
+  currentStatus: "NOVA_INITIALIZING",
   scanIndex: 0,
   liquidity: { eur: 0, usdc: 0 }
 };
@@ -79,110 +78,116 @@ async function runNeuralStrategicScan(symbol, price, history, context) {
           },
           required: ['side', 'tp', 'sl', 'confidence', 'strategy', 'reason']
         },
-        systemInstruction: `You are NOVA_ELITE_QUANT. Provide precise market analysis with TP/SL. Return JSON only.`
+        systemInstruction: "You are NOVA_ELITE_QUANT. Provide precise market analysis with TP/SL. Return JSON only."
       }
     });
     return JSON.parse(response.text);
   } catch (e) { return null; }
 }
 
-// --- ASSET PROCESSOR ---
+// --- DEFENSIVE ASSET PROCESSOR ---
 async function syncAsset(curr, amount, isOwned) {
-  // فوق‌العاده مهم: ارزهای نقد نباید وارد چرخه تحلیل تکنیکال شوند
-  if (!curr || LIQUIDITY_ASSETS.includes(curr.toUpperCase())) return;
+  // جلوگیری از پردازش ارزهای نقد به عنوان دارایی معاملاتی
+  if (!curr) return;
+  const currencyKey = curr.toUpperCase().trim();
+  if (LIQUIDITY_ASSETS.includes(currencyKey)) return;
 
   try {
-    const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${curr}&tsyms=EUR,USD`).catch(() => null);
-    if (!pRes) return;
-    const currentPrice = pRes.data.EUR || (pRes.data.USD ? pRes.data.USD * 0.94 : 0);
-    if (currentPrice === 0) return;
+    const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${currencyKey}&tsyms=EUR,USD`).catch(() => null);
+    const currentPrice = pRes?.data?.EUR || (pRes?.data?.USD ? pRes.data.USD * 0.94 : 0);
+    if (!currentPrice || currentPrice === 0) return;
 
     let entryPrice = currentPrice;
     if (isOwned && amount > 0) {
       try {
-        const fillsRes = await coinbaseCall('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${curr}-EUR&limit=1`);
-        // دفاع در برابر خطای Length با بررسی دقیق وجود داده
-        if (fillsRes.data && fillsRes.data.fills && Array.isArray(fillsRes.data.fills) && fillsRes.data.fills.length > 0) {
-          entryPrice = parseFloat(fillsRes.data.fills[0].price);
+        const fillsRes = await coinbaseCall('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${currencyKey}-EUR&limit=1`);
+        // ایمن‌سازی کامل در برابر خطای Length
+        const fills = fillsRes?.data?.fills;
+        if (Array.isArray(fills) && fills.length > 0) {
+          entryPrice = parseFloat(fills[0].price) || currentPrice;
         }
       } catch (e) {}
     }
 
     const currentAsset = {
-      ...ghostState.managedAssets[curr],
-      currency: curr, amount, currentPrice, entryPrice, lastSync: new Date().toISOString()
+      ...ghostState.managedAssets[currencyKey],
+      currency: currencyKey, amount, currentPrice, entryPrice, lastSync: new Date().toISOString()
     };
-    ghostState.managedAssets[curr] = currentAsset;
+    ghostState.managedAssets[currencyKey] = currentAsset;
 
-    // تحلیل زنده برای ارزهای تحت نظر یا موجود
-    const analysis = await runNeuralStrategicScan(curr, currentPrice, [], isOwned ? "PORTFOLIO" : "WATCHLIST");
+    const hRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${currencyKey}&tsym=EUR&limit=12`).catch(() => null);
+    const history = hRes?.data?.Data?.Data || [];
+    const analysis = await runNeuralStrategicScan(currencyKey, currentPrice, history, isOwned ? "HODL_MODE" : "HUNT_MODE");
+    
     if (analysis) {
-      ghostState.managedAssets[curr] = { ...ghostState.managedAssets[curr], ...analysis };
+      ghostState.managedAssets[currencyKey] = { ...ghostState.managedAssets[currencyKey], ...analysis };
     }
   } catch (e) {
-    console.error(`[SYSTEM] Skip logic for ${curr}: ${e.message}`);
+    // خطاهای احتمالی در کنسول ثبت می‌شوند اما باعث توقف برنامه نمی‌شوند
+    console.warn(`[SKIP] Node ${currencyKey} error: ${e.message}`);
   }
 }
 
-// --- MASTER LOOP: رفع مشکل همگام‌سازی موجودی ---
+// --- MASTER LOOP: FIXED BALANCE & ERROR HANDLING ---
 async function masterLoop() {
   if (!ghostState.isEngineActive) return;
 
   try {
-    ghostState.currentStatus = "SCANNING_COINBASE_VAULT";
+    ghostState.currentStatus = "NOVA_VAULT_SYNCING";
     const accRes = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=250');
     
-    // شناسایی خودکار ساختار پاسخ (آرایه مستقیم یا شیء محصور)
     const accounts = accRes.data?.accounts || (Array.isArray(accRes.data) ? accRes.data : []);
 
-    let totalEur = 0;
-    let totalUsdc = 0;
-    const cryptoToSync = [];
+    let eurTotal = 0;
+    let usdcTotal = 0;
+    const cryptoHoldings = [];
 
     if (Array.isArray(accounts)) {
       accounts.forEach(a => {
-        // استخراج امن موجودی برای جلوگیری از خطای NaN
-        const val = parseFloat(a.available_balance?.value || a.balance?.value || 0) || 0;
-        const cur = (a.currency || "").toUpperCase();
+        const rawVal = a.available_balance?.value || a.balance?.value || "0";
+        const val = parseFloat(rawVal) || 0;
+        const cur = String(a.currency || "").trim().toUpperCase();
 
+        if (!cur || val < 0) return;
+
+        // دسته‌بندی دقیق نقدینگی برای نمایش در ویجت بالا
         if (cur === 'EUR' || cur === 'EURC') {
-          totalEur += val;
-        } else if (cur === 'USDC' || cur === 'USDT') {
-          totalUsdc += val;
+          eurTotal += val;
+        } else if (cur === 'USDC' || cur === 'USDT' || cur === 'USD') {
+          usdcTotal += val;
         } else if (val > 0.0001) {
-          cryptoToSync.push({ cur, val });
+          cryptoHoldings.push({ cur, val });
         }
       });
     }
 
-    // به‌روزرسانی نقدینگی جهانی
-    ghostState.liquidity.eur = totalEur;
-    ghostState.liquidity.usdc = totalUsdc;
+    // به‌روزرسانی نقدینگی در حالت سراسری (این مقادیر در داشبورد شما نمایش داده می‌شوند)
+    ghostState.liquidity.eur = eurTotal;
+    ghostState.liquidity.usdc = usdcTotal;
 
-    // همگام‌سازی ارزهای دیجیتال موجود
-    for (const item of cryptoToSync) {
+    // پردازش دارایی‌های کریپتو موجود
+    for (const item of cryptoHoldings) {
       await syncAsset(item.cur, item.val, true);
     }
 
-    // پایش لیست پیگیری (Watchlist) اگر نقدینگی وجود داشته باشد
-    if (totalEur > 1 || totalUsdc > 1) {
-      ghostState.currentStatus = "NOVA_SNIPER_HUNTING";
+    // اسکن دوره‌ای Watchlist
+    if (eurTotal > 1 || usdcTotal > 1) {
+      ghostState.currentStatus = "NOVA_SNIPER_IDLE";
       const target = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
       ghostState.scanIndex++;
-      if (!ghostState.managedAssets[target] || (ghostState.managedAssets[target].amount || 0) === 0) {
+      if (!ghostState.managedAssets[target] || (ghostState.managedAssets[target].amount || 0) <= 0) {
         await syncAsset(target, 0, false);
       }
     }
 
-    ghostState.currentStatus = "SYSTEM_LIVE_PROTECTED";
+    ghostState.currentStatus = "NOVA_SYSTEM_STABLE";
   } catch (e) {
-    console.error("[CRITICAL] Master Pulse Failure:", e.message);
-    ghostState.currentStatus = "RECOVERY_MODE";
+    console.error("[CRITICAL] Master Sync Pulse Failure:", e.message);
+    ghostState.currentStatus = "BRIDGE_RECOVERY";
   }
 }
 
-// فواصل زمانی کوتاه‌تر برای همگام‌سازی سریع‌تر موجودی
-setInterval(masterLoop, 10000);
+setInterval(masterLoop, 15000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.get('/api/balances', (req, res) => {
@@ -203,4 +208,4 @@ app.post('/api/ghost/toggle', (req, res) => {
 });
 
 const PORT = 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`[NOVA_CORE] Tactical Bridge operational on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`CORE_TACTICAL_BRIDGE_ONLINE:${PORT}`));
