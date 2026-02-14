@@ -1,4 +1,4 @@
-
+ 
 import React, { useState, useEffect } from 'react';
 import { AccountBalance, ActivePosition, TradeSignal, OpenOrder, ExecutionLog, PerformanceStats } from '../types';
 import { getApiBase } from '../services/tradingService';
@@ -57,7 +57,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
   return (
     <div className="flex flex-col space-y-6 font-mono">
-      {/* Precision Liquidity Dashboard */}
+      {/* Precision Liquidity Hub */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-2 bg-gradient-to-br from-[#0a0f18] to-black border border-cyan-500/40 p-7 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
            <div className="absolute top-0 right-0 w-40 h-40 bg-cyan-500/5 blur-[100px] rounded-full"></div>
@@ -105,7 +105,6 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
       </div>
 
       <div className="bg-[#050810]/90 backdrop-blur-3xl border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl min-h-[600px] flex flex-col">
-         {/* System Tabs */}
          <div className="px-10 pt-10 pb-4 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-cyan-950/10 to-transparent">
             <div className="flex space-x-12">
                {[
