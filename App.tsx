@@ -21,60 +21,65 @@ const App: React.FC = () => {
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [bridgeUrl, setBridgeUrl] = useState<string>(getApiBase());
 
-  const syncAll = useCallback(async () => {
+  // همگام‌سازی کامل با سرور
+  const syncWithServer = useCallback(async () => {
     const base = getApiBase();
     try {
-      const stateRes = await fetch(`${base}/api/ghost/state`).then(r => r.json());
-      if (stateRes) {
-        setThoughtHistory(stateRes.thoughts || []);
-        setIsEngineActive(stateRes.isEngineActive);
-        setAutoTradeEnabled(stateRes.autoPilot);
-        setLiveActivity(stateRes.currentStatus || "SYSTEM_ACTIVE");
-      }
+      const response = await fetch(`${base}/api/ghost/state`);
+      if (!response.ok) throw new Error("Offline");
+      const data = await response.json();
+      
+      setThoughtHistory(data.thoughts || []);
+      setIsEngineActive(data.isEngineActive);
+      setAutoTradeEnabled(data.autoPilot);
+      setLiveActivity(data.currentStatus || "SYSTEM_SCANNING");
+      
       const bals = await fetchAccountBalance();
       if (bals) setBalances(bals);
+      setStatus(AnalysisStatus.IDLE);
     } catch (e) {
-      setLiveActivity("BRIDGE_OFFLINE");
+      setLiveActivity("CONNECTING_TO_BRIDGE...");
+      setStatus(AnalysisStatus.ERROR);
     }
   }, []);
 
   const handleUpdateBridge = (url: string) => {
     localStorage.setItem('NOVA_BRIDGE_URL', url);
     setBridgeUrl(url);
-    syncAll();
+    syncWithServer();
   };
 
   const toggleEngine = async () => {
     const base = getApiBase();
     const newState = !isEngineActive;
-    setIsEngineActive(newState);
     try {
       await fetch(`${base}/api/ghost/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ engine: newState })
       });
-      syncAll();
+      setIsEngineActive(newState);
     } catch (e) {}
   };
 
   const toggleAuto = async () => {
     const base = getApiBase();
     const newState = !autoTradeEnabled;
-    setAutoTradeEnabled(newState);
     try {
       await fetch(`${base}/api/ghost/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ auto: newState })
       });
-      syncAll();
+      setAutoTradeEnabled(newState);
     } catch (e) {}
   };
 
   useEffect(() => {
-    syncAll();
-    const interval = setInterval(syncAll, 4000); 
+    syncWithServer();
+    const interval = setInterval(syncWithServer, 5000); 
+    
+    // دریافت قیمت‌های لحظه‌ای
     const statsInterval = setInterval(() => {
       WATCHLIST.forEach(id => fetchProductStats(id).then(info => {
         setAssets(prev => {
@@ -82,14 +87,23 @@ const App: React.FC = () => {
           return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
         });
       }));
-    }, 12000);
+    }, 15000);
+
     return () => { clearInterval(interval); clearInterval(statsInterval); };
-  }, [syncAll]);
+  }, [syncWithServer]);
 
   return (
     <div className="flex flex-col h-screen bg-black text-slate-100 overflow-hidden font-mono">
-      <Header status={status} onGenerate={syncAll} autoPilot={autoTradeEnabled} scanningSymbol={liveActivity} engineActive={isEngineActive} />
+      <Header 
+        status={status} 
+        onGenerate={syncWithServer} 
+        autoPilot={autoTradeEnabled} 
+        scanningSymbol={liveActivity} 
+        engineActive={isEngineActive} 
+      />
+      
       <div className="flex-1 flex overflow-hidden relative">
+        {/* Sidebar Left: Watchlist & Controls */}
         <Sidebar 
           assets={assets} 
           selected={selectedAsset} 
@@ -103,9 +117,10 @@ const App: React.FC = () => {
           bridgeUrl={bridgeUrl} 
           onUpdateBridge={handleUpdateBridge} 
         />
-        <main className="flex-1 flex bg-[#020408]">
-          <div className="flex-1 p-8 overflow-y-auto">
-              {/* Fix: Removed extra props (positions, logs, totalValue, performance, openOrders) that are not present in TradingTerminalProps to resolve TypeScript error */}
+
+        <main className="flex-1 flex bg-[#020308]">
+          {/* Center: Neural Thoughts & Order Logs */}
+          <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">
               <TradingTerminal 
                 balances={balances} 
                 autoTradeEnabled={autoTradeEnabled} 
@@ -114,15 +129,21 @@ const App: React.FC = () => {
                 onToggleAutoTrade={toggleAuto} 
                 thoughtHistory={thoughtHistory} 
                 liveActivity={liveActivity} 
-                onForceScan={syncAll} 
+                onForceScan={syncWithServer} 
               />
           </div>
-          <div className="w-96 border-l border-white/5 p-6 overflow-y-auto custom-scrollbar bg-black/40">
-              <div className="mb-6 flex justify-between items-center">
-                 <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Tactical Signals</h3>
-                 <span className="text-[8px] font-black text-slate-600">LIVE_FEED</span>
-              </div>
+
+          {/* Right Sidebar: Signal Feed */}
+          <div className="w-80 border-l border-white/5 bg-black/40 flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-white/5 bg-indigo-950/10">
+               <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] flex items-center">
+                  <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2 animate-pulse"></span>
+                  Tactical Signals
+               </h3>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
               <SignalList signals={thoughtHistory} />
+            </div>
           </div>
         </main>
       </div>

@@ -1,0 +1,18 @@
+{
+  "isEngineActive": true,
+  "autoPilot": true,
+  "thoughts": [],
+  "managedAssets": {},
+  "executionLogs": [],
+  "currentStatus": "HUNTING_MATIC_LIQUIDITY",
+  "scanIndex": 8,
+  "liquidity": {
+    "eur": 13.097553268664,
+    "usdc": 20.3458948764328
+  },
+  "dailyStats": {
+    "trades": 0,
+    "profit": 0,
+    "fees": 0
+  }
+}

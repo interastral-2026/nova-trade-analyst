@@ -1,42 +1,23 @@
 
-import { TradeSignal, AccountBalance, ExecutionLog, OpenOrder } from "../types.ts";
+import { TradeSignal, AccountBalance, ExecutionLog } from "../types.ts";
 
-/**
- * NovaTrade Tactical Bridge Configuration
- * If localStorage has a custom bridge, use it. Otherwise, default to relative (Vite proxy).
- */
 export const getApiBase = () => {
-  return localStorage.getItem('NOVA_BRIDGE_URL') || "";
-};
-
-export const setApiBase = (url: string) => {
-  localStorage.setItem('NOVA_BRIDGE_URL', url);
+  return localStorage.getItem('NOVA_BRIDGE_URL') || "http://localhost:3001";
 };
 
 export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
   const base = getApiBase();
   try {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 8000);
-
-    const url = `${base}/api/balances`;
-    const response = await fetch(url, {
-      signal: controller.signal
-    });
-    
-    clearTimeout(id);
-    
+    const response = await fetch(`${base}/api/ghost/state`);
     if (!response.ok) return [];
     const data = await response.json();
     
-    if (!Array.isArray(data)) return [];
-
-    return data.map((acc: any) => ({
-      currency: acc.currency || '?',
-      available: parseFloat(acc.available || acc.total || 0),
-      total: parseFloat(acc.total || 0)
-    }));
-  } catch (error: any) {
+    // تبدیل دیتای بک‌اند به فرمت مورد نظر فرانت
+    return [
+      { currency: 'EUR', available: data.liquidity?.eur || 0, total: data.liquidity?.eur || 0 },
+      { currency: 'USDC', available: data.liquidity?.usdc || 0, total: data.liquidity?.usdc || 0 }
+    ];
+  } catch (error) {
     return [];
   }
 };
@@ -46,7 +27,6 @@ export const executeAutoTrade = async (
   amountEur: number
 ): Promise<{ success: boolean; log: ExecutionLog; error?: string }> => {
   const base = getApiBase();
-  const timestamp = new Date().toISOString();
   try {
     const response = await fetch(`${base}/api/trade`, {
       method: 'POST',
@@ -63,14 +43,14 @@ export const executeAutoTrade = async (
     return { 
       success: data.success, 
       log: {
-        id: data.order?.order_id || crypto.randomUUID(),
+        id: crypto.randomUUID(),
         symbol: signal.symbol,
         action: signal.side,
         amount: amountEur,
         price: signal.entryPrice,
-        timestamp,
+        timestamp: new Date().toISOString(),
         status: data.success ? 'SUCCESS' : 'FAILED',
-        details: data.success ? `EXECUTED_ON_NODE` : data.error
+        thought: signal.analysis
       }
     };
   } catch (error: any) {
@@ -79,7 +59,7 @@ export const executeAutoTrade = async (
       error: error.message,
       log: { 
         id: crypto.randomUUID(), symbol: signal.symbol, action: signal.side, 
-        amount: 0, price: 0, timestamp, status: 'FAILED'
+        amount: 0, price: 0, timestamp: new Date().toISOString(), status: 'FAILED'
       }
     };
   }
