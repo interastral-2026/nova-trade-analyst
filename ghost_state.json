@@ -2,10 +2,10 @@
   "isEngineActive": true,
   "autoPilot": true,
   "thoughts": [],
-  "managedAssets": {},
   "executionLogs": [],
-  "currentStatus": "HUNTING_AVAX_VOLATILITY",
-  "scanIndex": 130,
+  "activePositions": [],
+  "currentStatus": "SCANNING_ADA_ENTRY",
+  "scanIndex": 185,
   "liquidity": {
     "eur": 13.097553268664,
     "usdc": 20.3458948764328
@@ -14,5 +14,6 @@
     "trades": 0,
     "profit": 0,
     "fees": 0
-  }
+  },
+  "managedAssets": {}
 }

@@ -25,7 +25,6 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-// مکانیزم بارگذاری امن برای جلوگیری از خطای undefined در آرایه‌ها
 function loadState() {
   const defaults = {
     isEngineActive: true,
@@ -42,11 +41,10 @@ function loadState() {
   try {
     if (fs.existsSync(STATE_FILE)) {
       const saved = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-      // ترکیب مقادیر ذخیره شده با مقادیر پیش‌فرض برای اطمینان از وجود فیلدهای جدید (مثل activePositions)
       return { ...defaults, ...saved, 
-        activePositions: saved.activePositions || [],
-        executionLogs: saved.executionLogs || [],
-        thoughts: saved.thoughts || [],
+        activePositions: Array.isArray(saved.activePositions) ? saved.activePositions : [],
+        executionLogs: Array.isArray(saved.executionLogs) ? saved.executionLogs : [],
+        thoughts: Array.isArray(saved.thoughts) ? saved.thoughts : [],
         liquidity: saved.liquidity || defaults.liquidity
       };
     }
@@ -72,7 +70,7 @@ async function getEntryAnalysis(symbol, price) {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `PREDATOR_ENTRY: ${symbol} @ €${price}. Identify SMART MONEY Entry. Confidence > 70% required.` }] }],
+      contents: [{ parts: [{ text: `PREDATOR_ENTRY: ${symbol} @ €${price}. Identify SMART MONEY Entry. Confidence must be between 0-100.` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -101,10 +99,7 @@ async function getExitAnalysis(symbol, entryPrice, currentPrice, tp, sl) {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `PREDATOR_EXIT_DECISION: ${symbol}. 
-      Entry: €${entryPrice}, Current: €${currentPrice}, PnL: ${pnl.toFixed(2)}%. 
-      Targets: TP €${tp}, SL €${sl}.
-      Decision: SELL or HOLD?` }] }],
+      contents: [{ parts: [{ text: `PREDATOR_EXIT_DECISION: ${symbol}. Entry: €${entryPrice}, Current: €${currentPrice}, PnL: ${pnl.toFixed(2)}%.` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -130,34 +125,30 @@ async function loop() {
   try {
     const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=EUR,USD`);
     const priceEur = pRes.data.EUR;
-    const priceUsd = pRes.data.USD;
-
-    // اطمینان از اینکه activePositions یک آرایه است قبل از فراخوانی findIndex
-    if (!Array.isArray(ghostState.activePositions)) {
-      ghostState.activePositions = [];
-    }
-
+    
+    // ۱. مدیریت پوزیشن‌های باز
+    if (!Array.isArray(ghostState.activePositions)) ghostState.activePositions = [];
     const existingPosIndex = ghostState.activePositions.findIndex(p => p.symbol === symbol);
     
     if (existingPosIndex !== -1) {
       const pos = ghostState.activePositions[existingPosIndex];
-      ghostState.currentStatus = `MANAGING_${symbol}_POSITION`;
+      ghostState.currentStatus = `MONITORING_${symbol}`;
 
-      let shouldAutoSell = false;
+      let shouldSell = false;
       let sellReason = "";
       
-      if (priceEur >= pos.tp) { shouldAutoSell = true; sellReason = "TAKE_PROFIT_HIT"; }
-      else if (priceEur <= pos.sl) { shouldAutoSell = true; sellReason = "STOP_LOSS_HIT"; }
+      if (priceEur >= pos.tp) { shouldSell = true; sellReason = "TARGET_PROFIT_HIT"; }
+      else if (priceEur <= pos.sl) { shouldSell = true; sellReason = "STOP_LOSS_HIT"; }
 
-      if (!shouldAutoSell) {
+      if (!shouldSell) {
         const exitAdvice = await getExitAnalysis(symbol, pos.entryPrice, priceEur, pos.tp, pos.sl);
         if (exitAdvice && exitAdvice.decision === 'SELL' && exitAdvice.confidence > 75) {
-          shouldAutoSell = true;
-          sellReason = `AI_DECISION: ${exitAdvice.reason}`;
+          shouldSell = true;
+          sellReason = `AI_EXIT_SIGNAL: ${exitAdvice.reason}`;
         }
       }
 
-      if (shouldAutoSell) {
+      if (shouldSell) {
         const pnlEur = (priceEur - pos.entryPrice) * (pos.amount / pos.entryPrice);
         const fee = pos.amount * 0.006;
         const netProfit = pnlEur - fee - (pos.feesPaid || 0);
@@ -178,23 +169,23 @@ async function loop() {
           fees: fee,
           thought: sellReason
         });
-
         ghostState.dailyStats.profit += netProfit;
         ghostState.activePositions.splice(existingPosIndex, 1);
       }
     } else {
-      ghostState.currentStatus = `SCANNING_${symbol}_ENTRY`;
+      // ۲. جستجوی فرصت جدید
+      ghostState.currentStatus = `ANALYZING_${symbol}`;
       const analysis = await getEntryAnalysis(symbol, priceEur);
       
-      if (analysis && analysis.side === 'BUY' && analysis.confidence >= 70) {
-        // اطمینان از وجود آرایه thoughts
+      // نمایش سیگنال برای هر چیزی بالای ۷۰٪
+      if (analysis && analysis.confidence >= 70 && analysis.side === 'BUY') {
         if (!Array.isArray(ghostState.thoughts)) ghostState.thoughts = [];
-        
         ghostState.thoughts.unshift({ ...analysis, symbol, timestamp: new Date().toISOString(), price: priceEur, id: crypto.randomUUID() });
         if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
 
-        if (ghostState.autoPilot) {
-          const tradeAmount = 200; 
+        // ثبت سفارش خودکار فقط برای بالای ۷۵٪
+        if (ghostState.autoPilot && analysis.confidence >= 75) {
+          const tradeAmount = 250; 
           const currencyKey = ghostState.liquidity.eur >= tradeAmount ? 'eur' : 'usdc';
           
           if (ghostState.liquidity[currencyKey] >= tradeAmount) {
@@ -224,7 +215,7 @@ async function loop() {
               timestamp: new Date().toISOString(),
               status: 'SUCCESS',
               fees: fee,
-              thought: analysis.reason
+              thought: `AUTO_ORDER_EXECUTED: ${analysis.reason}`
             });
             ghostState.dailyStats.trades++;
             ghostState.dailyStats.fees += fee;
@@ -235,11 +226,10 @@ async function loop() {
     saveState();
   } catch (e) { 
     console.error("LOOP_ERR:", e.message); 
-    // در صورت بروز خطا در منطق، وضعیت را بازنشانی نکنید، فقط لاگ کنید.
   }
 }
 
-setInterval(loop, 15000);
+setInterval(loop, 12000); // تکرار سریع‌تر برای تست
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
@@ -250,4 +240,4 @@ app.post('/api/ghost/toggle', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_ENGINE_v4_STABLE_ONLINE`));
+app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_STABLE_V4_CONNECTED`));

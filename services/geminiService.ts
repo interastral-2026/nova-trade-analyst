@@ -12,14 +12,13 @@ export const analyzeMarketData = async (
 
   const systemInstruction = `YOU ARE NOVA_ELITE_PREDATOR.
 CORE LOGIC:
-1. DETECT LIQUIDITY TRAPS: Exchange algorithms often push price past highs to hunt stops. Look for rejection wicks.
-2. NET ROI CALCULATION: Deduct 1.2% total fees (entry+exit) from any expected move. Only signal if Net ROI > 2%.
+1. DETECT LIQUIDITY TRAPS: Look for rejection wicks past key highs/lows.
+2. ROI CALCULATION: Deduction 1.2% total fees.
 3. STRICT CONFIDENCE: 
-   - <80%: NEUTRAL/HOLD.
-   - 80-84%: DISPLAY ONLY.
-   - 85%+: AUTO-TRADE TRIGGER.
-4. CONSERVATIVE TP: Target 85% of technical move to avoid "last minute" reversals.
-5. DEEP SL: Place SL below order blocks, not just recent lows.`;
+   - <70%: NEUTRAL/HOLD.
+   - 70-74%: DISPLAY ONLY.
+   - 75%+: AUTO-TRADE TRIGGER.
+4. CONSERVATIVE TP: Target 85% of technical move.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -47,7 +46,7 @@ CORE LOGIC:
     });
 
     const result = JSON.parse(response.text.trim());
-    if (result.confidence < 80) return null;
+    if (result.confidence < 70) return null;
 
     return {
       ...result,
