@@ -9,61 +9,50 @@ export const analyzeMarketData = async (
   activePosition?: ActivePosition
 ): Promise<TradeSignal | null> => {
   
-  // ایجاد نمونه جدید در هر بار فراخوانی برای اطمینان از دریافت آخرین کلید انتخابی کاربر
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const currentPrice = data[data.length - 1]?.close || 0;
   
-  const formattedData = data.slice(-40).map(d => ({
+  const formattedData = data.slice(-50).map(d => ({
     t: new Date(d.time * 1000).toISOString().substring(11, 16),
-    p: d.close,
+    h: d.high,
+    l: d.low,
+    c: d.close,
     v: d.volume
   }));
 
-  const systemInstruction = `YOU ARE THE "ELITE_QUANT_NAVIGATOR". 
-CORE DIRECTIVE: Analyze market data and manage open positions with extreme precision.
+  const systemInstruction = `YOU ARE "NOVA_PREDATOR_V3" - AN ELITE INSTITUTIONAL QUANT ANALYST.
+CORE MISSION: Identify high-probability entries while AVOIDING exchange traps (Fakeouts/Liquidity Hunts).
 
-MANDATORY RESPONSE PROTOCOL:
-1. IDENTIFY ENTRY: If "active_node" exists, use its "entry_price" as the absolute reference for SL/TP.
-2. RISK MANAGEMENT: 
-   - If Profit > 2%, move SL to Entry (Break-even).
-   - If Trend reverses, issue SELL signal to protect capital.
-3. SCALPING LOGIC: Use Smart Money Concepts to find liquidity zones.
+STRATEGIC RULES:
+1. ANTI-TRAP PROTOCOL: Identify "Wick Rejections" and "Stop Hunts". Do not enter on massive green candles (FOMO traps). Wait for retests of Fair Value Gaps (FVG).
+2. CONSERVATIVE PROFIT: Set Take Profit (TP) at 85% of the next structural resistance. Never aim for the absolute top.
+3. BREATHING STOP LOSS: Set SL slightly wider than structural lows to survive "Stop Hunts" by exchanges, but maintain a minimum 1.5:1 Risk/Reward.
+4. INSTITUTIONAL FLOW: Look for Order Blocks and Liquidity Sweeps. If price just broke a high and immediately returned, it's a BULL TRAP -> Signal SELL.
 
-OUTPUT RULE:
-You MUST return valid JSON. No conversational text.
-If no clear move, side is NEUTRAL but TP/SL must still be logical based on current price.
-
-JSON SCHEMA:
+RESPONSE FORMAT: Valid JSON only.
 {
   "side": "BUY" | "SELL" | "NEUTRAL",
   "entryPrice": number,
   "takeProfit": number,
   "stopLoss": number,
   "confidence": number,
-  "analysis": "Summary of technical bias",
-  "thoughtProcess": "Deep dive into logic including Entry Price consideration",
-  "netRoiExpected": "RRR ratio"
+  "analysis": "Identify the trap avoided or the liquidity zone found",
+  "thoughtProcess": "Briefly explain the SMC (Smart Money Concepts) logic used",
+  "netRoiExpected": "Calculated RR Ratio"
 }`;
 
   const context = {
     symbol,
     market_price: currentPrice,
-    // تشخیص دقیق قیمت خرید از پوزیشن‌های فعال یا موجودی کیف پول
-    active_node: activePosition ? {
-      entry_price: activePosition.entryPrice,
-      pnl_pct: activePosition.pnlPercent,
-      size: activePosition.size
-    } : (balances.find(b => symbol.startsWith(b.currency))?.total || 0) > 0 ? {
-      entry_price: currentPrice, // فرض قیمت فعلی به عنوان ورود برای ارزهای موجود
-      status: "EXISTING_BALANCE_DETECTED"
-    } : "NO_ACTIVE_POSITION",
+    volatility: "Detected via high/low range",
+    active_trade: activePosition || "NONE",
     price_action_history: formattedData
   };
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview', // استفاده از مدل Pro برای تحلیل عمیق‌تر
-      contents: [{ parts: [{ text: `EXECUTE_ANALYSIS_REQUEST: ${JSON.stringify(context)}` }] }],
+      model: 'gemini-3-pro-preview',
+      contents: [{ parts: [{ text: `PREDATOR_SCAN_REQ: ${JSON.stringify(context)}` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -81,14 +70,10 @@ JSON SCHEMA:
           required: ['side', 'entryPrice', 'takeProfit', 'stopLoss', 'confidence', 'analysis', 'thoughtProcess', 'netRoiExpected']
         },
         systemInstruction: systemInstruction,
-        temperature: 0.1,
-        thinkingConfig: { thinkingBudget: 15000 } // فعال‌سازی قابلیت تفکر برای محاسبات ریاضی دقیق‌تر SL/TP
+        temperature: 0.2,
+        thinkingConfig: { thinkingBudget: 20000 }
       }
     });
-
-    if (!response.text) {
-      throw new Error("EMPTY_AI_RESPONSE");
-    }
 
     const result = JSON.parse(response.text.trim());
     return {
@@ -96,26 +81,11 @@ JSON SCHEMA:
       symbol,
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
-      timeframe: 'H1_SMC_QUANT',
-      indicators: { rsi: 0, macd: 'INSTITUTIONAL_FLOW', trend: 'LIQUIDITY_MAP' }
+      timeframe: 'M15/H1_PREDATOR_SCAN',
+      indicators: { rsi: 0, macd: 'SMC_FLOW', trend: 'ANTI_TRAP_ENABLED' }
     };
   } catch (e: any) {
-    console.error("ANALYSIS_ERROR:", e.message);
-    // بازگرداندن یک سیگنال خنثی همراه با دلیل خطا در بخش thoughtProcess برای نمایش به کاربر
-    return {
-      id: 'err-' + Date.now(),
-      symbol,
-      side: 'NEUTRAL',
-      entryPrice: currentPrice,
-      takeProfit: currentPrice * 1.05,
-      stopLoss: currentPrice * 0.95,
-      confidence: 0,
-      timeframe: 'ERR',
-      analysis: "AI_NODE_CONNECTION_ERROR",
-      thoughtProcess: `Error: ${e.message}. Please ensure API Key is valid and billing is active.`,
-      timestamp: new Date().toISOString(),
-      netRoiExpected: "0",
-      indicators: { rsi: 0, macd: 'ERR', trend: 'ERR' }
-    };
+    console.error("PREDATOR_NODE_ERROR:", e.message);
+    return null;
   }
 };
