@@ -83,8 +83,8 @@ function loadState() {
     thoughts: [],
     executionLogs: [],
     activePositions: [], 
-    lastScans: [], // بخش جدید برای نمایش تمام فعالیت‌ها
-    currentStatus: "CORE_READY",
+    lastScans: [],
+    currentStatus: "INITIALIZING",
     scanIndex: 0,
     liquidity: { eur: 0, usdc: 0 },
     dailyStats: { trades: 0, profit: 0, fees: 0 }
@@ -118,17 +118,15 @@ const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'ADA', 'LINK'];
 
 async function getEntryAnalysis(symbol, price) {
   if (!process.env.API_KEY) return null;
+  // استفاده از مدل Flash برای سرعت بیشتر در تحلیل‌های مکرر
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `STRICT_MARKET_ANALYSIS: Asset ${symbol} at Price €${price}. 
-      Look for:
-      1. Order Block Rejections.
-      2. Fair Value Gaps (FVG).
-      3. Relative Strength vs Market.
-      Identify if this is a 'BUY' opportunity with high confidence (75%+). 
-      If not perfect, return 'NEUTRAL' with a short reason. Confidence must reflect the strength of the SMC setup.` }] }],
+      model: 'gemini-3-flash-preview',
+      contents: [{ parts: [{ text: `QUICK_SCAN: ${symbol} @ €${price}. 
+      Check for: High-conviction SMART MONEY entry. 
+      Return 'BUY' only if confidence > 70%. Otherwise return 'NEUTRAL'. 
+      Provide a 1-sentence logic for your decision.` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -150,21 +148,27 @@ async function getEntryAnalysis(symbol, price) {
 }
 
 async function loop() {
-  if (!process.env.API_KEY || !ghostState.isEngineActive) return;
+  if (!process.env.API_KEY) {
+    ghostState.currentStatus = "MISSING_API_KEY";
+    return;
+  }
+  if (!ghostState.isEngineActive) {
+    ghostState.currentStatus = "ENGINE_SUSPENDED";
+    return;
+  }
   
   try {
-    await syncLiquidity();
     const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
     ghostState.scanIndex++;
     
+    ghostState.currentStatus = `FETCHING_${symbol}_PRICE`;
     const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=EUR`);
     const priceEur = pRes.data.EUR;
     
-    ghostState.currentStatus = `ANALYZING_${symbol}`;
+    ghostState.currentStatus = `AI_PROMPTING_${symbol}`;
     const analysis = await getEntryAnalysis(symbol, priceEur);
     
     if (analysis) {
-      // ثبت در فعالیت‌های اخیر (بدون توجه به سیگنال)
       const scanLog = {
         id: crypto.randomUUID(),
         symbol,
@@ -176,15 +180,16 @@ async function loop() {
       };
       
       ghostState.lastScans.unshift(scanLog);
-      if (ghostState.lastScans.length > 15) ghostState.lastScans.pop();
+      if (ghostState.lastScans.length > 20) ghostState.lastScans.pop();
 
-      // اگر سیگنال قوی بود، به لیست "اندیشه‌ها" اضافه کن
-      if (analysis.confidence >= 70 && analysis.side === 'BUY') {
+      // کاهش فیلتر نمایش به 60٪ برای اینکه تحلیل‌های بیشتری در تب ROI-Feed ببینید
+      if (analysis.confidence >= 60) {
         ghostState.thoughts.unshift({ ...analysis, symbol, timestamp: new Date().toISOString(), price: priceEur, id: crypto.randomUUID() });
         if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
 
-        // خرید خودکار
-        if (ghostState.autoPilot && analysis.confidence >= 75) {
+        // خرید واقعی همچنان فقط برای موارد بسیار قوی
+        if (ghostState.autoPilot && analysis.confidence >= 75 && analysis.side === 'BUY') {
+          ghostState.currentStatus = `EXECUTING_BUY_${symbol}`;
           const tradeAmount = 100;
           if (ghostState.liquidity.eur >= tradeAmount) {
             const order = await placeRealOrder(symbol, 'BUY', tradeAmount);
@@ -203,16 +208,21 @@ async function loop() {
         }
       }
     }
+    ghostState.currentStatus = `IDLE_WAITING`;
     saveState();
-  } catch (e) { console.error("LOOP_ERR:", e.message); }
+  } catch (e) { 
+    console.error("LOOP_ERROR:", e.message);
+    ghostState.currentStatus = `ERROR: ${e.message.slice(0, 20)}`;
+  }
 }
 
-setInterval(loop, 10000); // اسکن سریع‌تر هر ۱۰ ثانیه
+// اجرای بلافاصله اولین اسکن
+setTimeout(loop, 2000);
+// چرخه اسکن هر ۱۲ ثانیه
+setInterval(loop, 12000);
 
-app.get('/api/ghost/state', async (req, res) => {
-  try {
-    res.json(ghostState);
-  } catch (e) { res.status(500).json({ error: "ERR" }); }
+app.get('/api/ghost/state', (req, res) => {
+  res.json(ghostState);
 });
 
 app.post('/api/ghost/toggle', (req, res) => {
@@ -222,5 +232,10 @@ app.post('/api/ghost/toggle', (req, res) => {
   res.json({ success: true });
 });
 
+// جلوگیری از کراش در صورت خطای غیرمنتظره
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT_EXCEPTION:', err);
+});
+
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`STABLE_V5_READY`));
+app.listen(PORT, '0.0.0.0', () => console.log(`CORE_V6_UP_PORT_${PORT}`));

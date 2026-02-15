@@ -7,9 +7,9 @@ interface SignalListProps {
 }
 
 const SignalList: React.FC<SignalListProps> = ({ signals }) => {
-  // Sort signals by expectedROI (highest first)
+  // مرتب‌سازی بر اساس زمان (جدیدترین‌ها اول) برای اینکه بلافاصله نتایج اسکن را ببینید
   const sortedSignals = Array.isArray(signals) 
-    ? [...signals].sort((a, b) => (b.expectedROI || 0) - (a.expectedROI || 0))
+    ? [...signals].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     : [];
   
   const limitedSignals = sortedSignals.slice(0, 20);
@@ -19,16 +19,17 @@ const SignalList: React.FC<SignalListProps> = ({ signals }) => {
       <div className="p-5 border-b border-white/5 bg-[#0a0a0c] flex items-center justify-between">
         <h3 className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center space-x-2">
            <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></span>
-           <span>ROI-Sorted Signals</span>
+           <span>Live Signal Stream</span>
         </h3>
-        <span className="text-[8px] font-black text-slate-600">PREDATOR_ELITE</span>
+        <span className="text-[8px] font-black text-slate-600">PREDATOR_V6</span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {limitedSignals.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 opacity-20 text-center grayscale">
-             <i className="fas fa-crosshairs text-4xl mb-4 animate-pulse"></i>
-             <p className="text-[9px] font-black uppercase tracking-widest">Scanning for 70% Confidence...</p>
+             <i className="fas fa-satellite text-4xl mb-4 animate-bounce"></i>
+             <p className="text-[9px] font-black uppercase tracking-widest">Awaiting Neural Link...</p>
+             <p className="text-[7px] text-slate-500 mt-2">Checking BTC, ETH, SOL, AVAX...</p>
           </div>
         ) : (
           limitedSignals.map((signal) => {
@@ -41,22 +42,21 @@ const SignalList: React.FC<SignalListProps> = ({ signals }) => {
               <div 
                 key={signal.id} 
                 className={`border rounded-xl p-4 transition-all relative overflow-hidden group hover:border-indigo-500/40 ${
-                  signal.side === 'BUY' ? 'border-emerald-500/30 bg-emerald-500/[0.03]' : 
-                  signal.side === 'SELL' ? 'border-rose-500/30 bg-rose-500/[0.03]' : 'border-white/5 bg-white/[0.01]'
+                  signal.side === 'BUY' ? 'border-emerald-500/30 bg-emerald-500/[0.03]' : 'border-white/5 bg-white/[0.01]'
                 }`}
               >
-                {/* ROI Badge */}
-                <div className="absolute top-0 right-0 p-2">
-                   <div className="bg-indigo-600 text-[8px] font-black text-white px-2 py-0.5 rounded shadow-lg">
-                      +{roi.toFixed(1)}% ROI
-                   </div>
-                </div>
+                {roi > 0 && (
+                  <div className="absolute top-0 right-0 p-2">
+                     <div className="bg-indigo-600 text-[8px] font-black text-white px-2 py-0.5 rounded shadow-lg">
+                        +{roi.toFixed(1)}% ROI
+                     </div>
+                  </div>
+                )}
 
                 <div className="flex justify-between items-center mb-3">
                   <span className="text-xs font-black text-white">{signal.symbol}</span>
                   <span className={`text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-tighter mr-12 ${
-                    signal.side === 'BUY' ? 'bg-emerald-500 text-black' : 
-                    signal.side === 'SELL' ? 'bg-rose-500 text-black' : 'bg-slate-800 text-slate-400'
+                    signal.side === 'BUY' ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400'
                   }`}>
                     {signal.side}
                   </span>
@@ -68,7 +68,7 @@ const SignalList: React.FC<SignalListProps> = ({ signals }) => {
 
                 <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-4 mb-3">
                   <div className="text-left">
-                    <p className="text-[7px] text-slate-600 font-black uppercase mb-1">Entry</p>
+                    <p className="text-[7px] text-slate-600 font-black uppercase mb-1">Price</p>
                     <p className="text-[10px] font-black text-white">€{Number(entry).toLocaleString()}</p>
                   </div>
                   <div className="text-center">
