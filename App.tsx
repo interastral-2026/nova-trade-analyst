@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { AssetInfo, TradeSignal, AnalysisStatus, AccountBalance, ActivePosition, ExecutionLog } from './types.ts';
+import { AssetInfo, TradeSignal, AnalysisStatus, AccountBalance } from './types.ts';
 import { fetchProductStats } from './services/coinbaseService.ts';
 import { getApiBase, fetchAccountBalance } from './services/tradingService.ts';
 import Header from './components/Header.tsx';
@@ -17,10 +17,9 @@ const App: React.FC = () => {
   const [balances, setBalances] = useState<AccountBalance[]>([]);
   const [isEngineActive, setIsEngineActive] = useState<boolean>(true);
   const [autoTradeEnabled, setAutoTradeEnabled] = useState<boolean>(true);
-  const [liveActivity, setLiveActivity] = useState<string>("INITIALIZING_SYSTEM...");
+  const [liveActivity, setLiveActivity] = useState<string>("INITIALIZING...");
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [bridgeUrl, setBridgeUrl] = useState<string>(getApiBase());
-  const [bridgeOnline, setBridgeOnline] = useState<boolean>(false);
 
   const syncAll = useCallback(async () => {
     const base = getApiBase();
@@ -31,14 +30,10 @@ const App: React.FC = () => {
         setIsEngineActive(stateRes.isEngineActive);
         setAutoTradeEnabled(stateRes.autoPilot);
         setLiveActivity(stateRes.currentStatus || "SYSTEM_ACTIVE");
-        setBridgeOnline(true);
       }
-
       const bals = await fetchAccountBalance();
       if (bals) setBalances(bals);
-
     } catch (e) {
-      setBridgeOnline(false);
       setLiveActivity("BRIDGE_OFFLINE");
     }
   }, []);
@@ -52,7 +47,7 @@ const App: React.FC = () => {
   const toggleEngine = async () => {
     const base = getApiBase();
     const newState = !isEngineActive;
-    setIsEngineActive(newState); // Optimistic update
+    setIsEngineActive(newState);
     try {
       await fetch(`${base}/api/ghost/toggle`, {
         method: 'POST',
@@ -66,7 +61,7 @@ const App: React.FC = () => {
   const toggleAuto = async () => {
     const base = getApiBase();
     const newState = !autoTradeEnabled;
-    setAutoTradeEnabled(newState); // Optimistic update
+    setAutoTradeEnabled(newState);
     try {
       await fetch(`${base}/api/ghost/toggle`, {
         method: 'POST',
@@ -80,20 +75,15 @@ const App: React.FC = () => {
   useEffect(() => {
     syncAll();
     const interval = setInterval(syncAll, 4000); 
-    
     const statsInterval = setInterval(() => {
       WATCHLIST.forEach(id => fetchProductStats(id).then(info => {
         setAssets(prev => {
           const filtered = prev.filter(a => a.id !== id);
           return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
         });
-      }).catch(() => {}));
+      }));
     }, 12000);
-
-    return () => {
-      clearInterval(interval);
-      clearInterval(statsInterval);
-    };
+    return () => { clearInterval(interval); clearInterval(statsInterval); };
   }, [syncAll]);
 
   return (
@@ -113,28 +103,26 @@ const App: React.FC = () => {
           bridgeUrl={bridgeUrl} 
           onUpdateBridge={handleUpdateBridge} 
         />
-        <main className="flex-1 p-4 lg:p-8 overflow-y-auto bg-[radial-gradient(ellipse_at_top,_#042f2e_0%,_#000_100%)]">
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 max-w-[1800px] mx-auto">
-            <div className="xl:col-span-8">
+        <main className="flex-1 flex bg-[#020408]">
+          <div className="flex-1 p-8 overflow-y-auto">
+              {/* Fix: Removed extra props (positions, logs, totalValue, performance, openOrders) that are not present in TradingTerminalProps to resolve TypeScript error */}
               <TradingTerminal 
                 balances={balances} 
-                positions={[]} 
-                logs={[]} 
                 autoTradeEnabled={autoTradeEnabled} 
                 isEngineActive={isEngineActive} 
                 onToggleEngine={toggleEngine} 
                 onToggleAutoTrade={toggleAuto} 
-                totalValue={0} 
-                performance={{netProfit:0, grossLoss:0, winRate:0, totalTrades:0, history:[]}} 
                 thoughtHistory={thoughtHistory} 
                 liveActivity={liveActivity} 
-                openOrders={[]} 
                 onForceScan={syncAll} 
               />
-            </div>
-            <div className="xl:col-span-4">
+          </div>
+          <div className="w-96 border-l border-white/5 p-6 overflow-y-auto custom-scrollbar bg-black/40">
+              <div className="mb-6 flex justify-between items-center">
+                 <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Tactical Signals</h3>
+                 <span className="text-[8px] font-black text-slate-600">LIVE_FEED</span>
+              </div>
               <SignalList signals={thoughtHistory} />
-            </div>
           </div>
         </main>
       </div>

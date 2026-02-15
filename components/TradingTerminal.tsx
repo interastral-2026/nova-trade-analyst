@@ -1,27 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AccountBalance, ExecutionLog } from '../types';
 import { getApiBase } from '../services/tradingService';
 
 interface TradingTerminalProps {
   balances: AccountBalance[];
-  positions: any[];
-  logs: ExecutionLog[];
   autoTradeEnabled: boolean;
   isEngineActive: boolean;
   onToggleEngine: () => void;
   onToggleAutoTrade: () => void;
-  totalValue: number;
-  performance: {
-    netProfit: number;
-    grossLoss: number;
-    winRate: number;
-    totalTrades: number;
-    history: any[];
-  };
   thoughtHistory: any[];
   liveActivity?: string;
-  openOrders: any[];
   onForceScan?: () => void;
 }
 
@@ -31,18 +20,18 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
   liveActivity,
   onForceScan
 }) => {
-  const [managedAssets, setManagedAssets] = useState<any>({});
   const [liquidity, setLiquidity] = useState({ eur: 0, usdc: 0 });
   const [dailyStats, setDailyStats] = useState({ trades: 0, profit: 0, fees: 0 });
   const [logs, setLogs] = useState<ExecutionLog[]>([]);
-  
+  const [activeTab, setActiveTab] = useState<'thoughts' | 'logs'>('thoughts');
+  const terminalRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const fetchState = async () => {
       try {
         const urlBase = getApiBase();
         const res = await fetch(`${urlBase}/api/ghost/state`);
         const data = await res.json();
-        if (data.managedAssets) setManagedAssets(data.managedAssets);
         if (data.liquidity) setLiquidity(data.liquidity);
         if (data.dailyStats) setDailyStats(data.dailyStats);
         if (data.executionLogs) setLogs(data.executionLogs);
@@ -53,114 +42,113 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
     return () => clearInterval(inv);
   }, []);
 
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = 0;
+    }
+  }, [thoughtHistory, logs]);
+
   return (
-    <div className="flex flex-col space-y-6 font-mono">
-      {/* Predator Dashboard Header */}
+    <div className="flex flex-col space-y-6 font-mono h-full">
+      {/* Predator Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="md:col-span-2 bg-gradient-to-br from-[#0a0514] to-black border border-indigo-500/50 p-8 rounded-[2rem] relative overflow-hidden shadow-[0_0_50px_rgba(99,102,241,0.1)]">
-           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[120px] rounded-full"></div>
-           <div className="flex justify-between items-start relative z-10">
+        <div className="md:col-span-2 bg-[#050505] border border-indigo-500/30 p-6 rounded-3xl relative overflow-hidden shadow-2xl">
+           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/10 blur-[80px]"></div>
+           <div className="relative z-10 flex justify-between items-center">
               <div>
-                 <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] mb-4 flex items-center">
-                    <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2 animate-ping"></span>
-                    ELITE PREDATOR HUB
-                 </p>
-                 <div className="flex items-baseline space-x-10">
-                    <div>
-                       <span className="text-[8px] text-slate-500 block uppercase mb-1 tracking-widest">Available Reserve</span>
-                       <h2 className="text-4xl font-black text-white tracking-tighter">
-                          €{liquidity.eur.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                       </h2>
-                    </div>
-                    <div className="w-[1px] h-12 bg-white/10"></div>
-                    <div>
-                       <span className="text-[8px] text-slate-500 block uppercase mb-1 tracking-widest">Net Daily Profit</span>
-                       <h2 className={`text-2xl font-black ${dailyStats.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                          €{dailyStats.profit.toFixed(2)}
-                       </h2>
-                    </div>
-                 </div>
-                 <div className="mt-6 flex items-center space-x-6 text-[9px] font-black uppercase tracking-widest">
-                    <span className="text-indigo-400">FEES: €{dailyStats.fees.toFixed(3)}</span>
-                    <span className="text-slate-600">|</span>
-                    <span className="text-cyan-400">ACTIVITY: {liveActivity || "HUNTING"}</span>
+                 <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-3">SYSTEM_LIQUIDITY_VAULT</p>
+                 <div className="flex items-center space-x-6">
+                    <h2 className="text-3xl font-black text-white">€{liquidity.eur.toLocaleString()}</h2>
+                    <div className="h-8 w-px bg-white/10"></div>
+                    <div className="text-emerald-400 text-sm font-black">ACTIVE_MINING</div>
                  </div>
               </div>
-              <button onClick={onForceScan} className="w-14 h-14 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 text-white transition-all shadow-xl active:scale-90 group">
-                 <i className="fas fa-crosshairs group-hover:scale-125 transition-transform text-indigo-400"></i>
-              </button>
+              <div className="text-right">
+                 <p className="text-[8px] text-slate-500 uppercase tracking-widest mb-1">Total Fees Paid</p>
+                 <p className="text-md font-black text-rose-400">€{dailyStats.fees.toFixed(3)}</p>
+              </div>
            </div>
         </div>
-        
-        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center items-center group hover:border-indigo-500/30 transition-all shadow-lg">
-           <p className="text-[8px] font-black text-slate-500 uppercase mb-2 tracking-widest">Confidence Floor</p>
-           <p className="text-3xl font-black text-indigo-400">80%</p>
-           <p className="text-[7px] text-slate-700 mt-2">MIN_SIGNAL_DISPLAY</p>
+        <div className="bg-[#050505] border border-white/5 p-6 rounded-3xl flex flex-col justify-center items-center">
+           <p className="text-[8px] text-slate-500 uppercase mb-1">Hunter Status</p>
+           <p className="text-xl font-black text-indigo-400 animate-pulse">{liveActivity?.split('_')[0] || "SCANNING"}</p>
         </div>
-        
-        <div className="bg-[#050810] border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center items-center group hover:border-emerald-500/30 transition-all shadow-lg">
-           <p className="text-[8px] font-black text-slate-500 uppercase mb-2 tracking-widest">Sniper Protocol</p>
-           <p className={`text-2xl font-black ${autoTradeEnabled ? 'text-emerald-400' : 'text-slate-600'}`}>
-            {autoTradeEnabled ? 'ACTIVE' : 'READY'}
-           </p>
-           <p className="text-[7px] text-slate-700 mt-2">THRESHOLD: 85%+</p>
+        <div className="bg-[#050505] border border-white/5 p-6 rounded-3xl flex flex-col justify-center items-center">
+           <p className="text-[8px] text-slate-500 uppercase mb-1">Sniper Mode</p>
+           <p className={`text-xl font-black ${autoTradeEnabled ? 'text-emerald-400' : 'text-slate-600'}`}>{autoTradeEnabled ? 'AUTO' : 'MANUAL'}</p>
         </div>
       </div>
 
-      {/* Main Terminal Interface */}
-      <div className="bg-[#050810]/95 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl min-h-[500px] flex flex-col">
-         <div className="p-8 border-b border-white/5 bg-indigo-950/5 flex justify-between items-center">
-            <div className="flex space-x-10 text-[10px] font-black uppercase tracking-[0.3em]">
-               <button className="text-indigo-400 border-b-2 border-indigo-500 pb-2">HUNT_RADAR</button>
-               <button className="text-slate-500 hover:text-slate-300 transition-colors">KILL_LOGS</button>
-            </div>
-            <div className="flex items-center space-x-2 text-[8px] font-black text-slate-600">
-               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-               <span>SYSTEM_SYNCHRONIZED_WITH_COINBASE</span>
-            </div>
-         </div>
+      {/* Main Terminal UI */}
+      <div className="flex-1 bg-black border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col min-h-[500px]">
+        <div className="bg-white/5 p-4 flex justify-between items-center border-b border-white/5 px-8">
+           <div className="flex space-x-8">
+              <button 
+                onClick={() => setActiveTab('thoughts')}
+                className={`text-[10px] font-black uppercase tracking-widest pb-1 transition-all ${activeTab === 'thoughts' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-slate-500'}`}
+              >
+                Neural Thoughts
+              </button>
+              <button 
+                onClick={() => setActiveTab('logs')}
+                className={`text-[10px] font-black uppercase tracking-widest pb-1 transition-all ${activeTab === 'logs' ? 'text-emerald-400 border-b-2 border-emerald-500' : 'text-slate-500'}`}
+              >
+                Order Kill-Logs
+              </button>
+           </div>
+           <div className="flex items-center space-x-2 text-[8px] text-slate-600 font-black">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+              <span>LIVE_BRIDGE_STABLE</span>
+           </div>
+        </div>
 
-         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-               {thoughtHistory.filter(t => t.confidence >= 80).map((t, i) => (
-                  <div key={i} className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl relative group overflow-hidden hover:border-indigo-500/40 transition-all">
-                     <div className="flex justify-between items-start mb-4">
-                        <div>
-                           <span className="text-lg font-black text-white">{t.symbol}</span>
-                           <span className={`ml-3 text-[10px] px-2 py-0.5 rounded font-black ${t.side === 'BUY' ? 'bg-emerald-500 text-black' : 'bg-rose-500 text-black'}`}>
-                              {t.side}
-                           </span>
-                        </div>
-                        <div className="text-right">
-                           <p className="text-xl font-black text-indigo-400">{t.confidence}%</p>
-                           <p className="text-[7px] text-slate-600 uppercase font-black">Confidence</p>
-                        </div>
-                     </div>
-                     <p className="text-[10px] text-slate-400 mb-6 italic leading-relaxed">"{t.reason}"</p>
-                     <div className="grid grid-cols-3 gap-4 text-[10px] font-black">
-                        <div className="bg-black/40 p-3 rounded-xl border border-white/5">
-                           <span className="text-slate-600 block text-[7px] mb-1">ENTRY</span>
-                           <span className="text-white">€{t.price?.toLocaleString()}</span>
-                        </div>
-                        <div className="bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10">
-                           <span className="text-emerald-600 block text-[7px] mb-1">SAFE TP</span>
-                           <span className="text-emerald-400">€{t.tp?.toLocaleString()}</span>
-                        </div>
-                        <div className="bg-rose-500/5 p-3 rounded-xl border border-rose-500/10">
-                           <span className="text-rose-600 block text-[7px] mb-1">DEEP SL</span>
-                           <span className="text-rose-400">€{t.sl?.toLocaleString()}</span>
-                        </div>
-                     </div>
-                     {t.confidence >= 85 && (
-                        <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between text-[8px] font-black text-indigo-500 animate-pulse">
-                           <span>SNIPER_TRIGGER_ARMED</span>
-                           <i className="fas fa-bolt"></i>
-                        </div>
-                     )}
+        <div ref={terminalRef} className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-[radial-gradient(circle_at_center,_#050814_0%,_#000_100%)]">
+           {activeTab === 'thoughts' ? (
+             <div className="space-y-6">
+                {thoughtHistory.map((t, i) => (
+                  <div key={t.id || i} className="border-l-2 border-indigo-500/30 pl-6 py-2 group hover:border-indigo-400 transition-all">
+                    <div className="flex items-center space-x-3 mb-2">
+                       <span className="text-[10px] font-black text-indigo-500">[{new Date(t.timestamp).toLocaleTimeString()}]</span>
+                       <span className="text-[10px] font-black text-white uppercase tracking-tighter">{t.symbol} Analysis</span>
+                       <span className={`text-[8px] px-2 py-0.5 rounded font-black ${t.side === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>{t.side}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 italic leading-relaxed mb-3">"{t.thoughtProcess || t.reason}"</p>
+                    <div className="flex space-x-6 text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                       <span>CONFIDENCE: <span className="text-indigo-400">{t.confidence}%</span></span>
+                       <span>SAFE_TP: €{t.tp}</span>
+                       <span>DEEP_SL: €{t.sl}</span>
+                    </div>
                   </div>
-               ))}
-            </div>
-         </div>
+                ))}
+             </div>
+           ) : (
+             <div className="space-y-4">
+                {logs.length === 0 ? (
+                  <div className="text-center py-20 opacity-20 uppercase text-[10px] tracking-widest">No Executions Detected In Current Cycle</div>
+                ) : (
+                  logs.map((log) => (
+                    <div key={log.id} className="bg-white/5 border border-white/5 p-5 rounded-2xl group hover:border-emerald-500/30 transition-all">
+                       <div className="flex justify-between items-center mb-3">
+                          <div className="flex items-center space-x-3">
+                             <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-black">
+                                <i className="fas fa-shopping-cart"></i>
+                             </div>
+                             <span className="text-xs font-black text-white">{log.symbol}</span>
+                          </div>
+                          <span className="text-[9px] text-slate-500">{new Date(log.timestamp).toLocaleString()}</span>
+                       </div>
+                       <div className="grid grid-cols-3 gap-4 text-[9px] font-black uppercase mb-3">
+                          <div><span className="text-slate-600 block mb-1">Action</span><span className="text-emerald-400">{log.action}</span></div>
+                          <div><span className="text-slate-600 block mb-1">Execution Price</span><span className="text-white">€{log.price.toLocaleString()}</span></div>
+                          <div><span className="text-slate-600 block mb-1">Net Fee</span><span className="text-rose-400">€{log.fees?.toFixed(4)}</span></div>
+                       </div>
+                       <p className="text-[10px] text-slate-500 italic">Reason: {log.thought || "Auto-sniper trigger based on 85%+ confidence"}</p>
+                    </div>
+                  ))
+                )}
+             </div>
+           )}
+        </div>
       </div>
     </div>
   );

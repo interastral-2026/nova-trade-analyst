@@ -3,18 +3,29 @@ import express from 'express';
 import crypto from 'crypto';
 import axios from 'axios';
 import cors from 'cors';
+import fs from 'fs';
 import { GoogleGenAI, Type } from "@google/genai";
 
 const app = express();
+const STATE_FILE = './ghost_state.json';
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
-
+app.use(cors({ origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-Type'] }));
 app.use(express.json());
+
+// --- PERSISTENCE LAYER ---
+function saveState() {
+  try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {}
+}
+
+function loadState() {
+  try {
+    if (fs.existsSync(STATE_FILE)) {
+      const data = fs.readFileSync(STATE_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (e) {}
+  return null;
+}
 
 const API_KEY_NAME = "organizations/d90bac52-0e8a-4999-b156-7491091ffb5e/apiKeys/79d55457-7e62-45ad-8656-31e1d96e0571";
 const PRIVATE_KEY = `-----BEGIN EC PRIVATE KEY-----
@@ -24,29 +35,26 @@ Dgbh5U2Zj3zlxHWivwVyZGMWMf8xEdxYXw==
 -----END EC PRIVATE KEY-----`;
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'ADA', 'LINK', 'DOT', 'MATIC'];
-const TAKER_FEE = 0.006; // 0.6% standard fee
+const TAKER_FEE = 0.006; 
 
-let ghostState = {
+let ghostState = loadState() || {
   isEngineActive: true,
   autoPilot: true,
   thoughts: [],
   managedAssets: {}, 
   executionLogs: [], 
-  currentStatus: "PREDATOR_STANDBY",
+  currentStatus: "PREDATOR_READY",
   scanIndex: 0,
   liquidity: { eur: 0, usdc: 0 },
   dailyStats: { trades: 0, profit: 0, fees: 0 }
 };
 
-// --- AUTH & COMMUNICATION ---
+// --- AUTH ---
 function generateToken(method, path) {
   try {
     const header = { alg: 'ES256', kid: API_KEY_NAME, typ: 'JWT' };
     const now = Math.floor(Date.now() / 1000);
-    const payload = { 
-      iss: 'coinbase-cloud', nbf: now, exp: now + 60, sub: API_KEY_NAME, 
-      uri: `${method} api.coinbase.com${path.split('?')[0]}` 
-    };
+    const payload = { iss: 'coinbase-cloud', nbf: now, exp: now + 60, sub: API_KEY_NAME, uri: `${method} api.coinbase.com${path.split('?')[0]}` };
     const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
     const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
     const tokenData = `${encodedHeader}.${encodedPayload}`;
@@ -57,23 +65,17 @@ function generateToken(method, path) {
 async function coinbaseCall(method, path, body = null) {
   const token = generateToken(method, path);
   if (!token) return null;
-  return await axios({
-    method,
-    url: `https://api.coinbase.com${path}`,
-    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-    data: body,
-    timeout: 15000
-  });
+  return await axios({ method, url: `https://api.coinbase.com${path}`, headers: { 'Authorization': `Bearer ${token}` }, data: body, timeout: 15000 }).catch(() => null);
 }
 
-// --- PREDATOR QUANT BRAIN ---
-async function runEliteScan(symbol, price, context) {
+// --- AI BRAIN ---
+async function runEliteScan(symbol, price) {
   if (!process.env.API_KEY) return null;
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `ELITE_SCAN: ${symbol} | PRICE: ${price} | BAL: ${JSON.stringify(ghostState.liquidity)}` }] }],
+      contents: [{ parts: [{ text: `PREDATOR_ANALYSIS: ${symbol} @ ${price}. Current Liquidity: ${ghostState.liquidity.eur} EUR.` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -84,112 +86,70 @@ async function runEliteScan(symbol, price, context) {
             sl: { type: Type.NUMBER },
             confidence: { type: Type.NUMBER },
             reason: { type: Type.STRING },
-            netRoi: { type: Type.NUMBER }
+            thoughtProcess: { type: Type.STRING }
           },
-          required: ['side', 'tp', 'sl', 'confidence', 'reason', 'netRoi']
+          required: ['side', 'tp', 'sl', 'confidence', 'reason', 'thoughtProcess']
         },
-        systemInstruction: `YOU ARE NOVA_ELITE_QUANT. 
-        - DO NOT FEAR THE MARKET, HUNT IT.
-        - IGNORE TRAPS: Wait for Liquidity Sweeps.
-        - STRICT FEES: Account for 0.6% entry and 0.6% exit fees.
-        - CONFIDENCE: Only return >80% for signals. Return side="HOLD" if unsure.
-        - STRATEGY: TP at 85% of target for guaranteed capture. SL in Deep Liquidity Zones.`
+        systemInstruction: "You are NOVA_ELITE_PREDATOR. Spot Smart Money moves and avoid exchange traps. Set TP at 85% of target. Account for 0.6% fees. Only >80% signals. Return JSON only."
       }
     });
     return JSON.parse(response.text || "{}");
   } catch (e) { return null; }
 }
 
-// --- ORDER EXECUTION ---
-async function executeOrder(symbol, side, amount, price) {
-  console.log(`[EXECUTING] ${side} ${symbol} @ ${price}`);
-  try {
-    const res = await coinbaseCall('POST', '/api/v3/brokerage/orders', {
-      client_order_id: crypto.randomUUID(),
-      product_id: `${symbol}-EUR`,
-      side: side,
-      order_configuration: { market_market_ioc: { quote_size: amount.toString() } }
-    });
-    
-    if (res?.data?.success) {
-      const fee = amount * TAKER_FEE;
-      ghostState.dailyStats.fees += fee;
-      ghostState.executionLogs.unshift({
-        id: crypto.randomUUID(),
-        symbol,
-        action: side,
-        amount,
-        price,
-        timestamp: new Date().toISOString(),
-        status: 'AUTO_EXECUTED',
-        fees: fee
-      });
-      return true;
-    }
-  } catch (e) { console.error("Trade Error", e.message); }
-  return false;
-}
-
-// --- MASTER LOOP ---
 async function masterLoop() {
   if (!ghostState.isEngineActive) return;
-  
   try {
-    // 1. Sync Balances
-    const accRes = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=100');
+    const accRes = await coinbaseCall('GET', '/api/v3/brokerage/accounts?limit=50');
     if (accRes?.data?.accounts) {
-      let e = 0, u = 0;
       accRes.data.accounts.forEach(a => {
         const v = parseFloat(a.available_balance?.value || "0");
-        if (a.currency === 'EUR') e = v;
-        if (a.currency === 'USDC' || a.currency === 'USDT') u = v;
+        if (a.currency === 'EUR') ghostState.liquidity.eur = v;
+        if (a.currency === 'USDC') ghostState.liquidity.usdc = v;
       });
-      ghostState.liquidity = { eur: e, usdc: u };
     }
 
-    // 2. Scan Next Asset
     const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
     ghostState.scanIndex++;
     
     const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=EUR`);
     const price = pRes.data.EUR;
 
-    const analysis = await runEliteScan(symbol, price, "LIVE_MARKET");
-    
+    const analysis = await runEliteScan(symbol, price);
     if (analysis && analysis.confidence >= 80) {
-      const signal = { ...analysis, symbol, timestamp: new Date().toISOString(), price };
+      const signal = { ...analysis, symbol, timestamp: new Date().toISOString(), price, id: crypto.randomUUID() };
       ghostState.thoughts.unshift(signal);
-      ghostState.thoughts = ghostState.thoughts.slice(0, 30);
+      ghostState.thoughts = ghostState.thoughts.slice(0, 50);
 
-      // AUTO EXECUTE if > 85% and funds available
       if (ghostState.autoPilot && analysis.confidence >= 85 && analysis.side === 'BUY' && ghostState.liquidity.eur > 50) {
-        ghostState.currentStatus = "EXECUTING_PREDATOR_STRIKE";
-        const tradeAmount = Math.min(ghostState.liquidity.eur * 0.25, 200); // Risk 25% or max 200 EUR
-        await executeOrder(symbol, 'BUY', tradeAmount, price);
+        const amount = Math.min(ghostState.liquidity.eur * 0.3, 300);
+        const res = await coinbaseCall('POST', '/api/v3/brokerage/orders', {
+          client_order_id: crypto.randomUUID(),
+          product_id: `${symbol}-EUR`,
+          side: 'BUY',
+          order_configuration: { market_market_ioc: { quote_size: amount.toString() } }
+        });
+        if (res?.data?.success) {
+          ghostState.executionLogs.unshift({ id: crypto.randomUUID(), symbol, action: 'BUY', amount, price, timestamp: new Date().toISOString(), status: 'AUTO_EXECUTED', fees: amount * TAKER_FEE, thought: analysis.reason });
+          ghostState.dailyStats.trades++;
+          ghostState.dailyStats.fees += amount * TAKER_FEE;
+        }
       }
     }
-    
-    ghostState.currentStatus = `SCANNING_${symbol}_LIQUIDITY`;
-  } catch (e) {
-    ghostState.currentStatus = "RECONNECTING_TO_VAULT";
-  }
+    ghostState.currentStatus = `HUNTING_${symbol}_LIQUIDITY`;
+    saveState();
+  } catch (e) { ghostState.currentStatus = "ENGINE_RETRYING"; }
 }
 
-setInterval(masterLoop, 15000);
-
+setInterval(masterLoop, 20000);
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
-app.get('/api/balances', (req, res) => {
-  res.json([
-    { currency: 'EUR', available: ghostState.liquidity.eur, total: ghostState.liquidity.eur },
-    { currency: 'USDC', available: ghostState.liquidity.usdc, total: ghostState.liquidity.usdc }
-  ]);
-});
 app.post('/api/ghost/toggle', (req, res) => {
   const { engine, auto } = req.body;
   if (engine !== undefined) ghostState.isEngineActive = engine;
   if (auto !== undefined) ghostState.autoPilot = auto;
+  saveState();
   res.json({ success: true });
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`ELITE_PREDATOR_ACTIVE:${PORT}`));
+const PORT = 3001;
+app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_CORE_V3_ONLINE:${PORT}`));
