@@ -4,8 +4,8 @@
   "thoughts": [],
   "managedAssets": {},
   "executionLogs": [],
-  "currentStatus": "SCANNING_SOL_LIQUIDITY",
-  "scanIndex": 11,
+  "currentStatus": "HUNTING_BTC_LIQUIDITY",
+  "scanIndex": 25,
   "liquidity": {
     "eur": 13.097553268664,
     "usdc": 20.3458948764328
