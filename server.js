@@ -25,21 +25,35 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+// مکانیزم بارگذاری امن برای جلوگیری از خطای undefined در آرایه‌ها
 function loadState() {
-  try {
-    if (fs.existsSync(STATE_FILE)) return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-  } catch (e) {}
-  return {
+  const defaults = {
     isEngineActive: true,
     autoPilot: true,
     thoughts: [],
     executionLogs: [],
-    activePositions: [], // ذخیره دارایی‌های در حال نگهداری
+    activePositions: [], 
     currentStatus: "PREDATOR_CORE_ONLINE",
     scanIndex: 0,
     liquidity: { eur: 2500.00, usdc: 1200.00 },
     dailyStats: { trades: 0, profit: 0, fees: 0 }
   };
+
+  try {
+    if (fs.existsSync(STATE_FILE)) {
+      const saved = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      // ترکیب مقادیر ذخیره شده با مقادیر پیش‌فرض برای اطمینان از وجود فیلدهای جدید (مثل activePositions)
+      return { ...defaults, ...saved, 
+        activePositions: saved.activePositions || [],
+        executionLogs: saved.executionLogs || [],
+        thoughts: saved.thoughts || [],
+        liquidity: saved.liquidity || defaults.liquidity
+      };
+    }
+  } catch (e) {
+    console.error("LOAD_STATE_ERR:", e.message);
+  }
+  return defaults;
 }
 
 let ghostState = loadState();
@@ -47,12 +61,11 @@ let ghostState = loadState();
 function saveState() {
   try {
     fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2));
-  } catch (e) { console.error("FS_ERROR:", e); }
+  } catch (e) { console.error("FS_WRITE_ERROR:", e); }
 }
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'ADA', 'LINK'];
 
-// تحلیل ورود به پوزیشن
 async function getEntryAnalysis(symbol, price) {
   if (!process.env.API_KEY) return null;
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -80,7 +93,6 @@ async function getEntryAnalysis(symbol, price) {
   } catch (e) { return null; }
 }
 
-// تحلیل خروج از پوزیشن
 async function getExitAnalysis(symbol, entryPrice, currentPrice, tp, sl) {
   if (!process.env.API_KEY) return null;
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -120,21 +132,23 @@ async function loop() {
     const priceEur = pRes.data.EUR;
     const priceUsd = pRes.data.USD;
 
-    // ۱. بررسی پوزیشن‌های باز برای این نماد
+    // اطمینان از اینکه activePositions یک آرایه است قبل از فراخوانی findIndex
+    if (!Array.isArray(ghostState.activePositions)) {
+      ghostState.activePositions = [];
+    }
+
     const existingPosIndex = ghostState.activePositions.findIndex(p => p.symbol === symbol);
     
     if (existingPosIndex !== -1) {
       const pos = ghostState.activePositions[existingPosIndex];
       ghostState.currentStatus = `MANAGING_${symbol}_POSITION`;
 
-      // الف: بررسی خودکار TP/SL
       let shouldAutoSell = false;
       let sellReason = "";
       
       if (priceEur >= pos.tp) { shouldAutoSell = true; sellReason = "TAKE_PROFIT_HIT"; }
       else if (priceEur <= pos.sl) { shouldAutoSell = true; sellReason = "STOP_LOSS_HIT"; }
 
-      // ب: مشورت با هوش مصنوعی برای خروج زودهنگام
       if (!shouldAutoSell) {
         const exitAdvice = await getExitAnalysis(symbol, pos.entryPrice, priceEur, pos.tp, pos.sl);
         if (exitAdvice && exitAdvice.decision === 'SELL' && exitAdvice.confidence > 75) {
@@ -146,9 +160,9 @@ async function loop() {
       if (shouldAutoSell) {
         const pnlEur = (priceEur - pos.entryPrice) * (pos.amount / pos.entryPrice);
         const fee = pos.amount * 0.006;
-        const netProfit = pnlEur - fee - pos.feesPaid;
+        const netProfit = pnlEur - fee - (pos.feesPaid || 0);
         
-        const currencyKey = pos.currency.toLowerCase();
+        const currencyKey = (pos.currency || 'EUR').toLowerCase();
         ghostState.liquidity[currencyKey] += (pos.amount + pnlEur - fee);
         
         ghostState.executionLogs.unshift({
@@ -169,11 +183,13 @@ async function loop() {
         ghostState.activePositions.splice(existingPosIndex, 1);
       }
     } else {
-      // ۲. اگر پوزیشنی نداریم، به دنبال فرصت ورود می‌گردیم
       ghostState.currentStatus = `SCANNING_${symbol}_ENTRY`;
       const analysis = await getEntryAnalysis(symbol, priceEur);
       
       if (analysis && analysis.side === 'BUY' && analysis.confidence >= 70) {
+        // اطمینان از وجود آرایه thoughts
+        if (!Array.isArray(ghostState.thoughts)) ghostState.thoughts = [];
+        
         ghostState.thoughts.unshift({ ...analysis, symbol, timestamp: new Date().toISOString(), price: priceEur, id: crypto.randomUUID() });
         if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
 
@@ -217,7 +233,10 @@ async function loop() {
       }
     }
     saveState();
-  } catch (e) { console.error("LOOP_ERR:", e.message); }
+  } catch (e) { 
+    console.error("LOOP_ERR:", e.message); 
+    // در صورت بروز خطا در منطق، وضعیت را بازنشانی نکنید، فقط لاگ کنید.
+  }
 }
 
 setInterval(loop, 15000);
@@ -231,4 +250,4 @@ app.post('/api/ghost/toggle', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_ENGINE_v4_ONLINE`));
+app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_ENGINE_v4_STABLE_ONLINE`));
