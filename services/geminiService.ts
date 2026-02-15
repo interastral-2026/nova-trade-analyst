@@ -7,6 +7,11 @@ export const analyzeMarketData = async (
   data: MarketData[],
 ): Promise<TradeSignal | null> => {
   
+  if (!process.env.API_KEY) {
+    console.warn("Client-side Gemini API key missing. Analysis skipped.");
+    return null;
+  }
+
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const currentPrice = data[data.length - 1]?.close || 0;
 
@@ -41,7 +46,7 @@ CORE LOGIC:
         },
         systemInstruction: systemInstruction,
         temperature: 0.1,
-        thinkingConfig: { thinkingBudget: 25000 }
+        thinkingConfig: { thinkingBudget: 32768 }
       }
     });
 
@@ -58,6 +63,7 @@ CORE LOGIC:
       indicators: { rsi: 0, macd: 'SMC', trend: 'PREDATOR_FLOW' }
     };
   } catch (e: any) {
+    console.error("Gemini Analysis Error:", e);
     return null;
   }
 };
