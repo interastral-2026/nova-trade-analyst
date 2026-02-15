@@ -20,7 +20,8 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 }) => {
   const [stats, setStats] = useState({ eur: 0, usdc: 0, trades: 0, fees: 0, profit: 0 });
   const [logs, setLogs] = useState<ExecutionLog[]>([]);
-  const [activeTab, setActiveTab] = useState<'stream' | 'orders'>('stream');
+  const [holdings, setHoldings] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'stream' | 'holdings' | 'orders'>('stream');
   const terminalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,6 +37,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
           profit: data.dailyStats?.profit || 0
         });
         setLogs(data.executionLogs || []);
+        setHoldings(data.activePositions || []);
       } catch (e) {}
     };
     fetchState();
@@ -45,7 +47,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
   useEffect(() => {
     if (terminalRef.current) terminalRef.current.scrollTop = 0;
-  }, [thoughtHistory, logs, activeTab]);
+  }, [thoughtHistory, logs, holdings, activeTab]);
 
   return (
     <div className="flex flex-col space-y-6 h-full font-mono">
@@ -60,23 +62,26 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
            <h2 className="text-2xl font-black text-white">${stats.usdc.toLocaleString()}</h2>
         </div>
         <div className="bg-[#050508] border border-emerald-500/20 p-5 rounded-[2rem]">
-           <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1">DAILY_NET_PNL</p>
+           <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1">REALIZED_PNL</p>
            <h2 className={`text-2xl font-black ${stats.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
              {stats.profit >= 0 ? '+' : ''}€{stats.profit.toFixed(2)}
            </h2>
         </div>
         <div className="bg-[#050508] border border-white/5 p-5 rounded-[2rem]">
-           <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">EXECUTIONS_COUNT</p>
-           <h2 className="text-2xl font-black text-white">{stats.trades}</h2>
+           <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">ACTIVE_HOLDINGS</p>
+           <h2 className="text-2xl font-black text-white">{holdings.length}</h2>
         </div>
       </div>
 
       {/* Main Console */}
       <div className="flex-1 bg-black border border-white/10 rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl">
         <div className="px-8 py-5 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-           <div className="flex space-x-10">
+           <div className="flex space-x-8">
               <button onClick={() => setActiveTab('stream')} className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'stream' ? 'text-indigo-400 border-indigo-500' : 'text-slate-600 border-transparent hover:text-slate-400'}`}>
                 Neural ROI-Feed
+              </button>
+              <button onClick={() => setActiveTab('holdings')} className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'holdings' ? 'text-cyan-400 border-cyan-500' : 'text-slate-600 border-transparent hover:text-slate-400'}`}>
+                Active Positions
               </button>
               <button onClick={() => setActiveTab('orders')} className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'orders' ? 'text-emerald-400 border-emerald-500' : 'text-slate-600 border-transparent hover:text-slate-400'}`}>
                 Trade History
@@ -84,78 +89,114 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
            </div>
            <div className="flex items-center space-x-2 text-[8px] font-black text-slate-600 uppercase tracking-tighter">
               <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${autoTradeEnabled ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-              <span>{autoTradeEnabled ? 'Auto-Executor Active' : 'Manual Mode Only'}</span>
+              <span>{autoTradeEnabled ? 'AUTO_MODE_ACTIVE' : 'WATCH_ONLY'}</span>
            </div>
         </div>
 
         <div ref={terminalRef} className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-           {activeTab === 'stream' ? (
+           {activeTab === 'stream' && (
              <div className="space-y-8">
                 {thoughtHistory.length === 0 ? (
-                  <div className="h-48 flex items-center justify-center opacity-10 italic text-xs uppercase tracking-[0.5em]">Syncing Tactical Stream...</div>
+                  <div className="h-48 flex items-center justify-center opacity-10 italic text-xs uppercase tracking-[0.5em]">Synchronizing Deep Neural Feed...</div>
                 ) : (
                   thoughtHistory.map((t, i) => (
                     <div key={t.id || i} className="group border-l-2 border-indigo-500/20 pl-6 py-1 hover:border-indigo-500 transition-all relative">
                        <div className="flex items-center space-x-4 mb-2">
                           <span className="text-[9px] font-black text-indigo-500">[{new Date(t.timestamp).toLocaleTimeString()}]</span>
                           <span className="text-sm font-black text-white uppercase">{t.symbol}</span>
-                          <span className={`text-[8px] px-2 py-0.5 rounded font-black ${t.side === 'BUY' ? 'bg-emerald-500 text-black' : t.side === 'SELL' ? 'bg-rose-500 text-black' : 'bg-slate-800 text-slate-400'}`}>
+                          <span className={`text-[8px] px-2 py-0.5 rounded font-black ${t.side === 'BUY' ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400'}`}>
                             {t.side}
                           </span>
-                          <span className="bg-indigo-500/10 text-indigo-400 text-[8px] font-black px-2 rounded">EXPECTED_ROI: +{t.expectedROI}%</span>
+                          <span className="bg-indigo-500/10 text-indigo-400 text-[8px] font-black px-2 rounded">POTENTIAL: +{t.expectedROI}%</span>
                        </div>
                        <p className="text-[11px] text-slate-400 leading-relaxed mb-4 italic max-w-3xl">
                         "{t.thoughtProcess || t.reason}"
                        </p>
-                       <div className="flex space-x-12 text-[9px] font-black text-slate-500 uppercase border-t border-white/5 pt-3">
-                          <span>Confidence Score: <span className="text-white">{t.confidence}%</span></span>
-                          <span>Target Exit: <span className="text-emerald-500">€{t.tp || t.takeProfit}</span></span>
-                          <span>Hard Stop: <span className="text-rose-500">€{t.sl || t.stopLoss}</span></span>
+                    </div>
+                  ))
+                )}
+             </div>
+           )}
+
+           {activeTab === 'holdings' && (
+             <div className="grid grid-cols-1 gap-4">
+                {holdings.length === 0 ? (
+                   <div className="h-48 flex flex-col items-center justify-center opacity-20 grayscale">
+                      <i className="fas fa-box-open text-4xl mb-4"></i>
+                      <p className="text-[10px] font-black uppercase tracking-widest">No Active Positions Held</p>
+                   </div>
+                ) : (
+                  holdings.map((pos) => (
+                    <div key={pos.id} className="bg-white/[0.02] border border-cyan-500/20 p-5 rounded-2xl relative overflow-hidden group">
+                       <div className="flex justify-between items-start mb-6">
+                          <div className="flex items-center space-x-4">
+                             <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400">
+                                <i className="fas fa-wallet"></i>
+                             </div>
+                             <div>
+                                <h4 className="text-sm font-black text-white">{pos.symbol}</h4>
+                                <p className="text-[8px] text-slate-500 uppercase">Entry Price: €{pos.entryPrice.toLocaleString()}</p>
+                             </div>
+                          </div>
+                          <div className="text-right">
+                             <span className="text-[9px] font-black text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full uppercase">Monitoring</span>
+                             <p className="text-[8px] text-slate-500 mt-2">{new Date(pos.timestamp).toLocaleString()}</p>
+                          </div>
+                       </div>
+                       
+                       <div className="grid grid-cols-3 gap-4 mb-4">
+                          <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                             <span className="text-[8px] text-slate-600 block uppercase mb-1">Position Size</span>
+                             <span className="text-xs font-black text-white">€{pos.amount} ({(pos.amount/pos.entryPrice).toFixed(4)})</span>
+                          </div>
+                          <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                             <span className="text-[8px] text-emerald-600 block uppercase mb-1">Take Profit</span>
+                             <span className="text-xs font-black text-emerald-400">€{pos.tp.toLocaleString()}</span>
+                          </div>
+                          <div className="bg-black/40 p-3 rounded-xl border border-white/5">
+                             <span className="text-[8px] text-rose-600 block uppercase mb-1">Stop Loss</span>
+                             <span className="text-xs font-black text-rose-400">€{pos.sl.toLocaleString()}</span>
+                          </div>
+                       </div>
+
+                       <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-500 shadow-[0_0_10px_#22d3ee] animate-pulse" style={{width: '65%'}}></div>
                        </div>
                     </div>
                   ))
                 )}
              </div>
-           ) : (
+           )}
+
+           {activeTab === 'orders' && (
              <div className="space-y-4">
                 {logs.length === 0 ? (
-                  <div className="h-48 flex items-center justify-center opacity-10 italic text-xs uppercase tracking-[0.5em]">No simulated trades executed.</div>
+                  <div className="h-48 flex items-center justify-center opacity-10 italic text-xs uppercase tracking-[0.5em]">Order History Empty</div>
                 ) : (
                   logs.map((log) => (
                     <div key={log.id} className="bg-white/[0.02] border border-white/5 p-5 rounded-2xl hover:border-emerald-500/30 transition-all">
                        <div className="flex justify-between items-center mb-4">
                           <div className="flex items-center space-x-3">
-                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${log.status.includes('PROFIT') ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
-                                <i className={`fas ${log.status.includes('PROFIT') ? 'fa-chart-line' : 'fa-crosshairs'}`}></i>
+                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${log.status.includes('PROFIT') ? 'bg-emerald-500/20 text-emerald-400' : log.status.includes('LOSS') ? 'bg-rose-500/20 text-rose-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
+                                <i className={`fas ${log.action === 'BUY' ? 'fa-arrow-down' : 'fa-arrow-up'}`}></i>
                              </div>
                              <div>
-                                <span className="text-xs font-black text-white block">{log.symbol} / {(log as any).currency || 'EUR'}</span>
+                                <span className="text-xs font-black text-white block">{log.symbol} / {log.action}</span>
                                 <span className="text-[8px] text-slate-500">{new Date(log.timestamp).toLocaleString()}</span>
                              </div>
                           </div>
                           <div className="text-right">
-                             <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase ${log.status.includes('PROFIT') ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
+                             <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase ${log.status.includes('PROFIT') ? 'bg-emerald-500/20 text-emerald-400' : log.status.includes('LOSS') ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-800 text-slate-500'}`}>
                                {log.status}
                              </span>
-                             {log.netProfit && (
-                               <span className="block text-[10px] font-black text-emerald-400 mt-1">Net: +€{log.netProfit.toFixed(2)}</span>
+                             {log.netProfit !== undefined && (
+                               <span className={`block text-[10px] font-black mt-1 ${log.netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                 {log.netProfit >= 0 ? '+' : ''}€{log.netProfit.toFixed(2)}
+                               </span>
                              )}
                           </div>
                        </div>
-                       <div className="grid grid-cols-3 gap-4 text-[9px] font-black uppercase">
-                          <div className="bg-black/40 p-2 rounded-lg">
-                            <span className="text-slate-600 block">Execution Price</span>
-                            <span className="text-white">€{log.price.toLocaleString()}</span>
-                          </div>
-                          <div className="bg-black/40 p-2 rounded-lg">
-                            <span className="text-slate-600 block">Position Size</span>
-                            <span className="text-white">€{log.amount}</span>
-                          </div>
-                          <div className="bg-black/40 p-2 rounded-lg">
-                            <span className="text-slate-600 block">Total Fees</span>
-                            <span className="text-rose-400">€{log.fees?.toFixed(3)}</span>
-                          </div>
-                       </div>
+                       <p className="text-[9px] text-slate-500 mb-2 italic">"{log.thought}"</p>
                     </div>
                   ))
                 )}

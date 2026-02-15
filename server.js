@@ -9,7 +9,6 @@ import { GoogleGenAI, Type } from "@google/genai";
 const app = express();
 const STATE_FILE = './ghost_state.json';
 
-// CORS configuration for local and remote access
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -35,6 +34,7 @@ function loadState() {
     autoPilot: true,
     thoughts: [],
     executionLogs: [],
+    activePositions: [], // ذخیره دارایی‌های در حال نگهداری
     currentStatus: "PREDATOR_CORE_ONLINE",
     scanIndex: 0,
     liquidity: { eur: 2500.00, usdc: 1200.00 },
@@ -52,30 +52,57 @@ function saveState() {
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'ADA', 'LINK'];
 
-async function getAnalysis(symbol, price) {
+// تحلیل ورود به پوزیشن
+async function getEntryAnalysis(symbol, price) {
   if (!process.env.API_KEY) return null;
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `PREDATOR_TACTICAL_ANALYSIS: ${symbol} currently at €${price}. 
-      Task: Detect Smart Money Reversals. 
-      Threshold: Confidence > 70% required for signal.
-      ROI Calculation: Must include estimated Net ROI after 0.6% fees.` }] }],
+      contents: [{ parts: [{ text: `PREDATOR_ENTRY: ${symbol} @ €${price}. Identify SMART MONEY Entry. Confidence > 70% required.` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            side: { type: Type.STRING, enum: ['BUY', 'SELL', 'NEUTRAL'] },
+            side: { type: Type.STRING, enum: ['BUY', 'NEUTRAL'] },
             tp: { type: Type.NUMBER },
             sl: { type: Type.NUMBER },
             confidence: { type: Type.NUMBER },
-            expectedROI: { type: Type.NUMBER, description: "Percentage expected profit" },
-            reason: { type: Type.STRING },
-            thoughtProcess: { type: Type.STRING }
+            expectedROI: { type: Type.NUMBER },
+            reason: { type: Type.STRING }
           },
-          required: ['side', 'tp', 'sl', 'confidence', 'expectedROI', 'reason', 'thoughtProcess']
+          required: ['side', 'tp', 'sl', 'confidence', 'expectedROI', 'reason']
+        }
+      }
+    });
+    return JSON.parse(response.text || "{}");
+  } catch (e) { return null; }
+}
+
+// تحلیل خروج از پوزیشن
+async function getExitAnalysis(symbol, entryPrice, currentPrice, tp, sl) {
+  if (!process.env.API_KEY) return null;
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const pnl = ((currentPrice - entryPrice) / entryPrice) * 100;
+  
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: [{ parts: [{ text: `PREDATOR_EXIT_DECISION: ${symbol}. 
+      Entry: €${entryPrice}, Current: €${currentPrice}, PnL: ${pnl.toFixed(2)}%. 
+      Targets: TP €${tp}, SL €${sl}.
+      Decision: SELL or HOLD?` }] }],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            decision: { type: Type.STRING, enum: ['SELL', 'HOLD'] },
+            reason: { type: Type.STRING },
+            confidence: { type: Type.NUMBER }
+          },
+          required: ['decision', 'reason', 'confidence']
         }
       }
     });
@@ -89,67 +116,102 @@ async function loop() {
   ghostState.scanIndex++;
   
   try {
-    ghostState.currentStatus = `HUNTING_${symbol}_VOLATILITY`;
     const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=EUR,USD`);
     const priceEur = pRes.data.EUR;
     const priceUsd = pRes.data.USD;
 
-    const analysis = await getAnalysis(symbol, priceEur);
+    // ۱. بررسی پوزیشن‌های باز برای این نماد
+    const existingPosIndex = ghostState.activePositions.findIndex(p => p.symbol === symbol);
     
-    if (analysis && analysis.confidence >= 70 && analysis.side !== 'NEUTRAL') {
-      const signal = { 
-        ...analysis, 
-        symbol, 
-        timestamp: new Date().toISOString(), 
-        price: priceEur, 
-        id: crypto.randomUUID() 
-      };
-      
-      // Add and sort thoughts by ROI then Confidence
-      ghostState.thoughts.unshift(signal);
-      ghostState.thoughts.sort((a, b) => b.expectedROI - a.expectedROI || b.confidence - a.confidence);
-      
-      if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
-      
-      // AUTO-TRADE EXECUTION (SIMULATED FOR TEST)
-      if (ghostState.autoPilot && analysis.confidence >= 70) {
-        const tradeAmount = 150; // €150 per trade for testing
-        const fee = tradeAmount * 0.006;
-        
-        // Choose liquidity source
-        let source = 'eur';
-        if (ghostState.liquidity.eur < tradeAmount && ghostState.liquidity.usdc > tradeAmount) {
-          source = 'usdc';
-        }
+    if (existingPosIndex !== -1) {
+      const pos = ghostState.activePositions[existingPosIndex];
+      ghostState.currentStatus = `MANAGING_${symbol}_POSITION`;
 
-        if (ghostState.liquidity[source] >= tradeAmount) {
-          ghostState.liquidity[source] -= tradeAmount;
+      // الف: بررسی خودکار TP/SL
+      let shouldAutoSell = false;
+      let sellReason = "";
+      
+      if (priceEur >= pos.tp) { shouldAutoSell = true; sellReason = "TAKE_PROFIT_HIT"; }
+      else if (priceEur <= pos.sl) { shouldAutoSell = true; sellReason = "STOP_LOSS_HIT"; }
+
+      // ب: مشورت با هوش مصنوعی برای خروج زودهنگام
+      if (!shouldAutoSell) {
+        const exitAdvice = await getExitAnalysis(symbol, pos.entryPrice, priceEur, pos.tp, pos.sl);
+        if (exitAdvice && exitAdvice.decision === 'SELL' && exitAdvice.confidence > 75) {
+          shouldAutoSell = true;
+          sellReason = `AI_DECISION: ${exitAdvice.reason}`;
+        }
+      }
+
+      if (shouldAutoSell) {
+        const pnlEur = (priceEur - pos.entryPrice) * (pos.amount / pos.entryPrice);
+        const fee = pos.amount * 0.006;
+        const netProfit = pnlEur - fee - pos.feesPaid;
+        
+        const currencyKey = pos.currency.toLowerCase();
+        ghostState.liquidity[currencyKey] += (pos.amount + pnlEur - fee);
+        
+        ghostState.executionLogs.unshift({
+          id: crypto.randomUUID(),
+          symbol,
+          action: 'SELL',
+          amount: pos.amount,
+          price: priceEur,
+          currency: pos.currency,
+          timestamp: new Date().toISOString(),
+          status: netProfit >= 0 ? 'SUCCESS_PROFIT' : 'CLOSED_LOSS',
+          netProfit: netProfit,
+          fees: fee,
+          thought: sellReason
+        });
+
+        ghostState.dailyStats.profit += netProfit;
+        ghostState.activePositions.splice(existingPosIndex, 1);
+      }
+    } else {
+      // ۲. اگر پوزیشنی نداریم، به دنبال فرصت ورود می‌گردیم
+      ghostState.currentStatus = `SCANNING_${symbol}_ENTRY`;
+      const analysis = await getEntryAnalysis(symbol, priceEur);
+      
+      if (analysis && analysis.side === 'BUY' && analysis.confidence >= 70) {
+        ghostState.thoughts.unshift({ ...analysis, symbol, timestamp: new Date().toISOString(), price: priceEur, id: crypto.randomUUID() });
+        if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
+
+        if (ghostState.autoPilot) {
+          const tradeAmount = 200; 
+          const currencyKey = ghostState.liquidity.eur >= tradeAmount ? 'eur' : 'usdc';
           
-          const logEntry = {
-             id: crypto.randomUUID(), 
-             symbol, 
-             action: analysis.side, 
-             amount: tradeAmount, 
-             price: source === 'eur' ? priceEur : priceUsd,
-             currency: source.toUpperCase(),
-             timestamp: new Date().toISOString(), 
-             status: 'SUCCESS', 
-             fees: fee, 
-             thought: analysis.reason,
-             roi: analysis.expectedROI
-          };
-          
-          ghostState.executionLogs.unshift(logEntry);
-          ghostState.dailyStats.trades++;
-          ghostState.dailyStats.fees += fee;
-          
-          // Simple simulated profit realization (50% of signals "hit" instantly for visual feedback in test)
-          if (Math.random() > 0.5) {
-            const profit = tradeAmount * (analysis.expectedROI / 100);
-            ghostState.liquidity[source] += (tradeAmount + profit - fee);
-            ghostState.dailyStats.profit += (profit - fee);
-            logEntry.status = 'COMPLETED_PROFIT';
-            logEntry.netProfit = profit - fee;
+          if (ghostState.liquidity[currencyKey] >= tradeAmount) {
+            ghostState.liquidity[currencyKey] -= tradeAmount;
+            const fee = tradeAmount * 0.006;
+            
+            const newPosition = {
+              id: crypto.randomUUID(),
+              symbol,
+              entryPrice: priceEur,
+              amount: tradeAmount,
+              currency: currencyKey.toUpperCase(),
+              tp: analysis.tp,
+              sl: analysis.sl,
+              timestamp: new Date().toISOString(),
+              feesPaid: fee
+            };
+
+            ghostState.activePositions.push(newPosition);
+            ghostState.executionLogs.unshift({
+              id: crypto.randomUUID(),
+              symbol,
+              action: 'BUY',
+              amount: tradeAmount,
+              price: priceEur,
+              currency: currencyKey.toUpperCase(),
+              timestamp: new Date().toISOString(),
+              status: 'SUCCESS',
+              fees: fee,
+              thought: analysis.reason
+            });
+            ghostState.dailyStats.trades++;
+            ghostState.dailyStats.fees += fee;
           }
         }
       }
@@ -158,7 +220,6 @@ async function loop() {
   } catch (e) { console.error("LOOP_ERR:", e.message); }
 }
 
-// Faster loop for testing (every 15 seconds)
 setInterval(loop, 15000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
@@ -170,4 +231,4 @@ app.post('/api/ghost/toggle', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`BRIDGE_SERVER_RUNNING_ON_${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_ENGINE_v4_ONLINE`));
