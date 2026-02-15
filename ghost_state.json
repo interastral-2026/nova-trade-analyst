@@ -4,8 +4,8 @@
   "thoughts": [],
   "executionLogs": [],
   "activePositions": [],
-  "currentStatus": "ANALYZING_LINK",
-  "scanIndex": 192,
+  "currentStatus": "SCANNING_SOL",
+  "scanIndex": 219,
   "liquidity": {
     "eur": 13.097553268664,
     "usdc": 20.3458948764328
