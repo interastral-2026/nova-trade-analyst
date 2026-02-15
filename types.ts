@@ -1,4 +1,13 @@
 
+export interface AssetInfo {
+  id: string;
+  name: string;
+  price: string;
+  change24h: number;
+  volume: string;
+  marketCap: string;
+}
+
 export interface MarketData {
   time: number;
   low: number;
@@ -21,33 +30,12 @@ export interface TradeSignal {
   thoughtProcess: string; 
   timestamp: string;
   netRoiExpected: string;
+  estimatedFees: number;
   indicators: {
     rsi: number;
     macd: string;
     trend: string;
   };
-  size?: number;
-}
-
-export interface OpenOrder {
-  order_id: string;
-  symbol: string;
-  side: 'BUY' | 'SELL';
-  price: number;
-  size: number;
-  status: string;
-  created_at: string;
-  type: 'LIMIT' | 'STOP_LIMIT' | 'MARKET';
-  ai_plan?: string; 
-}
-
-export interface AssetInfo {
-  id: string;
-  name: string;
-  price: string;
-  change24h: number;
-  volume: string;
-  marketCap: string;
 }
 
 export interface AccountBalance {
@@ -62,27 +50,24 @@ export interface ActivePosition {
   symbol: string;
   entryPrice: number;
   currentPrice: number;
-  side: 'LONG' | 'SHORT';
+  side: 'BUY' | 'SELL';
   size: number;
-  status: 'OPEN' | 'CLOSED';
   pnl: number;
   pnlPercent: number;
   tp: number;
   sl: number;
-  openTime: string;
-  closeTime?: string;
-  exitPrice?: number;
-  orderSource: 'BOT' | 'MANUAL';
-  strategyPlan?: string;
-  analysisContext?: string;
+  feesPaid: number;
+  status: 'OPEN' | 'CLOSED';
 }
 
-export interface PerformanceStats {
-  netProfit: number;
-  grossLoss: number;
-  winRate: number;
-  totalTrades: number;
-  history: {pnl: number, timestamp: string}[];
+export interface OpenOrder {
+  id: string;
+  symbol: string;
+  side: 'BUY' | 'SELL';
+  price: number;
+  amount: number;
+  filled: number;
+  status: string;
 }
 
 export interface ExecutionLog {
@@ -92,22 +77,21 @@ export interface ExecutionLog {
   amount: number;
   price: number;
   timestamp: string;
-  status: 'SUCCESS' | 'FAILED' | 'CLOSED';
-  pnl?: number;
-  pnlPercent?: number;
-  details?: string;
+  status: 'SUCCESS' | 'FAILED' | 'AUTO_EXECUTED';
+  fees?: number;
+  netProfit?: number;
   thought?: string;
-  tp?: number;
-  sl?: number;
-  exitPrice?: number;
+  details?: string;
 }
 
 export enum AnalysisStatus {
   IDLE = 'IDLE',
-  FETCHING = 'FETCHING',
-  ANALYZING = 'ANALYZING',
-  COMPLETED = 'COMPLETED',
+  SCANNING = 'SCANNING_LIQUIDITY',
+  EXECUTING = 'EXECUTING_ORDER',
   ERROR = 'ERROR',
+  ANALYZING = 'ANALYZING',
+  FETCHING = 'FETCHING',
+  COMPLETED = 'COMPLETED',
   RATE_LIMITED = 'RATE_LIMITED',
   OVERLOADED = 'OVERLOADED',
   KEY_REQUIRED = 'KEY_REQUIRED'
