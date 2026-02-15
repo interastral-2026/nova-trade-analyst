@@ -9,7 +9,6 @@ import { GoogleGenAI, Type } from "@google/genai";
 const app = express();
 const STATE_FILE = './ghost_state.json';
 
-// --- تنظیمات فوق امنیتی و صریح CORS برای رفع خطای مرورگر ---
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -21,9 +20,7 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
 
@@ -39,7 +36,6 @@ function getCoinbaseHeaders(method, path, body = '') {
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const message = timestamp + method.toUpperCase() + path + body;
   const signature = crypto.createHmac('sha256', CB_CONFIG.apiSecret).update(message).digest('hex');
-
   return {
     'CB-ACCESS-KEY': CB_CONFIG.apiKey,
     'CB-ACCESS-SIGN': signature,
@@ -59,9 +55,7 @@ async function fetchRealBalances() {
     const eur = accounts.find(a => a.currency === 'EUR')?.available_balance.value || 0;
     const usdc = accounts.find(a => a.currency === 'USDC')?.available_balance.value || 0;
     return { eur: parseFloat(eur), usdc: parseFloat(usdc) };
-  } catch (e) {
-    return null;
-  }
+  } catch (e) { return null; }
 }
 
 async function placeRealOrder(symbol, side, amountEur) {
@@ -79,9 +73,7 @@ async function placeRealOrder(symbol, side, amountEur) {
       headers: getCoinbaseHeaders('POST', path, body)
     });
     return { success: true, data: response.data };
-  } catch (e) {
-    return { success: false, error: e.response?.data || e.message };
-  }
+  } catch (e) { return { success: false, error: e.response?.data || e.message }; }
 }
 
 function loadState() {
@@ -91,7 +83,8 @@ function loadState() {
     thoughts: [],
     executionLogs: [],
     activePositions: [], 
-    currentStatus: "CORE_INITIALIZING",
+    lastScans: [], // بخش جدید برای نمایش تمام فعالیت‌ها
+    currentStatus: "CORE_READY",
     scanIndex: 0,
     liquidity: { eur: 0, usdc: 0 },
     dailyStats: { trades: 0, profit: 0, fees: 0 }
@@ -129,7 +122,13 @@ async function getEntryAnalysis(symbol, price) {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `PREDATOR_SCAN: ${symbol} @ €${price}. Identify SMC entries. Return JSON.` }] }],
+      contents: [{ parts: [{ text: `STRICT_MARKET_ANALYSIS: Asset ${symbol} at Price €${price}. 
+      Look for:
+      1. Order Block Rejections.
+      2. Fair Value Gaps (FVG).
+      3. Relative Strength vs Market.
+      Identify if this is a 'BUY' opportunity with high confidence (75%+). 
+      If not perfect, return 'NEUTRAL' with a short reason. Confidence must reflect the strength of the SMC setup.` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -150,37 +149,8 @@ async function getEntryAnalysis(symbol, price) {
   } catch (e) { return null; }
 }
 
-async function getExitAnalysis(symbol, entryPrice, currentPrice, tp, sl) {
-  if (!process.env.API_KEY) return null;
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `EXIT_SCAN: ${symbol}. Entry €${entryPrice}, Now €${currentPrice}. Decision SELL/HOLD.` }] }],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            decision: { type: Type.STRING, enum: ['SELL', 'HOLD'] },
-            reason: { type: Type.STRING },
-            confidence: { type: Type.NUMBER }
-          },
-          required: ['decision', 'reason', 'confidence']
-        }
-      }
-    });
-    return JSON.parse(response.text || "{}");
-  } catch (e) { return null; }
-}
-
 async function loop() {
-  // جلوگیری از کراش در صورت نبود کلید API
-  if (!process.env.API_KEY) {
-    ghostState.currentStatus = "WAITING_FOR_API_KEY";
-    return;
-  }
-  if (!ghostState.isEngineActive) return;
+  if (!process.env.API_KEY || !ghostState.isEngineActive) return;
   
   try {
     await syncLiquidity();
@@ -190,41 +160,30 @@ async function loop() {
     const pRes = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=EUR`);
     const priceEur = pRes.data.EUR;
     
-    const existingPosIndex = ghostState.activePositions.findIndex(p => p.symbol === symbol);
-    if (existingPosIndex !== -1) {
-      const pos = ghostState.activePositions[existingPosIndex];
-      ghostState.currentStatus = `MANAGING_${symbol}`;
-      let shouldSell = false;
-      let sellReason = "";
+    ghostState.currentStatus = `ANALYZING_${symbol}`;
+    const analysis = await getEntryAnalysis(symbol, priceEur);
+    
+    if (analysis) {
+      // ثبت در فعالیت‌های اخیر (بدون توجه به سیگنال)
+      const scanLog = {
+        id: crypto.randomUUID(),
+        symbol,
+        price: priceEur,
+        side: analysis.side,
+        confidence: analysis.confidence,
+        reason: analysis.reason,
+        timestamp: new Date().toISOString()
+      };
+      
+      ghostState.lastScans.unshift(scanLog);
+      if (ghostState.lastScans.length > 15) ghostState.lastScans.pop();
 
-      if (priceEur >= pos.tp) { shouldSell = true; sellReason = "TARGET_HIT"; }
-      else if (priceEur <= pos.sl) { shouldSell = true; sellReason = "STOP_HIT"; }
-
-      if (!shouldSell) {
-        const exitAdvice = await getExitAnalysis(symbol, pos.entryPrice, priceEur, pos.tp, pos.sl);
-        if (exitAdvice && exitAdvice.decision === 'SELL' && exitAdvice.confidence > 75) {
-          shouldSell = true;
-          sellReason = `AI_EXIT: ${exitAdvice.reason}`;
-        }
-      }
-
-      if (shouldSell) {
-        const order = await placeRealOrder(symbol, 'SELL', pos.amount);
-        if (order.success) {
-           ghostState.executionLogs.unshift({
-             id: crypto.randomUUID(), symbol, action: 'SELL', amount: pos.amount, price: priceEur,
-             status: 'SUCCESS', timestamp: new Date().toISOString(), thought: sellReason
-           });
-           ghostState.activePositions.splice(existingPosIndex, 1);
-        }
-      }
-    } else {
-      ghostState.currentStatus = `SCANNING_${symbol}`;
-      const analysis = await getEntryAnalysis(symbol, priceEur);
-      if (analysis && analysis.confidence >= 70 && analysis.side === 'BUY') {
+      // اگر سیگنال قوی بود، به لیست "اندیشه‌ها" اضافه کن
+      if (analysis.confidence >= 70 && analysis.side === 'BUY') {
         ghostState.thoughts.unshift({ ...analysis, symbol, timestamp: new Date().toISOString(), price: priceEur, id: crypto.randomUUID() });
         if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
 
+        // خرید خودکار
         if (ghostState.autoPilot && analysis.confidence >= 75) {
           const tradeAmount = 100;
           if (ghostState.liquidity.eur >= tradeAmount) {
@@ -245,20 +204,15 @@ async function loop() {
       }
     }
     saveState();
-  } catch (e) {
-    console.error("CRITICAL_LOOP_ERROR:", e.message);
-  }
+  } catch (e) { console.error("LOOP_ERR:", e.message); }
 }
 
-setInterval(loop, 15000);
+setInterval(loop, 10000); // اسکن سریع‌تر هر ۱۰ ثانیه
 
 app.get('/api/ghost/state', async (req, res) => {
   try {
-    await syncLiquidity();
     res.json(ghostState);
-  } catch (e) {
-    res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
-  }
+  } catch (e) { res.status(500).json({ error: "ERR" }); }
 });
 
 app.post('/api/ghost/toggle', (req, res) => {
@@ -269,4 +223,4 @@ app.post('/api/ghost/toggle', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`STABLE_ENGINE_READY_ON_PORT_${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`STABLE_V5_READY`));
