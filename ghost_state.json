@@ -4,8 +4,8 @@
   "thoughts": [],
   "managedAssets": {},
   "executionLogs": [],
-  "currentStatus": "HUNTING_MATIC_LIQUIDITY",
-  "scanIndex": 8,
+  "currentStatus": "SCANNING_SOL_LIQUIDITY",
+  "scanIndex": 11,
   "liquidity": {
     "eur": 13.097553268664,
     "usdc": 20.3458948764328
