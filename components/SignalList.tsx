@@ -7,29 +7,27 @@ interface SignalListProps {
 }
 
 const SignalList: React.FC<SignalListProps> = ({ signals }) => {
-  // مرتب‌سازی بر اساس زمان (جدیدترین‌ها اول) برای اینکه بلافاصله نتایج اسکن را ببینید
   const sortedSignals = Array.isArray(signals) 
     ? [...signals].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     : [];
   
-  const limitedSignals = sortedSignals.slice(0, 20);
+  const limitedSignals = sortedSignals.slice(0, 25);
 
   return (
     <div className="bg-[#050507] border border-white/5 rounded-2xl flex flex-col h-full shadow-2xl overflow-hidden font-mono">
       <div className="p-5 border-b border-white/5 bg-[#0a0a0c] flex items-center justify-between">
         <h3 className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center space-x-2">
            <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></span>
-           <span>Live Signal Stream</span>
+           <span>Aggressive Signal Flow</span>
         </h3>
-        <span className="text-[8px] font-black text-slate-600">PREDATOR_V6</span>
+        <span className="text-[8px] font-black text-slate-600">PREDATOR_X</span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {limitedSignals.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 opacity-20 text-center grayscale">
-             <i className="fas fa-satellite text-4xl mb-4 animate-bounce"></i>
-             <p className="text-[9px] font-black uppercase tracking-widest">Awaiting Neural Link...</p>
-             <p className="text-[7px] text-slate-500 mt-2">Checking BTC, ETH, SOL, AVAX...</p>
+             <i className="fas fa-crosshairs text-4xl mb-4 animate-pulse"></i>
+             <p className="text-[9px] font-black uppercase tracking-widest">Searching for High-ROI Traps...</p>
           </div>
         ) : (
           limitedSignals.map((signal) => {
@@ -47,28 +45,28 @@ const SignalList: React.FC<SignalListProps> = ({ signals }) => {
               >
                 {roi > 0 && (
                   <div className="absolute top-0 right-0 p-2">
-                     <div className="bg-indigo-600 text-[8px] font-black text-white px-2 py-0.5 rounded shadow-lg">
-                        +{roi.toFixed(1)}% ROI
+                     <div className="bg-indigo-600 text-[8px] font-black text-white px-2 py-0.5 rounded shadow-lg animate-pulse">
+                        +{roi.toFixed(1)}% TARGET
                      </div>
                   </div>
                 )}
 
                 <div className="flex justify-between items-center mb-3">
                   <span className="text-xs font-black text-white">{signal.symbol}</span>
-                  <span className={`text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-tighter mr-12 ${
+                  <span className={`text-[8px] font-black px-2 py-0.5 rounded uppercase ${
                     signal.side === 'BUY' ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400'
                   }`}>
                     {signal.side}
                   </span>
                 </div>
 
-                <p className="text-[10px] text-slate-400 leading-tight mb-4 pr-10">
-                  {signal.reason || signal.analysis}
+                <p className="text-[10px] text-slate-400 leading-tight mb-4 pr-8 italic">
+                  "{signal.reason || signal.analysis}"
                 </p>
 
-                <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-4 mb-3">
-                  <div className="text-left">
-                    <p className="text-[7px] text-slate-600 font-black uppercase mb-1">Price</p>
+                <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-4">
+                  <div>
+                    <p className="text-[7px] text-slate-600 font-black uppercase mb-1">Entry</p>
                     <p className="text-[10px] font-black text-white">€{Number(entry).toLocaleString()}</p>
                   </div>
                   <div className="text-center">
@@ -79,17 +77,6 @@ const SignalList: React.FC<SignalListProps> = ({ signals }) => {
                     <p className="text-[7px] text-rose-600 font-black uppercase mb-1">SL</p>
                     <p className="text-[10px] font-black text-rose-400">€{Number(sl).toLocaleString()}</p>
                   </div>
-                </div>
-                
-                <div className="flex justify-between items-center pt-2 border-t border-white/5">
-                   <div className="flex items-center space-x-2">
-                      <span className="text-[8px] font-black text-slate-500">Confidence</span>
-                      <div className="w-16 h-1 bg-slate-800 rounded-full overflow-hidden">
-                         <div className="h-full bg-indigo-500" style={{width: `${signal.confidence || 0}%`}}></div>
-                      </div>
-                      <span className="text-[8px] font-black text-indigo-400">{signal.confidence || 0}%</span>
-                   </div>
-                   <span className="text-[7px] text-slate-600 font-bold uppercase">{new Date(signal.timestamp).toLocaleTimeString()}</span>
                 </div>
               </div>
             );

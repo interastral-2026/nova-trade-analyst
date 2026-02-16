@@ -79,7 +79,7 @@ function loadState() {
     executionLogs: [],
     activePositions: [], 
     lastScans: [],
-    currentStatus: "INITIALIZING",
+    currentStatus: "INITIALIZING_PREDATOR_X",
     scanIndex: 0,
     liquidity: { eur: 10000, usdc: 0 },
     dailyStats: { trades: 0, profit: 0, fees: 0 },
@@ -95,7 +95,6 @@ function loadState() {
 
 let ghostState = loadState();
 
-// چرخه مجزا برای همگام‌سازی موجودی (هر ۵ ثانیه)
 async function syncLiquidity() {
   const realBals = await fetchRealBalances();
   if (realBals) {
@@ -106,7 +105,7 @@ async function syncLiquidity() {
   }
   saveState();
 }
-setInterval(syncLiquidity, 5000);
+setInterval(syncLiquidity, 10000);
 
 function saveState() {
   try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {}
@@ -118,18 +117,30 @@ async function getAdvancedAnalysis(symbol, price, candles) {
   if (!process.env.API_KEY) return { error: "MISSING_AI_KEY" };
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
-  const systemPrompt = `You are "SPECTRAL OVERLORD V3", a high-stakes institutional trader.
-  STRATEGY: Smart Money Concepts, Liquidity Trap identification.
-  ONLY SUGGEST 'BUY' if confidence is 75%+. 
-  Be extremely critical. If the market is unclear, stay NEUTRAL.`;
+  // منطق تهاجمی برای شکار سودهای بالا
+  const systemPrompt = `You are "SPECTRAL PREDATOR X", an AI designed for High-Frequency Scalping and aggressive profit taking.
+  GOAL: Identify short-term 2% to 10% profit opportunities.
+  STRATEGY: 
+  - Detect "Smart Money" accumulation zones.
+  - Look for "Liquidity Grabs" (retail stop-losses being hit).
+  - Identify Fair Value Gaps (FVG) for precise entries.
+  DECISION RULES:
+  - If you see a high-probability reversal with a 1:3 Risk/Reward, respond with 'BUY'.
+  - Provide aggressive TP (Take Profit) and tight SL (Stop Loss).
+  - Even if NEUTRAL, explain the market trap you are avoiding.
+  - You MUST output JSON only.`;
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `SYMBOL: ${symbol} | PRICE: €${price} | DATA: ${JSON.stringify(candles.slice(-20))}` }] }],
+      contents: [{ parts: [{ text: `MARKET_SCAN: ${symbol}
+      PRICE: €${price}
+      CANDLES (1H): ${JSON.stringify(candles.slice(-25))}
+      
+      Find a high-profit opportunity or explain the current danger.` }] }],
       config: {
         systemInstruction: systemPrompt,
-        thinkingConfig: { thinkingBudget: 12000 },
+        thinkingConfig: { thinkingBudget: 15000 },
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -138,9 +149,10 @@ async function getAdvancedAnalysis(symbol, price, candles) {
             tp: { type: Type.NUMBER },
             sl: { type: Type.NUMBER },
             confidence: { type: Type.NUMBER },
-            reason: { type: Type.STRING }
+            reason: { type: Type.STRING },
+            expectedROI: { type: Type.NUMBER }
           },
-          required: ['side', 'tp', 'sl', 'confidence', 'reason']
+          required: ['side', 'tp', 'sl', 'confidence', 'reason', 'expectedROI']
         }
       }
     });
@@ -149,21 +161,19 @@ async function getAdvancedAnalysis(symbol, price, candles) {
     if (text.startsWith('```')) text = text.replace(/```json|```/g, '').trim();
     return JSON.parse(text);
   } catch (e) { 
-    if (e.message?.includes('429')) return { error: "RATE_LIMIT_EXCEEDED" };
-    return { error: e.message || "UNKNOWN_AI_ERROR" }; 
+    if (e.message?.includes('429')) return { error: "RATE_LIMIT" };
+    return { error: "ANALYSIS_FAILED" }; 
   }
 }
 
 async function loop() {
   if (!ghostState.isEngineActive) {
-    ghostState.currentStatus = "ENGINE_OFF";
+    ghostState.currentStatus = "ENGINE_OFFLINE";
     return;
   }
   
-  // چک کردن کول‌داون برای جلوگیری از 429
   if (Date.now() < ghostState.cooldownUntil) {
-    const remaining = Math.ceil((ghostState.cooldownUntil - Date.now()) / 1000);
-    ghostState.currentStatus = `AI_COOLDOWN_${remaining}S`;
+    ghostState.currentStatus = "AI_COOLING_DOWN";
     return;
   }
 
@@ -171,22 +181,22 @@ async function loop() {
     const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
     ghostState.scanIndex++;
     
-    ghostState.currentStatus = `ANALYZING_${symbol}`;
+    ghostState.currentStatus = `PREDATOR_HUNTING: ${symbol}`;
     saveState();
 
     const candleRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=30`);
     const candles = candleRes.data.Data.Data;
     const currentPrice = candles[candles.length - 1].close;
 
-    // 1. Manage existing positions
+    // ۱. مدیریت پوزیشن‌های باز
     const posIndex = ghostState.activePositions.findIndex(p => p.symbol === symbol);
     if (posIndex !== -1) {
       const pos = ghostState.activePositions[posIndex];
-      let triggered = "";
-      if (currentPrice >= pos.tp) triggered = "TP";
-      else if (currentPrice <= pos.sl) triggered = "SL";
+      let action = "";
+      if (currentPrice >= pos.tp) action = "PROFIT_TARGET_HIT";
+      else if (currentPrice <= pos.sl) action = "STOP_LOSS_HIT";
 
-      if (triggered) {
+      if (action) {
         const order = await placeRealOrder(symbol, 'SELL', pos.amount);
         if (order.success) {
           const profit = (currentPrice - pos.entryPrice) * (pos.amount / pos.entryPrice);
@@ -194,57 +204,51 @@ async function loop() {
           ghostState.dailyStats.profit += profit;
           ghostState.executionLogs.unshift({
             id: crypto.randomUUID(), symbol, action: 'SELL', amount: pos.amount, price: currentPrice,
-            status: 'SUCCESS', timestamp: new Date().toISOString(), thought: `EXIT: ${triggered} hit @ €${currentPrice}`
+            status: 'SUCCESS', timestamp: new Date().toISOString(), thought: `Automatic Exit: ${action} at €${currentPrice}`
           });
           ghostState.activePositions.splice(posIndex, 1);
         }
       }
     }
 
-    // 2. Deep Analysis
+    // ۲. تحلیل عمیق بازار (۴۰ ثانیه یک‌بار)
     const analysis = await getAdvancedAnalysis(symbol, currentPrice, candles);
     
     if (analysis && !analysis.error) {
-      ghostState.currentStatus = `ACTIVE: ${symbol} ${analysis.confidence}%`;
-      
-      // Update Scans
+      // ثبت اسکن در لیست
       ghostState.lastScans.unshift({ 
         id: crypto.randomUUID(), symbol, price: currentPrice, side: analysis.side, 
         confidence: analysis.confidence, reason: analysis.reason, timestamp: new Date().toISOString() 
       });
-      if (ghostState.lastScans.length > 20) ghostState.lastScans.pop();
 
-      // Store Thoughts
+      // ثبت در فید افکار (حتی اگر NEUTRAL باشد برای زنده بودن سیستم)
       ghostState.thoughts.unshift({ ...analysis, symbol, timestamp: new Date().toISOString(), price: currentPrice, id: crypto.randomUUID() });
-      if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
+      if (ghostState.thoughts.length > 30) ghostState.thoughts.pop();
 
-      // 3. Execution (Auto-Trade logic)
-      if (ghostState.autoPilot && analysis.confidence >= 75 && analysis.side === 'BUY' && posIndex === -1) {
-        const tradeAmount = 10; 
-        if (ghostState.liquidity.eur >= tradeAmount) {
-          const order = await placeRealOrder(symbol, 'BUY', tradeAmount);
+      // ۳. اجرای عملیات خرید تهاجمی (بالای ۷۵٪ اعتماد)
+      if (ghostState.autoPilot && analysis.side === 'BUY' && analysis.confidence >= 75 && posIndex === -1) {
+        const tradeSize = 25; // افزایش مبلغ خرید برای سوددهی ملموس‌تر
+        if (ghostState.liquidity.eur >= tradeSize) {
+          const order = await placeRealOrder(symbol, 'BUY', tradeSize);
           if (order.success) {
-            if (ghostState.isPaperMode) ghostState.liquidity.eur -= tradeAmount;
+            if (ghostState.isPaperMode) ghostState.liquidity.eur -= tradeSize;
             ghostState.activePositions.push({
-              symbol, entryPrice: currentPrice, amount: tradeAmount,
+              symbol, entryPrice: currentPrice, amount: tradeSize,
               tp: analysis.tp, sl: analysis.sl, timestamp: new Date().toISOString()
             });
             ghostState.executionLogs.unshift({
-              id: crypto.randomUUID(), symbol, action: 'BUY', amount: tradeAmount, price: currentPrice,
+              id: crypto.randomUUID(), symbol, action: 'BUY', amount: tradeSize, price: currentPrice,
               status: order.isPaper ? 'PAPER_FILLED' : 'LIVE_FILLED', 
-              timestamp: new Date().toISOString(), thought: `AI Confirm: ${analysis.reason}`
+              timestamp: new Date().toISOString(), thought: `High-ROI Opportunity: ${analysis.reason}`
             });
             ghostState.dailyStats.trades++;
           }
         }
       }
-    } else if (analysis?.error) {
-      if (analysis.error === "RATE_LIMIT_EXCEEDED") {
-        ghostState.currentStatus = "AI_RATE_LIMIT_BACKOFF";
-        ghostState.cooldownUntil = Date.now() + 45000; // ۴۵ ثانیه صبر
-      } else {
-        ghostState.currentStatus = `AI_ERR_${analysis.error.substring(0, 10)}`;
-      }
+      ghostState.currentStatus = `STABLE: ${symbol} SCANNED`;
+    } else if (analysis?.error === "RATE_LIMIT") {
+      ghostState.cooldownUntil = Date.now() + 60000;
+      ghostState.currentStatus = "AI_RATE_LIMIT_WAITING";
     }
     saveState();
   } catch (e) { 
@@ -252,8 +256,8 @@ async function loop() {
   }
 }
 
-// افزایش فاصله بین درخواست‌ها برای مدیریت سهمیه (هر ۲۰ ثانیه یک تحلیل)
-setInterval(loop, 20000);
+// فاصله ۴۰ ثانیه‌ای برای تحلیل دقیق و جلوگیری از بلاک شدن
+setInterval(loop, 40000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
@@ -263,5 +267,5 @@ app.post('/api/ghost/toggle', (req, res) => {
   res.json({ success: true });
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`ELITE_PREDATOR_V10_STABLE`));
+const PORT = 3001;
+app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_X_ENGINE_RUNNING`));
