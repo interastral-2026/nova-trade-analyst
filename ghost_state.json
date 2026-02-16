@@ -6,8 +6,8 @@
   "executionLogs": [],
   "activePositions": [],
   "lastScans": [],
-  "currentStatus": "PREDATOR_SCANNING: BTC",
-  "scanIndex": 325,
+  "currentStatus": "ANALYZING_SOL",
+  "scanIndex": 331,
   "liquidity": {
     "eur": 13.097553268664,
     "usdc": 20.3458948764328
