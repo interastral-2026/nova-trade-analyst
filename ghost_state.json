@@ -6,8 +6,8 @@
   "executionLogs": [],
   "activePositions": [],
   "lastScans": [],
-  "currentStatus": "AI_ERROR_NEAR",
-  "scanIndex": 440,
+  "currentStatus": "AI_TIMEOUT_FET",
+  "scanIndex": 446,
   "liquidity": {
     "eur": 13.097553268664,
     "usdc": 20.3458948764328
@@ -18,7 +18,7 @@
     "fees": 0
   },
   "lastSync": null,
-  "diag": "NO_KEYS_PAPER_MODE",
+  "diag": "NO_KEYS_PAPER_ACTIVE",
   "cooldownUntil": 0,
   "managedAssets": {}
 }
