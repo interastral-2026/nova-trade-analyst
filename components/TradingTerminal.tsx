@@ -17,8 +17,9 @@ interface TradingTerminalProps {
 const TradingTerminal: React.FC<TradingTerminalProps> = ({ 
   autoTradeEnabled,
   thoughtHistory,
+  liveActivity
 }) => {
-  const [stats, setStats] = useState({ eur: 0, usdc: 0, trades: 0, fees: 0, profit: 0 });
+  const [stats, setStats] = useState({ eur: 0, usdc: 0, trades: 0, fees: 0, profit: 0, isPaper: true });
   const [logs, setLogs] = useState<ExecutionLog[]>([]);
   const [holdings, setHoldings] = useState<any[]>([]);
   const [lastScans, setLastScans] = useState<any[]>([]);
@@ -35,7 +36,8 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
           usdc: data.liquidity?.usdc || 0,
           trades: data.dailyStats?.trades || 0, 
           fees: data.dailyStats?.fees || 0,
-          profit: data.dailyStats?.profit || 0
+          profit: data.dailyStats?.profit || 0,
+          isPaper: data.isPaperMode || false
         });
         setLogs(data.executionLogs || []);
         setHoldings(data.activePositions || []);
@@ -47,20 +49,17 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
     return () => clearInterval(i);
   }, []);
 
-  useEffect(() => {
-    if (terminalRef.current) terminalRef.current.scrollTop = 0;
-  }, [thoughtHistory, logs, holdings, activeTab, lastScans]);
-
   return (
     <div className="flex flex-col space-y-6 h-full font-mono">
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-[#050508] border border-indigo-500/20 p-5 rounded-[2rem] shadow-xl">
-           <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">LIQUIDITY_EUR</p>
+        <div className="bg-[#050508] border border-indigo-500/20 p-5 rounded-[2rem] shadow-xl relative overflow-hidden">
+           {stats.isPaper && <div className="absolute top-0 right-0 bg-amber-500 text-black text-[7px] font-black px-2 py-0.5 rounded-bl-lg">PAPER</div>}
+           <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">BALANCE_EUR</p>
            <h2 className="text-2xl font-black text-white">€{stats.eur.toLocaleString()}</h2>
         </div>
         <div className="bg-[#050508] border border-cyan-500/20 p-5 rounded-[2rem]">
-           <p className="text-[8px] font-black text-cyan-400 uppercase tracking-widest mb-1">LIQUIDITY_USDC</p>
+           <p className="text-[8px] font-black text-cyan-400 uppercase tracking-widest mb-1">BALANCE_USDC</p>
            <h2 className="text-2xl font-black text-white">${stats.usdc.toLocaleString()}</h2>
         </div>
         <div className="bg-[#050508] border border-emerald-500/20 p-5 rounded-[2rem]">
@@ -70,8 +69,8 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
            </h2>
         </div>
         <div className="bg-[#050508] border border-white/5 p-5 rounded-[2rem]">
-           <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">ACTIVE_HOLDINGS</p>
-           <h2 className="text-2xl font-black text-white">{holdings.length}</h2>
+           <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">SYSTEM_STATUS</p>
+           <h2 className="text-[10px] font-black text-white truncate uppercase">{liveActivity || "STABLE"}</h2>
         </div>
       </div>
 
@@ -83,18 +82,20 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                 Neural ROI-Feed
               </button>
               <button onClick={() => setActiveTab('activity')} className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'activity' ? 'text-amber-400 border-amber-500' : 'text-slate-600 border-transparent hover:text-slate-400'}`}>
-                Live Activity
+                Last Scans
               </button>
               <button onClick={() => setActiveTab('holdings')} className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'holdings' ? 'text-cyan-400 border-cyan-500' : 'text-slate-600 border-transparent hover:text-slate-400'}`}>
-                Positions
+                Positions ({holdings.length})
               </button>
               <button onClick={() => setActiveTab('orders')} className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === 'orders' ? 'text-emerald-400 border-emerald-500' : 'text-slate-600 border-transparent hover:text-slate-400'}`}>
                 History
               </button>
            </div>
-           <div className="flex items-center space-x-2 text-[8px] font-black text-slate-600 uppercase tracking-tighter">
-              <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${autoTradeEnabled ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-              <span>{autoTradeEnabled ? 'AUTO_SNIPER' : 'WATCH_ONLY'}</span>
+           <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 text-[8px] font-black text-slate-600 uppercase tracking-tighter">
+                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${autoTradeEnabled ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                <span>{autoTradeEnabled ? 'SNIPER_ON' : 'WATCH_ONLY'}</span>
+              </div>
            </div>
         </div>
 
@@ -105,16 +106,16 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                   <div className="h-48 flex items-center justify-center opacity-10 italic text-xs uppercase tracking-[0.5em]">Searching for High-Confidence setups...</div>
                 ) : (
                   thoughtHistory.map((t, i) => (
-                    <div key={t.id || i} className="group border-l-2 border-indigo-500/20 pl-6 py-1 hover:border-indigo-500 transition-all relative">
+                    <div key={t.id || i} className={`group border-l-2 pl-6 py-1 transition-all relative ${t.side === 'BUY' ? 'border-indigo-500' : 'border-slate-800'}`}>
                        <div className="flex items-center space-x-4 mb-2">
                           <span className="text-[9px] font-black text-indigo-500">[{new Date(t.timestamp).toLocaleTimeString()}]</span>
                           <span className="text-sm font-black text-white uppercase">{t.symbol}</span>
-                          <span className={`text-[8px] px-2 py-0.5 rounded font-black ${t.side === 'BUY' ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400'}`}>
+                          <span className={`text-[8px] px-2 py-0.5 rounded font-black ${t.side === 'BUY' ? 'bg-indigo-500 text-white' : 'bg-slate-800 text-slate-400'}`}>
                             {t.side}
                           </span>
-                          <span className="bg-indigo-500/10 text-indigo-400 text-[8px] font-black px-2 rounded">CONFIDENCE: {t.confidence}%</span>
+                          <span className="bg-white/5 text-slate-500 text-[8px] font-black px-2 rounded">CONFIDENCE: {t.confidence}%</span>
                        </div>
-                       <p className="text-[11px] text-slate-400 leading-relaxed mb-4 italic max-w-3xl">
+                       <p className="text-[11px] text-slate-400 leading-relaxed mb-4 italic max-w-3xl pr-12">
                         "{t.reason}"
                        </p>
                     </div>
@@ -136,7 +137,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                           {scan.side} ({scan.confidence}%)
                         </span>
                      </div>
-                     <p className="text-[10px] text-slate-500 italic">Decision: {scan.reason}</p>
+                     <p className="text-[10px] text-slate-500 italic">Analysis: {scan.reason}</p>
                    </div>
                  </div>
                ))}
@@ -152,7 +153,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                    </div>
                 ) : (
                   holdings.map((pos) => (
-                    <div key={pos.id} className="bg-white/[0.02] border border-cyan-500/20 p-5 rounded-2xl relative overflow-hidden group">
+                    <div key={pos.symbol} className="bg-white/[0.02] border border-cyan-500/20 p-5 rounded-2xl relative overflow-hidden group">
                        <div className="flex justify-between items-start mb-6">
                           <div className="flex items-center space-x-4">
                              <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400">
@@ -162,9 +163,6 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                                 <h4 className="text-sm font-black text-white">{pos.symbol}</h4>
                                 <p className="text-[8px] text-slate-500 uppercase">Entry: €{pos.entryPrice.toLocaleString()}</p>
                              </div>
-                          </div>
-                          <div className="text-right">
-                             <span className="text-[9px] font-black text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full uppercase">Monitoring</span>
                           </div>
                        </div>
                        <div className="grid grid-cols-3 gap-4 mb-4">
@@ -196,7 +194,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                     <div key={log.id} className="bg-white/[0.02] border border-white/5 p-5 rounded-2xl">
                        <div className="flex justify-between items-center mb-4">
                           <div className="flex items-center space-x-3">
-                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${log.status.includes('PROFIT') ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
+                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${log.status.includes('SUCCESS') || log.status.includes('FILLED') ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
                                 <i className={`fas ${log.action === 'BUY' ? 'fa-arrow-down' : 'fa-arrow-up'}`}></i>
                              </div>
                              <div>
@@ -205,12 +203,12 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                              </div>
                           </div>
                           <div className="text-right">
-                             <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase bg-slate-800 text-slate-500`}>
+                             <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase ${log.status.includes('PAPER') ? 'bg-amber-500/10 text-amber-500' : 'bg-indigo-800 text-white'}`}>
                                {log.status}
                              </span>
                           </div>
                        </div>
-                       <p className="text-[9px] text-slate-500 italic">"{log.thought}"</p>
+                       <p className="text-[9px] text-slate-400 italic">"{log.thought}"</p>
                     </div>
                   ))
                 )}
