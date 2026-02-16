@@ -9,12 +9,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 const app = express();
 const STATE_FILE = './ghost_state.json';
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  credentials: true
-}));
+app.use(cors({ origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-Type'] }));
 app.use(express.json());
 
 const CB_CONFIG = {
@@ -36,26 +31,32 @@ function getCoinbaseHeaders(method, path, body = '') {
 }
 
 async function fetchRealBalances() {
-  if (!CB_CONFIG.apiKey || !CB_CONFIG.apiSecret) return null;
+  if (!CB_CONFIG.apiKey || !CB_CONFIG.apiSecret) {
+    console.log("[SYNC] API Keys missing, using simulated balance.");
+    return null;
+  }
   const path = '/api/v3/brokerage/accounts';
   try {
     const response = await axios.get(`${CB_CONFIG.baseUrl}${path}`, {
       headers: getCoinbaseHeaders('GET', path)
     });
     
-    // بهبود پارس کردن موجودی برای دقت ۱۰۰٪
     const accounts = response.data?.accounts || [];
-    if (accounts.length === 0) return null;
-
-    const eurAcc = accounts.find(a => a.currency === 'EUR' || a.name?.includes('EUR'));
-    const usdcAcc = accounts.find(a => a.currency === 'USDC' || a.name?.includes('USDC'));
+    // جستجوی دقیق برای ارز یورو (EUR)
+    const eurAcc = accounts.find(a => a.currency === 'EUR' || a.name === 'EUR Wallet' || a.available_balance?.currency === 'EUR');
+    const usdcAcc = accounts.find(a => a.currency === 'USDC' || a.name === 'USDC Wallet');
     
+    if (!eurAcc) {
+      console.log("[SYNC] EUR Account not found in Coinbase response.");
+      return null;
+    }
+
     return { 
-      eur: parseFloat(eurAcc?.available_balance?.value || 0),
+      eur: parseFloat(eurAcc.available_balance?.value || 0),
       usdc: parseFloat(usdcAcc?.available_balance?.value || 0)
     };
   } catch (e) { 
-    console.error("[Coinbase Sync Error]:", e.message);
+    console.error("[Coinbase API Error]:", e.response?.data || e.message);
     return null; 
   }
 }
@@ -93,16 +94,15 @@ function loadState() {
     executionLogs: [],
     activePositions: [], 
     lastScans: [],
-    currentStatus: "PREDATOR_V13_READY",
+    currentStatus: "PREDATOR_V14_ONLINE",
     scanIndex: 0,
-    liquidity: { eur: 1000, usdc: 0 },
-    dailyStats: { trades: 0, profit: 0, fees: 0 },
+    liquidity: { eur: 0, usdc: 0 },
+    dailyStats: { trades: 0, profit: 0 },
     cooldownUntil: 0
   };
   try {
     if (fs.existsSync(STATE_FILE)) {
-      const saved = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-      return { ...defaults, ...saved };
+      return { ...defaults, ...JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) };
     }
   } catch (e) {}
   return defaults;
@@ -111,50 +111,54 @@ function loadState() {
 let ghostState = loadState();
 
 async function syncLiquidity() {
-  try {
-    const realBals = await fetchRealBalances();
-    if (realBals) {
-      ghostState.liquidity = realBals;
-      ghostState.isPaperMode = false;
+  const realBals = await fetchRealBalances();
+  if (realBals) {
+    ghostState.liquidity = realBals;
+    ghostState.isPaperMode = false;
+    console.log(`[BALANCE_SYNC] EUR: ${realBals.eur} | LIVE`);
+  } else {
+    // اگر موجودی صفر است و دیتایی نیامد، در حالت Paper یک مبلغ فرضی بگذار تا ربات کار کند
+    if (ghostState.liquidity.eur === 0 && ghostState.isPaperMode) {
+      ghostState.liquidity.eur = 5000; 
     }
-  } catch (e) {}
+  }
   saveState();
 }
-setInterval(syncLiquidity, 5000); // همگام‌سازی بسیار سریع هر ۵ ثانیه
+setInterval(syncLiquidity, 8000);
 
 function saveState() {
   try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {}
 }
 
-const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'ADA', 'LINK'];
+const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'ADA', 'LINK', 'DOT', 'NEAR'];
 
 async function getAdvancedAnalysis(symbol, price, candles) {
   if (!process.env.API_KEY) return { error: "MISSING_AI_KEY" };
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
-  const systemPrompt = `You are "SPECTRAL PREDATOR V13". 
-  MISSION: Detect short-term scalp opportunities (1-4 hours).
+  const systemPrompt = `You are "SPECTRAL PREDATOR V14". 
+  MISSION: High-speed market analysis.
   
-  ANALYSIS RULES:
-  - ALWAYS provide an analysis, even if the market is sideways.
-  - Confidence > 60%: Signal will be SHOWN to user.
-  - Confidence > 75%: Signal will be AUTO-TRADED.
-  - Look for "Wick Rejections", "Volume Spikes", and "Trend Exhaustion".
+  RULES:
+  1. ALWAYS provide a detailed technical reason for the asset's current state.
+  2. If Confidence > 60%, the user MUST see your thought.
+  3. If Confidence > 75% AND side is BUY, we execute.
+  4. Detect support/resistance levels from the candle data.
   
-  RESPONSE: JSON format ONLY. Be bold in your predictions but set safe SL.`;
+  FORMAT: Return JSON. Be decisive. "NEUTRAL" is allowed but explain why.`;
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `MARKET_SCAN: ${symbol} | PRICE: €${price} | RECENT_CANDLES: ${JSON.stringify(candles.slice(-12))}` }] }],
+      contents: [{ parts: [{ text: `SCAN: ${symbol} | PRICE: €${price} | DATA: ${JSON.stringify(candles.slice(-15))}` }] }],
       config: {
         systemInstruction: systemPrompt,
-        thinkingConfig: { thinkingBudget: 10000 },
+        temperature: 0.4,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            side: { type: Type.STRING, enum: ['BUY', 'NEUTRAL'] },
+            side: { type: Type.STRING, enum: ['BUY', 'SELL', 'NEUTRAL'] },
             tp: { type: Type.NUMBER },
             sl: { type: Type.NUMBER },
             confidence: { type: Type.NUMBER },
@@ -170,8 +174,7 @@ async function getAdvancedAnalysis(symbol, price, candles) {
     if (text.startsWith('```')) text = text.replace(/```json|```/g, '').trim();
     return JSON.parse(text);
   } catch (e) { 
-    if (e.message?.includes('429')) return { error: "RATE_LIMIT" };
-    return { error: "AI_PROCESSING_ERROR" }; 
+    return { error: "AI_ERROR" }; 
   }
 }
 
@@ -183,54 +186,33 @@ async function loop() {
     const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
     ghostState.scanIndex++;
     
-    ghostState.currentStatus = `PREDATOR_SCANNING: ${symbol}`;
+    ghostState.currentStatus = `ANALYZING_${symbol}`;
     saveState();
 
     const candleRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=24`);
     const candles = candleRes.data?.Data?.Data;
     
-    if (!candles || candles.length === 0) return;
-
-    const currentPrice = candles[candles.length - 1].close;
-
-    // ۱. چک کردن پوزیشن‌های باز
-    const posIndex = ghostState.activePositions.findIndex(p => p.symbol === symbol);
-    if (posIndex !== -1) {
-      const pos = ghostState.activePositions[posIndex];
-      let exitReason = "";
-      if (currentPrice >= pos.tp) exitReason = "TP_SMASHED";
-      else if (currentPrice <= pos.sl) exitReason = "SL_HIT";
-
-      if (exitReason) {
-        const order = await placeRealOrder(symbol, 'SELL', pos.amount);
-        if (order.success) {
-          const profit = (currentPrice - pos.entryPrice) * (pos.amount / pos.entryPrice);
-          if (ghostState.isPaperMode) ghostState.liquidity.eur += (pos.amount + profit);
-          ghostState.dailyStats.profit += profit;
-          ghostState.executionLogs.unshift({
-            id: crypto.randomUUID(), symbol, action: 'SELL', amount: pos.amount, price: currentPrice,
-            status: 'SUCCESS', timestamp: new Date().toISOString(), thought: `POSITION_CLOSED: ${exitReason}`
-          });
-          ghostState.activePositions.splice(posIndex, 1);
-        }
-      }
+    if (!candles || candles.length === 0) {
+       console.log(`[DATA] Empty candles for ${symbol}`);
+       return;
     }
 
-    // ۲. تحلیل جدید
+    const currentPrice = candles[candles.length - 1].close;
     const analysis = await getAdvancedAnalysis(symbol, currentPrice, candles);
     
     if (analysis && !analysis.error) {
-      // نمایش تحلیل در صورت اعتماد بالای ۶۰٪
+      // قانون نمایش: نمایش در صورت اطمینان بالای ۶۰٪ (صرف نظر از BUY/SELL/NEUTRAL)
       if (analysis.confidence >= 60) {
-        ghostState.thoughts.unshift({ 
+        const thought = { 
           ...analysis, 
           symbol, 
           timestamp: new Date().toISOString(), 
           price: currentPrice, 
           id: crypto.randomUUID() 
-        });
-        if (ghostState.thoughts.length > 40) ghostState.thoughts.pop();
-        
+        };
+        ghostState.thoughts.unshift(thought);
+        if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
+
         ghostState.lastScans.unshift({ 
           id: crypto.randomUUID(), symbol, price: currentPrice, side: analysis.side, 
           confidence: analysis.confidence, reason: analysis.reason, timestamp: new Date().toISOString() 
@@ -238,32 +220,30 @@ async function loop() {
         if (ghostState.lastScans.length > 50) ghostState.lastScans.pop();
       }
 
-      // ۳. ورود خودکار با اعتماد بالای ۷۵٪
-      if (ghostState.autoPilot && analysis.side === 'BUY' && analysis.confidence >= 75 && posIndex === -1) {
-        // اختصاص ۲۰٪ از موجودی برای سوددهی سریع و ملموس
-        const tradeSize = Math.max(30, ghostState.liquidity.eur * 0.20); 
-        
-        if (ghostState.liquidity.eur >= tradeSize) {
-          const order = await placeRealOrder(symbol, 'BUY', tradeSize);
-          if (order.success) {
-            if (ghostState.isPaperMode) ghostState.liquidity.eur -= tradeSize;
-            ghostState.activePositions.push({
-              symbol, entryPrice: currentPrice, amount: tradeSize,
-              tp: analysis.tp, sl: analysis.sl, timestamp: new Date().toISOString()
-            });
-            ghostState.executionLogs.unshift({
-              id: crypto.randomUUID(), symbol, action: 'BUY', amount: tradeSize, price: currentPrice,
-              status: order.isPaper ? 'PAPER_FILLED' : 'LIVE_FILLED', 
-              timestamp: new Date().toISOString(), thought: `PREDATOR_ENTRY: ${analysis.reason}`
-            });
-            ghostState.dailyStats.trades++;
+      // قانون معامله: فقط خرید (BUY) با اطمینان بالای ۷۵٪
+      if (ghostState.autoPilot && analysis.side === 'BUY' && analysis.confidence >= 75) {
+        // چک کردن اینکه پوزیشن باز برای این ارز نداریم
+        const hasPos = ghostState.activePositions.some(p => p.symbol === symbol);
+        if (!hasPos) {
+          const tradeSize = Math.max(35, ghostState.liquidity.eur * 0.25); // ۲۵٪ موجودی برای هر معامله
+          if (ghostState.liquidity.eur >= tradeSize) {
+            const order = await placeRealOrder(symbol, 'BUY', tradeSize);
+            if (order.success) {
+              if (ghostState.isPaperMode) ghostState.liquidity.eur -= tradeSize;
+              ghostState.activePositions.push({
+                symbol, entryPrice: currentPrice, amount: tradeSize,
+                tp: analysis.tp, sl: analysis.sl, timestamp: new Date().toISOString()
+              });
+              ghostState.executionLogs.unshift({
+                id: crypto.randomUUID(), symbol, action: 'BUY', amount: tradeSize, price: currentPrice,
+                status: order.isPaper ? 'PAPER' : 'LIVE', timestamp: new Date().toISOString(), thought: analysis.reason
+              });
+              ghostState.dailyStats.trades++;
+            }
           }
         }
       }
-      ghostState.currentStatus = `WATCHING_${symbol}`;
-    } else if (analysis?.error === "RATE_LIMIT") {
-      ghostState.cooldownUntil = Date.now() + 30000;
-      ghostState.currentStatus = "AI_RATE_LIMIT_WAIT";
+      ghostState.currentStatus = `MONITORING_${symbol}`;
     }
     saveState();
   } catch (e) { 
@@ -271,8 +251,8 @@ async function loop() {
   }
 }
 
-// اسکن هر ۲۵ ثانیه برای سرعت عمل بالاتر
-setInterval(loop, 25000);
+// اسکن سریع هر ۱۸ ثانیه برای پیدا کردن سیگنال‌های بیشتر
+setInterval(loop, 18000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
@@ -283,4 +263,4 @@ app.post('/api/ghost/toggle', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_V13_STABLE_PORT_${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_V14_READY_ON_${PORT}`));
