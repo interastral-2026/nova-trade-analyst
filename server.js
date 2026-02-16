@@ -9,7 +9,6 @@ import { GoogleGenAI, Type } from "@google/genai";
 const app = express();
 const STATE_FILE = './ghost_state.json';
 
-// پیکربندی CORS برای جلوگیری از بلاک شدن توسط مرورگر
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -43,13 +42,20 @@ async function fetchRealBalances() {
     const response = await axios.get(`${CB_CONFIG.baseUrl}${path}`, {
       headers: getCoinbaseHeaders('GET', path)
     });
+    
+    // بهبود پارس کردن موجودی برای دقت ۱۰۰٪
     const accounts = response.data?.accounts || [];
-    const eurAcc = accounts.find(a => a.currency === 'EUR');
+    if (accounts.length === 0) return null;
+
+    const eurAcc = accounts.find(a => a.currency === 'EUR' || a.name?.includes('EUR'));
+    const usdcAcc = accounts.find(a => a.currency === 'USDC' || a.name?.includes('USDC'));
+    
     return { 
       eur: parseFloat(eurAcc?.available_balance?.value || 0),
-      usdc: 0
+      usdc: parseFloat(usdcAcc?.available_balance?.value || 0)
     };
   } catch (e) { 
+    console.error("[Coinbase Sync Error]:", e.message);
     return null; 
   }
 }
@@ -87,15 +93,16 @@ function loadState() {
     executionLogs: [],
     activePositions: [], 
     lastScans: [],
-    currentStatus: "PREDATOR_V12_INITIALIZED",
+    currentStatus: "PREDATOR_V13_READY",
     scanIndex: 0,
-    liquidity: { eur: 10000, usdc: 0 },
+    liquidity: { eur: 1000, usdc: 0 },
     dailyStats: { trades: 0, profit: 0, fees: 0 },
     cooldownUntil: 0
   };
   try {
     if (fs.existsSync(STATE_FILE)) {
-      return { ...defaults, ...JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) };
+      const saved = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      return { ...defaults, ...saved };
     }
   } catch (e) {}
   return defaults;
@@ -113,7 +120,7 @@ async function syncLiquidity() {
   } catch (e) {}
   saveState();
 }
-setInterval(syncLiquidity, 7000); // همگام‌سازی سریع‌تر هر ۷ ثانیه
+setInterval(syncLiquidity, 5000); // همگام‌سازی بسیار سریع هر ۵ ثانیه
 
 function saveState() {
   try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {}
@@ -125,25 +132,24 @@ async function getAdvancedAnalysis(symbol, price, candles) {
   if (!process.env.API_KEY) return { error: "MISSING_AI_KEY" };
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
-  const systemPrompt = `You are "SPECTRAL PREDATOR V12", a world-class AI Scalper for short-term profits.
-  STRATEGY:
-  1. Identify High-Probability Reversals from Liquidity Grabs.
-  2. Use SMC (Smart Money Concepts) to detect institutional Order Blocks.
-  3. ROI TARGET: 2% to 15% per trade.
-  4. RISK: Tight Stop-Loss (max 1-2%).
+  const systemPrompt = `You are "SPECTRAL PREDATOR V13". 
+  MISSION: Detect short-term scalp opportunities (1-4 hours).
   
-  RESPONSE FORMAT:
-  - If confidence > 80%, suggest 'BUY'.
-  - Provide precise Take-Profit and Stop-Loss levels.
-  - Explain the logic clearly (e.g. "Bullish Divergence + FVG filling").`;
+  ANALYSIS RULES:
+  - ALWAYS provide an analysis, even if the market is sideways.
+  - Confidence > 60%: Signal will be SHOWN to user.
+  - Confidence > 75%: Signal will be AUTO-TRADED.
+  - Look for "Wick Rejections", "Volume Spikes", and "Trend Exhaustion".
+  
+  RESPONSE: JSON format ONLY. Be bold in your predictions but set safe SL.`;
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `SCANNING: ${symbol} | PRICE: €${price} | RECENT_DATA: ${JSON.stringify(candles.slice(-15))}` }] }],
+      contents: [{ parts: [{ text: `MARKET_SCAN: ${symbol} | PRICE: €${price} | RECENT_CANDLES: ${JSON.stringify(candles.slice(-12))}` }] }],
       config: {
         systemInstruction: systemPrompt,
-        thinkingConfig: { thinkingBudget: 15000 },
+        thinkingConfig: { thinkingBudget: 10000 },
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -165,7 +171,7 @@ async function getAdvancedAnalysis(symbol, price, candles) {
     return JSON.parse(text);
   } catch (e) { 
     if (e.message?.includes('429')) return { error: "RATE_LIMIT" };
-    return { error: "AI_ERROR" }; 
+    return { error: "AI_PROCESSING_ERROR" }; 
   }
 }
 
@@ -177,29 +183,25 @@ async function loop() {
     const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
     ghostState.scanIndex++;
     
-    ghostState.currentStatus = `PREDATOR_HUNTING: ${symbol}`;
+    ghostState.currentStatus = `PREDATOR_SCANNING: ${symbol}`;
     saveState();
 
-    const candleRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=30`);
+    const candleRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=24`);
     const candles = candleRes.data?.Data?.Data;
     
-    // حل ارور Length: چک کردن وجود دیتا قبل از ادامه
-    if (!candles || candles.length === 0) {
-      console.warn(`[API] Empty data for ${symbol}, skipping...`);
-      return;
-    }
+    if (!candles || candles.length === 0) return;
 
     const currentPrice = candles[candles.length - 1].close;
 
-    // ۱. مدیریت پوزیشن‌های باز برای کسب سود
+    // ۱. چک کردن پوزیشن‌های باز
     const posIndex = ghostState.activePositions.findIndex(p => p.symbol === symbol);
     if (posIndex !== -1) {
       const pos = ghostState.activePositions[posIndex];
-      let exitAction = "";
-      if (currentPrice >= pos.tp) exitAction = "TARGET_SMASHED";
-      else if (currentPrice <= pos.sl) exitAction = "STOP_LOSS_EXIT";
+      let exitReason = "";
+      if (currentPrice >= pos.tp) exitReason = "TP_SMASHED";
+      else if (currentPrice <= pos.sl) exitReason = "SL_HIT";
 
-      if (exitAction) {
+      if (exitReason) {
         const order = await placeRealOrder(symbol, 'SELL', pos.amount);
         if (order.success) {
           const profit = (currentPrice - pos.entryPrice) * (pos.amount / pos.entryPrice);
@@ -207,31 +209,39 @@ async function loop() {
           ghostState.dailyStats.profit += profit;
           ghostState.executionLogs.unshift({
             id: crypto.randomUUID(), symbol, action: 'SELL', amount: pos.amount, price: currentPrice,
-            status: 'SUCCESS', timestamp: new Date().toISOString(), thought: `EXIT: ${exitAction} | Profit: €${profit.toFixed(2)}`
+            status: 'SUCCESS', timestamp: new Date().toISOString(), thought: `POSITION_CLOSED: ${exitReason}`
           });
           ghostState.activePositions.splice(posIndex, 1);
         }
       }
     }
 
-    // ۲. تحلیل برای شکار فرصت جدید
+    // ۲. تحلیل جدید
     const analysis = await getAdvancedAnalysis(symbol, currentPrice, candles);
     
     if (analysis && !analysis.error) {
-      // ثبت اسکن
-      ghostState.lastScans.unshift({ 
-        id: crypto.randomUUID(), symbol, price: currentPrice, side: analysis.side, 
-        confidence: analysis.confidence, reason: analysis.reason, timestamp: new Date().toISOString() 
-      });
-      if (ghostState.lastScans.length > 50) ghostState.lastScans.pop();
+      // نمایش تحلیل در صورت اعتماد بالای ۶۰٪
+      if (analysis.confidence >= 60) {
+        ghostState.thoughts.unshift({ 
+          ...analysis, 
+          symbol, 
+          timestamp: new Date().toISOString(), 
+          price: currentPrice, 
+          id: crypto.randomUUID() 
+        });
+        if (ghostState.thoughts.length > 40) ghostState.thoughts.pop();
+        
+        ghostState.lastScans.unshift({ 
+          id: crypto.randomUUID(), symbol, price: currentPrice, side: analysis.side, 
+          confidence: analysis.confidence, reason: analysis.reason, timestamp: new Date().toISOString() 
+        });
+        if (ghostState.lastScans.length > 50) ghostState.lastScans.pop();
+      }
 
-      ghostState.thoughts.unshift({ ...analysis, symbol, timestamp: new Date().toISOString(), price: currentPrice, id: crypto.randomUUID() });
-      if (ghostState.thoughts.length > 30) ghostState.thoughts.pop();
-
-      // ۳. ورود خودکار با ذکاوت بالا (اعتماد بالای ۸۰٪)
-      if (ghostState.autoPilot && analysis.side === 'BUY' && analysis.confidence >= 80 && posIndex === -1) {
-        // اختصاص ۱۵٪ از موجودی برای هر معامله جهت مدیریت ریسک و سوددهی خوب
-        const tradeSize = Math.max(25, ghostState.liquidity.eur * 0.15); 
+      // ۳. ورود خودکار با اعتماد بالای ۷۵٪
+      if (ghostState.autoPilot && analysis.side === 'BUY' && analysis.confidence >= 75 && posIndex === -1) {
+        // اختصاص ۲۰٪ از موجودی برای سوددهی سریع و ملموس
+        const tradeSize = Math.max(30, ghostState.liquidity.eur * 0.20); 
         
         if (ghostState.liquidity.eur >= tradeSize) {
           const order = await placeRealOrder(symbol, 'BUY', tradeSize);
@@ -243,17 +253,17 @@ async function loop() {
             });
             ghostState.executionLogs.unshift({
               id: crypto.randomUUID(), symbol, action: 'BUY', amount: tradeSize, price: currentPrice,
-              status: order.isPaper ? 'PAPER_ENTRY' : 'LIVE_ENTRY', 
-              timestamp: new Date().toISOString(), thought: `PREDATOR_STRIKE: ${analysis.reason}`
+              status: order.isPaper ? 'PAPER_FILLED' : 'LIVE_FILLED', 
+              timestamp: new Date().toISOString(), thought: `PREDATOR_ENTRY: ${analysis.reason}`
             });
             ghostState.dailyStats.trades++;
           }
         }
       }
-      ghostState.currentStatus = `STABLE: MONITORED ${symbol}`;
+      ghostState.currentStatus = `WATCHING_${symbol}`;
     } else if (analysis?.error === "RATE_LIMIT") {
-      ghostState.cooldownUntil = Date.now() + 40000;
-      ghostState.currentStatus = "AI_RATE_LIMIT_WAITING";
+      ghostState.cooldownUntil = Date.now() + 30000;
+      ghostState.currentStatus = "AI_RATE_LIMIT_WAIT";
     }
     saveState();
   } catch (e) { 
@@ -261,8 +271,8 @@ async function loop() {
   }
 }
 
-// اسکن هر ۳۵ ثانیه برای توازن بین سرعت و پایداری
-setInterval(loop, 35000);
+// اسکن هر ۲۵ ثانیه برای سرعت عمل بالاتر
+setInterval(loop, 25000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
@@ -273,4 +283,4 @@ app.post('/api/ghost/toggle', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_V12_RUNNING_ON_PORT_${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_V13_STABLE_PORT_${PORT}`));
