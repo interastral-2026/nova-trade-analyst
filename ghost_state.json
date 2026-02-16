@@ -6,8 +6,8 @@
   "executionLogs": [],
   "activePositions": [],
   "lastScans": [],
-  "currentStatus": "ANALYZING_NEAR",
-  "scanIndex": 416,
+  "currentStatus": "AI_ERROR_NEAR",
+  "scanIndex": 440,
   "liquidity": {
     "eur": 13.097553268664,
     "usdc": 20.3458948764328
@@ -18,7 +18,7 @@
     "fees": 0
   },
   "lastSync": null,
-  "diag": "USING_SIMULATED_DATA",
+  "diag": "NO_KEYS_PAPER_MODE",
   "cooldownUntil": 0,
   "managedAssets": {}
 }
