@@ -71,8 +71,8 @@
   ],
   "executionLogs": [],
   "activePositions": [],
-  "currentStatus": "ANALYZING_FET",
-  "scanIndex": 502,
+  "currentStatus": "SCANNING_ETH",
+  "scanIndex": 530,
   "liquidity": {
     "eur": 13.097553268664,
     "usdc": 20.3458948764328
@@ -82,7 +82,7 @@
     "profit": 0,
     "fees": 0
   },
-  "diag": "ENV_VAR_MISSING",
+  "diag": "AUTH_FAILED_PAPER_MODE",
   "lastScans": [],
   "lastSync": null,
   "cooldownUntil": 0,
