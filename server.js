@@ -9,7 +9,13 @@ import { GoogleGenAI, Type } from "@google/genai";
 const app = express();
 const STATE_FILE = './ghost_state.json';
 
-app.use(cors({ origin: '*', methods: ['GET', 'POST', 'OPTIONS'], allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'], credentials: true }));
+// رفع کامل ارور CORS برای محیط Production و Local
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  credentials: true
+}));
 app.use(express.json());
 
 const CB_CONFIG = {
@@ -43,7 +49,10 @@ async function fetchRealBalances() {
       eur: parseFloat(eurAcc?.available_balance?.value || 0),
       usdc: 0
     };
-  } catch (e) { return null; }
+  } catch (e) { 
+    console.error("Coinbase Sync Error:", e.message);
+    return null; 
+  }
 }
 
 async function placeRealOrder(symbol, side, amountEur) {
@@ -79,7 +88,7 @@ function loadState() {
     executionLogs: [],
     activePositions: [], 
     lastScans: [],
-    currentStatus: "INITIALIZING_PREDATOR_X",
+    currentStatus: "HYPER_SCALPER_READY",
     scanIndex: 0,
     liquidity: { eur: 10000, usdc: 0 },
     dailyStats: { trades: 0, profit: 0, fees: 0 },
@@ -95,17 +104,18 @@ function loadState() {
 
 let ghostState = loadState();
 
+// همگام‌سازی موجودی هر ۸ ثانیه
 async function syncLiquidity() {
-  const realBals = await fetchRealBalances();
-  if (realBals) {
-    ghostState.liquidity = realBals;
-    ghostState.isPaperMode = false;
-  } else {
-    ghostState.isPaperMode = true;
-  }
+  try {
+    const realBals = await fetchRealBalances();
+    if (realBals) {
+      ghostState.liquidity = realBals;
+      ghostState.isPaperMode = false;
+    }
+  } catch (e) {}
   saveState();
 }
-setInterval(syncLiquidity, 10000);
+setInterval(syncLiquidity, 8000);
 
 function saveState() {
   try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {}
@@ -117,27 +127,24 @@ async function getAdvancedAnalysis(symbol, price, candles) {
   if (!process.env.API_KEY) return { error: "MISSING_AI_KEY" };
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
-  // منطق تهاجمی برای شکار سودهای بالا
-  const systemPrompt = `You are "SPECTRAL PREDATOR X", an AI designed for High-Frequency Scalping and aggressive profit taking.
-  GOAL: Identify short-term 2% to 10% profit opportunities.
-  STRATEGY: 
-  - Detect "Smart Money" accumulation zones.
-  - Look for "Liquidity Grabs" (retail stop-losses being hit).
-  - Identify Fair Value Gaps (FVG) for precise entries.
-  DECISION RULES:
-  - If you see a high-probability reversal with a 1:3 Risk/Reward, respond with 'BUY'.
-  - Provide aggressive TP (Take Profit) and tight SL (Stop Loss).
-  - Even if NEUTRAL, explain the market trap you are avoiding.
-  - You MUST output JSON only.`;
+  const systemPrompt = `You are "SPECTRAL PREDATOR V11", a hyper-intelligent AI Scalper.
+  MISSION: High-frequency profit extraction from volatility.
+  
+  STRATEGY:
+  1. Identify "Bullish Order Blocks" for entry.
+  2. Detect "Fair Value Gaps" (FVG) that the market must fill.
+  3. Spot "Stop Hunts" (When price dips below support to trap retail, then rockets up).
+  
+  RULES:
+  - Respond 'BUY' ONLY if you expect 3-7% profit in the next few candles.
+  - Set a tight Stop-Loss to protect the EUR capital.
+  - Set an aggressive Take-Profit at the next liquidity level.
+  - If neutral, explain the trap you see (e.g. "Fakeout detected").`;
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `MARKET_SCAN: ${symbol}
-      PRICE: €${price}
-      CANDLES (1H): ${JSON.stringify(candles.slice(-25))}
-      
-      Find a high-profit opportunity or explain the current danger.` }] }],
+      contents: [{ parts: [{ text: `SCAN: ${symbol} | PRICE: €${price} | TREND: ${JSON.stringify(candles.slice(-20))}` }] }],
       config: {
         systemInstruction: systemPrompt,
         thinkingConfig: { thinkingBudget: 15000 },
@@ -162,41 +169,34 @@ async function getAdvancedAnalysis(symbol, price, candles) {
     return JSON.parse(text);
   } catch (e) { 
     if (e.message?.includes('429')) return { error: "RATE_LIMIT" };
-    return { error: "ANALYSIS_FAILED" }; 
+    return { error: "AI_TIMEOUT" }; 
   }
 }
 
 async function loop() {
-  if (!ghostState.isEngineActive) {
-    ghostState.currentStatus = "ENGINE_OFFLINE";
-    return;
-  }
-  
-  if (Date.now() < ghostState.cooldownUntil) {
-    ghostState.currentStatus = "AI_COOLING_DOWN";
-    return;
-  }
+  if (!ghostState.isEngineActive) return;
+  if (Date.now() < ghostState.cooldownUntil) return;
 
   try {
     const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
     ghostState.scanIndex++;
     
-    ghostState.currentStatus = `PREDATOR_HUNTING: ${symbol}`;
+    ghostState.currentStatus = `PREDATOR_V11_HUNTING: ${symbol}`;
     saveState();
 
     const candleRes = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=30`);
     const candles = candleRes.data.Data.Data;
     const currentPrice = candles[candles.length - 1].close;
 
-    // ۱. مدیریت پوزیشن‌های باز
+    // ۱. چک کردن پوزیشن‌های باز برای خروج (TP/SL)
     const posIndex = ghostState.activePositions.findIndex(p => p.symbol === symbol);
     if (posIndex !== -1) {
       const pos = ghostState.activePositions[posIndex];
-      let action = "";
-      if (currentPrice >= pos.tp) action = "PROFIT_TARGET_HIT";
-      else if (currentPrice <= pos.sl) action = "STOP_LOSS_HIT";
+      let exitReason = "";
+      if (currentPrice >= pos.tp) exitReason = "TP_TARGET_SMASHED";
+      else if (currentPrice <= pos.sl) exitReason = "STOP_LOSS_EXIT";
 
-      if (action) {
+      if (exitReason) {
         const order = await placeRealOrder(symbol, 'SELL', pos.amount);
         if (order.success) {
           const profit = (currentPrice - pos.entryPrice) * (pos.amount / pos.entryPrice);
@@ -204,30 +204,22 @@ async function loop() {
           ghostState.dailyStats.profit += profit;
           ghostState.executionLogs.unshift({
             id: crypto.randomUUID(), symbol, action: 'SELL', amount: pos.amount, price: currentPrice,
-            status: 'SUCCESS', timestamp: new Date().toISOString(), thought: `Automatic Exit: ${action} at €${currentPrice}`
+            status: 'SUCCESS', timestamp: new Date().toISOString(), thought: `CASHED_OUT: ${exitReason} at €${currentPrice}`
           });
           ghostState.activePositions.splice(posIndex, 1);
         }
       }
     }
 
-    // ۲. تحلیل عمیق بازار (۴۰ ثانیه یک‌بار)
+    // ۲. تحلیل برای ورود جدید
     const analysis = await getAdvancedAnalysis(symbol, currentPrice, candles);
     
     if (analysis && !analysis.error) {
-      // ثبت اسکن در لیست
-      ghostState.lastScans.unshift({ 
-        id: crypto.randomUUID(), symbol, price: currentPrice, side: analysis.side, 
-        confidence: analysis.confidence, reason: analysis.reason, timestamp: new Date().toISOString() 
-      });
-
-      // ثبت در فید افکار (حتی اگر NEUTRAL باشد برای زنده بودن سیستم)
       ghostState.thoughts.unshift({ ...analysis, symbol, timestamp: new Date().toISOString(), price: currentPrice, id: crypto.randomUUID() });
       if (ghostState.thoughts.length > 30) ghostState.thoughts.pop();
 
-      // ۳. اجرای عملیات خرید تهاجمی (بالای ۷۵٪ اعتماد)
       if (ghostState.autoPilot && analysis.side === 'BUY' && analysis.confidence >= 75 && posIndex === -1) {
-        const tradeSize = 25; // افزایش مبلغ خرید برای سوددهی ملموس‌تر
+        const tradeSize = 30; // ورود با ۳۰ یورو
         if (ghostState.liquidity.eur >= tradeSize) {
           const order = await placeRealOrder(symbol, 'BUY', tradeSize);
           if (order.success) {
@@ -239,25 +231,24 @@ async function loop() {
             ghostState.executionLogs.unshift({
               id: crypto.randomUUID(), symbol, action: 'BUY', amount: tradeSize, price: currentPrice,
               status: order.isPaper ? 'PAPER_FILLED' : 'LIVE_FILLED', 
-              timestamp: new Date().toISOString(), thought: `High-ROI Opportunity: ${analysis.reason}`
+              timestamp: new Date().toISOString(), thought: `PREDATOR_ENTRY: ${analysis.reason}`
             });
-            ghostState.dailyStats.trades++;
           }
         }
       }
-      ghostState.currentStatus = `STABLE: ${symbol} SCANNED`;
+      ghostState.currentStatus = `MONITORING_${symbol}`;
     } else if (analysis?.error === "RATE_LIMIT") {
-      ghostState.cooldownUntil = Date.now() + 60000;
-      ghostState.currentStatus = "AI_RATE_LIMIT_WAITING";
+      ghostState.cooldownUntil = Date.now() + 45000;
+      ghostState.currentStatus = "AI_RATE_LIMIT_BACKOFF";
     }
     saveState();
   } catch (e) { 
-    ghostState.currentStatus = "DATA_SYNC_ERROR";
+    console.error("Loop error:", e.message);
   }
 }
 
-// فاصله ۴۰ ثانیه‌ای برای تحلیل دقیق و جلوگیری از بلاک شدن
-setInterval(loop, 40000);
+// اسکن هر ۳۵ ثانیه برای دقت بالا و پایداری
+setInterval(loop, 35000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
@@ -267,5 +258,6 @@ app.post('/api/ghost/toggle', (req, res) => {
   res.json({ success: true });
 });
 
-const PORT = 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_X_ENGINE_RUNNING`));
+// استفاده از پورت داینامیک برای Railway
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, '0.0.0.0', () => console.log(`PREDATOR_V11_STABLE_PORT_${PORT}`));

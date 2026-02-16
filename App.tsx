@@ -28,7 +28,12 @@ const App: React.FC = () => {
         headers: { 'Accept': 'application/json' }
       });
       
-      if (!response.ok) throw new Error(`HTTP_${response.status}`);
+      if (!response.ok) {
+        if (response.status === 502) setLiveActivity("SERVER_REBOOTING...");
+        else setLiveActivity(`HTTP_ERR_${response.status}`);
+        setStatus(AnalysisStatus.ERROR);
+        return;
+      }
       
       const data = await response.json();
       setThoughtHistory(data.thoughts || []);
@@ -36,11 +41,13 @@ const App: React.FC = () => {
       setAutoTradeEnabled(data.autoPilot);
       setLiveActivity(data.currentStatus || "SYSTEM_SCANNING");
       
-      const bals = await fetchAccountBalance();
-      if (bals) setBalances(bals);
+      setBalances([
+        { currency: 'EUR', available: data.liquidity?.eur || 0, total: data.liquidity?.eur || 0 },
+        { currency: 'USDC', available: data.liquidity?.usdc || 0, total: data.liquidity?.usdc || 0 }
+      ]);
       setStatus(AnalysisStatus.IDLE);
     } catch (e) {
-      setLiveActivity("BRIDGE_OFFLINE (CHECK_SERVER)");
+      setLiveActivity("CONNECTING_TO_PREDATOR_BRIDGE...");
       setStatus(AnalysisStatus.ERROR);
     }
   }, []);
@@ -81,7 +88,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     syncWithServer();
-    const interval = setInterval(syncWithServer, 5000); 
+    const interval = setInterval(syncWithServer, 4000); 
     const statsInterval = setInterval(() => {
       WATCHLIST.forEach(id => fetchProductStats(id).then(info => {
         setAssets(prev => {
@@ -89,7 +96,7 @@ const App: React.FC = () => {
           return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
         });
       }));
-    }, 15000);
+    }, 10000);
     return () => { clearInterval(interval); clearInterval(statsInterval); };
   }, [syncWithServer]);
 
