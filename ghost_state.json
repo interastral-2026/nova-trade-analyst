@@ -2,12 +2,77 @@
   "isEngineActive": true,
   "autoPilot": true,
   "isPaperMode": true,
-  "thoughts": [],
+  "thoughts": [
+    {
+      "side": "NEUTRAL",
+      "tp": 8.09,
+      "sl": 7.68,
+      "confidence": 40,
+      "reason": "[SYNTHETIC_OVERRIDE] Env variables not detected yet. Running pure technical scan on AVAX. Indicators suggest range consolidation.",
+      "expectedROI": 3.5,
+      "isSynthetic": true,
+      "symbol": "AVAX",
+      "price": 7.817,
+      "timestamp": "2026-02-16T22:52:06.846Z",
+      "id": "97be42fc-7e6f-420b-abd3-d95c5883ce89"
+    },
+    {
+      "side": "NEUTRAL",
+      "tp": 74.93,
+      "sl": 71.1,
+      "confidence": 40,
+      "reason": "[SYNTHETIC_OVERRIDE] Env variables not detected yet. Running pure technical scan on SOL. Indicators suggest range consolidation.",
+      "expectedROI": 3.5,
+      "isSynthetic": true,
+      "symbol": "SOL",
+      "price": 72.4,
+      "timestamp": "2026-02-16T22:51:51.705Z",
+      "id": "6fbb2dd4-6d6b-4903-8984-3dfa8bb69650"
+    },
+    {
+      "side": "NEUTRAL",
+      "tp": 1737.55,
+      "sl": 1648.57,
+      "confidence": 40,
+      "reason": "[SYNTHETIC_OVERRIDE] Env variables not detected yet. Running pure technical scan on ETH. Indicators suggest range consolidation.",
+      "expectedROI": 3.5,
+      "isSynthetic": true,
+      "symbol": "ETH",
+      "price": 1678.79,
+      "timestamp": "2026-02-16T22:51:36.968Z",
+      "id": "29e2a856-109a-4dcb-8f58-131e45dad42b"
+    },
+    {
+      "side": "NEUTRAL",
+      "tp": 59914.98,
+      "sl": 56846.87,
+      "confidence": 40,
+      "reason": "[SYNTHETIC_OVERRIDE] Env variables not detected yet. Running pure technical scan on BTC. Indicators suggest range consolidation.",
+      "expectedROI": 3.5,
+      "isSynthetic": true,
+      "symbol": "BTC",
+      "price": 57888.87,
+      "timestamp": "2026-02-16T22:51:22.288Z",
+      "id": "f529f89e-1545-473b-9a7a-28e023f26f92"
+    },
+    {
+      "side": "NEUTRAL",
+      "tp": 0.92,
+      "sl": 0.88,
+      "confidence": 40,
+      "reason": "[SYNTHETIC_OVERRIDE] Env variables not detected yet. Running pure technical scan on NEAR. Indicators suggest range consolidation.",
+      "expectedROI": 3.5,
+      "isSynthetic": true,
+      "symbol": "NEAR",
+      "price": 0.8927,
+      "timestamp": "2026-02-16T22:51:06.727Z",
+      "id": "ad954964-96b1-4dd4-9a47-c8b55d65c62b"
+    }
+  ],
   "executionLogs": [],
   "activePositions": [],
-  "lastScans": [],
-  "currentStatus": "AI_TIMEOUT_FET",
-  "scanIndex": 478,
+  "currentStatus": "ANALYZING_FET",
+  "scanIndex": 486,
   "liquidity": {
     "eur": 13.097553268664,
     "usdc": 20.3458948764328
@@ -17,8 +82,9 @@
     "profit": 0,
     "fees": 0
   },
+  "diag": "ENV_VAR_MISSING",
+  "lastScans": [],
   "lastSync": null,
-  "diag": "NO_KEYS_PAPER_ACTIVE",
   "cooldownUntil": 0,
   "managedAssets": {}
 }

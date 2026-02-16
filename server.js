@@ -4,19 +4,28 @@ import crypto from 'crypto';
 import axios from 'axios';
 import cors from 'cors';
 import fs from 'fs';
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
 const app = express();
 const STATE_FILE = './ghost_state.json';
 
-app.use(cors({ origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-Type'] }));
+// Use process.env.PORT for Railway compatibility
+const PORT = process.env.PORT || 3001;
+
+// Permissive CORS configuration
+app.use(cors());
 app.use(express.json());
+
+// Log all requests for debugging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url} - Origin: ${req.headers.origin}`);
+  next();
+});
 
 // CONFIGURATION - Enhanced for Railway/Cloud Environments
 const API_KEY = process.env.API_KEY ? process.env.API_KEY.trim() : null;
 const CB_CONFIG = {
   apiKey: (process.env.CB_API_KEY || '').trim(),
-  // Handles both literal \n and real newlines provided by Railway dashboard
   apiSecret: (process.env.CB_API_SECRET || '').replace(/\\n/g, '\n').trim(),
   baseUrl: 'https://api.coinbase.com'
 };
@@ -195,6 +204,9 @@ async function loop() {
 setInterval(loop, 15000);
 setInterval(syncLiquidity, 10000);
 
+// Root route to verify server status
+app.get('/', (req, res) => res.send('SPECTRAL OVERLORD API ACTIVE'));
+
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
   if (req.body.engine !== undefined) ghostState.isEngineActive = req.body.engine;
@@ -203,9 +215,10 @@ app.post('/api/ghost/toggle', (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(3001, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n========================================`);
-  console.log(`🚀 SPECTRAL OVERLORD V16.5`);
+  console.log(`🚀 SPECTRAL OVERLORD V16.5 ONLINE`);
+  console.log(`📡 LISTENING ON PORT: ${PORT}`);
   console.log(`🧠 AI STATUS: ${API_KEY ? 'GEMINI_PRO' : 'MISSING'}`);
   console.log(`💹 TRADE MODE: ${CB_CONFIG.apiKey ? 'COINBASE_CLOUD' : 'PAPER'}`);
   console.log(`========================================\n`);

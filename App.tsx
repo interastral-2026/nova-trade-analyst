@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AssetInfo, TradeSignal, AnalysisStatus, AccountBalance } from './types.ts';
 import { fetchProductStats } from './services/coinbaseService.ts';
-import { getApiBase, fetchAccountBalance } from './services/tradingService.ts';
+import { getApiBase } from './services/tradingService.ts';
 import Header from './components/Header.tsx';
 import Sidebar from './components/Sidebar.tsx';
 import SignalList from './components/SignalList.tsx';
@@ -25,11 +25,13 @@ const App: React.FC = () => {
     const base = getApiBase();
     try {
       const response = await fetch(`${base}/api/ghost/state`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { 'Accept': 'application/json' },
+        mode: 'cors'
       });
       
       if (!response.ok) {
         if (response.status === 502) setLiveActivity("SERVER_REBOOTING...");
+        else if (response.status === 404) setLiveActivity("API_NOT_FOUND");
         else setLiveActivity(`HTTP_ERR_${response.status}`);
         setStatus(AnalysisStatus.ERROR);
         return;
@@ -46,8 +48,9 @@ const App: React.FC = () => {
         { currency: 'USDC', available: data.liquidity?.usdc || 0, total: data.liquidity?.usdc || 0 }
       ]);
       setStatus(AnalysisStatus.IDLE);
-    } catch (e) {
-      setLiveActivity("CONNECTING_TO_PREDATOR_BRIDGE...");
+    } catch (e: any) {
+      console.warn("Connection attempt failed:", e.message);
+      setLiveActivity("BRIDGE_CORS_OR_NETWORK_ERROR");
       setStatus(AnalysisStatus.ERROR);
     }
   }, []);
@@ -57,6 +60,7 @@ const App: React.FC = () => {
     if (cleanUrl.endsWith('/')) cleanUrl = cleanUrl.slice(0, -1);
     localStorage.setItem('NOVA_BRIDGE_URL', cleanUrl);
     setBridgeUrl(cleanUrl);
+    setLiveActivity("REFRESHING_BRIDGE...");
     syncWithServer();
   };
 
