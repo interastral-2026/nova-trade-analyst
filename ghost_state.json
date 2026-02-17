@@ -4,6 +4,48 @@
   "isPaperMode": true,
   "thoughts": [
     {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "symbol": "SOL",
+      "price": 73.12,
+      "timestamp": "2026-02-17T00:58:34.460Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "symbol": "ETH",
+      "price": 1686.81,
+      "timestamp": "2026-02-17T00:58:14.135Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "symbol": "BTC",
+      "price": 58122.89,
+      "timestamp": "2026-02-17T00:57:55.280Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "symbol": "FET",
+      "price": 0.146,
+      "timestamp": "2026-02-17T00:57:34.454Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "symbol": "NEAR",
+      "price": 0.8887,
+      "timestamp": "2026-02-17T00:57:14.430Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "symbol": "AVAX",
+      "price": 7.806,
+      "timestamp": "2026-02-17T00:56:54.311Z"
+    },
+    {
       "side": "BUY",
       "tp": 75.41,
       "sl": 71.75,
@@ -530,78 +572,6 @@
       "price": 0.1466,
       "timestamp": "2026-02-17T00:29:38.101Z",
       "id": "d21d079c-2c3f-4029-b95f-24bed9be455d"
-    },
-    {
-      "side": "NEUTRAL",
-      "tp": 0.92,
-      "sl": 0.87,
-      "confidence": 30,
-      "reason": "Price movement for NEAR suggests no clear trend.",
-      "expectedROI": 3,
-      "symbol": "NEAR",
-      "price": 0.891,
-      "timestamp": "2026-02-17T00:29:13.499Z",
-      "id": "565e5887-2845-4678-a9b9-ccbf4869550c"
-    },
-    {
-      "side": "BUY",
-      "tp": 8.06,
-      "sl": 7.66,
-      "confidence": 80,
-      "reason": "Price movement for AVAX suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "AVAX",
-      "price": 7.821,
-      "timestamp": "2026-02-17T00:28:48.030Z",
-      "id": "00d0bb01-00ce-480d-8cdf-12ce4530a87b"
-    },
-    {
-      "side": "BUY",
-      "tp": 75.31,
-      "sl": 71.66,
-      "confidence": 80,
-      "reason": "Price movement for SOL suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "SOL",
-      "price": 73.12,
-      "timestamp": "2026-02-17T00:28:22.891Z",
-      "id": "79892cbb-18e5-485e-8a9b-509e54e01499"
-    },
-    {
-      "side": "BUY",
-      "tp": 1737.69,
-      "sl": 1653.34,
-      "confidence": 80,
-      "reason": "Price movement for ETH suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "ETH",
-      "price": 1687.08,
-      "timestamp": "2026-02-17T00:28:00.844Z",
-      "id": "460ca436-7e02-4496-907f-f4dcf090ea09"
-    },
-    {
-      "side": "NEUTRAL",
-      "tp": 59817.59,
-      "sl": 56913.82,
-      "confidence": 30,
-      "reason": "Price movement for BTC suggests no clear trend.",
-      "expectedROI": 3,
-      "symbol": "BTC",
-      "price": 58075.33,
-      "timestamp": "2026-02-17T00:27:33.009Z",
-      "id": "e0c2e886-988f-42d1-a64c-ccd74fa46360"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.15,
-      "sl": 0.14,
-      "confidence": 80,
-      "reason": "Price movement for FET suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "FET",
-      "price": 0.1465,
-      "timestamp": "2026-02-17T00:27:08.056Z",
-      "id": "82a9f2f8-8838-4d80-8c31-98b37c6c9ae5"
     }
   ],
   "executionLogs": [
@@ -704,8 +674,6 @@
       "sl": 56981.39
     }
   ],
-  "currentStatus": "READY",
-  "scanIndex": 681,
   "liquidity": {
     "eur": -46.902446731336,
     "usdc": 20.3458948764328
@@ -715,7 +683,9 @@
     "profit": 0,
     "fees": 0
   },
-  "diag": "AUTH_FAIL | CHECK_KEYS",
+  "currentStatus": "READY",
+  "scanIndex": 687,
+  "diag": "AUTH_FAIL | SIM_ONLY",
   "lastScans": [],
   "lastSync": null,
   "cooldownUntil": 0,
