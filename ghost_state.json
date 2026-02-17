@@ -586,9 +586,9 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": -0.330746205817662,
-      "pnl": -0.0330746205817662,
-      "currentPrice": 57951.97
+      "pnlPercent": 0.17552887403541273,
+      "pnl": 0.01755288740354127,
+      "currentPrice": 58246.34
     }
   ],
   "liquidity": {
@@ -600,8 +600,8 @@
     "profit": 0,
     "fees": 0
   },
-  "currentStatus": "SCANNING_ETH",
-  "scanIndex": 812,
+  "currentStatus": "SCANNING_BTC",
+  "scanIndex": 823,
   "diag": "SIM_MODE_ACTIVE",
   "lastScans": [],
   "lastSync": null,
