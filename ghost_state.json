@@ -11,6 +11,206 @@
       "side": "NEUTRAL",
       "confidence": 0,
       "analysis": "Missing API Key",
+      "symbol": "NEAR",
+      "id": "4aa6cd34-1a18-40cb-8ea7-3e4729980b1f",
+      "timestamp": "2026-02-17T20:54:02.930Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "AVAX",
+      "id": "f19c3040-5413-4d1e-91ee-ed0d19e1d7d1",
+      "timestamp": "2026-02-17T20:53:53.041Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "SOL",
+      "id": "032a0b1c-42fd-4456-8563-686fa21a5337",
+      "timestamp": "2026-02-17T20:53:42.963Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "ETH",
+      "id": "74e58bb4-9979-4ddb-98b6-72496e5e5a20",
+      "timestamp": "2026-02-17T20:53:32.914Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "FET",
+      "id": "6dadf63b-65b7-4759-b6b2-27153f0b33bf",
+      "timestamp": "2026-02-17T20:53:12.975Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "NEAR",
+      "id": "37f479dc-1f61-4b2b-a7c1-3aea7fdfc9df",
+      "timestamp": "2026-02-17T20:53:02.935Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "AVAX",
+      "id": "fb04d134-ea0b-4f44-aeec-1da7bb56f78b",
+      "timestamp": "2026-02-17T20:52:52.916Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "SOL",
+      "id": "8d2461c0-d97f-4483-a509-96f2a2a122f4",
+      "timestamp": "2026-02-17T20:52:42.914Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "ETH",
+      "id": "e518ff78-b202-4b8b-97a1-dc98a0d12798",
+      "timestamp": "2026-02-17T20:52:32.947Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "FET",
+      "id": "917dd407-0c5b-4e38-a86e-cf4fd334673d",
+      "timestamp": "2026-02-17T20:52:13.183Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "NEAR",
+      "id": "6da1a62c-7bad-4edf-a639-c4dbff4be247",
+      "timestamp": "2026-02-17T20:52:04.404Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "AVAX",
+      "id": "26a48ed8-1e7a-4038-ae50-a28409c50ece",
+      "timestamp": "2026-02-17T20:51:52.969Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "SOL",
+      "id": "eee13d42-251d-4755-a6a1-7778caefe376",
+      "timestamp": "2026-02-17T20:51:42.926Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "ETH",
+      "id": "27dc4fb3-0cc4-4e58-9235-ced7d6784907",
+      "timestamp": "2026-02-17T20:51:33.834Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "BTC",
+      "id": "8c7861cb-99f3-414c-8c4f-b234bd16ce7b",
+      "timestamp": "2026-02-17T20:51:23.200Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "FET",
+      "id": "3976bfe6-ea1b-4287-ab78-b3d544d26052",
+      "timestamp": "2026-02-17T20:51:12.916Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "NEAR",
+      "id": "b8cbe90e-e076-4ef1-b643-92455af8a27e",
+      "timestamp": "2026-02-17T20:51:02.906Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "AVAX",
+      "id": "8fe7c2b5-3cda-416b-9692-9c751c2e6fd2",
+      "timestamp": "2026-02-17T20:50:52.962Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "SOL",
+      "id": "bb3a9fec-1623-4807-95a3-9a58f1228cbd",
+      "timestamp": "2026-02-17T20:50:42.903Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "ETH",
+      "id": "16ff5169-0a92-4cb3-a320-0cb263f81192",
+      "timestamp": "2026-02-17T20:50:32.969Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "BTC",
+      "id": "00a6aac9-0cd3-4cbb-83f3-5ab810a613c1",
+      "timestamp": "2026-02-17T20:50:23.245Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "FET",
+      "id": "118ed50c-f5ca-47ce-beff-347798893ca9",
+      "timestamp": "2026-02-17T20:50:12.906Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "NEAR",
+      "id": "f5994aeb-41a5-435d-8aa6-513d883a9823",
+      "timestamp": "2026-02-17T20:50:02.925Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "AVAX",
+      "id": "2476857d-ac21-43a5-ad41-116c2d78877a",
+      "timestamp": "2026-02-17T20:49:52.962Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "SOL",
+      "id": "9f94ccc7-e0bf-4096-871f-7cad54e60b18",
+      "timestamp": "2026-02-17T20:49:42.913Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
       "symbol": "BTC",
       "id": "d4fd7b09-4896-4d9c-995d-5f587314f043",
       "timestamp": "2026-02-17T20:48:56.476Z"
@@ -302,306 +502,6 @@
       "symbol": "FET",
       "id": "bc8b7657-4459-437f-8432-a556834f8d28",
       "timestamp": "2026-02-17T19:52:27.900Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.8828,
-      "potentialRoi": 0,
-      "symbol": "NEAR",
-      "id": "3adab063-4a9d-4eca-947c-d8ddba097412",
-      "timestamp": "2026-02-17T19:52:18.104Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 7.751,
-      "potentialRoi": 0,
-      "symbol": "AVAX",
-      "id": "e2391c08-c041-4cd2-8250-baa4ed68b0c3",
-      "timestamp": "2026-02-17T19:52:08.704Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 71.58,
-      "potentialRoi": 0,
-      "symbol": "SOL",
-      "id": "3b0edd3e-de95-4586-967c-2f5415e4797e",
-      "timestamp": "2026-02-17T19:51:57.969Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 1687.81,
-      "potentialRoi": 0,
-      "symbol": "ETH",
-      "id": "10ce7f28-ea5d-4600-8fee-7b707f999468",
-      "timestamp": "2026-02-17T19:51:48.415Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 57253.94,
-      "potentialRoi": 0,
-      "symbol": "BTC",
-      "id": "6a92d2b2-a291-46e4-956b-f352aa26e0e7",
-      "timestamp": "2026-02-17T19:51:37.793Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.1448,
-      "potentialRoi": 0,
-      "symbol": "FET",
-      "id": "e9c38cd2-cdb1-40e2-8d9c-49b9fb81aa18",
-      "timestamp": "2026-02-17T19:51:27.955Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.8828,
-      "potentialRoi": 0,
-      "symbol": "NEAR",
-      "id": "57358535-27df-4d02-9034-acda6a9f729b",
-      "timestamp": "2026-02-17T19:51:18.007Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 7.757,
-      "potentialRoi": 0,
-      "symbol": "AVAX",
-      "id": "d4ca5577-9f8f-4530-9788-a67ac9d55960",
-      "timestamp": "2026-02-17T19:51:07.924Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 71.63,
-      "potentialRoi": 0,
-      "symbol": "SOL",
-      "id": "26d454f8-819b-44db-a0f5-91503db651ad",
-      "timestamp": "2026-02-17T19:50:57.941Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 1689.76,
-      "potentialRoi": 0,
-      "symbol": "ETH",
-      "id": "b36837ac-95cf-402d-9ea1-c6eff0fcab6d",
-      "timestamp": "2026-02-17T19:50:47.809Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 57311.3,
-      "potentialRoi": 0,
-      "symbol": "BTC",
-      "id": "d76c2f3f-1728-419f-97cd-b49259c4ad84",
-      "timestamp": "2026-02-17T19:50:37.781Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.145,
-      "potentialRoi": 0,
-      "symbol": "FET",
-      "id": "fbcae8bf-dee1-4904-abb3-9be7a7918eb3",
-      "timestamp": "2026-02-17T19:50:27.789Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.8837,
-      "potentialRoi": 0,
-      "symbol": "NEAR",
-      "id": "23f08c46-8c08-431c-bfef-a7a5243475ae",
-      "timestamp": "2026-02-17T19:50:18.028Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 7.761,
-      "potentialRoi": 0,
-      "symbol": "AVAX",
-      "id": "f423ff8b-2971-4633-ba6d-4f4a624e627f",
-      "timestamp": "2026-02-17T19:50:09.025Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 71.63,
-      "potentialRoi": 0,
-      "symbol": "SOL",
-      "id": "9163e214-6e68-4d6b-90e4-716bdc1ebceb",
-      "timestamp": "2026-02-17T19:49:57.785Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 1690.41,
-      "potentialRoi": 0,
-      "symbol": "ETH",
-      "id": "f13622bb-504f-4e68-8aca-1fc2711c397d",
-      "timestamp": "2026-02-17T19:49:47.783Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 57343.42,
-      "potentialRoi": 0,
-      "symbol": "BTC",
-      "id": "597c6890-f522-472e-aeca-5d860e93b1c2",
-      "timestamp": "2026-02-17T19:49:37.786Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.1449,
-      "potentialRoi": 0,
-      "symbol": "FET",
-      "id": "60af5007-a6a6-4aa1-8bf3-19eeed026017",
-      "timestamp": "2026-02-17T19:49:28.641Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.8842,
-      "potentialRoi": 0,
-      "symbol": "NEAR",
-      "id": "6534fe36-f9e7-4ae1-82cd-f891eb950234",
-      "timestamp": "2026-02-17T19:49:17.787Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 7.762,
-      "potentialRoi": 0,
-      "symbol": "AVAX",
-      "id": "96cc3129-5b36-4f0a-b4ad-b8ba79efe1df",
-      "timestamp": "2026-02-17T19:49:07.778Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 71.65,
-      "potentialRoi": 0,
-      "symbol": "SOL",
-      "id": "54e666a7-58d9-48c2-860d-94596f7253dc",
-      "timestamp": "2026-02-17T19:48:57.789Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 1690.96,
-      "potentialRoi": 0,
-      "symbol": "ETH",
-      "id": "35c32cb2-53d2-46af-aec9-bb8af722b04d",
-      "timestamp": "2026-02-17T19:48:47.872Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 57357.8,
-      "potentialRoi": 0,
-      "symbol": "BTC",
-      "id": "f129e3f6-acd9-4cae-96cd-e2190acc0385",
-      "timestamp": "2026-02-17T19:48:37.937Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.1449,
-      "potentialRoi": 0,
-      "symbol": "FET",
-      "id": "ec74e0f8-367b-4058-9a7e-a5081b7c0f97",
-      "timestamp": "2026-02-17T19:48:28.024Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.8844,
-      "potentialRoi": 0,
-      "symbol": "NEAR",
-      "id": "ed89143e-bf09-4ec7-b77e-5cbc9b12c22c",
-      "timestamp": "2026-02-17T19:48:17.829Z"
     }
   ],
   "executionLogs": [],
@@ -612,9 +512,9 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": -1.6275203682976171,
+      "pnlPercent": -1.661728376376829,
       "pnl": null,
-      "currentPrice": 57197.97
+      "currentPrice": 57178.08
     }
   ],
   "liquidity": {
@@ -627,8 +527,8 @@
     "fees": 0,
     "dailyGoal": 50
   },
-  "currentStatus": "ANALYZING_BTC",
-  "scanIndex": 1183,
+  "currentStatus": "ANALYZING_NEAR",
+  "scanIndex": 1211,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

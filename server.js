@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import axios from 'axios';
 import cors from 'cors';
 import fs from 'fs';
+import jwt from 'jsonwebtoken';
 import { GoogleGenAI } from "@google/genai";
 
 const app = express();
@@ -13,20 +14,90 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Environment Variables
 const API_KEY = process.env.API_KEY ? process.env.API_KEY.trim() : null;
+const CB_API_KEY = process.env.CB_API_KEY ? process.env.CB_API_KEY.trim() : null;
+const CB_API_SECRET = process.env.CB_API_SECRET ? process.env.CB_API_SECRET.replace(/\\n/g, '\n').trim() : null;
+
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'NEAR', 'FET'];
 
+/**
+ * GENERATE COINBASE CLOUD JWT (Advanced Trade API v3)
+ */
+function generateCoinbaseJWT(method, path) {
+  if (!CB_API_KEY || !CB_API_SECRET) return null;
+
+  try {
+    const algorithm = "ES256";
+    const uri = `GET api.coinbase.com${path}`; // For Advanced Trade V3
+    
+    const token = jwt.sign(
+      {
+        iss: "coinbase-cloud",
+        nbf: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 120,
+        sub: CB_API_KEY,
+      },
+      CB_API_SECRET,
+      {
+        algorithm,
+        header: {
+          kid: CB_API_KEY,
+          nonce: crypto.randomBytes(16).toString("hex"),
+        },
+      }
+    );
+    return token;
+  } catch (e) {
+    console.error("JWT Generation Error:", e.message);
+    return null;
+  }
+}
+
+/**
+ * SYNC REAL COINBASE BALANCES
+ */
+async function syncCoinbaseBalance() {
+  if (!CB_API_KEY || !CB_API_SECRET) return;
+
+  const path = '/api/v3/brokerage/accounts';
+  const token = generateCoinbaseJWT('GET', path);
+  if (!token) return;
+
+  try {
+    const response = await axios.get(`https://api.coinbase.com${path}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const accounts = response.data?.accounts || [];
+    accounts.forEach(acc => {
+      const currency = acc.currency;
+      const amount = parseFloat(acc.available_balance?.value || 0);
+      
+      if (currency === 'EUR') ghostState.liquidity.eur = amount;
+      if (currency === 'USDC' || currency === 'USD') ghostState.liquidity.usdc = amount;
+    });
+  } catch (e) {
+    console.warn("Coinbase Balance Sync Warning (API check):", e.response?.data || e.message);
+  }
+}
+
+/**
+ * AI SMC ANALYSIS CORE
+ */
 async function getAdvancedAnalysis(symbol, price, candles) {
-  if (!API_KEY) return { side: "NEUTRAL", confidence: 0, analysis: "Missing API Key" };
+  if (!API_KEY) return { side: "NEUTRAL", confidence: 0, analysis: "AI Key Missing" };
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   const history = (candles || []).slice(-30).map(c => ({ h: c.high, l: c.low, c: c.close }));
   
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `SMC_SCAN: ${symbol} @ ${price} EUR. DATA: ${JSON.stringify(history)}` }] }],
+      contents: [{ parts: [{ text: `SMC_SIGNAL_ENGINE: ${symbol} @ ${price} EUR. DATA: ${JSON.stringify(history)}` }] }],
       config: {
-        systemInstruction: `ROLE: SMC_ANALYST. Identify FVG, MSS, and Liquidity Sweeps. Confidence 0-100. PotentialRoi in %. JSON output strictly.`,
+        systemInstruction: `ROLE: ELITE_SMC_BOT. 
+TASK: Identify MSS (Market Structure Shift) and FVG (Fair Value Gaps). 
+OUTPUT: JSON ONLY. Fields: side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi (Expected %), analysis (max 10 words).`,
         responseMimeType: "application/json",
         temperature: 0.1
       }
@@ -40,10 +111,10 @@ async function getAdvancedAnalysis(symbol, price, candles) {
       entryPrice: Number(result.entryPrice) || Number(price) || 0,
       confidence: Number(result.confidence) || 0,
       potentialRoi: Number(result.potentialRoi) || 0,
-      analysis: result.analysis || "Market neutral."
+      analysis: result.analysis || "Market structure neutral."
     };
   } catch (e) { 
-    return { side: "NEUTRAL", tp: 0, sl: 0, entryPrice: Number(price) || 0, confidence: 0, potentialRoi: 0, analysis: "AI Processing Error" };
+    return { side: "NEUTRAL", tp: 0, sl: 0, entryPrice: Number(price) || 0, confidence: 0, potentialRoi: 0, analysis: "AI Neural Lag" };
   }
 }
 
@@ -52,7 +123,7 @@ function loadState() {
     isEngineActive: true, autoPilot: true, isPaperMode: true,
     settings: { confidenceThreshold: 80, defaultTradeSize: 60.0 },
     thoughts: [], executionLogs: [], activePositions: [],
-    liquidity: { eur: 1000, usdc: 500 }, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0 },
+    liquidity: { eur: 0, usdc: 0 }, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0 },
     currentStatus: "INITIALIZING", scanIndex: 0
   };
   try { 
@@ -70,7 +141,7 @@ async function loop() {
   if (!ghostState.isEngineActive) return;
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
   ghostState.scanIndex++;
-  ghostState.currentStatus = `ANALYZING_${symbol}`;
+  ghostState.currentStatus = `HUNTING_${symbol}`;
   
   try {
     const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=40`);
@@ -81,12 +152,7 @@ async function loop() {
     const analysis = await getAdvancedAnalysis(symbol, price, candles);
     
     if (analysis) {
-      const signal = { 
-        ...analysis, 
-        symbol, 
-        id: crypto.randomUUID(), 
-        timestamp: new Date().toISOString() 
-      };
+      const signal = { ...analysis, symbol, id: crypto.randomUUID(), timestamp: new Date().toISOString() };
       
       if (signal.side === 'BUY' && signal.confidence >= ghostState.settings.confidenceThreshold) {
         if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
@@ -94,12 +160,12 @@ async function loop() {
           ghostState.activePositions.push({
             symbol, entryPrice: price || 0, currentPrice: price || 0, amount: ghostState.settings.defaultTradeSize,
             quantity: qty, tp: signal.tp, sl: signal.sl, confidence: signal.confidence, 
-            potentialRoi: signal.potentialRoi,
+            potentialRoi: signal.potentialRoi, // ENSURING ROI PERSISTENCE
             pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
           });
           ghostState.executionLogs.unshift({ 
             id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
-            status: 'SUCCESS', details: `AUTO_TRADE_CONF_${signal.confidence}%`, timestamp: new Date().toISOString() 
+            status: 'SUCCESS', details: `SMC_AUTO_BUY_${signal.confidence}%`, timestamp: new Date().toISOString() 
           });
         }
       }
@@ -111,6 +177,7 @@ async function loop() {
 }
 
 async function monitor() {
+  await syncCoinbaseBalance(); // Always sync real balance
   if (ghostState.activePositions.length === 0) return;
   const symbols = ghostState.activePositions.map(p => p.symbol).join(',');
   try {
@@ -132,7 +199,7 @@ async function monitor() {
         ghostState.dailyStats.profit += pos.pnl;
         ghostState.executionLogs.unshift({ 
           id: crypto.randomUUID(), symbol: pos.symbol, action: 'SELL', 
-          price: curPrice, pnl: pos.pnl, status: 'SUCCESS', details: hitTP ? 'TP_HIT' : 'SL_HIT', 
+          price: curPrice, pnl: pos.pnl, status: 'SUCCESS', details: hitTP ? 'TP_TARGET_HIT' : 'SL_HIT', 
           timestamp: new Date().toISOString() 
         });
         ghostState.activePositions.splice(i, 1);
@@ -144,7 +211,7 @@ async function monitor() {
 
 function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {} }
 
-setInterval(monitor, 3000);
+setInterval(monitor, 4000);
 setInterval(loop, 10000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
@@ -155,4 +222,8 @@ app.post('/api/ghost/toggle', (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🎯 GHOST CORE V34 READY`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n🚀 SPECTRAL OVERLORD CORE V35 ONLINE`);
+  console.log(`🔗 COINBASE CLOUD SYNC: ${CB_API_KEY ? 'ENABLED' : 'DISABLED'}`);
+  console.log(`🤖 AI SMC AGENT: READY\n`);
+});
