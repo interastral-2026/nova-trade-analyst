@@ -2,8 +2,15 @@
 import { TradeSignal, AccountBalance, ExecutionLog } from "../types.ts";
 
 export const getApiBase = () => {
-  const url = localStorage.getItem('NOVA_BRIDGE_URL') || "http://localhost:3001";
-  return url.endsWith('/') ? url.slice(0, -1) : url;
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const url = localStorage.getItem('NOVA_BRIDGE_URL') || "http://localhost:3001";
+      return url.endsWith('/') ? url.slice(0, -1) : url;
+    }
+  } catch (e) {
+    console.warn("Storage access restricted:", e);
+  }
+  return "http://localhost:3001";
 };
 
 export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
@@ -15,8 +22,8 @@ export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
     if (!response.ok) return [];
     const data = await response.json();
     return [
-      { currency: 'EUR', available: data.liquidity?.eur || 0, total: data.liquidity?.eur || 0 },
-      { currency: 'USDC', available: data.liquidity?.usdc || 0, total: data.liquidity?.usdc || 0 }
+      { currency: 'EUR', available: Number(data.liquidity?.eur) || 0, total: Number(data.liquidity?.eur) || 0 },
+      { currency: 'USDC', available: Number(data.liquidity?.usdc) || 0, total: Number(data.liquidity?.usdc) || 0 }
     ];
   } catch (error) {
     return [];
@@ -44,7 +51,7 @@ export const executeAutoTrade = async (
     const data = await response.json();
     
     return { 
-      success: data.success, 
+      success: !!data.success, 
       log: {
         id: crypto.randomUUID(),
         symbol: signal.symbol,

@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { AssetInfo, TradeSignal, AnalysisStatus, AccountBalance } from './types';
-import { fetchProductStats } from './services/coinbaseService';
-import { getApiBase } from './services/tradingService';
-import Header from './components/Header';
-import Sidebar from './components/Sidebar';
-import SignalList from './components/SignalList';
-import TradingTerminal from './components/TradingTerminal';
+import { AssetInfo, TradeSignal, AnalysisStatus, AccountBalance } from './types.ts';
+import { fetchProductStats } from './services/coinbaseService.ts';
+import { getApiBase } from './services/tradingService.ts';
+import Header from './components/Header.tsx';
+import Sidebar from './components/Sidebar.tsx';
+import SignalList from './components/SignalList.tsx';
+import TradingTerminal from './components/TradingTerminal.tsx';
 
 const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'NEAR-EUR', 'FET-EUR'];
 
@@ -22,8 +22,9 @@ const App: React.FC = () => {
   const [bridgeUrl, setBridgeUrl] = useState<string>(getApiBase());
 
   const syncWithServer = useCallback(async () => {
+    const base = getApiBase();
     try {
-      const response = await fetch(`${getApiBase()}/api/ghost/state`);
+      const response = await fetch(`${base}/api/ghost/state`);
       if (!response.ok) {
         setLiveActivity("SERVER_DISCONNECTED");
         setStatus(AnalysisStatus.ERROR);
@@ -32,13 +33,13 @@ const App: React.FC = () => {
       
       const data = await response.json();
       setThoughtHistory(data.thoughts || []);
-      setIsEngineActive(data.isEngineActive);
-      setAutoTradeEnabled(data.autoPilot);
+      setIsEngineActive(!!data.isEngineActive);
+      setAutoTradeEnabled(!!data.autoPilot);
       setLiveActivity(data.currentStatus || "IDLE");
       
       setBalances([
-        { currency: 'EUR', available: data.liquidity?.eur || 0, total: data.liquidity?.eur || 0 },
-        { currency: 'USDC', available: data.liquidity?.usdc || 0, total: data.liquidity?.usdc || 0 }
+        { currency: 'EUR', available: Number(data.liquidity?.eur) || 0, total: Number(data.liquidity?.eur) || 0 },
+        { currency: 'USDC', available: Number(data.liquidity?.usdc) || 0, total: Number(data.liquidity?.usdc) || 0 }
       ]);
       setStatus(AnalysisStatus.IDLE);
     } catch (e) {
@@ -48,7 +49,9 @@ const App: React.FC = () => {
   }, []);
 
   const handleUpdateBridge = (url: string) => {
-    localStorage.setItem('NOVA_BRIDGE_URL', url.trim());
+    try {
+      localStorage.setItem('NOVA_BRIDGE_URL', url.trim());
+    } catch (e) {}
     setBridgeUrl(url.trim());
     syncWithServer();
   };
@@ -81,12 +84,14 @@ const App: React.FC = () => {
     syncWithServer();
     const interval = setInterval(syncWithServer, 4000);
     const statsInterval = setInterval(() => {
-      WATCHLIST.forEach(id => fetchProductStats(id).then(info => {
-        setAssets(prev => {
-          const filtered = prev.filter(a => a.id !== id);
-          return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
-        });
-      }));
+      WATCHLIST.forEach(id => {
+        fetchProductStats(id).then(info => {
+          setAssets(prev => {
+            const filtered = prev.filter(a => a.id !== id);
+            return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
+          });
+        }).catch(() => {});
+      });
     }, 8000);
     return () => { clearInterval(interval); clearInterval(statsInterval); };
   }, [syncWithServer]);

@@ -9,6 +9,14 @@
   "thoughts": [
     {
       "side": "NEUTRAL",
+      "confidence": 0,
+      "analysis": "Missing API Key",
+      "symbol": "BTC",
+      "id": "d4fd7b09-4896-4d9c-995d-5f587314f043",
+      "timestamp": "2026-02-17T20:48:56.476Z"
+    },
+    {
+      "side": "NEUTRAL",
       "analysis": "API_KEY_MISSING",
       "confidence": 0,
       "tp": 0,
@@ -594,18 +602,6 @@
       "symbol": "NEAR",
       "id": "ed89143e-bf09-4ec7-b77e-5cbc9b12c22c",
       "timestamp": "2026-02-17T19:48:17.829Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 7.757,
-      "potentialRoi": 0,
-      "symbol": "AVAX",
-      "id": "3807def1-697c-4ab4-96f1-aadb9fa7763e",
-      "timestamp": "2026-02-17T19:48:08.020Z"
     }
   ],
   "executionLogs": [],
@@ -616,9 +612,9 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": -1.5389303986565759,
+      "pnlPercent": -1.6275203682976171,
       "pnl": null,
-      "currentPrice": 57249.48
+      "currentPrice": 57197.97
     }
   ],
   "liquidity": {
@@ -631,8 +627,8 @@
     "fees": 0,
     "dailyGoal": 50
   },
-  "currentStatus": "SCANNING_BTC",
-  "scanIndex": 1147,
+  "currentStatus": "ANALYZING_BTC",
+  "scanIndex": 1183,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

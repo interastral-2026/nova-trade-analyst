@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { ExecutionLog, ActivePosition, TradeSignal } from '../types';
-import { getApiBase } from '../services/tradingService';
+import { ExecutionLog, ActivePosition, TradeSignal } from '../types.ts';
+import { getApiBase } from '../services/tradingService.ts';
 
 interface TradingTerminalProps {
   thoughtHistory: TradeSignal[];
@@ -23,15 +23,15 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
       if (!res.ok) return;
       const data = await res.json();
       setStats({ 
-        eur: data.liquidity?.eur ?? 0, 
-        usdc: data.liquidity?.usdc ?? 0,
-        trades: data.dailyStats?.trades ?? 0, 
-        profit: data.dailyStats?.profit ?? 0,
-        isPaper: data.isPaperMode ?? true,
-        dailyGoal: data.dailyStats?.dailyGoal ?? 50
+        eur: Number(data.liquidity?.eur) || 0, 
+        usdc: Number(data.liquidity?.usdc) || 0,
+        trades: Number(data.dailyStats?.trades) || 0, 
+        profit: Number(data.dailyStats?.profit) || 0,
+        isPaper: data.isPaperMode !== false,
+        dailyGoal: Number(data.dailyStats?.dailyGoal) || 50
       });
-      setLogs(data.executionLogs || []);
-      setHoldings(data.activePositions || []);
+      setLogs(Array.isArray(data.executionLogs) ? data.executionLogs : []);
+      setHoldings(Array.isArray(data.activePositions) ? data.activePositions : []);
     } catch (e) {}
   };
 
@@ -45,18 +45,23 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
   const formatPrice = (val: any) => {
     const num = Number(val);
-    return isNaN(num) ? "0.00" : num.toLocaleString();
+    if (isNaN(num)) return "0.00";
+    return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const getSafeNum = (val: any) => {
+    const n = Number(val);
+    return isNaN(n) ? 0 : n;
   };
 
   return (
     <div className="flex flex-col space-y-6 h-full font-mono bg-black/50">
-      {/* V33 Status Banner */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="col-span-1 md:col-span-2 bg-[#080812] border-2 border-indigo-500/20 rounded-[2.2rem] p-7 shadow-2xl relative overflow-hidden group">
            <div className="flex justify-between items-end mb-4 relative z-10">
               <div>
-                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] mb-1">PROFIT_HARVEST_V33</p>
-                <h3 className="text-3xl font-black text-white">€{stats.profit.toFixed(2)} <span className="text-slate-600 text-lg">/ €{stats.dailyGoal}</span></h3>
+                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] mb-1">PROFIT_HARVEST_V34</p>
+                <h3 className="text-3xl font-black text-white">€{getSafeNum(stats.profit).toFixed(2)} <span className="text-slate-600 text-lg">/ €{stats.dailyGoal}</span></h3>
               </div>
               <div className="text-right">
                 <span className={`text-[12px] font-black ${goalProgress >= 100 ? 'text-emerald-400' : 'text-indigo-500'}`}>
@@ -118,19 +123,19 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                    </div>
                 ) : (
                   holdings.map((pos) => {
-                    const isProfit = (pos.pnlPercent || 0) >= 0;
+                    const isProfit = getSafeNum(pos.pnlPercent) >= 0;
                     return (
                       <div key={pos.symbol} className={`group bg-[#0a0a14] border-2 p-10 rounded-[3rem] relative overflow-hidden transition-all hover:scale-[1.01] ${isProfit ? 'border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.05)]' : 'border-rose-500/20 shadow-[0_0_50px_rgba(244,63,94,0.05)]'}`}>
                          <div className="flex justify-between items-start mb-10">
                             <div>
                                <h4 className="text-2xl font-black text-white tracking-tighter uppercase mb-1">{pos.symbol}</h4>
-                               <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest">{(pos.confidence || 0)}% Conf. | {(pos.potentialRoi || 0).toFixed(1)}% ROI</span>
+                               <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest">{getSafeNum(pos.confidence)}% Conf. | {getSafeNum(pos.potentialRoi).toFixed(1)}% ROI</span>
                             </div>
                             <div className="text-right">
                                <h2 className={`text-4xl font-black tracking-tighter ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                 {isProfit ? '+' : ''}{(pos.pnlPercent || 0).toFixed(2)}%
+                                 {isProfit ? '+' : ''}{getSafeNum(pos.pnlPercent).toFixed(2)}%
                                </h2>
-                               <p className="text-[12px] font-black text-slate-500 mt-1 uppercase">€{(pos.pnl || 0).toFixed(2)} ROI</p>
+                               <p className="text-[12px] font-black text-slate-500 mt-1 uppercase">€{getSafeNum(pos.pnl).toFixed(2)} ROI</p>
                             </div>
                          </div>
 
@@ -164,13 +169,13 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                 {thoughtHistory.map((t, i) => (
                   <div key={t.id || i} className={`border-l-4 pl-10 py-8 bg-white/[0.01] border-white/5 rounded-r-[2.5rem] transition-all hover:bg-white/[0.03] ${t.side === 'BUY' ? 'border-emerald-500 bg-emerald-500/[0.02]' : 'border-slate-800'}`}>
                      <div className="flex items-center space-x-8 mb-4">
-                        <span className="text-[12px] font-black text-slate-600">[{new Date(t.timestamp).toLocaleTimeString()}]</span>
+                        <span className="text-[12px] font-black text-slate-600">[{t.timestamp ? new Date(t.timestamp).toLocaleTimeString() : "00:00"}]</span>
                         <span className="text-2xl font-black text-white uppercase tracking-tighter">{t.symbol}</span>
                         <div className={`px-4 py-1.5 rounded-full text-[10px] font-black ${t.side === 'BUY' ? 'bg-emerald-500 text-black shadow-[0_0_20px_#10b981]' : 'bg-slate-800 text-slate-500'}`}>
-                          {t.side} | {(t.confidence || 0)}% CONFIDENCE
+                          {t.side} | {getSafeNum(t.confidence)}% CONFIDENCE
                         </div>
                      </div>
-                     <p className="text-[16px] text-slate-400 leading-relaxed font-medium mb-8 italic pr-20 opacity-90">"{t.analysis}"</p>
+                     <p className="text-[16px] text-slate-400 leading-relaxed font-medium mb-8 italic pr-20 opacity-90">"{t.analysis || "No analysis data."}"</p>
                      
                      {t.side !== 'NEUTRAL' && (
                        <div className="grid grid-cols-3 gap-8 max-w-2xl p-6 bg-black/40 border border-white/5 rounded-[2rem] shadow-xl">
@@ -184,12 +189,34 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                           </div>
                           <div className="text-right">
                              <p className="text-[9px] font-black text-slate-600 uppercase mb-1">Est. ROI</p>
-                             <p className="text-[15px] font-black text-indigo-400">+{(t.potentialRoi || 0).toFixed(1)}%</p>
+                             <p className="text-[15px] font-black text-indigo-400">+{getSafeNum(t.potentialRoi).toFixed(1)}%</p>
                           </div>
                        </div>
                      )}
                   </div>
                 ))}
+             </div>
+           )}
+
+           {activeTab === 'activity' && (
+             <div className="space-y-4 max-w-5xl mx-auto">
+                {logs.length === 0 ? (
+                  <p className="text-slate-600 text-[10px] uppercase font-black text-center py-20">No execution logs found.</p>
+                ) : (
+                  logs.map(log => (
+                    <div key={log.id} className="bg-[#0a0a14] border border-white/5 p-6 rounded-2xl flex justify-between items-center">
+                       <div>
+                          <p className="text-[10px] text-slate-500 mb-1">{new Date(log.timestamp).toLocaleString()}</p>
+                          <h5 className="text-sm font-black text-white uppercase tracking-tight">{log.symbol} / {log.action}</h5>
+                       </div>
+                       <div className="text-right">
+                          <span className={`text-[10px] font-black px-2 py-1 rounded ${log.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                            {log.status}
+                          </span>
+                       </div>
+                    </div>
+                  ))
+                )}
              </div>
            )}
         </div>
