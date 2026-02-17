@@ -586,8 +586,9 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": null,
-      "pnl": null
+      "pnlPercent": -0.09146213522637187,
+      "pnl": -0.009146213522637186,
+      "currentPrice": 58091.1
     }
   ],
   "liquidity": {
@@ -599,9 +600,9 @@
     "profit": 0,
     "fees": 0
   },
-  "currentStatus": "RADAR_ACTIVE",
-  "scanIndex": 791,
-  "diag": "SIM_HUNT_ONLY",
+  "currentStatus": "READY_FOR_NEXT_PREY",
+  "scanIndex": 806,
+  "diag": "SIM_MODE_ONLY",
   "lastScans": [],
   "lastSync": null,
   "cooldownUntil": 0,
