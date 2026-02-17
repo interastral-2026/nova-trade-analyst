@@ -85,10 +85,7 @@ async function placeRealOrder(symbol, side, size, isPaper) {
 
 async function getAdvancedAnalysis(symbol, price, candles) {
   if (!API_KEY) return null;
-  if (isRateLimited && Date.now() < retryAfter) {
-    console.log(`[QUOTA_SLEEP] Skipping ${symbol} - System is waiting for rate limit reset.`);
-    return null;
-  }
+  if (isRateLimited && Date.now() < retryAfter) return null;
 
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   const historicalData = candles.slice(-20).map(c => ({ h: c.high, l: c.low, c: c.close }));
@@ -108,11 +105,8 @@ async function getAdvancedAnalysis(symbol, price, candles) {
   } catch (e) { 
     if (e.message.includes('429') || e.message.includes('RESOURCE_EXHAUSTED')) {
       isRateLimited = true;
-      retryAfter = Date.now() + 60000; // Wait 1 minute minimum
+      retryAfter = Date.now() + 60000;
       ghostState.diag = "RATE_LIMIT_EXCEEDED (AI)";
-      console.error(`[RATE_LIMIT] 429 Detected. Cooling down for 60s...`);
-    } else {
-      console.error(`[AI_ERROR] ${symbol}:`, e.message);
     }
     return null; 
   }
@@ -124,13 +118,11 @@ function loadState() {
     settings: { confidenceThreshold: 80, defaultTradeSize: 25.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 0, usdc: 0 }, dailyStats: { trades: 0, profit: 0 },
-    currentStatus: "IDLE", scanIndex: 0, diag: "BOOT_V20.0"
+    currentStatus: "IDLE", scanIndex: 0, diag: "BOOT_V21.0"
   };
   try { 
     if (fs.existsSync(STATE_FILE)) {
       let state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-      state.activePositions = (state.activePositions || []).filter(p => p.isPaper === false || p.symbol === 'BTC');
-      state.executionLogs = (state.executionLogs || []).filter(l => l.details?.includes('[LIVE]'));
       return { ...defaults, ...state };
     } 
   } catch (e) {}
@@ -139,35 +131,53 @@ function loadState() {
 
 let ghostState = loadState();
 
+/**
+ * ULTRA_FAST MONITORING: This runs every 5s to ensure SL/TP hits are instant.
+ */
 async function monitorPositions() {
-  for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
-    const pos = ghostState.activePositions[i];
-    try {
-      const res = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${pos.symbol}&tsyms=EUR`);
-      const currentPrice = res.data.EUR;
+  if (ghostState.activePositions.length === 0) return;
+  
+  // Batch price fetch for all active symbols
+  const symbols = ghostState.activePositions.map(p => p.symbol).join(',');
+  try {
+    const res = await axios.get(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${symbols}&tsyms=EUR`);
+    const prices = res.data;
+
+    for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
+      const pos = ghostState.activePositions[i];
+      const currentPrice = prices[pos.symbol]?.EUR;
+      if (!currentPrice) continue;
+
       pos.currentPrice = currentPrice;
       pos.pnlPercent = ((currentPrice - pos.entryPrice) / pos.entryPrice) * 100;
       pos.pnl = (currentPrice - pos.entryPrice) * (pos.quantity || (pos.amount / pos.entryPrice));
 
-      if (currentPrice >= pos.tp || currentPrice <= pos.sl) {
+      // Trigger Liquidation
+      const isTP = currentPrice >= pos.tp;
+      const isSL = currentPrice <= pos.sl;
+
+      if (isTP || isSL) {
+        console.log(`[ALERT] Liquidation Triggered for ${pos.symbol} at ${currentPrice}. Reason: ${isTP ? 'TP' : 'SL'}`);
         const order = await placeRealOrder(pos.symbol, 'SELL', pos.quantity, pos.isPaper);
         if (order.success) {
           ghostState.dailyStats.profit += pos.pnl;
           ghostState.executionLogs.unshift({
             id: crypto.randomUUID(), symbol: pos.symbol, action: 'SELL', price: currentPrice,
-            status: 'SUCCESS', details: pos.isPaper ? '[SIM_EXIT]' : '[LIVE_EXIT]', timestamp: new Date().toISOString(), pnl: pos.pnl
+            status: 'SUCCESS', details: pos.isPaper ? `[SIM_${isTP?'TP':'SL'}]` : `[LIVE_${isTP?'TP':'SL'}]`, 
+            timestamp: new Date().toISOString(), pnl: pos.pnl
           });
           ghostState.activePositions.splice(i, 1);
         }
       }
-    } catch (e) {}
+    }
+  } catch (e) {
+    console.error(`[MONITOR_ERROR]`, e.message);
   }
   saveState();
 }
 
 async function loop() {
   if (!ghostState.isEngineActive) return;
-  await monitorPositions();
   
   const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'NEAR', 'FET'];
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
@@ -186,14 +196,10 @@ async function loop() {
     if (!candles) return;
     const price = candles[candles.length - 1].close;
     
-    // QUOTA OPTIMIZATION: Only call AI if price changed significantly (>0.5%) since last analysis
     const lastPrice = lastAnalysisPrices.get(symbol);
     if (lastPrice) {
       const diff = Math.abs((price - lastPrice) / lastPrice) * 100;
-      if (diff < 0.5) {
-        console.log(`[OPTIMIZATION] ${symbol} price change is too small (${diff.toFixed(2)}%). Skipping AI call.`);
-        return;
-      }
+      if (diff < 0.5) return;
     }
 
     const analysis = await getAdvancedAnalysis(symbol, price, candles);
@@ -230,7 +236,7 @@ async function syncLiquidity() {
   if (realData) {
     ghostState.liquidity = realData;
     ghostState.isPaperMode = false;
-    ghostState.diag = "PREDATOR_LIVE_OK";
+    ghostState.diag = "PREDATOR_LIVE_SYNCED";
   } else {
     ghostState.isPaperMode = true;
     if (!isRateLimited) ghostState.diag = "SIM_MODE_ACTIVE";
@@ -241,7 +247,9 @@ async function syncLiquidity() {
 function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {} }
 
 syncLiquidity();
-// Quota-Friendly Loop: 60s interval instead of 12s
+// AGGRESSIVE POSITION MONITORING: 5s
+setInterval(monitorPositions, 5000); 
+// QUOTA FRIENDLY SCANNING: 60s
 setInterval(loop, 60000); 
 setInterval(syncLiquidity, 120000);
 
@@ -253,11 +261,11 @@ app.post('/api/ghost/toggle', (req, res) => {
   res.json({ success: true });
 });
 app.post('/api/ghost/clear-history', (req, res) => {
-  ghostState.executionLogs = ghostState.executionLogs.filter(l => l.details?.includes('[LIVE]'));
+  ghostState.executionLogs = [];
   ghostState.thoughts = [];
-  if (req.body.clearPositions) ghostState.activePositions = ghostState.activePositions.filter(p => !p.isPaper);
+  if (req.body.clearPositions) ghostState.activePositions = [];
   saveState();
   res.json({ success: true });
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🌍 PREDATOR V20.0: QUOTA_AWARE_ENGINE ONLINE ON ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 PREDATOR V21.0: FAST_MONITOR_ENGINE ONLINE ON ${PORT}`));
