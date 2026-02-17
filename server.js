@@ -98,21 +98,20 @@ async function getAdvancedAnalysis(symbol, price, candles) {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `FORCE_HUNT: ${symbol} @ ${price} EUR. DATA: ${JSON.stringify(historicalData)}` }] }],
+      contents: [{ parts: [{ text: `INSTANT_EXECUTION_SCAN: ${symbol} @ ${price} EUR. DATA: ${JSON.stringify(historicalData)}` }] }],
       config: {
-        systemInstruction: `SYSTEM_ROLE: ULTRA_PREDATOR_V25. 
-MISSION: 50 EUR PROFIT DAILY. 
-MANDATE: YOU MUST ANALYZE EVERY OPPORTUNITY. 
-SMC RULES: 
-1. FIND liquidity pools (Equal Highs/Lows). 
-2. Identify Market Structure Break (MSB). 
-3. Identify Fair Value Gaps (FVG) for entry. 
-4. If there's a 70%+ chance of a move, GIVE A BUY SIGNAL. 
-5. Tight SL is mandatory. 
-OUTPUT JSON: { "side": "BUY"|"SELL"|"NEUTRAL", "tp": number, "sl": number, "confidence": number, "analysis": "string" }. 
-DO NOT BE SHY. WE NEED TRADES.`,
+        systemInstruction: `SYSTEM_ROLE: PREDATOR_INSTANT_BUYER_V26. 
+MISSION: ACHIEVE 50 EUR PROFIT DAILY. 
+DIRECTIVE: BE DECISIVE. IF A SETUP EXISTS, TAKE IT.
+SMC STRATEGY:
+1. Identify Liquidity Sweep (Look for spikes below/above key zones).
+2. Market Structure Shift (MSS) verification on displacement.
+3. Entry at FVG (Fair Value Gap) or OB (Order Block).
+4. TP must be the NEXT major liquidity pool. SL must be behind the displacement candle.
+OUTPUT JSON: { "side": "BUY"|"SELL"|"NEUTRAL", "tp": number, "sl": number, "confidence": number, "analysis": "string" }.
+CONFIDENCE: 0-100. 75%+ triggers immediate auto-trade.`,
         responseMimeType: "application/json",
-        temperature: 0.2
+        temperature: 0.1
       }
     });
     isRateLimited = false;
@@ -120,7 +119,7 @@ DO NOT BE SHY. WE NEED TRADES.`,
   } catch (e) { 
     if (e.message.includes('429')) {
       isRateLimited = true;
-      retryAfter = Date.now() + 15000;
+      retryAfter = Date.now() + 10000;
       return { side: "NEUTRAL", analysis: "RATE_LIMIT_PAUSE", confidence: 0 };
     }
     return { side: "NEUTRAL", analysis: "AI_ERROR: " + e.message, confidence: 0 };
@@ -130,10 +129,10 @@ DO NOT BE SHY. WE NEED TRADES.`,
 function loadState() {
   const defaults = {
     isEngineActive: true, autoPilot: true, isPaperMode: true,
-    settings: { confidenceThreshold: 70, defaultTradeSize: 50.0 },
+    settings: { confidenceThreshold: 75, defaultTradeSize: 60.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 1000, usdc: 500 }, dailyStats: { trades: 0, profit: 0, dailyGoal: DAILY_GOAL_EUR },
-    currentStatus: "IDLE", scanIndex: 0, diag: "V25_HYPER_DRIVE"
+    currentStatus: "IDLE", scanIndex: 0, diag: "V26_PREDATOR_X"
   };
   try { 
     if (fs.existsSync(STATE_FILE)) {
@@ -193,44 +192,40 @@ async function loop() {
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
   ghostState.scanIndex++;
   
-  ghostState.currentStatus = `DECODING_${symbol}_STRUCTURE`;
+  ghostState.currentStatus = `HUNTING_${symbol}_ENTRY`;
 
   try {
     const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=48`);
     const candles = res.data?.Data?.Data;
-    if (!candles || candles.length === 0) {
-        ghostState.currentStatus = `DATA_FETCH_ERROR_${symbol}`;
-        return;
-    }
+    if (!candles || candles.length === 0) return;
     const price = candles[candles.length - 1].close;
     
     const analysis = await getAdvancedAnalysis(symbol, price, candles);
     
-    if (analysis) {
-      if (analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold) {
-        if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
-          const order = await placeRealOrder(symbol, 'BUY', ghostState.settings.defaultTradeSize, ghostState.isPaperMode);
-          if (order.success) {
-            const qty = ghostState.settings.defaultTradeSize / price;
-            ghostState.activePositions.push({
-              symbol, entryPrice: price, currentPrice: price, amount: ghostState.settings.defaultTradeSize,
-              quantity: qty, tp: analysis.tp, sl: analysis.sl,
-              pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
-            });
-            ghostState.executionLogs.unshift({
-              id: crypto.randomUUID(), symbol, action: 'BUY', price, status: 'SUCCESS',
-              details: ghostState.isPaperMode ? '[SIM]' : '[LIVE]', timestamp: new Date().toISOString()
-            });
-          }
+    if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold) {
+      if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
+        const order = await placeRealOrder(symbol, 'BUY', ghostState.settings.defaultTradeSize, ghostState.isPaperMode);
+        if (order.success) {
+          const qty = ghostState.settings.defaultTradeSize / price;
+          ghostState.activePositions.push({
+            symbol, entryPrice: price, currentPrice: price, amount: ghostState.settings.defaultTradeSize,
+            quantity: qty, tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence,
+            pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
+          });
+          ghostState.executionLogs.unshift({
+            id: crypto.randomUUID(), symbol, action: 'BUY', price, status: 'SUCCESS',
+            details: ghostState.isPaperMode ? '[SIM]' : '[LIVE]', timestamp: new Date().toISOString()
+          });
         }
       }
-      // V25.0: ALWAYS PUSH THOUGHTS TO SHOW SYSTEM IS ALIVE
+    }
+
+    if (analysis) {
       ghostState.thoughts.unshift({ ...analysis, symbol, entryPrice: price, id: crypto.randomUUID(), timestamp: new Date().toISOString() });
-      if (ghostState.thoughts.length > 40) ghostState.thoughts.pop();
+      if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
     }
   } catch (e) { 
     console.error(`[LOOP_ERROR]:`, e.message);
-    ghostState.diag = "ENGINE_STALL_RECOVERY";
   }
   saveState();
 }
@@ -249,14 +244,14 @@ async function syncLiquidity() {
 
 function saveState() { 
   try { 
-    ghostState.diag = isRateLimited ? "AI_WAIT" : "HYPER_ENGINE_ONLINE";
+    ghostState.diag = isRateLimited ? "AI_WAIT" : "PREDATOR_X_ONLINE";
     fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); 
   } catch (e) {} 
 }
 
 syncLiquidity();
-setInterval(monitorPositions, 4000); 
-setInterval(loop, 12000); // 12 Seconds - Even faster aggression
+setInterval(monitorPositions, 2000); // Tighter tracking
+setInterval(loop, 10000); // 10s cycles
 setInterval(syncLiquidity, 120000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
@@ -274,4 +269,4 @@ app.post('/api/ghost/clear-history', (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🎯 PREDATOR V25.0: HYPER_ACTIVE_ENGINE ONLINE`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🎯 PREDATOR X: V26.0 FAST SCAN ONLINE`));
