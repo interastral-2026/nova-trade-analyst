@@ -616,9 +616,9 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": -1.4941108566483203,
-      "pnl": -0.14941108566483202,
-      "currentPrice": 57275.54
+      "pnlPercent": -1.5389303986565759,
+      "pnl": null,
+      "currentPrice": 57249.48
     }
   ],
   "liquidity": {
@@ -631,8 +631,8 @@
     "fees": 0,
     "dailyGoal": 50
   },
-  "currentStatus": "ANALYZING_NEAR_SMC",
-  "scanIndex": 1097,
+  "currentStatus": "SCANNING_BTC",
+  "scanIndex": 1147,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

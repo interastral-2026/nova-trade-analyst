@@ -6,16 +6,21 @@ interface SignalListProps {
   signals: TradeSignal[];
 }
 
-const SignalList: React.FC<SignalListProps> = ({ signals }) => {
+const SignalList: React.FC<SignalListProps> = ({ signals = [] }) => {
   const safeSignals = Array.isArray(signals) ? signals : [];
   
   const activeSignals = safeSignals
-    .filter(s => s.side !== 'NEUTRAL')
+    .filter(s => s && s.side !== 'NEUTRAL')
     .sort((a, b) => {
       const scoreA = (a.confidence || 0) + (a.potentialRoi || 0);
       const scoreB = (b.confidence || 0) + (b.potentialRoi || 0);
       return scoreB - scoreA;
     });
+
+  const formatPrice = (val: any) => {
+    const num = Number(val);
+    return isNaN(num) ? "0.00" : num.toLocaleString();
+  };
 
   return (
     <div className="flex flex-col h-full bg-[#020204] font-mono select-none">
@@ -24,7 +29,7 @@ const SignalList: React.FC<SignalListProps> = ({ signals }) => {
           <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse shadow-[0_0_10px_#6366f1]"></span>
           <span>Ghost Signals</span>
         </h3>
-        <span className="text-[8px] text-slate-600 font-bold uppercase tracking-tighter">V32_SYNC</span>
+        <span className="text-[8px] text-slate-600 font-bold uppercase tracking-tighter">V33_SMC</span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
@@ -73,28 +78,28 @@ const SignalList: React.FC<SignalListProps> = ({ signals }) => {
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   <div className="bg-black/60 border border-white/5 p-2.5 rounded-xl text-center shadow-inner">
                     <p className="text-[7px] text-slate-600 uppercase font-black mb-1">Entry</p>
-                    <p className="text-[10px] font-black text-white truncate">€{signal.entryPrice?.toLocaleString()}</p>
+                    <p className="text-[10px] font-black text-white truncate">€{formatPrice(signal.entryPrice)}</p>
                   </div>
                   <div className="bg-emerald-500/[0.03] border border-emerald-500/10 p-2.5 rounded-xl text-center shadow-inner">
                     <p className="text-[7px] text-emerald-500 uppercase font-black mb-1">Target</p>
-                    <p className="text-[10px] font-black text-emerald-400 truncate">€{signal.tp?.toLocaleString()}</p>
+                    <p className="text-[10px] font-black text-emerald-400 truncate">€{formatPrice(signal.tp)}</p>
                   </div>
                   <div className="bg-rose-500/[0.03] border border-rose-500/10 p-2.5 rounded-xl text-center shadow-inner">
                     <p className="text-[7px] text-rose-500 uppercase font-black mb-1">Stop</p>
-                    <p className="text-[10px] font-black text-rose-400 truncate">€{signal.sl?.toLocaleString()}</p>
+                    <p className="text-[10px] font-black text-rose-400 truncate">€{formatPrice(signal.sl)}</p>
                   </div>
                 </div>
 
                 <p className="text-[10px] text-slate-400 leading-tight italic font-medium border-t border-white/5 pt-3">
-                  "{signal.analysis}"
+                  "{signal.analysis || "No analysis details provided."}"
                 </p>
                 
                 <div className="mt-4 flex justify-between items-center text-[7px] font-black text-slate-600 uppercase tracking-widest">
                   <span className="flex items-center space-x-1">
                     <i className="fas fa-check-double text-indigo-500"></i>
-                    <span>SMC_CORE_V32</span>
+                    <span>SMC_VALIDATED</span>
                   </span>
-                  <span className="opacity-40">{new Date(signal.timestamp).toLocaleTimeString()}</span>
+                  <span className="opacity-40">{signal.timestamp ? new Date(signal.timestamp).toLocaleTimeString() : "--:--"}</span>
                 </div>
               </div>
             );

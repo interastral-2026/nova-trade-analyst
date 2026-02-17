@@ -14,24 +14,8 @@ app.use(cors());
 app.use(express.json());
 
 const API_KEY = process.env.API_KEY ? process.env.API_KEY.trim() : null;
-const CB_CONFIG = {
-  apiKey: (process.env.CB_API_KEY || '').trim(), 
-  apiSecret: (process.env.CB_API_SECRET || '').trim()
-};
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'NEAR', 'FET'];
-
-// --- COINBASE BALANCE SYNC ---
-async function syncCoinbaseBalance() {
-  if (!CB_CONFIG.apiKey) return;
-  try {
-    // Note: This is a placeholder for real Coinbase Cloud/Advanced Trade API call
-    // In a real environment, you'd use their SDK or signed requests
-    // ghostState.liquidity.eur = actualBalanceFromCB;
-  } catch (e) {
-    console.error("Coinbase Sync Error:", e.message);
-  }
-}
 
 // --- AI CORE ANALYZER (SMC STRATEGY) ---
 async function getAdvancedAnalysis(symbol, price, candles) {
@@ -42,20 +26,12 @@ async function getAdvancedAnalysis(symbol, price, candles) {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `SMC_SNIPER_V32: ${symbol} @ ${price} EUR. DATA: ${JSON.stringify(history)}` }] }],
+      contents: [{ parts: [{ text: `SMC_SNIPER_V33: ${symbol} @ ${price} EUR. DATA: ${JSON.stringify(history)}` }] }],
       config: {
-        systemInstruction: `ROLE: ELITE_TRADER_V32. STRATEGY: SMC (Smart Money Concepts).
-CRITICAL: Analyze Liquidity Sweeps, Market Structure Shifts (MSS), and Fair Value Gaps (FVG).
-REQUIRED JSON OUTPUT:
-{
-  "side": "BUY" | "SELL" | "NEUTRAL",
-  "tp": number,
-  "sl": number,
-  "entryPrice": number,
-  "confidence": number (0-100),
-  "potentialRoi": number (Expected % Profit),
-  "analysis": "string (Max 12 words)"
-}`,
+        systemInstruction: `ROLE: ELITE_TRADER_V33. STRATEGY: SMC (Smart Money Concepts).
+CRITICAL: Identify Liquidity Sweeps, Market Structure Shifts (MSS), and Fair Value Gaps (FVG).
+ALWAYS return valid JSON with these numeric fields: side, tp, sl, entryPrice, confidence, potentialRoi, analysis.
+Confidence must be 0-100. potentialRoi is percentage.`,
         responseMimeType: "application/json",
         temperature: 0.1
       }
@@ -66,12 +42,14 @@ REQUIRED JSON OUTPUT:
       side: result.side || "NEUTRAL",
       tp: Number(result.tp) || 0,
       sl: Number(result.sl) || 0,
-      entryPrice: Number(result.entryPrice) || price,
+      entryPrice: Number(result.entryPrice) || price || 0,
       confidence: Number(result.confidence) || 0,
       potentialRoi: Number(result.potentialRoi) || 0,
-      analysis: result.analysis || "Market structure neutral."
+      analysis: result.analysis || "Observing price action..."
     };
-  } catch (e) { return null; }
+  } catch (e) { 
+    return { side: "NEUTRAL", tp: 0, sl: 0, entryPrice: price || 0, confidence: 0, potentialRoi: 0, analysis: "AI Analysis Error" };
+  }
 }
 
 function loadState() {
@@ -83,7 +61,10 @@ function loadState() {
     currentStatus: "INITIALIZING", scanIndex: 0
   };
   try { 
-    if (fs.existsSync(STATE_FILE)) return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+    if (fs.existsSync(STATE_FILE)) {
+      const saved = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      return { ...defaults, ...saved };
+    }
   } catch (e) {}
   return defaults;
 }
@@ -94,7 +75,7 @@ async function loop() {
   if (!ghostState.isEngineActive) return;
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
   ghostState.scanIndex++;
-  ghostState.currentStatus = `SCANNING_${symbol}`;
+  ghostState.currentStatus = `SNIPING_${symbol}`;
   
   try {
     const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=40`);
@@ -110,15 +91,15 @@ async function loop() {
       // AUTO-EXECUTION (STRICT 80%+)
       if (signal.side === 'BUY' && signal.confidence >= ghostState.settings.confidenceThreshold) {
         if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
-          const qty = ghostState.settings.defaultTradeSize / price;
+          const qty = ghostState.settings.defaultTradeSize / (price || 1);
           ghostState.activePositions.push({
-            symbol, entryPrice: price, currentPrice: price, amount: ghostState.settings.defaultTradeSize,
+            symbol, entryPrice: price || 0, currentPrice: price || 0, amount: ghostState.settings.defaultTradeSize,
             quantity: qty, tp: signal.tp, sl: signal.sl, confidence: signal.confidence, 
-            potentialRoi: signal.potentialRoi, // FIXED: Ensure this field is passed to ActivePosition
+            potentialRoi: signal.potentialRoi,
             pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
           });
           ghostState.executionLogs.unshift({ 
-            id: crypto.randomUUID(), symbol, action: 'BUY', price, 
+            id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
             status: 'SUCCESS', details: `SMC_SIGNAL_${signal.confidence}%`, timestamp: new Date().toISOString() 
           });
         }
@@ -126,12 +107,11 @@ async function loop() {
       ghostState.thoughts.unshift(signal);
       if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
     }
-  } catch (e) {}
+  } catch (e) { console.error("Loop failed", e.message); }
   saveState();
 }
 
 async function monitor() {
-  await syncCoinbaseBalance();
   if (ghostState.activePositions.length === 0) return;
   const symbols = ghostState.activePositions.map(p => p.symbol).join(',');
   try {
@@ -143,10 +123,13 @@ async function monitor() {
       if (!curPrice) continue;
       
       pos.currentPrice = curPrice;
-      pos.pnlPercent = ((curPrice - pos.entryPrice) / pos.entryPrice) * 100;
+      pos.pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
       pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
       
-      if ((curPrice >= pos.tp && pos.tp > 0) || (curPrice <= pos.sl && pos.sl > 0)) {
+      const hitTP = curPrice >= pos.tp && pos.tp > 0;
+      const hitSL = curPrice <= pos.sl && pos.sl > 0;
+
+      if (hitTP || hitSL) {
         ghostState.dailyStats.profit += pos.pnl;
         ghostState.executionLogs.unshift({ 
           id: crypto.randomUUID(), symbol: pos.symbol, action: 'SELL', 
@@ -161,7 +144,7 @@ async function monitor() {
 
 function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {} }
 
-setInterval(monitor, 2000);
+setInterval(monitor, 3000);
 setInterval(loop, 10000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
@@ -172,4 +155,4 @@ app.post('/api/ghost/toggle', (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🎯 PREDATOR GHOST V32 SYNCED`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🎯 PREDATOR GHOST V33 ONLINE`));
