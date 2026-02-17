@@ -118,11 +118,12 @@ function loadState() {
     settings: { confidenceThreshold: 80, defaultTradeSize: 25.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 0, usdc: 0 }, dailyStats: { trades: 0, profit: 0 },
-    currentStatus: "IDLE", scanIndex: 0, diag: "BOOT_V21.0"
+    currentStatus: "IDLE", scanIndex: 0, diag: "BOOT_V22.0"
   };
   try { 
     if (fs.existsSync(STATE_FILE)) {
       let state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      // BUG FIX: Removed the .filter() that was stripping non-BTC assets
       return { ...defaults, ...state };
     } 
   } catch (e) {}
@@ -131,13 +132,9 @@ function loadState() {
 
 let ghostState = loadState();
 
-/**
- * ULTRA_FAST MONITORING: This runs every 5s to ensure SL/TP hits are instant.
- */
 async function monitorPositions() {
   if (ghostState.activePositions.length === 0) return;
   
-  // Batch price fetch for all active symbols
   const symbols = ghostState.activePositions.map(p => p.symbol).join(',');
   try {
     const res = await axios.get(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${symbols}&tsyms=EUR`);
@@ -152,12 +149,11 @@ async function monitorPositions() {
       pos.pnlPercent = ((currentPrice - pos.entryPrice) / pos.entryPrice) * 100;
       pos.pnl = (currentPrice - pos.entryPrice) * (pos.quantity || (pos.amount / pos.entryPrice));
 
-      // Trigger Liquidation
       const isTP = currentPrice >= pos.tp;
       const isSL = currentPrice <= pos.sl;
 
       if (isTP || isSL) {
-        console.log(`[ALERT] Liquidation Triggered for ${pos.symbol} at ${currentPrice}. Reason: ${isTP ? 'TP' : 'SL'}`);
+        console.log(`[ALERT] Liquidation: ${pos.symbol} at ${currentPrice}. ${isTP ? 'TARGET_HIT' : 'SAFETY_HIT'}`);
         const order = await placeRealOrder(pos.symbol, 'SELL', pos.quantity, pos.isPaper);
         if (order.success) {
           ghostState.dailyStats.profit += pos.pnl;
@@ -206,6 +202,7 @@ async function loop() {
     if (analysis) {
       lastAnalysisPrices.set(symbol, price);
       if (analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold) {
+        // Prevent duplicate entries for the same asset
         if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
           const order = await placeRealOrder(symbol, 'BUY', ghostState.settings.defaultTradeSize, ghostState.isPaperMode);
           if (order.success) {
@@ -236,7 +233,7 @@ async function syncLiquidity() {
   if (realData) {
     ghostState.liquidity = realData;
     ghostState.isPaperMode = false;
-    ghostState.diag = "PREDATOR_LIVE_SYNCED";
+    ghostState.diag = "PREDATOR_LIVE_OK";
   } else {
     ghostState.isPaperMode = true;
     if (!isRateLimited) ghostState.diag = "SIM_MODE_ACTIVE";
@@ -247,9 +244,7 @@ async function syncLiquidity() {
 function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {} }
 
 syncLiquidity();
-// AGGRESSIVE POSITION MONITORING: 5s
 setInterval(monitorPositions, 5000); 
-// QUOTA FRIENDLY SCANNING: 60s
 setInterval(loop, 60000); 
 setInterval(syncLiquidity, 120000);
 
@@ -268,4 +263,4 @@ app.post('/api/ghost/clear-history', (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 PREDATOR V21.0: FAST_MONITOR_ENGINE ONLINE ON ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🎯 PREDATOR V22.0: FULL_SYNC_ENGINE ONLINE ON ${PORT}`));
