@@ -16,9 +16,9 @@ app.use(express.json());
 // CONFIGURATION
 const API_KEY = process.env.API_KEY ? process.env.API_KEY.trim() : null;
 const CB_CONFIG = {
-  // Key Name format: organizations/{org_id}/apiKeys/{key_id}
+  // MUST BE FULL NAME: organizations/{org_id}/apiKeys/{key_id}
   apiKey: (process.env.CB_API_KEY || '').trim(), 
-  // Private Key (PEM format)
+  // PRIVATE KEY (PEM format string)
   apiSecret: (process.env.CB_API_SECRET || '')
     .replace(/\\n/g, '\n')
     .replace(/"/g, '')
@@ -28,45 +28,50 @@ const CB_CONFIG = {
 };
 
 /**
- * CDP V3 JWT GENERATION (Native Node Crypto Implementation)
- * This avoids common 'jsonwebtoken' library pitfalls with ES256 and Base64url encoding.
+ * GENERATES COMPLIANT JWT FOR COINBASE CDP
  */
 function getCoinbaseAuthHeader(method, path) {
-  if (!CB_CONFIG.apiKey || !CB_CONFIG.apiSecret || CB_CONFIG.apiSecret.length < 20) {
+  if (!CB_CONFIG.apiKey || !CB_CONFIG.apiSecret || CB_CONFIG.apiSecret.length < 30) {
     return {};
   }
 
   try {
+    // 1. JWT Header
     const header = { 
       alg: 'ES256', 
       typ: 'JWT', 
       kid: CB_CONFIG.apiKey 
     };
 
+    // 2. JWT Payload
     const now = Math.floor(Date.now() / 1000);
     const cleanPath = path.split('?')[0];
     const uriClaim = `${method.toUpperCase()} ${CB_CONFIG.hostname}${cleanPath}`;
     
     const payload = {
       iss: 'coinbase-cloud',
-      nbf: now - 10, // Buffer for clock skew
+      nbf: now - 2,
+      iat: now - 2,
       exp: now + 60,
       sub: CB_CONFIG.apiKey,
       uri: uriClaim
     };
 
+    // 3. Prepare Signing Parts
     const base64Header = Buffer.from(JSON.stringify(header)).toString('base64url');
     const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64url');
     const unsignedToken = `${base64Header}.${base64Payload}`;
 
-    // ENSURE PRIVATE KEY IS PEM FORMAT
+    // 4. Robust Private Key PEM Reconstruction
     let key = CB_CONFIG.apiSecret;
-    if (!key.includes('BEGIN')) {
-      const base64Key = key.replace(/\s/g, '');
-      const chunks = base64Key.match(/.{1,64}/g) || [];
-      key = `-----BEGIN EC PRIVATE KEY-----\n${chunks.join('\n')}\n-----END EC PRIVATE KEY-----`;
+    if (!key.includes('-----BEGIN')) {
+      // Remove all whitespaces and clean the string
+      const raw = key.replace(/\s/g, '');
+      const lines = raw.match(/.{1,64}/g) || [];
+      key = `-----BEGIN EC PRIVATE KEY-----\n${lines.join('\n')}\n-----END EC PRIVATE KEY-----`;
     }
 
+    // 5. Digital Signature using ECDSA with SHA-256
     const sign = crypto.createSign('SHA256');
     sign.update(unsignedToken);
     const signature = sign.sign(key, 'base64url');
@@ -74,15 +79,18 @@ function getCoinbaseAuthHeader(method, path) {
     const jwt = `${unsignedToken}.${signature}`;
     return { 'Authorization': `Bearer ${jwt}` };
   } catch (error) {
-    console.error("[JWT_SIGN_ERROR]:", error.message);
+    console.error("[JWT_FATAL_ERROR]: Check your Private Key format.", error.message);
     return {};
   }
 }
 
 async function fetchRealBalances() {
-  if (!CB_CONFIG.apiKey || CB_CONFIG.apiKey.length < 10) return null;
+  if (!CB_CONFIG.apiKey.includes('organizations/')) {
+    console.warn("[AUTH_WARN]: API Key Name must start with 'organizations/'. Currently: " + CB_CONFIG.apiKey.substring(0, 10) + "...");
+    return null;
+  }
+
   const path = '/api/v3/brokerage/accounts';
-  
   try {
     const authHeader = getCoinbaseAuthHeader('GET', path);
     if (!authHeader.Authorization) return null;
@@ -92,7 +100,7 @@ async function fetchRealBalances() {
         ...authHeader, 
         'Content-Type': 'application/json' 
       },
-      timeout: 10000
+      timeout: 12000
     });
     
     const accounts = response.data?.accounts || [];
@@ -110,16 +118,13 @@ async function fetchRealBalances() {
   } catch (e) {
     const status = e.response?.status;
     const detail = e.response?.data;
-    console.error(`[CB_AUTH_FAIL]: Status ${status} | Detail: ${JSON.stringify(detail || e.message)}`);
+    console.error(`[CB_AUTH_DENIED]: ${status} | Detail: ${JSON.stringify(detail || e.message)}`);
     return null;
   }
 }
 
 async function placeRealOrder(symbol, side, amountEur) {
-  if (ghostState.isPaperMode) {
-    console.log(`[SIMULATION]: ${side} ${symbol} €${amountEur}`);
-    return { success: true, isPaper: true };
-  }
+  if (ghostState.isPaperMode) return { success: true, isPaper: true };
 
   const productId = `${symbol}-EUR`;
   const path = '/api/v3/brokerage/orders';
@@ -141,10 +146,9 @@ async function placeRealOrder(symbol, side, amountEur) {
         'Content-Type': 'application/json' 
       }
     });
-    console.log(`[REAL_TRADE]: ${symbol} ${side} Success`);
     return { success: true, data: response.data, isPaper: false };
   } catch (e) {
-    console.error(`[TRADE_ERROR]: ${JSON.stringify(e.response?.data || e.message)}`);
+    console.error(`[TRADE_EXEC_ERROR]: ${JSON.stringify(e.response?.data || e.message)}`);
     return { success: false, error: e.response?.data?.message || e.message };
   }
 }
@@ -154,24 +158,24 @@ function getSyntheticAnalysis(symbol, price, candles) {
   const isUp = last.close > candles[candles.length - 2].close;
   return {
     side: isUp ? "BUY" : "NEUTRAL",
-    tp: Number((price * 1.025).toFixed(2)),
-    sl: Number((price * 0.985).toFixed(2)),
-    confidence: isUp ? 82 : 35,
-    reason: `System detection: ${symbol} is showing ${isUp ? 'bullish momentum' : 'no trend'}.`,
-    expectedROI: 2.5
+    tp: Number((price * 1.03).toFixed(2)),
+    sl: Number((price * 0.98).toFixed(2)),
+    confidence: isUp ? 80 : 30,
+    reason: `Price movement for ${symbol} suggests ${isUp ? 'potential growth' : 'no clear trend'}.`,
+    expectedROI: 3.0
   };
 }
 
 async function getAdvancedAnalysis(symbol, price, candles) {
   if (!API_KEY) return getSyntheticAnalysis(symbol, price, candles);
   const ai = new GoogleGenAI({ apiKey: API_KEY });
-  const compact = candles.slice(-24).map(c => ({ p: c.close, v: Math.round(c.volumeto) }));
+  const compact = candles.slice(-20).map(c => ({ p: c.close, v: Math.round(c.volumeto) }));
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `ANALYZE ${symbol}/EUR: ${JSON.stringify(compact)}` }] }],
+      contents: [{ parts: [{ text: `ANALYZE_MARKET ${symbol}/EUR: ${JSON.stringify(compact)}` }] }],
       config: {
-        systemInstruction: `YOU ARE A PROFESSIONAL ANALYST. Find profitable entries. Return ONLY JSON: { "side": "BUY"|"SELL"|"NEUTRAL", "tp": number, "sl": number, "confidence": number, "reason": "string", "expectedROI": number }.`,
+        systemInstruction: `SYSTEM: TRADING_BOT. Return JSON: { "side": "BUY"|"SELL"|"NEUTRAL", "tp": number, "sl": number, "confidence": number, "reason": "string", "expectedROI": number }. Confidence > 75 triggers BUY.`,
         responseMimeType: "application/json"
       }
     });
@@ -184,7 +188,7 @@ function loadState() {
     isEngineActive: true, autoPilot: true, isPaperMode: true,
     thoughts: [], executionLogs: [], activePositions: [],
     currentStatus: "INITIALIZING", scanIndex: 0,
-    liquidity: { eur: 0, usdc: 0 }, dailyStats: { trades: 0, profit: 0 }, diag: "BOOTING"
+    liquidity: { eur: 0, usdc: 0 }, dailyStats: { trades: 0, profit: 0 }, diag: "SYSTEM_BOOT"
   };
   try {
     if (fs.existsSync(STATE_FILE)) return { ...defaults, ...JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) };
@@ -195,19 +199,17 @@ function loadState() {
 let ghostState = loadState();
 
 async function syncLiquidity() {
-  console.log("[SYSTEM]: Checking Real-Money Connection...");
   const realData = await fetchRealBalances();
-  
   if (realData) {
     ghostState.liquidity.eur = realData.eur;
     ghostState.liquidity.usdc = realData.usdc;
     ghostState.isPaperMode = false; 
     ghostState.diag = `LIVE: EUR ${realData.eur.toFixed(2)}`;
-    console.log(`[SYSTEM]: AUTH SUCCESS. Connected to Live Account. EUR Balance: ${realData.eur}`);
+    console.log(`[SYSTEM]: AUTH SUCCESS. REAL FUNDS DETECTED: EUR ${realData.eur}`);
   } else {
     ghostState.isPaperMode = true; 
-    ghostState.diag = "AUTH_FAIL: 401";
-    console.warn("[SYSTEM]: Authentication failed. Staying in Simulation mode.");
+    ghostState.diag = "AUTH_FAIL: CHECK_CDP_KEYS";
+    console.warn("[SYSTEM]: Authentication failed. Check CB_API_KEY and CB_API_SECRET.");
   }
   saveState();
 }
@@ -222,7 +224,7 @@ async function loop() {
   if (!ghostState.isEngineActive) return;
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
   ghostState.scanIndex++;
-  ghostState.currentStatus = `SCANNING_${symbol}`;
+  ghostState.currentStatus = `ANALYZING_${symbol}`;
   saveState();
 
   try {
@@ -240,9 +242,7 @@ async function loop() {
       if (ghostState.autoPilot && analysis.side === 'BUY' && analysis.confidence >= 75) {
         if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
           const tradeSize = 10; 
-          const hasFunds = ghostState.isPaperMode || ghostState.liquidity.eur >= tradeSize;
-          
-          if (hasFunds) {
+          if (ghostState.isPaperMode || ghostState.liquidity.eur >= tradeSize) {
             const order = await placeRealOrder(symbol, 'BUY', tradeSize);
             if (order.success) {
               if (ghostState.isPaperMode) ghostState.liquidity.eur -= tradeSize;
@@ -264,10 +264,10 @@ async function loop() {
 }
 
 syncLiquidity();
-setInterval(loop, 20000); 
+setInterval(loop, 25000); 
 setInterval(syncLiquidity, 60000); 
 
-app.get('/', (req, res) => res.send('NOVA_TRADE_BRIDGE_ACTIVE'));
+app.get('/', (req, res) => res.send('BRIDGE_V3_ACTIVE'));
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
   if (req.body.engine !== undefined) ghostState.isEngineActive = req.body.engine;
@@ -278,7 +278,7 @@ app.post('/api/ghost/toggle', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n========================================`);
-  console.log(`🚀 NOVA_TRADE AI OVERLORD ACTIVE`);
-  console.log(`📡 BRIDGE: ${PORT} | AUTH: CDP_V3`);
+  console.log(`🚀 NOVATRADE AI V3 BRIDGE ACTIVE`);
+  console.log(`📡 LISTENING ON PORT ${PORT}`);
   console.log(`========================================\n`);
 });
