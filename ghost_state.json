@@ -11,6 +11,177 @@
       "side": "NEUTRAL",
       "analysis": "API_KEY_MISSING",
       "confidence": 0,
+      "symbol": "SOL",
+      "entryPrice": 73.43,
+      "id": "6e1333d1-816a-4c8e-97dd-9c7fbab25ccf",
+      "timestamp": "2026-02-17T03:22:40.653Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "ETH",
+      "entryPrice": 1683.38,
+      "id": "57fcea4f-875a-4fcb-b0e8-7025a1e5880a",
+      "timestamp": "2026-02-17T03:22:30.561Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "BTC",
+      "entryPrice": 58041.64,
+      "id": "8cd94942-033a-4e98-9167-bb02e39f825b",
+      "timestamp": "2026-02-17T03:22:21.015Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "FET",
+      "entryPrice": 0.1463,
+      "id": "11236dbc-e7e1-4741-a601-3a154b0c2897",
+      "timestamp": "2026-02-17T03:22:10.575Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "NEAR",
+      "entryPrice": 0.8912,
+      "id": "0756b82a-81fe-40b1-9597-938f4ed8ddd2",
+      "timestamp": "2026-02-17T03:22:00.729Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "AVAX",
+      "entryPrice": 7.812,
+      "id": "7f9876a0-43b7-46f2-aa08-c1723fbe9356",
+      "timestamp": "2026-02-17T03:21:50.573Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "SOL",
+      "entryPrice": 73.34,
+      "id": "284b86b7-43d1-47b2-887e-7ccb94737759",
+      "timestamp": "2026-02-17T03:21:40.552Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "ETH",
+      "entryPrice": 1682.69,
+      "id": "70e6d9f1-98af-4f5c-ae11-ba792a300db4",
+      "timestamp": "2026-02-17T03:21:30.637Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "BTC",
+      "entryPrice": 58018.29,
+      "id": "f5404e5b-3992-4ca6-b555-e2d2157cd627",
+      "timestamp": "2026-02-17T03:21:20.535Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "FET",
+      "entryPrice": 0.1461,
+      "id": "7ee15b0a-d3a6-4e6f-ae37-7c48a1058161",
+      "timestamp": "2026-02-17T03:21:12.243Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "NEAR",
+      "entryPrice": 0.8906,
+      "id": "ea11a21a-71a1-4be6-a170-61e78eef885d",
+      "timestamp": "2026-02-17T03:21:00.552Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "AVAX",
+      "entryPrice": 7.809,
+      "id": "3c62d5cf-34ef-4be0-8bf7-d51b5c0b5a69",
+      "timestamp": "2026-02-17T03:20:50.687Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "SOL",
+      "entryPrice": 73.32,
+      "id": "40d35c98-07b2-4b2e-bc45-03c0fac06bba",
+      "timestamp": "2026-02-17T03:20:40.548Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "ETH",
+      "entryPrice": 1682.48,
+      "id": "533a1ada-0bd0-4e03-a0bd-1d87885110d9",
+      "timestamp": "2026-02-17T03:20:30.516Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "BTC",
+      "entryPrice": 57992.02,
+      "id": "19ce44e0-d5f6-4082-b89d-f50296007004",
+      "timestamp": "2026-02-17T03:20:20.895Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "FET",
+      "entryPrice": 0.1459,
+      "id": "185853ed-c27c-45bd-ae39-dfebc65266f9",
+      "timestamp": "2026-02-17T03:20:10.553Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "NEAR",
+      "entryPrice": 0.8896,
+      "id": "54ca0648-030d-489e-b845-fe021d9268b2",
+      "timestamp": "2026-02-17T03:20:01.188Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "AVAX",
+      "entryPrice": 7.803,
+      "id": "c13d99de-8219-4af2-a371-eee8d25bfa15",
+      "timestamp": "2026-02-17T03:19:50.554Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "symbol": "SOL",
+      "entryPrice": 73.36,
+      "id": "94d9745b-32ae-46fb-b29e-b8e49552d855",
+      "timestamp": "2026-02-17T03:19:40.581Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
       "symbol": "ETH",
       "entryPrice": 1681.84,
       "id": "d73034c4-9859-4356-ba0e-03ee8a77652a",
@@ -285,225 +456,6 @@
       "entryPrice": 0.1461,
       "id": "a40f149d-e75c-4d10-841a-02410775aa36",
       "timestamp": "2026-02-17T03:10:04.843Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "symbol": "NEAR",
-      "entryPrice": 0.8901,
-      "id": "be077628-9144-49cb-a020-ac182a5714a7",
-      "timestamp": "2026-02-17T03:09:52.893Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "symbol": "AVAX",
-      "entryPrice": 7.81,
-      "id": "2c947d0f-fb47-40b0-9d1f-034e4ed3b638",
-      "timestamp": "2026-02-17T03:09:40.855Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "symbol": "SOL",
-      "entryPrice": 73.57,
-      "id": "4582d954-f5cc-43ec-bce8-56746155addc",
-      "timestamp": "2026-02-17T03:09:29.849Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 8.05,
-      "sl": 7.66,
-      "confidence": 80,
-      "reason": "Price movement for AVAX suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "AVAX",
-      "price": 7.815,
-      "timestamp": "2026-02-17T01:18:25.205Z",
-      "id": "a5880b8f-2dc9-43e1-b4a4-0dbe404b382c"
-    },
-    {
-      "side": "BUY",
-      "tp": 1738.82,
-      "sl": 1654.41,
-      "confidence": 80,
-      "reason": "Price movement for ETH suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "ETH",
-      "price": 1688.17,
-      "timestamp": "2026-02-17T01:17:05.534Z",
-      "id": "ebc0f915-f074-4186-9a53-16926abf18ff"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.15,
-      "sl": 0.14,
-      "confidence": 80,
-      "reason": "Price movement for FET suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "FET",
-      "price": 0.1468,
-      "timestamp": "2026-02-17T01:16:05.573Z",
-      "id": "31210f7f-1ffe-4cf0-a30a-300f18dbbbb5"
-    },
-    {
-      "side": "BUY",
-      "tp": 8.05,
-      "sl": 7.66,
-      "confidence": 80,
-      "reason": "Price movement for AVAX suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "AVAX",
-      "price": 7.813,
-      "timestamp": "2026-02-17T01:15:05.214Z",
-      "id": "e80e02d4-a1ed-449a-9227-e459d46bb6ed"
-    },
-    {
-      "side": "BUY",
-      "tp": 1739.54,
-      "sl": 1655.09,
-      "confidence": 80,
-      "reason": "Price movement for ETH suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "ETH",
-      "price": 1688.87,
-      "timestamp": "2026-02-17T01:14:05.042Z",
-      "id": "5d2f0a0f-f969-4fdd-a10c-08932253dc66"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.15,
-      "sl": 0.14,
-      "confidence": 80,
-      "reason": "Price movement for FET suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "FET",
-      "price": 0.1465,
-      "timestamp": "2026-02-17T01:13:05.862Z",
-      "id": "41d6ff68-7ccb-4b41-882e-a98719eaac4b"
-    },
-    {
-      "side": "BUY",
-      "tp": 8.05,
-      "sl": 7.66,
-      "confidence": 80,
-      "reason": "Price movement for AVAX suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "AVAX",
-      "price": 7.815,
-      "timestamp": "2026-02-17T01:12:05.339Z",
-      "id": "556f6d71-f8cb-4844-bfe0-f259776df458"
-    },
-    {
-      "side": "BUY",
-      "tp": 1740.52,
-      "sl": 1656.03,
-      "confidence": 80,
-      "reason": "Price movement for ETH suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "ETH",
-      "price": 1689.83,
-      "timestamp": "2026-02-17T01:11:04.715Z",
-      "id": "af28aab6-f33f-49d7-a4fd-fe82a9ae2100"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.15,
-      "sl": 0.14,
-      "confidence": 80,
-      "reason": "Price movement for FET suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "FET",
-      "price": 0.1465,
-      "timestamp": "2026-02-17T01:10:05.499Z",
-      "id": "4433a84d-76a2-4010-b629-75ce2ed490c6"
-    },
-    {
-      "side": "NEUTRAL",
-      "tp": 8.04,
-      "sl": 7.65,
-      "confidence": 30,
-      "reason": "Price movement for AVAX suggests no clear trend.",
-      "expectedROI": 3,
-      "symbol": "AVAX",
-      "price": 7.805,
-      "timestamp": "2026-02-17T01:09:05.182Z",
-      "id": "c9f940ba-469c-4d4b-a0c4-6ce118e1dd8e"
-    },
-    {
-      "side": "NEUTRAL",
-      "tp": 1736,
-      "sl": 1651.73,
-      "confidence": 30,
-      "reason": "Price movement for ETH suggests no clear trend.",
-      "expectedROI": 3,
-      "symbol": "ETH",
-      "price": 1685.44,
-      "timestamp": "2026-02-17T01:08:05.290Z",
-      "id": "ac78d37a-1300-43a2-ba2b-e580af9c1152"
-    },
-    {
-      "side": "NEUTRAL",
-      "tp": 0.15,
-      "sl": 0.14,
-      "confidence": 30,
-      "reason": "Price movement for FET suggests no clear trend.",
-      "expectedROI": 3,
-      "symbol": "FET",
-      "price": 0.1462,
-      "timestamp": "2026-02-17T01:07:04.861Z",
-      "id": "c3ef7cc9-1058-4c58-beeb-63706ff8f07e"
-    },
-    {
-      "side": "NEUTRAL",
-      "tp": 8.04,
-      "sl": 7.65,
-      "confidence": 30,
-      "reason": "Price movement for AVAX suggests no clear trend.",
-      "expectedROI": 3,
-      "symbol": "AVAX",
-      "price": 7.802,
-      "timestamp": "2026-02-17T01:06:04.735Z",
-      "id": "2c58851f-4a7d-4839-a702-0d77100b4bd9"
-    },
-    {
-      "side": "BUY",
-      "tp": 75.32,
-      "sl": 71.67,
-      "confidence": 80,
-      "reason": "Price movement for SOL suggests potential growth.",
-      "expectedROI": 3,
-      "symbol": "SOL",
-      "price": 73.13,
-      "timestamp": "2026-02-17T01:05:35.075Z",
-      "id": "2aefb744-4861-4881-9bc7-9294fd1a9543"
-    },
-    {
-      "side": "NEUTRAL",
-      "tp": 1736.08,
-      "sl": 1651.8,
-      "confidence": 30,
-      "reason": "Price movement for ETH suggests no clear trend.",
-      "expectedROI": 3,
-      "symbol": "ETH",
-      "price": 1685.51,
-      "timestamp": "2026-02-17T01:05:04.710Z",
-      "id": "3c1991c1-1ff0-4f40-a2c7-5992ebc7979b"
-    },
-    {
-      "side": "NEUTRAL",
-      "tp": 0.15,
-      "sl": 0.14,
-      "confidence": 30,
-      "reason": "Price movement for FET suggests no clear trend.",
-      "expectedROI": 3,
-      "symbol": "FET",
-      "price": 0.1462,
-      "timestamp": "2026-02-17T01:04:04.704Z",
-      "id": "c29ff66f-0eb1-4d66-9951-3034a55ea9f6"
     }
   ],
   "executionLogs": [],
@@ -514,9 +466,9 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": -0.23546598220838955,
-      "pnl": -0.023546598220838957,
-      "currentPrice": 58007.37
+      "pnlPercent": -0.2002260583500187,
+      "pnl": -0.02002260583500187,
+      "currentPrice": 58027.86
     }
   ],
   "liquidity": {
@@ -529,9 +481,9 @@
     "fees": 0,
     "dailyGoal": 50
   },
-  "currentStatus": "DECODING_ETH_STRUCTURE",
-  "scanIndex": 914,
-  "diag": "HYPER_ENGINE_ONLINE",
+  "currentStatus": "HUNTING_SOL_ENTRY",
+  "scanIndex": 933,
+  "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
   "cooldownUntil": 0,

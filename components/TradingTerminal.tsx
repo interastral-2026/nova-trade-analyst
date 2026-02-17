@@ -15,7 +15,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
   const [stats, setStats] = useState({ eur: 0, usdc: 0, trades: 0, profit: 0, isPaper: true, diag: '', dailyGoal: 50 });
   const [logs, setLogs] = useState<ExecutionLog[]>([]);
   const [holdings, setHoldings] = useState<ActivePosition[]>([]);
-  const [activeTab, setActiveTab] = useState<'stream' | 'activity' | 'holdings'>('holdings'); // Default to holdings for direct ROI tracking
+  const [activeTab, setActiveTab] = useState<'stream' | 'activity' | 'holdings'>('holdings');
   const terminalRef = useRef<HTMLDivElement>(null);
 
   const fetchState = async () => {
@@ -48,12 +48,12 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
   return (
     <div className="flex flex-col space-y-6 h-full font-mono">
-      {/* V26.0 Predator X Header */}
+      {/* V27.0 Header */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="col-span-2 bg-[#0a0a0f] border border-indigo-500/20 rounded-3xl p-6 relative overflow-hidden shadow-[0_0_30px_rgba(79,70,229,0.05)]">
            <div className="flex justify-between items-end mb-3 relative z-10">
               <div>
-                <p className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-1">PROFIT_HARVEST_ENGINE_V26</p>
+                <p className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-1">PROFIT_HARVEST_V27</p>
                 <h3 className="text-2xl font-black text-white">€{stats.profit.toFixed(2)} <span className="text-slate-500 text-sm font-bold">/ €{stats.dailyGoal}</span></h3>
               </div>
               <div className="text-right">
@@ -68,9 +68,6 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                 style={{ width: `${goalProgress}%` }}
               ></div>
            </div>
-           <div className="absolute -right-4 -bottom-4 opacity-5 rotate-12">
-              <i className="fas fa-crosshairs text-9xl text-indigo-500"></i>
-           </div>
         </div>
         
         <div className="bg-[#0a0a0f] border border-white/5 p-6 rounded-3xl flex flex-col justify-center">
@@ -79,7 +76,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
         </div>
 
         <div className="bg-[#0a0a0f] border border-white/5 p-6 rounded-3xl flex flex-col justify-center relative overflow-hidden">
-           <p className="text-[8px] font-black text-rose-500 uppercase tracking-widest mb-1">SAT_LINK_STATUS</p>
+           <p className="text-[8px] font-black text-rose-500 uppercase tracking-widest mb-1">LINK_STATUS</p>
            <div className="flex items-center space-x-2">
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
               <h2 className="text-[10px] font-black text-white truncate uppercase tracking-tighter">{liveActivity}</h2>
@@ -117,7 +114,6 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                    <div className="col-span-full h-80 flex flex-col items-center justify-center opacity-20 text-center">
                       <div className="w-20 h-20 border-4 border-indigo-500/30 rounded-full border-t-indigo-500 animate-spin mb-6"></div>
                       <p className="uppercase text-[12px] font-black tracking-[0.5em]">Scanning For High-Yield Entry...</p>
-                      <p className="text-[9px] text-slate-600 mt-2">ESTABLISHING SMC STRUCTURE MODELS</p>
                    </div>
                 ) : (
                   holdings.map((pos) => {
@@ -130,16 +126,15 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                       <div key={pos.symbol} className={`group bg-gradient-to-br from-zinc-900/50 to-transparent border-2 p-8 rounded-[2.5rem] relative overflow-hidden transition-all hover:scale-[1.01] ${isProfit ? 'border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.05)]' : 'border-rose-500/10'}`}>
                          <div className="flex justify-between items-start mb-8">
                             <div className="flex items-center space-x-4">
-                               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black ${isProfit ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-rose-500/10 text-rose-400'}`}>
+                               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black ${isProfit ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
                                   {pos.symbol[0]}
                                </div>
                                <div>
-                                  <h4 className="text-xl font-black text-white tracking-tighter uppercase">{pos.symbol}</h4>
-                                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{pos.isPaper ? 'SIM_ENVIRONMENT' : 'LIVE_MARKET'}</span>
+                                  <h4 className="text-xl font-black text-white uppercase">{pos.symbol}</h4>
+                                  <span className="text-[9px] font-black text-slate-500 uppercase">{pos.isPaper ? 'SIM' : 'LIVE'}</span>
                                </div>
                             </div>
                             <div className="text-right">
-                               <p className="text-[10px] font-black text-slate-500 uppercase mb-1">RETURN_ON_INVESTMENT</p>
                                <h2 className={`text-3xl font-black tracking-tighter ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
                                  {isProfit ? '+' : ''}{roi}%
                                </h2>
@@ -148,31 +143,9 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                          </div>
 
                          <div className="grid grid-cols-3 gap-6 p-6 bg-black/40 border border-white/5 rounded-3xl mb-8">
-                            <div>
-                               <span className="text-[8px] font-black text-slate-600 block mb-1 uppercase">Entry Point</span>
-                               <span className="text-[12px] font-black text-white">€{pos.entryPrice.toLocaleString()}</span>
-                            </div>
-                            <div className="text-center">
-                               <span className="text-[8px] font-black text-emerald-500 block mb-1 uppercase">Take Profit</span>
-                               <span className="text-[12px] font-black text-emerald-400">€{pos.tp.toLocaleString()}</span>
-                            </div>
-                            <div className="text-right">
-                               <span className="text-[8px] font-black text-rose-500 block mb-1 uppercase">Stop Loss</span>
-                               <span className="text-[12px] font-black text-rose-400">€{pos.sl.toLocaleString()}</span>
-                            </div>
-                         </div>
-
-                         <div className="space-y-3">
-                            <div className="flex justify-between text-[9px] font-black uppercase text-indigo-400">
-                               <span>Target Progression</span>
-                               <span>{tpDist.toFixed(0)}% TO GOAL</span>
-                            </div>
-                            <div className="h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                               <div 
-                                 className={`h-full transition-all duration-1000 ${isProfit ? 'bg-emerald-500 shadow-[0_0_15px_#10b981]' : 'bg-indigo-500'}`}
-                                 style={{ width: `${tpDist}%` }}
-                               ></div>
-                            </div>
+                            <div><span className="text-[8px] text-slate-600 block uppercase mb-1">Entry</span><span className="text-[12px] text-white font-black">€{pos.entryPrice.toLocaleString()}</span></div>
+                            <div className="text-center"><span className="text-[8px] text-emerald-500 block uppercase mb-1">TP</span><span className="text-[12px] text-emerald-400 font-black">€{pos.tp.toLocaleString()}</span></div>
+                            <div className="text-right"><span className="text-[8px] text-rose-500 block uppercase mb-1">SL</span><span className="text-[12px] text-rose-400 font-black">€{pos.sl.toLocaleString()}</span></div>
                          </div>
                       </div>
                     )
@@ -182,17 +155,35 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
            )}
 
            {activeTab === 'stream' && (
-             <div className="space-y-4">
+             <div className="space-y-6">
                 {thoughtHistory.map((t, i) => (
                   <div key={t.id || i} className={`border-l-4 pl-8 py-6 bg-white/[0.01] border-white/5 transition-all hover:bg-white/[0.03] ${t.side === 'BUY' ? 'border-emerald-500 bg-emerald-500/[0.02]' : ''}`}>
-                     <div className="flex items-center space-x-6 mb-3">
+                     <div className="flex items-center space-x-6 mb-4">
                         <span className="text-[10px] font-black text-slate-600">[{new Date(t.timestamp).toLocaleTimeString()}]</span>
                         <span className="text-lg font-black text-white uppercase">{t.symbol}</span>
-                        <div className={`px-3 py-1 rounded-full text-[10px] font-black ${t.side === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-500'}`}>
-                          {t.side} <span className="ml-2 opacity-60">CONFIDENCE: {t.confidence}%</span>
+                        <div className={`px-3 py-1 rounded-full text-[10px] font-black ${t.side === 'BUY' ? 'bg-emerald-500 text-black shadow-[0_0_10px_#10b981]' : 'bg-slate-800 text-slate-500'}`}>
+                          {t.side} <span className="ml-2 font-bold">{t.confidence}% CONFIDENCE</span>
                         </div>
                      </div>
-                     <p className="text-[13px] text-slate-400 leading-relaxed font-medium pr-10 italic">"{t.analysis}"</p>
+                     
+                     <p className="text-[13px] text-slate-300 leading-relaxed font-medium mb-6 italic pr-10">"{t.analysis}"</p>
+
+                     {(t.side === 'BUY' || t.side === 'SELL') && (
+                       <div className="grid grid-cols-3 gap-4 max-w-lg p-4 bg-black/40 border border-white/5 rounded-2xl">
+                          <div>
+                             <span className="text-[8px] font-black text-slate-600 block uppercase mb-1">Entry Suggestion</span>
+                             <span className="text-[11px] font-black text-white">€{(t.entryPrice || 0).toLocaleString()}</span>
+                          </div>
+                          <div className="text-center">
+                             <span className="text-[8px] font-black text-emerald-500 block uppercase mb-1">Target TP</span>
+                             <span className="text-[11px] font-black text-emerald-400">€{(t.tp || 0).toLocaleString()}</span>
+                          </div>
+                          <div className="text-right">
+                             <span className="text-[8px] font-black text-rose-500 block uppercase mb-1">Stop Loss</span>
+                             <span className="text-[11px] font-black text-rose-400">€{(t.sl || 0).toLocaleString()}</span>
+                          </div>
+                       </div>
+                     )}
                   </div>
                 ))}
              </div>
@@ -207,17 +198,12 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                            <i className={`fas ${log.action === 'BUY' ? 'fa-arrow-up' : 'fa-arrow-down'}`}></i>
                         </div>
                         <div>
-                           <h5 className="text-[14px] font-black text-white uppercase">{log.symbol} <span className="text-[9px] text-indigo-400 ml-3">{log.details}</span></h5>
-                           <p className="text-[10px] text-slate-600 font-bold">{new Date(log.timestamp).toLocaleString()}</p>
+                           <h5 className="text-[14px] font-black text-white uppercase">{log.symbol}</h5>
+                           <p className="text-[10px] text-slate-600 font-bold tracking-tighter">{new Date(log.timestamp).toLocaleString()}</p>
                         </div>
                      </div>
                      <div className="text-right">
                         <div className="text-lg font-black text-white">€{log.price.toLocaleString()}</div>
-                        {log.pnl !== undefined && (
-                           <div className={`text-xs font-black ${log.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                             {log.pnl >= 0 ? '+' : ''}€{log.pnl.toFixed(2)}
-                           </div>
-                        )}
                      </div>
                   </div>
                 ))}

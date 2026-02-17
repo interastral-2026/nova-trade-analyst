@@ -87,8 +87,8 @@ async function placeRealOrder(symbol, side, size, isPaper) {
 }
 
 async function getAdvancedAnalysis(symbol, price, candles) {
-  if (!API_KEY) return { side: "NEUTRAL", analysis: "API_KEY_MISSING", confidence: 0 };
-  if (isRateLimited && Date.now() < retryAfter) return { side: "NEUTRAL", analysis: "AI_COOLDOWN_ACTIVE", confidence: 0 };
+  if (!API_KEY) return { side: "NEUTRAL", analysis: "API_KEY_MISSING", confidence: 0, tp: 0, sl: 0, entryPrice: price };
+  if (isRateLimited && Date.now() < retryAfter) return { side: "NEUTRAL", analysis: "AI_COOLDOWN_ACTIVE", confidence: 0, tp: 0, sl: 0, entryPrice: price };
 
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   const historicalData = candles.slice(-48).map(c => ({ 
@@ -100,29 +100,34 @@ async function getAdvancedAnalysis(symbol, price, candles) {
       model: 'gemini-3-flash-preview',
       contents: [{ parts: [{ text: `INSTANT_EXECUTION_SCAN: ${symbol} @ ${price} EUR. DATA: ${JSON.stringify(historicalData)}` }] }],
       config: {
-        systemInstruction: `SYSTEM_ROLE: PREDATOR_INSTANT_BUYER_V26. 
+        systemInstruction: `SYSTEM_ROLE: PREDATOR_INSTANT_BUYER_V27. 
 MISSION: ACHIEVE 50 EUR PROFIT DAILY. 
-DIRECTIVE: BE DECISIVE. IF A SETUP EXISTS, TAKE IT.
+DIRECTIVE: YOU MUST OUTPUT FULL SIGNAL DATA INCLUDING TP, SL, AND CONFIDENCE.
 SMC STRATEGY:
-1. Identify Liquidity Sweep (Look for spikes below/above key zones).
-2. Market Structure Shift (MSS) verification on displacement.
-3. Entry at FVG (Fair Value Gap) or OB (Order Block).
-4. TP must be the NEXT major liquidity pool. SL must be behind the displacement candle.
-OUTPUT JSON: { "side": "BUY"|"SELL"|"NEUTRAL", "tp": number, "sl": number, "confidence": number, "analysis": "string" }.
-CONFIDENCE: 0-100. 75%+ triggers immediate auto-trade.`,
+1. Identify Liquidity Sweep & Market Structure Shift (MSS).
+2. Entry at FVG or OB. 
+3. Take Profit (TP) must be the NEXT major liquidity level. 
+4. Stop Loss (SL) must be below the swing low or displacement candle.
+OUTPUT JSON: { "side": "BUY"|"SELL"|"NEUTRAL", "tp": number, "sl": number, "entryPrice": number, "confidence": number, "analysis": "string" }.
+MANDATORY: ALWAYS provide numeric values for tp, sl, entryPrice and confidence.`,
         responseMimeType: "application/json",
         temperature: 0.1
       }
     });
     isRateLimited = false;
-    return JSON.parse(response.text.trim());
+    const result = JSON.parse(response.text.trim());
+    // Ensure all numeric fields exist
+    result.tp = result.tp || 0;
+    result.sl = result.sl || 0;
+    result.confidence = result.confidence || 0;
+    result.entryPrice = result.entryPrice || price;
+    return result;
   } catch (e) { 
     if (e.message.includes('429')) {
       isRateLimited = true;
       retryAfter = Date.now() + 10000;
-      return { side: "NEUTRAL", analysis: "RATE_LIMIT_PAUSE", confidence: 0 };
     }
-    return { side: "NEUTRAL", analysis: "AI_ERROR: " + e.message, confidence: 0 };
+    return { side: "NEUTRAL", analysis: "AI_ERROR: " + e.message, confidence: 0, tp: 0, sl: 0, entryPrice: price };
   }
 }
 
@@ -132,7 +137,7 @@ function loadState() {
     settings: { confidenceThreshold: 75, defaultTradeSize: 60.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 1000, usdc: 500 }, dailyStats: { trades: 0, profit: 0, dailyGoal: DAILY_GOAL_EUR },
-    currentStatus: "IDLE", scanIndex: 0, diag: "V26_PREDATOR_X"
+    currentStatus: "IDLE", scanIndex: 0, diag: "V27_PREDATOR_ULTRA"
   };
   try { 
     if (fs.existsSync(STATE_FILE)) {
@@ -204,16 +209,17 @@ async function loop() {
     
     if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold) {
       if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
+        const tradePrice = analysis.entryPrice || price;
         const order = await placeRealOrder(symbol, 'BUY', ghostState.settings.defaultTradeSize, ghostState.isPaperMode);
         if (order.success) {
-          const qty = ghostState.settings.defaultTradeSize / price;
+          const qty = ghostState.settings.defaultTradeSize / tradePrice;
           ghostState.activePositions.push({
-            symbol, entryPrice: price, currentPrice: price, amount: ghostState.settings.defaultTradeSize,
+            symbol, entryPrice: tradePrice, currentPrice: tradePrice, amount: ghostState.settings.defaultTradeSize,
             quantity: qty, tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence,
             pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
           });
           ghostState.executionLogs.unshift({
-            id: crypto.randomUUID(), symbol, action: 'BUY', price, status: 'SUCCESS',
+            id: crypto.randomUUID(), symbol, action: 'BUY', price: tradePrice, status: 'SUCCESS',
             details: ghostState.isPaperMode ? '[SIM]' : '[LIVE]', timestamp: new Date().toISOString()
           });
         }
@@ -221,7 +227,7 @@ async function loop() {
     }
 
     if (analysis) {
-      ghostState.thoughts.unshift({ ...analysis, symbol, entryPrice: price, id: crypto.randomUUID(), timestamp: new Date().toISOString() });
+      ghostState.thoughts.unshift({ ...analysis, symbol, entryPrice: analysis.entryPrice || price, id: crypto.randomUUID(), timestamp: new Date().toISOString() });
       if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
     }
   } catch (e) { 
@@ -250,8 +256,8 @@ function saveState() {
 }
 
 syncLiquidity();
-setInterval(monitorPositions, 2000); // Tighter tracking
-setInterval(loop, 10000); // 10s cycles
+setInterval(monitorPositions, 2000);
+setInterval(loop, 10000);
 setInterval(syncLiquidity, 120000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
@@ -269,4 +275,4 @@ app.post('/api/ghost/clear-history', (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🎯 PREDATOR X: V26.0 FAST SCAN ONLINE`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🎯 PREDATOR X ULTRA: V27.0 ONLINE`));

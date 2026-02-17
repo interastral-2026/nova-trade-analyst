@@ -7,7 +7,6 @@ interface SignalListProps {
 }
 
 const SignalList: React.FC<SignalListProps> = ({ signals }) => {
-  // Ensure we have a valid array and filter out any duplicates by ID if they exist
   const safeSignals = Array.isArray(signals) ? signals : [];
   
   const sortedSignals = [...safeSignals].sort((a, b) => 
@@ -21,23 +20,22 @@ const SignalList: React.FC<SignalListProps> = ({ signals }) => {
       <div className="p-5 border-b border-white/5 bg-[#0a0a0c] flex items-center justify-between">
         <h3 className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center space-x-2">
            <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></span>
-           <span>Predator Signals (v19)</span>
+           <span>Predator Signals</span>
         </h3>
-        <span className="text-[8px] font-black text-slate-600">FLASH_SCAN</span>
+        <span className="text-[8px] font-black text-slate-600">SMC_V27</span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {limitedSignals.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 opacity-20 text-center grayscale">
              <i className="fas fa-crosshairs text-4xl mb-4 animate-pulse"></i>
-             <p className="text-[9px] font-black uppercase tracking-widest">Intercepting Neural Signals...</p>
+             <p className="text-[9px] font-black uppercase tracking-widest">Awaiting Neural Signal...</p>
           </div>
         ) : (
           limitedSignals.map((signal, idx) => {
             const tp = signal.tp || 0;
             const sl = signal.sl || 0;
             const entry = signal.entryPrice || 0;
-            // Generate a truly unique key using ID and index as fallback
             const uniqueKey = signal.id || `signal-${idx}-${signal.timestamp}`;
 
             return (
@@ -48,15 +46,15 @@ const SignalList: React.FC<SignalListProps> = ({ signals }) => {
                 }`}
               >
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-xs font-black text-white">{signal.symbol}</span>
-                  <span className={`text-[8px] font-black px-2 py-0.5 rounded uppercase ${
+                  <span className="text-xs font-black text-white uppercase tracking-tighter">{signal.symbol}</span>
+                  <span className={`text-[9px] font-black px-2 py-0.5 rounded shadow-[0_0_8px_rgba(0,0,0,0.5)] ${
                     signal.side === 'BUY' ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-400'
                   }`}>
-                    {signal.side} ({signal.confidence}%)
+                    {signal.side} <span className="ml-1 opacity-70">{signal.confidence}%</span>
                   </span>
                 </div>
 
-                <p className="text-[10px] text-slate-400 leading-tight mb-4 pr-8 italic">
+                <p className="text-[10px] text-slate-400 leading-tight mb-4 pr-4 italic">
                   "{signal.analysis}"
                 </p>
 
@@ -66,11 +64,11 @@ const SignalList: React.FC<SignalListProps> = ({ signals }) => {
                     <p className="text-[10px] font-black text-white">€{Number(entry).toLocaleString()}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-[7px] text-emerald-600 font-black uppercase mb-1">Target</p>
+                    <p className="text-[7px] text-emerald-600 font-black uppercase mb-1">TP</p>
                     <p className="text-[10px] font-black text-emerald-400">€{Number(tp).toLocaleString()}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[7px] text-rose-600 font-black uppercase mb-1">Safety</p>
+                    <p className="text-[7px] text-rose-600 font-black uppercase mb-1">SL</p>
                     <p className="text-[10px] font-black text-rose-400">€{Number(sl).toLocaleString()}</p>
                   </div>
                 </div>
