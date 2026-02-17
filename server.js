@@ -16,65 +16,57 @@ app.use(express.json());
 // CONFIGURATION
 const API_KEY = process.env.API_KEY ? process.env.API_KEY.trim() : null;
 const CB_CONFIG = {
-  // Ensure the Key ID is the full string: organizations/{org_id}/apiKeys/{key_id}
+  // Key Name format: organizations/{org_id}/apiKeys/{key_id}
   apiKey: (process.env.CB_API_KEY || '').trim(), 
-  // Aggressive cleaning of the Private Key
+  // Private Key (PEM format)
   apiSecret: (process.env.CB_API_SECRET || '')
     .replace(/\\n/g, '\n')
     .replace(/"/g, '')
     .replace(/'/g, '')
-    .replace(/\r/g, '')
     .trim(),
   hostname: 'api.coinbase.com'
 };
 
 /**
- * GENERATES COMPLIANT JWT FOR COINBASE CDP (Cloud Developer Platform)
- * Requirements: ES256, kid, iss: 'coinbase-cloud', sub: {key_name}, nbf, exp, uri
+ * CDP V3 JWT GENERATION (Native Node Crypto Implementation)
+ * This avoids common 'jsonwebtoken' library pitfalls with ES256 and Base64url encoding.
  */
 function getCoinbaseAuthHeader(method, path) {
   if (!CB_CONFIG.apiKey || !CB_CONFIG.apiSecret || CB_CONFIG.apiSecret.length < 20) {
-    console.error("[AUTH_FAIL]: Missing API Key or Secret in Environment Variables.");
     return {};
   }
 
   try {
-    // 1. Prepare Header
     const header = { 
       alg: 'ES256', 
       typ: 'JWT', 
       kid: CB_CONFIG.apiKey 
     };
 
-    // 2. Prepare Payload
     const now = Math.floor(Date.now() / 1000);
-    // Remove query params for the URI claim
     const cleanPath = path.split('?')[0];
-    
-    // FORMAT: "METHOD hostname/path" (Strictly no protocol)
     const uriClaim = `${method.toUpperCase()} ${CB_CONFIG.hostname}${cleanPath}`;
     
     const payload = {
       iss: 'coinbase-cloud',
-      nbf: now - 30, // 30 seconds buffer for server clock differences
+      nbf: now - 10, // Buffer for clock skew
       exp: now + 60,
       sub: CB_CONFIG.apiKey,
       uri: uriClaim
     };
 
-    // 3. Encode Parts
     const base64Header = Buffer.from(JSON.stringify(header)).toString('base64url');
     const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64url');
     const unsignedToken = `${base64Header}.${base64Payload}`;
 
-    // 4. Normalize Private Key
+    // ENSURE PRIVATE KEY IS PEM FORMAT
     let key = CB_CONFIG.apiSecret;
-    if (!key.includes('BEGIN EC PRIVATE KEY')) {
-      // Reconstruct PEM if it was flattened
-      key = `-----BEGIN EC PRIVATE KEY-----\n${key}\n-----END EC PRIVATE KEY-----`;
+    if (!key.includes('BEGIN')) {
+      const base64Key = key.replace(/\s/g, '');
+      const chunks = base64Key.match(/.{1,64}/g) || [];
+      key = `-----BEGIN EC PRIVATE KEY-----\n${chunks.join('\n')}\n-----END EC PRIVATE KEY-----`;
     }
 
-    // 5. Sign with ECDSA SHA256 (ES256)
     const sign = crypto.createSign('SHA256');
     sign.update(unsignedToken);
     const signature = sign.sign(key, 'base64url');
@@ -82,7 +74,7 @@ function getCoinbaseAuthHeader(method, path) {
     const jwt = `${unsignedToken}.${signature}`;
     return { 'Authorization': `Bearer ${jwt}` };
   } catch (error) {
-    console.error("[JWT_CRYPTO_ERROR]:", error.message);
+    console.error("[JWT_SIGN_ERROR]:", error.message);
     return {};
   }
 }
@@ -117,15 +109,15 @@ async function fetchRealBalances() {
     return { eur: eurVal, usdc: usdcVal, count: accounts.length };
   } catch (e) {
     const status = e.response?.status;
-    const errData = e.response?.data;
-    console.error(`[CB_V3_AUTH_DENIED]: ${status} | Detail: ${JSON.stringify(errData || e.message)}`);
+    const detail = e.response?.data;
+    console.error(`[CB_AUTH_FAIL]: Status ${status} | Detail: ${JSON.stringify(detail || e.message)}`);
     return null;
   }
 }
 
 async function placeRealOrder(symbol, side, amountEur) {
   if (ghostState.isPaperMode) {
-    console.log(`[SIMULATION]: ${side} ${symbol} for €${amountEur}`);
+    console.log(`[SIMULATION]: ${side} ${symbol} €${amountEur}`);
     return { success: true, isPaper: true };
   }
 
@@ -149,10 +141,10 @@ async function placeRealOrder(symbol, side, amountEur) {
         'Content-Type': 'application/json' 
       }
     });
-    console.log(`[REAL_EXECUTION]: ${symbol} ${side} Order Processed.`);
+    console.log(`[REAL_TRADE]: ${symbol} ${side} Success`);
     return { success: true, data: response.data, isPaper: false };
   } catch (e) {
-    console.error(`[TRADE_EXEC_ERROR]: ${JSON.stringify(e.response?.data || e.message)}`);
+    console.error(`[TRADE_ERROR]: ${JSON.stringify(e.response?.data || e.message)}`);
     return { success: false, error: e.response?.data?.message || e.message };
   }
 }
@@ -162,24 +154,24 @@ function getSyntheticAnalysis(symbol, price, candles) {
   const isUp = last.close > candles[candles.length - 2].close;
   return {
     side: isUp ? "BUY" : "NEUTRAL",
-    tp: Number((price * 1.026).toFixed(2)),
-    sl: Number((price * 0.982).toFixed(2)),
-    confidence: isUp ? 83 : 40,
-    reason: `Price action on ${symbol} indicates ${isUp ? 'bullish drift' : 'neutral zone'}.`,
-    expectedROI: 2.6
+    tp: Number((price * 1.025).toFixed(2)),
+    sl: Number((price * 0.985).toFixed(2)),
+    confidence: isUp ? 82 : 35,
+    reason: `System detection: ${symbol} is showing ${isUp ? 'bullish momentum' : 'no trend'}.`,
+    expectedROI: 2.5
   };
 }
 
 async function getAdvancedAnalysis(symbol, price, candles) {
   if (!API_KEY) return getSyntheticAnalysis(symbol, price, candles);
   const ai = new GoogleGenAI({ apiKey: API_KEY });
-  const compact = candles.slice(-20).map(c => ({ p: c.close, v: Math.round(c.volumeto) }));
+  const compact = candles.slice(-24).map(c => ({ p: c.close, v: Math.round(c.volumeto) }));
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `SCAN: ${symbol}/EUR: ${JSON.stringify(compact)}` }] }],
+      contents: [{ parts: [{ text: `ANALYZE ${symbol}/EUR: ${JSON.stringify(compact)}` }] }],
       config: {
-        systemInstruction: `SYSTEM: ALPHA_TRADER. Detect breakouts. Return JSON: { "side": "BUY"|"SELL"|"NEUTRAL", "tp": number, "sl": number, "confidence": number, "reason": "string", "expectedROI": number }. Confidence > 75 triggers trade.`,
+        systemInstruction: `YOU ARE A PROFESSIONAL ANALYST. Find profitable entries. Return ONLY JSON: { "side": "BUY"|"SELL"|"NEUTRAL", "tp": number, "sl": number, "confidence": number, "reason": "string", "expectedROI": number }.`,
         responseMimeType: "application/json"
       }
     });
@@ -192,7 +184,7 @@ function loadState() {
     isEngineActive: true, autoPilot: true, isPaperMode: true,
     thoughts: [], executionLogs: [], activePositions: [],
     currentStatus: "INITIALIZING", scanIndex: 0,
-    liquidity: { eur: 0, usdc: 0 }, dailyStats: { trades: 0, profit: 0 }, diag: "SYSTEM_BOOT"
+    liquidity: { eur: 0, usdc: 0 }, dailyStats: { trades: 0, profit: 0 }, diag: "BOOTING"
   };
   try {
     if (fs.existsSync(STATE_FILE)) return { ...defaults, ...JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) };
@@ -203,19 +195,19 @@ function loadState() {
 let ghostState = loadState();
 
 async function syncLiquidity() {
-  console.log("[SYSTEM]: Authenticating with Coinbase Cloud V3...");
+  console.log("[SYSTEM]: Checking Real-Money Connection...");
   const realData = await fetchRealBalances();
   
   if (realData) {
     ghostState.liquidity.eur = realData.eur;
     ghostState.liquidity.usdc = realData.usdc;
     ghostState.isPaperMode = false; 
-    ghostState.diag = `LIVE_ACCOUNT: €${realData.eur.toFixed(2)}`;
-    console.log(`[SYSTEM]: AUTH SUCCESS. Connected to Live Trading. Balance: €${realData.eur}`);
+    ghostState.diag = `LIVE: EUR ${realData.eur.toFixed(2)}`;
+    console.log(`[SYSTEM]: AUTH SUCCESS. Connected to Live Account. EUR Balance: ${realData.eur}`);
   } else {
     ghostState.isPaperMode = true; 
-    ghostState.diag = "AUTH_FAIL: CHECK_V3_CDP_KEYS";
-    console.warn("[SYSTEM]: Authentication failed. Remaining in Simulation mode.");
+    ghostState.diag = "AUTH_FAIL: 401";
+    console.warn("[SYSTEM]: Authentication failed. Staying in Simulation mode.");
   }
   saveState();
 }
@@ -230,13 +222,13 @@ async function loop() {
   if (!ghostState.isEngineActive) return;
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
   ghostState.scanIndex++;
-  ghostState.currentStatus = `ANALYZING_${symbol}`;
+  ghostState.currentStatus = `SCANNING_${symbol}`;
   saveState();
 
   try {
     const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=24`);
     const candles = res.data?.Data?.Data;
-    if (!candles) return;
+    if (!candles || candles.length < 2) return;
     const price = candles[candles.length - 1].close;
     const analysis = await getAdvancedAnalysis(symbol, price, candles);
     
@@ -248,12 +240,18 @@ async function loop() {
       if (ghostState.autoPilot && analysis.side === 'BUY' && analysis.confidence >= 75) {
         if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
           const tradeSize = 10; 
-          if (ghostState.liquidity.eur >= tradeSize || ghostState.isPaperMode) {
+          const hasFunds = ghostState.isPaperMode || ghostState.liquidity.eur >= tradeSize;
+          
+          if (hasFunds) {
             const order = await placeRealOrder(symbol, 'BUY', tradeSize);
             if (order.success) {
               if (ghostState.isPaperMode) ghostState.liquidity.eur -= tradeSize;
               ghostState.activePositions.push({ symbol, entryPrice: price, amount: tradeSize, tp: analysis.tp, sl: analysis.sl });
-              ghostState.executionLogs.unshift({ id: crypto.randomUUID(), symbol, action: 'BUY', price, status: 'SUCCESS', details: ghostState.isPaperMode ? 'PAPER' : 'LIVE', timestamp: new Date().toISOString() });
+              ghostState.executionLogs.unshift({ 
+                id: crypto.randomUUID(), symbol, action: 'BUY', price, status: 'SUCCESS', 
+                details: ghostState.isPaperMode ? 'SIMULATION' : 'REAL_MARKET', 
+                timestamp: new Date().toISOString() 
+              });
               ghostState.dailyStats.trades++;
             }
           }
@@ -269,7 +267,7 @@ syncLiquidity();
 setInterval(loop, 20000); 
 setInterval(syncLiquidity, 60000); 
 
-app.get('/', (req, res) => res.send('SPECTRAL OVERLORD API ACTIVE'));
+app.get('/', (req, res) => res.send('NOVA_TRADE_BRIDGE_ACTIVE'));
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
   if (req.body.engine !== undefined) ghostState.isEngineActive = req.body.engine;
@@ -280,8 +278,7 @@ app.post('/api/ghost/toggle', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n========================================`);
-  console.log(`🚀 SPECTRAL OVERLORD V17.1 [FINAL_V3_FIX]`);
-  console.log(`🧠 AI ENGINE: GEMINI-3-PRO`);
-  console.log(`🔒 AUTH: CDP_V3_COMPLIANT`);
+  console.log(`🚀 NOVA_TRADE AI OVERLORD ACTIVE`);
+  console.log(`📡 BRIDGE: ${PORT} | AUTH: CDP_V3`);
   console.log(`========================================\n`);
 });
