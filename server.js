@@ -16,11 +16,9 @@ app.use(express.json());
 // CONFIGURATION
 const API_KEY = process.env.API_KEY ? process.env.API_KEY.trim() : null;
 const CB_CONFIG = {
-  // MUST BE FULL NAME: organizations/{org_id}/apiKeys/{key_id}
   apiKey: (process.env.CB_API_KEY || '').trim(), 
-  // PRIVATE KEY (PEM format string)
   apiSecret: (process.env.CB_API_SECRET || '')
-    .replace(/\\n/g, '\n')
+    .replace(/\\n/g, '\n') // Handle escaped newlines from .env
     .replace(/"/g, '')
     .replace(/'/g, '')
     .trim(),
@@ -28,7 +26,8 @@ const CB_CONFIG = {
 };
 
 /**
- * GENERATES COMPLIANT JWT FOR COINBASE CDP
+ * GENERATES JWT COMPLIANT WITH COINBASE CDP V3
+ * Uses ieee-p1363 encoding for ES256 (Strictly required for JWT)
  */
 function getCoinbaseAuthHeader(method, path) {
   if (!CB_CONFIG.apiKey || !CB_CONFIG.apiSecret || CB_CONFIG.apiSecret.length < 30) {
@@ -36,59 +35,61 @@ function getCoinbaseAuthHeader(method, path) {
   }
 
   try {
-    // 1. JWT Header
     const header = { 
       alg: 'ES256', 
       typ: 'JWT', 
       kid: CB_CONFIG.apiKey 
     };
 
-    // 2. JWT Payload
     const now = Math.floor(Date.now() / 1000);
     const cleanPath = path.split('?')[0];
+    // Format: METHOD hostname/path
     const uriClaim = `${method.toUpperCase()} ${CB_CONFIG.hostname}${cleanPath}`;
     
     const payload = {
       iss: 'coinbase-cloud',
-      nbf: now - 2,
-      iat: now - 2,
+      nbf: now - 5,
+      iat: now - 5,
       exp: now + 60,
       sub: CB_CONFIG.apiKey,
       uri: uriClaim
     };
 
-    // 3. Prepare Signing Parts
     const base64Header = Buffer.from(JSON.stringify(header)).toString('base64url');
     const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64url');
     const unsignedToken = `${base64Header}.${base64Payload}`;
 
-    // 4. Robust Private Key PEM Reconstruction
+    // Ensure Private Key is standard PEM format
     let key = CB_CONFIG.apiSecret;
     if (!key.includes('-----BEGIN')) {
-      // Remove all whitespaces and clean the string
       const raw = key.replace(/\s/g, '');
       const lines = raw.match(/.{1,64}/g) || [];
       key = `-----BEGIN EC PRIVATE KEY-----\n${lines.join('\n')}\n-----END EC PRIVATE KEY-----`;
     }
 
-    // 5. Digital Signature using ECDSA with SHA-256
-    const sign = crypto.createSign('SHA256');
-    sign.update(unsignedToken);
-    const signature = sign.sign(key, 'base64url');
+    /**
+     * CRITICAL FIX: Use ieee-p1363 encoding.
+     * JWT ES256 expects the concatenation of R and S (64 bytes), NOT the DER format.
+     */
+    const signature = crypto.sign(
+      'sha256',
+      Buffer.from(unsignedToken),
+      {
+        key: key,
+        dsaEncoding: 'ieee-p1363', 
+      }
+    ).toString('base64url');
     
     const jwt = `${unsignedToken}.${signature}`;
     return { 'Authorization': `Bearer ${jwt}` };
   } catch (error) {
-    console.error("[JWT_FATAL_ERROR]: Check your Private Key format.", error.message);
+    console.error("[JWT_SIGN_FAILURE]:", error.message);
     return {};
   }
 }
 
 async function fetchRealBalances() {
-  if (!CB_CONFIG.apiKey.includes('organizations/')) {
-    console.warn("[AUTH_WARN]: API Key Name must start with 'organizations/'. Currently: " + CB_CONFIG.apiKey.substring(0, 10) + "...");
-    return null;
-  }
+  if (!CB_CONFIG.apiKey.includes('organizations/')) return null;
 
   const path = '/api/v3/brokerage/accounts';
   try {
@@ -100,7 +101,7 @@ async function fetchRealBalances() {
         ...authHeader, 
         'Content-Type': 'application/json' 
       },
-      timeout: 12000
+      timeout: 10000
     });
     
     const accounts = response.data?.accounts || [];
@@ -118,7 +119,8 @@ async function fetchRealBalances() {
   } catch (e) {
     const status = e.response?.status;
     const detail = e.response?.data;
-    console.error(`[CB_AUTH_DENIED]: ${status} | Detail: ${JSON.stringify(detail || e.message)}`);
+    // Log the actual error for debugging
+    console.error(`[CB_V3_AUTH_FAIL]: ${status} | Error: ${JSON.stringify(detail || e.message)}`);
     return null;
   }
 }
@@ -204,12 +206,11 @@ async function syncLiquidity() {
     ghostState.liquidity.eur = realData.eur;
     ghostState.liquidity.usdc = realData.usdc;
     ghostState.isPaperMode = false; 
-    ghostState.diag = `LIVE: EUR ${realData.eur.toFixed(2)}`;
-    console.log(`[SYSTEM]: AUTH SUCCESS. REAL FUNDS DETECTED: EUR ${realData.eur}`);
+    ghostState.diag = `LIVE_SYNC_OK | EUR: ${realData.eur.toFixed(2)}`;
+    console.log(`[SUCCESS]: AUTHENTICATED WITH COINBASE. EUR: ${realData.eur}`);
   } else {
     ghostState.isPaperMode = true; 
-    ghostState.diag = "AUTH_FAIL: CHECK_CDP_KEYS";
-    console.warn("[SYSTEM]: Authentication failed. Check CB_API_KEY and CB_API_SECRET.");
+    ghostState.diag = "AUTH_FAIL | CHECK_KEYS";
   }
   saveState();
 }
@@ -264,10 +265,10 @@ async function loop() {
 }
 
 syncLiquidity();
-setInterval(loop, 25000); 
+setInterval(loop, 30000); 
 setInterval(syncLiquidity, 60000); 
 
-app.get('/', (req, res) => res.send('BRIDGE_V3_ACTIVE'));
+app.get('/', (req, res) => res.send('NOVA_BRIDGE_V17.4_ACTIVE'));
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
   if (req.body.engine !== undefined) ghostState.isEngineActive = req.body.engine;
@@ -278,7 +279,7 @@ app.post('/api/ghost/toggle', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n========================================`);
-  console.log(`🚀 NOVATRADE AI V3 BRIDGE ACTIVE`);
-  console.log(`📡 LISTENING ON PORT ${PORT}`);
+  console.log(`🚀 NOVATRADE AI V17.4 (IEEE-P1363)`);
+  console.log(`📡 BRIDGE_PORT: ${PORT}`);
   console.log(`========================================\n`);
 });
