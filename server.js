@@ -64,8 +64,6 @@ async function placeRealOrder(symbol, side, size, isPaper) {
   if (isPaper) return { success: true, isPaper: true };
   const productId = `${symbol}-EUR`;
   const path = '/api/v3/brokerage/orders';
-  
-  // Size for BUY is quote (EUR), for SELL is base (Asset amount)
   const orderConfig = side === 'BUY' 
     ? { market_market_ioc: { quote_size: size.toFixed(2).toString() } }
     : { market_market_ioc: { base_size: size.toFixed(8).toString() } };
@@ -76,7 +74,6 @@ async function placeRealOrder(symbol, side, size, isPaper) {
     }, { headers: { ...getCoinbaseAuthHeader('POST', path), 'Content-Type': 'application/json' } });
     return { success: true, data: response.data, isPaper: false };
   } catch (e) {
-    console.error(`[ORDER_ERROR] ${symbol} ${side}:`, e.response?.data || e.message);
     return { success: false, error: e.response?.data || e.message };
   }
 }
@@ -84,13 +81,27 @@ async function placeRealOrder(symbol, side, size, isPaper) {
 async function getAdvancedAnalysis(symbol, price, candles) {
   if (!API_KEY) return null;
   const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // Pass more detailed HLC data to AI for SMC detection
+  const historicalData = candles.slice(-24).map(c => ({ h: c.high, l: c.low, c: c.close, v: Math.round(c.volumeto) }));
+  
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `PREDATOR_SCAN: ${symbol} @ ${price} EUR. SMC Analysis required.` }] }],
+      contents: [{ parts: [{ text: `PREDATOR_SCAN: ${symbol} Current: ${price} EUR. History: ${JSON.stringify(historicalData)}` }] }],
       config: {
-        systemInstruction: `You are the Predator AI. Return JSON: { "side": "BUY"|"SELL"|"NEUTRAL", "tp": number, "sl": number, "confidence": number, "analysis": "string" }.`,
-        responseMimeType: "application/json"
+        systemInstruction: `YOU ARE PREDATOR_AI. 
+CORE OBJECTIVE: Detect high-probability scalp setups (15m-1h) while avoiding Exchange Liquidity Traps.
+SCAN FOR: 
+1. Liquidity Sweeps: Rejection wicks after clearing significant highs/lows.
+2. Market Structure Shift (MSS): Confirmation of trend reversal after sweep.
+3. Fair Value Gaps (FVG): Targeting price rebalancing.
+RULES:
+- Confidence must be >80% for BUY.
+- TP should be 1:2 Risk/Reward min.
+- SL must be placed behind the manipulation wick.
+RETURN JSON: { "side": "BUY"|"SELL"|"NEUTRAL", "tp": number, "sl": number, "confidence": 0-100, "analysis": "string" }`,
+        responseMimeType: "application/json",
+        temperature: 0.1
       }
     });
     return JSON.parse(response.text.trim());
@@ -100,16 +111,14 @@ async function getAdvancedAnalysis(symbol, price, candles) {
 function loadState() {
   const defaults = {
     isEngineActive: true, autoPilot: true, isPaperMode: true,
-    settings: { confidenceThreshold: 75, defaultTradeSize: 10.0 },
+    settings: { confidenceThreshold: 80, defaultTradeSize: 15.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 0, usdc: 0 }, dailyStats: { trades: 0, profit: 0 },
-    currentStatus: "IDLE", scanIndex: 0, diag: "BOOT"
+    currentStatus: "IDLE", scanIndex: 0, diag: "BOOT_V18.5"
   };
   try { 
     if (fs.existsSync(STATE_FILE)) {
       let state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-      // HARD_FILTER: Remove all legacy paper/simulated trades.
-      // Keep only positions that are NOT paper, or specifically BTC-EUR if explicitly real.
       state.activePositions = (state.activePositions || []).filter(p => p.isPaper === false || p.symbol === 'BTC');
       state.executionLogs = (state.executionLogs || []).filter(l => l.details?.includes('[LIVE]'));
       return { ...defaults, ...state };
@@ -130,9 +139,7 @@ async function monitorPositions() {
       pos.pnlPercent = ((currentPrice - pos.entryPrice) / pos.entryPrice) * 100;
       pos.pnl = (currentPrice - pos.entryPrice) * (pos.quantity || (pos.amount / pos.entryPrice));
 
-      // EXIT LOGIC: Liquidate if Target (TP) or Safety (SL) reached
       if (currentPrice >= pos.tp || currentPrice <= pos.sl) {
-        console.log(`[EXIT_TRIGGER] ${pos.symbol} at ${currentPrice}. Target: ${pos.tp}, SL: ${pos.sl}`);
         const order = await placeRealOrder(pos.symbol, 'SELL', pos.quantity, pos.isPaper);
         if (order.success) {
           ghostState.dailyStats.profit += pos.pnl;
@@ -154,7 +161,7 @@ async function loop() {
   const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'NEAR', 'FET'];
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
   ghostState.scanIndex++;
-  ghostState.currentStatus = `ANALYZING_${symbol}`;
+  ghostState.currentStatus = `HUNTING_${symbol}`;
 
   try {
     const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=24`);
@@ -163,10 +170,9 @@ async function loop() {
     const price = candles[candles.length - 1].close;
     const analysis = await getAdvancedAnalysis(symbol, price, candles);
     
+    // STRICT PREDATOR TRIGGER: Confidence >= 80%
     if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold) {
-      // Prevent multiple entries for same asset
       if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
-        console.log(`[ENTRY_SIGNAL] ${symbol} confirmed. Executing...`);
         const order = await placeRealOrder(symbol, 'BUY', ghostState.settings.defaultTradeSize, ghostState.isPaperMode);
         if (order.success) {
           const qty = ghostState.settings.defaultTradeSize / price;
@@ -184,9 +190,9 @@ async function loop() {
     }
     if (analysis) {
       ghostState.thoughts.unshift({ ...analysis, symbol, id: crypto.randomUUID(), timestamp: new Date().toISOString() });
-      if (ghostState.thoughts.length > 30) ghostState.thoughts.pop();
+      if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
     }
-    ghostState.currentStatus = `SCANNING_READY`;
+    ghostState.currentStatus = `RADAR_ACTIVE`;
   } catch (e) {}
   saveState();
 }
@@ -196,10 +202,10 @@ async function syncLiquidity() {
   if (realData) {
     ghostState.liquidity = realData;
     ghostState.isPaperMode = false;
-    ghostState.diag = `REAL_COINBASE: ${realData.eur.toFixed(2)} EUR`;
+    ghostState.diag = `PREDATOR_LIVE: ${realData.eur.toFixed(2)} EUR`;
   } else {
     ghostState.isPaperMode = true;
-    ghostState.diag = "SIM_MODE_ACTIVE";
+    ghostState.diag = "SIM_HUNT_ONLY";
   }
   saveState();
 }
@@ -207,8 +213,8 @@ async function syncLiquidity() {
 function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {} }
 
 syncLiquidity();
-setInterval(loop, 20000); // Scan every 20s
-setInterval(syncLiquidity, 45000);
+setInterval(loop, 15000); // More aggressive scanning (15s)
+setInterval(syncLiquidity, 60000);
 
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
@@ -218,14 +224,11 @@ app.post('/api/ghost/toggle', (req, res) => {
   res.json({ success: true });
 });
 app.post('/api/ghost/clear-history', (req, res) => {
-  // Purge legacy non-live logs and all thoughts
   ghostState.executionLogs = ghostState.executionLogs.filter(l => l.details?.includes('[LIVE]'));
   ghostState.thoughts = [];
-  if (req.body.clearPositions) {
-     ghostState.activePositions = ghostState.activePositions.filter(p => !p.isPaper);
-  }
+  if (req.body.clearPositions) ghostState.activePositions = ghostState.activePositions.filter(p => !p.isPaper);
   saveState();
   res.json({ success: true });
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 PREDATOR V18.0: ENGINE ONLINE ON ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`🦅 PREDATOR V18.5: SYSTEM ARMED ON ${PORT}`));

@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     <aside className="w-80 border-r border-cyan-500/10 bg-[#05070a] flex flex-col">
       <div className="p-6 border-b border-white/5 bg-gradient-to-b from-cyan-900/10 to-transparent">
         <div className="flex justify-between items-center mb-6">
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Control Interface</span>
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Neural Link v18.5</span>
           <button 
             onClick={() => setShowSettings(!showSettings)}
             className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${showSettings ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/20' : 'bg-white/5 text-slate-500 hover:text-white'}`}
@@ -49,7 +49,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <div className="space-y-3">
-          {/* Main Engine Toggle */}
           <button 
             onClick={onToggleEngine}
             className={`w-full p-5 rounded-2xl border transition-all flex flex-col items-center justify-center space-y-3 relative overflow-hidden group ${
@@ -62,22 +61,21 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div className="text-center">
               <span className={`text-[10px] font-black uppercase tracking-[0.3em] block ${engineActive ? 'text-cyan-400' : 'text-rose-400'}`}>
-                {engineActive ? 'SYSTEM_CONNECTED' : 'SYSTEM_OFFLINE'}
+                {engineActive ? 'RADAR_ARMED' : 'SYSTEM_OFF'}
               </span>
-              <p className="text-[8px] text-slate-500 mt-1 font-bold">{engineActive ? 'TAP_TO_SUSPEND' : 'TAP_TO_IGNITE'}</p>
+              <p className="text-[8px] text-slate-500 mt-1 font-bold">{engineActive ? 'MONITORING_LIVE' : 'IDLE'}</p>
             </div>
           </button>
 
-          {/* Auto Trade Toggle */}
           <button 
             onClick={onToggleAuto}
             className={`w-full py-3 rounded-xl border transition-all flex items-center justify-center space-x-3 ${
-              autoPilot && engineActive ? 'border-emerald-500/40 bg-emerald-500/5 text-emerald-400' : 'border-white/5 bg-white/[0.02] text-slate-500'
+              autoPilot && engineActive ? 'border-emerald-500/40 bg-emerald-500/5 text-emerald-400 shadow-[0_0_10px_#10b98133]' : 'border-white/5 bg-white/[0.02] text-slate-500'
             }`}
           >
-            <i className={`fas ${autoPilot ? 'fa-check-circle' : 'fa-circle'} text-[10px]`}></i>
+            <i className={`fas ${autoPilot ? 'fa-crosshairs' : 'fa-circle'} text-[10px]`}></i>
             <span className="text-[9px] font-black uppercase tracking-widest">
-              Auto-Trade (88% Mode): {autoPilot ? 'ACTIVE' : 'DISABLED'}
+              PREDATOR_80%_AUTO: {autoPilot ? 'ENGAGED' : 'OFF'}
             </span>
           </button>
         </div>
@@ -106,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       <div className="px-6 py-4 flex-1 overflow-hidden flex flex-col">
         <div className="flex justify-between items-center mb-6">
-           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Neural Watchlist</span>
+           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Radar Watchlist</span>
            <span className={`text-[8px] font-black px-2 py-0.5 rounded bg-white/5 tracking-widest ${engineActive ? 'text-emerald-500' : 'text-slate-600'}`}>
             {engineActive ? 'SCANNING' : 'IDLE'}
            </span>

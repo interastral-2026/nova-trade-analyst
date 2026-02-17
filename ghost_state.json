@@ -578,122 +578,17 @@
       "id": "2470fa62-860c-4ad2-b7c8-0e3b4c079212"
     }
   ],
-  "executionLogs": [
-    {
-      "id": "d3765e93-f716-42c9-8771-597e3ec2803a",
-      "symbol": "BTC",
-      "action": "BUY",
-      "price": 58144.28,
-      "status": "SUCCESS",
-      "details": "SIMULATION",
-      "timestamp": "2026-02-17T00:40:01.490Z"
-    },
-    {
-      "id": "19d42753-1be6-43d8-a1c5-6bd6eda51e2c",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1687.26,
-      "status": "SUCCESS",
-      "details": "SIMULATION",
-      "timestamp": "2026-02-17T00:16:25.190Z"
-    },
-    {
-      "id": "b5ea4aa7-6feb-444f-bb7b-878927b584aa",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1463,
-      "status": "SUCCESS",
-      "details": "SIMULATION",
-      "timestamp": "2026-02-17T00:15:45.124Z"
-    },
-    {
-      "id": "8916aa89-9db6-4836-a036-33fcb5243b8f",
-      "symbol": "SOL",
-      "action": "BUY",
-      "price": 73.05,
-      "status": "SUCCESS",
-      "details": "PAPER",
-      "timestamp": "2026-02-17T00:10:30.305Z"
-    },
-    {
-      "id": "e6d5be9c-0ecd-4e6c-ad38-8871102496b1",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8939,
-      "status": "SUCCESS",
-      "details": "PAPER",
-      "timestamp": "2026-02-17T00:02:50.350Z"
-    },
-    {
-      "id": "632c78c7-9fd2-4c01-a3b5-ead9a742f04a",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.817,
-      "status": "SUCCESS",
-      "details": "PAPER",
-      "timestamp": "2026-02-17T00:02:31.509Z"
-    }
-  ],
+  "executionLogs": [],
   "activePositions": [
-    {
-      "symbol": "AVAX",
-      "entryPrice": 7.817,
-      "amount": 10,
-      "tp": 8.02,
-      "sl": 7.68,
-      "currentPrice": 7.803,
-      "pnlPercent": -0.17909684022003627,
-      "pnl": -0.017909684022003627
-    },
-    {
-      "symbol": "NEAR",
-      "entryPrice": 0.8939,
-      "amount": 10,
-      "tp": 0.92,
-      "sl": 0.88,
-      "currentPrice": 0.8903,
-      "pnlPercent": -0.4027296118134073,
-      "pnl": -0.04027296118134072
-    },
-    {
-      "symbol": "SOL",
-      "entryPrice": 73.05,
-      "amount": 10,
-      "tp": 74.95,
-      "sl": 71.74,
-      "currentPrice": 73.18,
-      "pnlPercent": 0.17796030116359982,
-      "pnl": 0.01779603011635998
-    },
-    {
-      "symbol": "FET",
-      "entryPrice": 0.1463,
-      "amount": 10,
-      "tp": 0.15,
-      "sl": 0.14,
-      "currentPrice": 0.1465,
-      "pnlPercent": 0.13670539986327954,
-      "pnl": 0.013670539986327954
-    },
-    {
-      "symbol": "ETH",
-      "entryPrice": 1687.26,
-      "amount": 10,
-      "tp": 1729.44,
-      "sl": 1661.95,
-      "currentPrice": 1689.37,
-      "pnlPercent": 0.12505482261180256,
-      "pnl": 0.012505482261180256
-    },
     {
       "symbol": "BTC",
       "entryPrice": 58144.28,
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "currentPrice": 58142.87,
-      "pnlPercent": -0.0024250020810236477,
-      "pnl": -0.00024250020810236475
+      "currentPrice": 58204.81,
+      "pnlPercent": 0.10410310352110103,
+      "pnl": 0.010410310352110102
     }
   ],
   "liquidity": {
@@ -705,9 +600,9 @@
     "profit": 0,
     "fees": 0
   },
-  "currentStatus": "READY",
-  "scanIndex": 743,
-  "diag": "SIMULATION",
+  "currentStatus": "SCANNING_READY",
+  "scanIndex": 764,
+  "diag": "SIM_MODE_ACTIVE",
   "lastScans": [],
   "lastSync": null,
   "cooldownUntil": 0,
