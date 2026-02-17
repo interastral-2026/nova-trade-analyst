@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { AssetInfo, TradeSignal, AnalysisStatus, AccountBalance } from './types.ts';
-import { fetchProductStats } from './services/coinbaseService.ts';
-import { getApiBase } from './services/tradingService.ts';
-import Header from './components/Header.tsx';
-import Sidebar from './components/Sidebar.tsx';
-import SignalList from './components/SignalList.tsx';
-import TradingTerminal from './components/TradingTerminal.tsx';
+import { AssetInfo, TradeSignal, AnalysisStatus, AccountBalance } from './types';
+import { fetchProductStats } from './services/coinbaseService';
+import { getApiBase } from './services/tradingService';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import SignalList from './components/SignalList';
+import TradingTerminal from './components/TradingTerminal';
 
-const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'ADA-EUR', 'LINK-EUR'];
+const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'NEAR-EUR', 'FET-EUR'];
 
 const App: React.FC = () => {
   const [selectedAsset, setSelectedAsset] = useState<string>('BTC-EUR');
@@ -17,22 +17,15 @@ const App: React.FC = () => {
   const [balances, setBalances] = useState<AccountBalance[]>([]);
   const [isEngineActive, setIsEngineActive] = useState<boolean>(true);
   const [autoTradeEnabled, setAutoTradeEnabled] = useState<boolean>(true);
-  const [liveActivity, setLiveActivity] = useState<string>("SYSTEM_CONNECTING...");
+  const [liveActivity, setLiveActivity] = useState<string>("INITIALIZING...");
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [bridgeUrl, setBridgeUrl] = useState<string>(getApiBase());
 
   const syncWithServer = useCallback(async () => {
-    const base = getApiBase();
     try {
-      const response = await fetch(`${base}/api/ghost/state`, {
-        headers: { 'Accept': 'application/json' },
-        mode: 'cors'
-      });
-      
+      const response = await fetch(`${getApiBase()}/api/ghost/state`);
       if (!response.ok) {
-        if (response.status === 502) setLiveActivity("SERVER_REBOOTING...");
-        else if (response.status === 404) setLiveActivity("API_NOT_FOUND");
-        else setLiveActivity(`HTTP_ERR_${response.status}`);
+        setLiveActivity("SERVER_DISCONNECTED");
         setStatus(AnalysisStatus.ERROR);
         return;
       }
@@ -41,35 +34,30 @@ const App: React.FC = () => {
       setThoughtHistory(data.thoughts || []);
       setIsEngineActive(data.isEngineActive);
       setAutoTradeEnabled(data.autoPilot);
-      setLiveActivity(data.currentStatus || "SYSTEM_SCANNING");
+      setLiveActivity(data.currentStatus || "IDLE");
       
       setBalances([
         { currency: 'EUR', available: data.liquidity?.eur || 0, total: data.liquidity?.eur || 0 },
         { currency: 'USDC', available: data.liquidity?.usdc || 0, total: data.liquidity?.usdc || 0 }
       ]);
       setStatus(AnalysisStatus.IDLE);
-    } catch (e: any) {
-      console.warn("Connection attempt failed:", e.message);
-      setLiveActivity("BRIDGE_CORS_OR_NETWORK_ERROR");
+    } catch (e) {
+      setLiveActivity("BRIDGE_OFFLINE");
       setStatus(AnalysisStatus.ERROR);
     }
   }, []);
 
   const handleUpdateBridge = (url: string) => {
-    let cleanUrl = url.trim();
-    if (cleanUrl.endsWith('/')) cleanUrl = cleanUrl.slice(0, -1);
-    localStorage.setItem('NOVA_BRIDGE_URL', cleanUrl);
-    setBridgeUrl(cleanUrl);
-    setLiveActivity("REFRESHING_BRIDGE...");
+    localStorage.setItem('NOVA_BRIDGE_URL', url.trim());
+    setBridgeUrl(url.trim());
     syncWithServer();
   };
 
   const toggleEngine = async () => {
-    const base = getApiBase();
     const newState = !isEngineActive;
     setIsEngineActive(newState);
     try {
-      await fetch(`${base}/api/ghost/toggle`, {
+      await fetch(`${getApiBase()}/api/ghost/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ engine: newState })
@@ -78,11 +66,10 @@ const App: React.FC = () => {
   };
 
   const toggleAuto = async () => {
-    const base = getApiBase();
     const newState = !autoTradeEnabled;
     setAutoTradeEnabled(newState);
     try {
-      await fetch(`${base}/api/ghost/toggle`, {
+      await fetch(`${getApiBase()}/api/ghost/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ auto: newState })
@@ -92,13 +79,10 @@ const App: React.FC = () => {
 
   useEffect(() => {
     syncWithServer();
-    const interval = setInterval(syncWithServer, 4000); 
+    const interval = setInterval(syncWithServer, 4000);
     const statsInterval = setInterval(() => {
       WATCHLIST.forEach(id => fetchProductStats(id).then(info => {
-        setAssets(prev => {
-          const filtered = prev.filter(a => a.id !== id);
-          return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
-        });
+        setAssets(prev => [...prev.filter(a => a.id !== id), info].sort((a,b) => a.id.localeCompare(b.id)));
       }));
     }, 10000);
     return () => { clearInterval(interval); clearInterval(statsInterval); };
@@ -106,27 +90,40 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-black text-slate-100 overflow-hidden font-mono">
-      <Header status={status} onGenerate={syncWithServer} autoPilot={autoTradeEnabled} scanningSymbol={liveActivity} engineActive={isEngineActive} />
-      <div className="flex-1 flex overflow-hidden relative">
+      <Header 
+        status={status} 
+        onGenerate={syncWithServer} 
+        autoPilot={autoTradeEnabled} 
+        scanningSymbol={liveActivity} 
+        engineActive={isEngineActive} 
+      />
+      
+      <div className="flex-1 flex overflow-hidden">
         <Sidebar 
-          assets={assets} selected={selectedAsset} onSelect={setSelectedAsset} 
-          autoPilot={autoTradeEnabled} onToggleAuto={toggleAuto} 
-          engineActive={isEngineActive} onToggleEngine={toggleEngine} 
-          viewMode={'terminal'} onViewChange={() => {}} 
-          bridgeUrl={bridgeUrl} onUpdateBridge={handleUpdateBridge} 
+          assets={assets} 
+          selected={selectedAsset} 
+          onSelect={setSelectedAsset} 
+          autoPilot={autoTradeEnabled} 
+          onToggleAuto={toggleAuto} 
+          engineActive={isEngineActive} 
+          onToggleEngine={toggleEngine} 
+          viewMode={'terminal'} 
+          onViewChange={() => {}} 
+          bridgeUrl={bridgeUrl} 
+          onUpdateBridge={handleUpdateBridge} 
         />
+        
         <main className="flex-1 flex bg-[#020205]">
           <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">
               <TradingTerminal 
-                balances={balances} autoTradeEnabled={autoTradeEnabled} 
-                isEngineActive={isEngineActive} onToggleEngine={toggleEngine} 
-                onToggleAutoTrade={toggleAuto} thoughtHistory={thoughtHistory} 
-                liveActivity={liveActivity} onForceScan={syncWithServer} 
+                thoughtHistory={thoughtHistory} 
+                liveActivity={liveActivity} 
               />
           </div>
+          
           <div className="w-80 border-l border-white/5 bg-black/40 flex flex-col">
             <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-               <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Target Signals</span>
+               <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Active Signals</span>
                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar">

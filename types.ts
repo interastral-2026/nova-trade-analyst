@@ -22,74 +22,53 @@ export interface TradeSignal {
   symbol: string;
   side: 'BUY' | 'SELL' | 'NEUTRAL';
   entryPrice: number;
-  takeProfit: number;
-  stopLoss: number;
+  tp: number;
+  sl: number;
   confidence: number;
-  timeframe: string;
   analysis: string;
-  thoughtProcess: string; 
   timestamp: string;
-  netRoiExpected: string;
-  estimatedFees: number;
-  indicators: {
-    rsi: number;
-    macd: string;
-    trend: string;
-  };
+  isPaper?: boolean;
 }
 
 export interface AccountBalance {
   currency: string;
   available: number;
   total: number;
-  valueInEur?: number;
 }
 
 export interface ActivePosition {
-  id: string;
   symbol: string;
   entryPrice: number;
   currentPrice: number;
-  side: 'BUY' | 'SELL';
-  size: number;
-  pnl: number;
-  pnlPercent: number;
+  amount: number;
+  quantity: number;
   tp: number;
   sl: number;
-  feesPaid: number;
-  status: 'OPEN' | 'CLOSED';
-}
-
-export interface OpenOrder {
-  id: string;
-  symbol: string;
-  side: 'BUY' | 'SELL';
-  price: number;
-  amount: number;
-  filled: number;
-  status: string;
+  pnl: number;
+  pnlPercent: number;
+  isPaper: boolean;
+  timestamp: string;
 }
 
 export interface ExecutionLog {
   id: string;
   symbol: string;
-  action: string;
-  amount: number;
+  action: 'BUY' | 'SELL' | 'NEUTRAL';
   price: number;
-  timestamp: string;
-  status: 'SUCCESS' | 'FAILED' | 'AUTO_EXECUTED';
-  fees?: number;
-  netProfit?: number;
-  thought?: string;
+  status: 'SUCCESS' | 'FAILED';
   details?: string;
+  timestamp: string;
+  pnl?: number;
+  amount?: number;
+  thought?: string;
 }
 
 export enum AnalysisStatus {
   IDLE = 'IDLE',
-  SCANNING = 'SCANNING_LIQUIDITY',
-  EXECUTING = 'EXECUTING_ORDER',
+  SCANNING = 'SCANNING',
   ERROR = 'ERROR',
   ANALYZING = 'ANALYZING',
+  // Added missing members used in components/Header.tsx
   FETCHING = 'FETCHING',
   COMPLETED = 'COMPLETED',
   RATE_LIMITED = 'RATE_LIMITED',
