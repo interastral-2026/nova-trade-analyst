@@ -586,9 +586,9 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": 0.17552887403541273,
-      "pnl": 0.01755288740354127,
-      "currentPrice": 58246.34
+      "pnlPercent": 0.13352990182353175,
+      "pnl": 0.013352990182353176,
+      "currentPrice": 58221.92
     }
   ],
   "liquidity": {
@@ -598,10 +598,11 @@
   "dailyStats": {
     "trades": 6,
     "profit": 0,
-    "fees": 0
+    "fees": 0,
+    "dailyGoal": 50
   },
-  "currentStatus": "SCANNING_BTC",
-  "scanIndex": 823,
+  "currentStatus": "SNIPING_SOL",
+  "scanIndex": 849,
   "diag": "SIM_MODE_ACTIVE",
   "lastScans": [],
   "lastSync": null,

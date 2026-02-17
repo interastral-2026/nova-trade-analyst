@@ -64,13 +64,19 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
       <div className="bg-zinc-900/40 border border-indigo-500/20 rounded-[2rem] p-6 relative overflow-hidden">
          <div className="flex justify-between items-end mb-3">
             <div>
-              <p className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-1">Daily_Profit_Directive</p>
+              <p className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-1">UNLEASHED_DIRECTIVE_V24</p>
               <h3 className="text-xl font-black text-white">€{stats.profit.toFixed(2)} / <span className="text-slate-500">€{stats.dailyGoal}</span></h3>
             </div>
-            <div className="text-right">
+            <div className="text-right flex flex-col items-end">
               <span className={`text-[10px] font-black ${goalProgress >= 100 ? 'text-emerald-400' : 'text-indigo-400'}`}>
-                {goalProgress.toFixed(1)}% REACHED
+                {goalProgress.toFixed(1)}% SUCCESS
               </span>
+              <div className="flex items-center space-x-2 mt-1">
+                 <span className="text-[7px] text-slate-600 uppercase font-black tracking-tighter">Engine Status:</span>
+                 <span className={`text-[7px] font-black uppercase ${stats.diag.includes('OK') || stats.diag.includes('STABLE') ? 'text-emerald-500' : 'text-amber-500'}`}>
+                   {stats.diag}
+                 </span>
+              </div>
             </div>
          </div>
          <div className="h-2 bg-white/5 rounded-full overflow-hidden">
@@ -85,15 +91,15 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
         <div className={`p-5 rounded-3xl border transition-all ${stats.isPaper ? 'bg-zinc-900/50 border-white/5 opacity-80' : 'bg-emerald-950/20 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.1)]'}`}>
            <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">AVAILABLE_LIQUIDITY</p>
            <h2 className="text-2xl font-black text-white">€{stats.eur.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h2>
-           <p className="text-[7px] text-slate-500 mt-2 uppercase font-black">{stats.diag}</p>
         </div>
         <div className="bg-zinc-900/50 border border-white/5 p-5 rounded-3xl">
-           <p className="text-[8px] font-black text-cyan-400 uppercase tracking-widest mb-1">STABLE_COIN_USDC</p>
-           <h2 className="text-2xl font-black text-white">${stats.usdc.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h2>
+           <p className="text-[8px] font-black text-cyan-400 uppercase tracking-widest mb-1">COMPLETED_TRADES</p>
+           <h2 className="text-2xl font-black text-white">{stats.trades} <span className="text-[10px] text-slate-500">SNIPES</span></h2>
         </div>
-        <div className="bg-zinc-900/50 border border-white/5 p-5 rounded-3xl flex flex-col justify-center">
-           <p className="text-[8px] font-black text-rose-500 uppercase tracking-widest mb-1">RADAR_TARGETING</p>
-           <h2 className="text-[10px] font-black text-white truncate uppercase animate-pulse">{liveActivity}</h2>
+        <div className="bg-zinc-900/50 border border-white/5 p-5 rounded-3xl flex flex-col justify-center relative overflow-hidden">
+           <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500 animate-pulse"></div>
+           <p className="text-[8px] font-black text-rose-500 uppercase tracking-widest mb-1">ACTIVE_RADAR_SCAN</p>
+           <h2 className="text-[10px] font-black text-white truncate uppercase">{liveActivity}</h2>
         </div>
       </div>
 
@@ -101,9 +107,9 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
         <div className="px-8 py-5 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
            <div className="flex space-x-6">
               {[
-                { id: 'stream', label: 'Neural Stream' },
-                { id: 'activity', label: 'Execution Logs' },
-                { id: 'holdings', label: 'Active Hunts', count: holdings.length }
+                { id: 'stream', label: 'Neural Intelligence' },
+                { id: 'activity', label: 'Sniping History' },
+                { id: 'holdings', label: 'Open Positions', count: holdings.length }
               ].map((tab) => (
                 <button 
                   key={tab.id}
@@ -117,11 +123,6 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                 </button>
               ))}
            </div>
-           {activeTab === 'activity' && (
-             <button onClick={handlePurge} className="text-[8px] font-black bg-rose-500/10 border border-rose-500/20 text-rose-500 px-3 py-1 rounded-lg hover:bg-rose-500/20 uppercase">
-               Purge Data
-             </button>
-           )}
         </div>
 
         <div ref={terminalRef} className="flex-1 overflow-y-auto p-8 custom-scrollbar">
@@ -129,20 +130,20 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
              <div className="space-y-4">
                 {thoughtHistory.length === 0 ? (
                    <div className="h-64 flex flex-col items-center justify-center opacity-20 text-center">
-                      <i className="fas fa-satellite-dish text-3xl mb-4 animate-bounce"></i>
-                      <p className="text-[10px] font-black uppercase tracking-[0.5em]">Syncing Neural Hub...</p>
+                      <div className="w-12 h-12 border-2 border-indigo-500 rounded-full border-t-transparent animate-spin mb-4"></div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.5em]">Aggressive Scan Initiated...</p>
                    </div>
                 ) : (
                   thoughtHistory.map((t, i) => (
-                    <div key={t.id || i} className={`border-l-2 pl-6 py-4 transition-all ${t.side === 'BUY' ? 'border-emerald-500 bg-emerald-500/5' : 'border-white/5'}`}>
-                       <div className="flex items-center space-x-4 mb-1">
+                    <div key={t.id || i} className={`border-l-2 pl-6 py-4 transition-all hover:bg-white/[0.02] cursor-default ${t.side === 'BUY' ? 'border-emerald-500 bg-emerald-500/5' : 'border-white/5'}`}>
+                       <div className="flex items-center space-x-4 mb-2">
                           <span className="text-[8px] font-black text-indigo-500/60">[{new Date(t.timestamp).toLocaleTimeString()}]</span>
                           <span className="text-sm font-black text-white uppercase">{t.symbol}</span>
                           <span className={`text-[9px] font-black px-2 py-0.5 rounded border ${t.side === 'BUY' ? 'border-emerald-500/40 text-emerald-400' : 'text-slate-600'}`}>
                             {t.side} ({t.confidence}%)
                           </span>
                        </div>
-                       <p className="text-[11px] text-slate-400 pr-10 italic leading-relaxed">"{t.analysis}"</p>
+                       <p className="text-[11px] text-slate-300 pr-10 italic leading-relaxed font-medium">"{t.analysis}"</p>
                     </div>
                   ))
                 )}
@@ -152,13 +153,13 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
            {activeTab === 'activity' && (
              <div className="space-y-3">
                 {logs.length === 0 ? (
-                  <div className="h-48 flex items-center justify-center opacity-20 uppercase text-[10px] font-black tracking-widest">Waiting for Sniper Activity...</div>
+                  <div className="h-48 flex items-center justify-center opacity-20 uppercase text-[10px] font-black tracking-widest">Waiting for Force Fills...</div>
                 ) : (
                   logs.map((log) => (
                     <div key={log.id} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:border-indigo-500/30 transition-all">
                        <div className="flex items-center space-x-4">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[12px] font-black ${log.action === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-                             {log.action === 'BUY' ? <i className="fas fa-arrow-up"></i> : <i className="fas fa-arrow-down"></i>}
+                             {log.action === 'BUY' ? <i className="fas fa-crosshairs"></i> : <i className="fas fa-check-double"></i>}
                           </div>
                           <div>
                              <h5 className="text-[11px] font-black text-white uppercase">{log.symbol} <span className="text-[8px] text-indigo-400 ml-2 font-mono tracking-tighter opacity-70">{log.details}</span></h5>
@@ -183,8 +184,8 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {holdings.length === 0 ? (
                    <div className="col-span-full h-64 flex flex-col items-center justify-center opacity-20 grayscale">
-                      <i className="fas fa-crosshairs text-4xl mb-4"></i>
-                      <p className="uppercase text-[10px] font-black tracking-[0.3em]">No Active Targets Found</p>
+                      <i className="fas fa-bullseye text-4xl mb-4 animate-ping"></i>
+                      <p className="uppercase text-[10px] font-black tracking-[0.3em]">Scoping New Targets...</p>
                    </div>
                 ) : (
                   holdings.map((pos) => {
@@ -206,7 +207,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                                   {pos.isPaper ? 'SIM' : 'LIVE'}
                                 </span>
                               </h4>
-                              <p className="text-[9px] text-slate-500 uppercase mt-1 font-black">Market: <span className="text-white">€{pos.currentPrice?.toLocaleString()}</span></p>
+                              <p className="text-[9px] text-slate-500 uppercase mt-1 font-black">Tracking: <span className="text-white">€{pos.currentPrice?.toLocaleString()}</span></p>
                             </div>
                             <div className={`px-4 py-2 rounded-2xl font-black text-[12px] border ${pos.pnlPercent >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
                                {pos.pnlPercent >= 0 ? '+' : ''}{pos.pnlPercent.toFixed(2)}%
@@ -223,26 +224,13 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                          <div className="space-y-4">
                            <div className="space-y-1">
                               <div className="flex justify-between text-[7px] font-black uppercase tracking-widest text-emerald-500">
-                                <span>Momentum to TP</span>
+                                <span>Profit Hunt</span>
                                 <span>{distTP.toFixed(0)}%</span>
                               </div>
                               <div className="relative h-1.5 bg-white/5 rounded-full overflow-hidden">
                                 <div 
                                   className={`h-full transition-all duration-700 ${pos.pnlPercent >= 0 ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-slate-700'}`}
                                   style={{ width: `${distTP}%` }}
-                                ></div>
-                              </div>
-                           </div>
-
-                           <div className="space-y-1">
-                              <div className="flex justify-between text-[7px] font-black uppercase tracking-widest text-rose-500">
-                                <span>Risk Proximity</span>
-                                <span>{distSL.toFixed(0)}%</span>
-                              </div>
-                              <div className="relative h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                <div 
-                                  className={`h-full transition-all duration-700 ${pos.pnlPercent < 0 ? 'bg-rose-500 shadow-[0_0_10px_#f43f5e]' : 'bg-slate-700'}`}
-                                  style={{ width: `${distSL}%` }}
                                 ></div>
                               </div>
                            </div>
