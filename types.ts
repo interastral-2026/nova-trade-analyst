@@ -68,7 +68,6 @@ export enum AnalysisStatus {
   SCANNING = 'SCANNING',
   ERROR = 'ERROR',
   ANALYZING = 'ANALYZING',
-  // Added missing members used in components/Header.tsx
   FETCHING = 'FETCHING',
   COMPLETED = 'COMPLETED',
   RATE_LIMITED = 'RATE_LIMITED',

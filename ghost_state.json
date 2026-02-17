@@ -2,6 +2,10 @@
   "isEngineActive": true,
   "autoPilot": true,
   "isPaperMode": true,
+  "settings": {
+    "confidenceThreshold": 80,
+    "defaultTradeSize": 10
+  },
   "thoughts": [
     {
       "side": "BUY",
@@ -636,46 +640,62 @@
       "entryPrice": 7.817,
       "amount": 10,
       "tp": 8.02,
-      "sl": 7.68
+      "sl": 7.68,
+      "currentPrice": 7.803,
+      "pnlPercent": -0.17909684022003627,
+      "pnl": -0.017909684022003627
     },
     {
       "symbol": "NEAR",
       "entryPrice": 0.8939,
       "amount": 10,
       "tp": 0.92,
-      "sl": 0.88
+      "sl": 0.88,
+      "currentPrice": 0.8903,
+      "pnlPercent": -0.4027296118134073,
+      "pnl": -0.04027296118134072
     },
     {
       "symbol": "SOL",
       "entryPrice": 73.05,
       "amount": 10,
       "tp": 74.95,
-      "sl": 71.74
+      "sl": 71.74,
+      "currentPrice": 73.18,
+      "pnlPercent": 0.17796030116359982,
+      "pnl": 0.01779603011635998
     },
     {
       "symbol": "FET",
       "entryPrice": 0.1463,
       "amount": 10,
       "tp": 0.15,
-      "sl": 0.14
+      "sl": 0.14,
+      "currentPrice": 0.1465,
+      "pnlPercent": 0.13670539986327954,
+      "pnl": 0.013670539986327954
     },
     {
       "symbol": "ETH",
       "entryPrice": 1687.26,
       "amount": 10,
       "tp": 1729.44,
-      "sl": 1661.95
+      "sl": 1661.95,
+      "currentPrice": 1689.37,
+      "pnlPercent": 0.12505482261180256,
+      "pnl": 0.012505482261180256
     },
     {
       "symbol": "BTC",
       "entryPrice": 58144.28,
       "amount": 10,
       "tp": 59888.61,
-      "sl": 56981.39
+      "sl": 56981.39,
+      "currentPrice": 58142.87,
+      "pnlPercent": -0.0024250020810236477,
+      "pnl": -0.00024250020810236475
     }
   ],
-  "currentStatus": "READY",
-  "scanIndex": 724,
   "liquidity": {
     "eur": -46.902446731336,
     "usdc": 20.3458948764328
@@ -685,7 +705,9 @@
     "profit": 0,
     "fees": 0
   },
-  "diag": "AUTH_FAIL | CHECK_KEYS",
+  "currentStatus": "READY",
+  "scanIndex": 743,
+  "diag": "SIMULATION",
   "lastScans": [],
   "lastSync": null,
   "cooldownUntil": 0,

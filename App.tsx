@@ -82,9 +82,12 @@ const App: React.FC = () => {
     const interval = setInterval(syncWithServer, 4000);
     const statsInterval = setInterval(() => {
       WATCHLIST.forEach(id => fetchProductStats(id).then(info => {
-        setAssets(prev => [...prev.filter(a => a.id !== id), info].sort((a,b) => a.id.localeCompare(b.id)));
+        setAssets(prev => {
+          const filtered = prev.filter(a => a.id !== id);
+          return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
+        });
       }));
-    }, 10000);
+    }, 8000);
     return () => { clearInterval(interval); clearInterval(statsInterval); };
   }, [syncWithServer]);
 
@@ -113,7 +116,7 @@ const App: React.FC = () => {
           onUpdateBridge={handleUpdateBridge} 
         />
         
-        <main className="flex-1 flex bg-[#020205]">
+        <main className="flex-1 flex bg-[#020204]">
           <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">
               <TradingTerminal 
                 thoughtHistory={thoughtHistory} 
@@ -123,8 +126,8 @@ const App: React.FC = () => {
           
           <div className="w-80 border-l border-white/5 bg-black/40 flex flex-col">
             <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-               <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Active Signals</span>
-               <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+               <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Signal Feed</span>
+               <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse shadow-[0_0_8px_#6366f1]"></div>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               <SignalList signals={thoughtHistory} />
