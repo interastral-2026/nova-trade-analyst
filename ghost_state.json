@@ -13,43 +13,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 1679.93,
-      "symbol": "ETH",
-      "id": "5296d925-110b-4679-bf0d-89a935dfc6c0",
-      "timestamp": "2026-02-17T03:34:10.238Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 57924.08,
-      "symbol": "BTC",
-      "id": "8b084ff3-e6bd-4694-a2c2-762138685884",
-      "timestamp": "2026-02-17T03:34:00.151Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.1461,
-      "symbol": "FET",
-      "id": "1691fc4e-b186-4db8-bbde-245aa297216b",
-      "timestamp": "2026-02-17T03:33:50.230Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.8909,
+      "entryPrice": 0.8829,
+      "potentialRoi": 0,
       "symbol": "NEAR",
-      "id": "e609b19e-e04b-4019-9c28-a86a613d777f",
-      "timestamp": "2026-02-17T03:33:40.158Z"
+      "id": "ad088542-f530-45b7-8874-33211d4d6246",
+      "timestamp": "2026-02-17T19:56:18.324Z"
     },
     {
       "side": "NEUTRAL",
@@ -57,10 +25,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 7.801,
+      "entryPrice": 7.752,
+      "potentialRoi": 0,
       "symbol": "AVAX",
-      "id": "1057b766-f05a-4036-8e68-761ae59bdeb1",
-      "timestamp": "2026-02-17T03:33:30.229Z"
+      "id": "d6de7774-59cb-4bf8-804e-0dce435f425a",
+      "timestamp": "2026-02-17T19:56:08.257Z"
     },
     {
       "side": "NEUTRAL",
@@ -68,10 +37,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 73.25,
+      "entryPrice": 71.61,
+      "potentialRoi": 0,
       "symbol": "SOL",
-      "id": "6f7b48ff-2792-4f98-8b0e-f4e6ab116509",
-      "timestamp": "2026-02-17T03:33:20.144Z"
+      "id": "7db533da-c925-4b5c-9da6-b59de54d246a",
+      "timestamp": "2026-02-17T19:55:58.472Z"
     },
     {
       "side": "NEUTRAL",
@@ -79,10 +49,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 1679.18,
+      "entryPrice": 1688.54,
+      "potentialRoi": 0,
       "symbol": "ETH",
-      "id": "6dbcda62-b817-44fd-8929-15b9d68b6819",
-      "timestamp": "2026-02-17T03:33:10.129Z"
+      "id": "32fb0c51-ae3b-4a03-ab9e-6820e07112e1",
+      "timestamp": "2026-02-17T19:55:48.224Z"
     },
     {
       "side": "NEUTRAL",
@@ -90,10 +61,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 57903.84,
+      "entryPrice": 57259.85,
+      "potentialRoi": 0,
       "symbol": "BTC",
-      "id": "8691db59-61a1-4c01-8cc9-5d9520d0678a",
-      "timestamp": "2026-02-17T03:33:00.152Z"
+      "id": "fedbccf2-b269-4984-bb17-63dc8702f9aa",
+      "timestamp": "2026-02-17T19:55:38.465Z"
     },
     {
       "side": "NEUTRAL",
@@ -101,10 +73,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.146,
+      "entryPrice": 0.1449,
+      "potentialRoi": 0,
       "symbol": "FET",
-      "id": "4eb167cb-f004-4540-a235-9adfc0ce18c3",
-      "timestamp": "2026-02-17T03:32:50.232Z"
+      "id": "1b823d20-3ad7-4a8e-8523-2a5c6c48e05e",
+      "timestamp": "2026-02-17T19:55:28.261Z"
     },
     {
       "side": "NEUTRAL",
@@ -112,10 +85,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.8906,
+      "entryPrice": 0.8827,
+      "potentialRoi": 0,
       "symbol": "NEAR",
-      "id": "7b05ca3c-915a-44ea-abcc-6b18fff3032b",
-      "timestamp": "2026-02-17T03:32:40.160Z"
+      "id": "9942f8cf-9687-4270-8bac-28a9d1e22ca6",
+      "timestamp": "2026-02-17T19:55:18.198Z"
     },
     {
       "side": "NEUTRAL",
@@ -123,10 +97,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 7.799,
+      "entryPrice": 7.751,
+      "potentialRoi": 0,
       "symbol": "AVAX",
-      "id": "54733f9b-2e3e-4016-88ea-5964882405e2",
-      "timestamp": "2026-02-17T03:32:30.162Z"
+      "id": "89bd2491-478d-47c6-bca0-439716c26b2c",
+      "timestamp": "2026-02-17T19:55:08.442Z"
     },
     {
       "side": "NEUTRAL",
@@ -134,10 +109,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 73.22,
+      "entryPrice": 71.59,
+      "potentialRoi": 0,
       "symbol": "SOL",
-      "id": "8fcd3bbb-a3c0-4ed4-a217-b68848e9c086",
-      "timestamp": "2026-02-17T03:32:20.313Z"
+      "id": "20a04ec2-2dc8-4c58-b818-34f0ac211b8a",
+      "timestamp": "2026-02-17T19:54:58.235Z"
     },
     {
       "side": "NEUTRAL",
@@ -145,10 +121,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 1679.25,
+      "entryPrice": 1688.51,
+      "potentialRoi": 0,
       "symbol": "ETH",
-      "id": "31a07c2a-aff7-4913-97ad-d1978929650e",
-      "timestamp": "2026-02-17T03:32:10.175Z"
+      "id": "eebf4a12-8134-4107-bc3e-48d697d86b42",
+      "timestamp": "2026-02-17T19:54:47.853Z"
     },
     {
       "side": "NEUTRAL",
@@ -156,10 +133,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 57910.21,
+      "entryPrice": 57286.21,
+      "potentialRoi": 0,
       "symbol": "BTC",
-      "id": "294f3ca0-1d54-452f-9ded-0dd9f06c2586",
-      "timestamp": "2026-02-17T03:32:00.626Z"
+      "id": "5cafdcdc-9252-4390-bb60-2873cbdbd48c",
+      "timestamp": "2026-02-17T19:54:37.945Z"
     },
     {
       "side": "NEUTRAL",
@@ -167,10 +145,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.1458,
+      "entryPrice": 0.145,
+      "potentialRoi": 0,
       "symbol": "FET",
-      "id": "97b2af27-9cc8-4563-a70c-c4f27cf3f92f",
-      "timestamp": "2026-02-17T03:31:50.230Z"
+      "id": "967b3c6b-c796-452f-9537-74891f5b7dd9",
+      "timestamp": "2026-02-17T19:54:28.180Z"
     },
     {
       "side": "NEUTRAL",
@@ -178,10 +157,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.8906,
+      "entryPrice": 0.8823,
+      "potentialRoi": 0,
       "symbol": "NEAR",
-      "id": "bd63b685-9b9d-41cc-b5d0-032b8f686a24",
-      "timestamp": "2026-02-17T03:31:40.149Z"
+      "id": "17968b5c-6e05-4211-a392-8d408494454f",
+      "timestamp": "2026-02-17T19:54:17.939Z"
     },
     {
       "side": "NEUTRAL",
@@ -189,10 +169,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 7.807,
+      "entryPrice": 7.741,
+      "potentialRoi": 0,
       "symbol": "AVAX",
-      "id": "86d23974-ef2d-4512-b50d-d2023bd1213f",
-      "timestamp": "2026-02-17T03:31:30.118Z"
+      "id": "0c2edee6-17d2-4f25-894d-f830bf16053d",
+      "timestamp": "2026-02-17T19:54:07.857Z"
     },
     {
       "side": "NEUTRAL",
@@ -200,10 +181,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 73.29,
+      "entryPrice": 71.55,
+      "potentialRoi": 0,
       "symbol": "SOL",
-      "id": "01dba47a-2f4e-411f-befa-0849e2d1fe67",
-      "timestamp": "2026-02-17T03:31:20.148Z"
+      "id": "9ba4dd38-4eea-486a-a666-177d6ed10417",
+      "timestamp": "2026-02-17T19:53:58.023Z"
     },
     {
       "side": "NEUTRAL",
@@ -211,10 +193,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 1680.42,
+      "entryPrice": 1687.59,
+      "potentialRoi": 0,
       "symbol": "ETH",
-      "id": "edad9f64-22d3-4068-a047-553e06bc1387",
-      "timestamp": "2026-02-17T03:31:10.123Z"
+      "id": "b438ced7-f03b-4509-8c2b-39cad00001a8",
+      "timestamp": "2026-02-17T19:53:47.914Z"
     },
     {
       "side": "NEUTRAL",
@@ -222,10 +205,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 57948.75,
+      "entryPrice": 57219,
+      "potentialRoi": 0,
       "symbol": "BTC",
-      "id": "3366a66f-d44b-44f0-9485-493f763da178",
-      "timestamp": "2026-02-17T03:31:00.145Z"
+      "id": "d38527a2-aa67-437e-b0d0-cb4c29d1115c",
+      "timestamp": "2026-02-17T19:53:37.791Z"
     },
     {
       "side": "NEUTRAL",
@@ -233,10 +217,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.1459,
+      "entryPrice": 0.1448,
+      "potentialRoi": 0,
       "symbol": "FET",
-      "id": "8a93d987-e13a-453f-bf88-9e31bc18281c",
-      "timestamp": "2026-02-17T03:30:50.173Z"
+      "id": "9b3d31e5-d856-413c-acfb-3a7736231ca8",
+      "timestamp": "2026-02-17T19:53:27.873Z"
     },
     {
       "side": "NEUTRAL",
@@ -244,10 +229,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.8914,
+      "entryPrice": 0.8818,
+      "potentialRoi": 0,
       "symbol": "NEAR",
-      "id": "4a066cd1-ee6b-4a02-9687-9775937b7af5",
-      "timestamp": "2026-02-17T03:30:40.121Z"
+      "id": "130d013e-f9ae-43fb-b31f-24df2d299176",
+      "timestamp": "2026-02-17T19:53:17.797Z"
     },
     {
       "side": "NEUTRAL",
@@ -255,10 +241,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 7.806,
+      "entryPrice": 7.745,
+      "potentialRoi": 0,
       "symbol": "AVAX",
-      "id": "c9ba8eba-02e7-432c-ae16-1170785465b6",
-      "timestamp": "2026-02-17T03:30:30.142Z"
+      "id": "a838c8e4-eed8-4f43-b53a-3a8d1831de18",
+      "timestamp": "2026-02-17T19:53:07.916Z"
     },
     {
       "side": "NEUTRAL",
@@ -266,10 +253,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 73.31,
+      "entryPrice": 71.49,
+      "potentialRoi": 0,
       "symbol": "SOL",
-      "id": "bb8f7b7f-b32b-462b-b17a-9e10a956de85",
-      "timestamp": "2026-02-17T03:30:20.157Z"
+      "id": "391e95db-bb60-4819-9307-4ea22cc89fbb",
+      "timestamp": "2026-02-17T19:52:57.935Z"
     },
     {
       "side": "NEUTRAL",
@@ -277,10 +265,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 1680.59,
+      "entryPrice": 1687.46,
+      "potentialRoi": 0,
       "symbol": "ETH",
-      "id": "f10d6202-aec2-4dcd-931b-597d18db704b",
-      "timestamp": "2026-02-17T03:30:10.230Z"
+      "id": "17999bd6-a336-44ad-a368-a992aca22257",
+      "timestamp": "2026-02-17T19:52:48.013Z"
     },
     {
       "side": "NEUTRAL",
@@ -288,10 +277,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 57962.24,
+      "entryPrice": 57237.79,
+      "potentialRoi": 0,
       "symbol": "BTC",
-      "id": "149e8ef3-c2d4-4b56-a4e0-5102fe3e3b25",
-      "timestamp": "2026-02-17T03:30:00.136Z"
+      "id": "0e284425-8a44-41b4-9d15-91fec752f1a6",
+      "timestamp": "2026-02-17T19:52:37.987Z"
     },
     {
       "side": "NEUTRAL",
@@ -299,10 +289,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.146,
+      "entryPrice": 0.1449,
+      "potentialRoi": 0,
       "symbol": "FET",
-      "id": "698f144f-95a1-4454-98e3-a46ccb53baf7",
-      "timestamp": "2026-02-17T03:29:50.162Z"
+      "id": "bc8b7657-4459-437f-8432-a556834f8d28",
+      "timestamp": "2026-02-17T19:52:27.900Z"
     },
     {
       "side": "NEUTRAL",
@@ -310,10 +301,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.8916,
+      "entryPrice": 0.8828,
+      "potentialRoi": 0,
       "symbol": "NEAR",
-      "id": "60c3dce5-6a42-4f79-a05d-bc065c6b032f",
-      "timestamp": "2026-02-17T03:29:40.219Z"
+      "id": "3adab063-4a9d-4eca-947c-d8ddba097412",
+      "timestamp": "2026-02-17T19:52:18.104Z"
     },
     {
       "side": "NEUTRAL",
@@ -321,65 +313,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 73.35,
-      "symbol": "SOL",
-      "id": "e10a7c2d-8b39-474f-ad62-3e9c85a72ce4",
-      "timestamp": "2026-02-17T03:29:20.154Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 1680.69,
-      "symbol": "ETH",
-      "id": "116574ef-34b4-4266-8540-d7abb9680063",
-      "timestamp": "2026-02-17T03:29:10.227Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 57955.35,
-      "symbol": "BTC",
-      "id": "55f1f92f-13ca-4ff3-ab66-52e042006391",
-      "timestamp": "2026-02-17T03:29:00.152Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.1459,
-      "symbol": "FET",
-      "id": "934093d6-6a00-4660-852d-4916775c41df",
-      "timestamp": "2026-02-17T03:28:50.300Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 0.8906,
-      "symbol": "NEAR",
-      "id": "e53fad2c-5eac-4013-bdda-7d7bdd43a211",
-      "timestamp": "2026-02-17T03:28:40.145Z"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "API_KEY_MISSING",
-      "confidence": 0,
-      "tp": 0,
-      "sl": 0,
-      "entryPrice": 7.802,
+      "entryPrice": 7.751,
+      "potentialRoi": 0,
       "symbol": "AVAX",
-      "id": "b016109f-db90-4268-a332-c85b735cd93c",
-      "timestamp": "2026-02-17T03:28:30.774Z"
+      "id": "e2391c08-c041-4cd2-8250-baa4ed68b0c3",
+      "timestamp": "2026-02-17T19:52:08.704Z"
     },
     {
       "side": "NEUTRAL",
@@ -387,10 +325,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 73.35,
+      "entryPrice": 71.58,
+      "potentialRoi": 0,
       "symbol": "SOL",
-      "id": "adc62a1b-e7e7-4550-a109-a2bc2f86ae89",
-      "timestamp": "2026-02-17T03:28:20.145Z"
+      "id": "3b0edd3e-de95-4586-967c-2f5415e4797e",
+      "timestamp": "2026-02-17T19:51:57.969Z"
     },
     {
       "side": "NEUTRAL",
@@ -398,10 +337,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 1680.97,
+      "entryPrice": 1687.81,
+      "potentialRoi": 0,
       "symbol": "ETH",
-      "id": "e1a9cd62-c39f-415f-b1c6-8836fc30f3ea",
-      "timestamp": "2026-02-17T03:28:10.094Z"
+      "id": "10ce7f28-ea5d-4600-8fee-7b707f999468",
+      "timestamp": "2026-02-17T19:51:48.415Z"
     },
     {
       "side": "NEUTRAL",
@@ -409,10 +349,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 57943.18,
+      "entryPrice": 57253.94,
+      "potentialRoi": 0,
       "symbol": "BTC",
-      "id": "5ea259d4-a40c-4fbf-a0fe-b37147863da7",
-      "timestamp": "2026-02-17T03:28:00.088Z"
+      "id": "6a92d2b2-a291-46e4-956b-f352aa26e0e7",
+      "timestamp": "2026-02-17T19:51:37.793Z"
     },
     {
       "side": "NEUTRAL",
@@ -420,10 +361,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.1459,
+      "entryPrice": 0.1448,
+      "potentialRoi": 0,
       "symbol": "FET",
-      "id": "abc26e6c-0845-4108-a188-5b00dbab1657",
-      "timestamp": "2026-02-17T03:27:50.146Z"
+      "id": "e9c38cd2-cdb1-40e2-8d9c-49b9fb81aa18",
+      "timestamp": "2026-02-17T19:51:27.955Z"
     },
     {
       "side": "NEUTRAL",
@@ -431,10 +373,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.8904,
+      "entryPrice": 0.8828,
+      "potentialRoi": 0,
       "symbol": "NEAR",
-      "id": "4a0f918e-aabf-4fc4-88aa-999b1dee0f1d",
-      "timestamp": "2026-02-17T03:27:42.715Z"
+      "id": "57358535-27df-4d02-9034-acda6a9f729b",
+      "timestamp": "2026-02-17T19:51:18.007Z"
     },
     {
       "side": "NEUTRAL",
@@ -442,10 +385,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 7.806,
+      "entryPrice": 7.757,
+      "potentialRoi": 0,
       "symbol": "AVAX",
-      "id": "0aa61b6c-065d-4f1c-873e-a6cab7441196",
-      "timestamp": "2026-02-17T03:27:30.102Z"
+      "id": "d4ca5577-9f8f-4530-9788-a67ac9d55960",
+      "timestamp": "2026-02-17T19:51:07.924Z"
     },
     {
       "side": "NEUTRAL",
@@ -453,10 +397,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 73.28,
+      "entryPrice": 71.63,
+      "potentialRoi": 0,
       "symbol": "SOL",
-      "id": "2aa61864-f314-49c3-884a-737851a6d06b",
-      "timestamp": "2026-02-17T03:27:20.108Z"
+      "id": "26d454f8-819b-44db-a0f5-91503db651ad",
+      "timestamp": "2026-02-17T19:50:57.941Z"
     },
     {
       "side": "NEUTRAL",
@@ -464,10 +409,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 1680.35,
+      "entryPrice": 1689.76,
+      "potentialRoi": 0,
       "symbol": "ETH",
-      "id": "2cb5b8ac-cdec-4f2e-85b0-fe7be8c47dcb",
-      "timestamp": "2026-02-17T03:27:10.718Z"
+      "id": "b36837ac-95cf-402d-9ea1-c6eff0fcab6d",
+      "timestamp": "2026-02-17T19:50:47.809Z"
     },
     {
       "side": "NEUTRAL",
@@ -475,10 +421,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 57958.75,
+      "entryPrice": 57311.3,
+      "potentialRoi": 0,
       "symbol": "BTC",
-      "id": "514d65e8-0848-4a5c-93ac-aa397cb6874e",
-      "timestamp": "2026-02-17T03:27:00.807Z"
+      "id": "d76c2f3f-1728-419f-97cd-b49259c4ad84",
+      "timestamp": "2026-02-17T19:50:37.781Z"
     },
     {
       "side": "NEUTRAL",
@@ -486,10 +433,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.1459,
+      "entryPrice": 0.145,
+      "potentialRoi": 0,
       "symbol": "FET",
-      "id": "959cec44-d9d8-4d7a-a240-493b7922609c",
-      "timestamp": "2026-02-17T03:26:50.116Z"
+      "id": "fbcae8bf-dee1-4904-abb3-9be7a7918eb3",
+      "timestamp": "2026-02-17T19:50:27.789Z"
     },
     {
       "side": "NEUTRAL",
@@ -497,10 +445,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.8906,
+      "entryPrice": 0.8837,
+      "potentialRoi": 0,
       "symbol": "NEAR",
-      "id": "0adde506-4cef-4e6d-a7cd-8931fd2d943a",
-      "timestamp": "2026-02-17T03:26:40.177Z"
+      "id": "23f08c46-8c08-431c-bfef-a7a5243475ae",
+      "timestamp": "2026-02-17T19:50:18.028Z"
     },
     {
       "side": "NEUTRAL",
@@ -508,10 +457,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 7.806,
+      "entryPrice": 7.761,
+      "potentialRoi": 0,
       "symbol": "AVAX",
-      "id": "76a174fa-da56-40cf-9f50-7060c94c38b4",
-      "timestamp": "2026-02-17T03:26:30.136Z"
+      "id": "f423ff8b-2971-4633-ba6d-4f4a624e627f",
+      "timestamp": "2026-02-17T19:50:09.025Z"
     },
     {
       "side": "NEUTRAL",
@@ -519,10 +469,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 73.27,
+      "entryPrice": 71.63,
+      "potentialRoi": 0,
       "symbol": "SOL",
-      "id": "ed5acc9a-680c-47d5-935a-483e37ec49b7",
-      "timestamp": "2026-02-17T03:26:20.170Z"
+      "id": "9163e214-6e68-4d6b-90e4-716bdc1ebceb",
+      "timestamp": "2026-02-17T19:49:57.785Z"
     },
     {
       "side": "NEUTRAL",
@@ -530,10 +481,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 1680.64,
+      "entryPrice": 1690.41,
+      "potentialRoi": 0,
       "symbol": "ETH",
-      "id": "e9a0aa9e-ebc5-44a4-bd37-be0679bc49f4",
-      "timestamp": "2026-02-17T03:26:10.264Z"
+      "id": "f13622bb-504f-4e68-8aca-1fc2711c397d",
+      "timestamp": "2026-02-17T19:49:47.783Z"
     },
     {
       "side": "NEUTRAL",
@@ -541,10 +493,11 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 57949.15,
+      "entryPrice": 57343.42,
+      "potentialRoi": 0,
       "symbol": "BTC",
-      "id": "74aa9508-6d7b-439f-b508-c87503f41d74",
-      "timestamp": "2026-02-17T03:26:00.177Z"
+      "id": "597c6890-f522-472e-aeca-5d860e93b1c2",
+      "timestamp": "2026-02-17T19:49:37.786Z"
     },
     {
       "side": "NEUTRAL",
@@ -552,10 +505,107 @@
       "confidence": 0,
       "tp": 0,
       "sl": 0,
-      "entryPrice": 0.1458,
+      "entryPrice": 0.1449,
+      "potentialRoi": 0,
       "symbol": "FET",
-      "id": "87beccbf-f078-4cf2-a9b5-6a7f2eef9049",
-      "timestamp": "2026-02-17T03:25:50.120Z"
+      "id": "60af5007-a6a6-4aa1-8bf3-19eeed026017",
+      "timestamp": "2026-02-17T19:49:28.641Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "tp": 0,
+      "sl": 0,
+      "entryPrice": 0.8842,
+      "potentialRoi": 0,
+      "symbol": "NEAR",
+      "id": "6534fe36-f9e7-4ae1-82cd-f891eb950234",
+      "timestamp": "2026-02-17T19:49:17.787Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "tp": 0,
+      "sl": 0,
+      "entryPrice": 7.762,
+      "potentialRoi": 0,
+      "symbol": "AVAX",
+      "id": "96cc3129-5b36-4f0a-b4ad-b8ba79efe1df",
+      "timestamp": "2026-02-17T19:49:07.778Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "tp": 0,
+      "sl": 0,
+      "entryPrice": 71.65,
+      "potentialRoi": 0,
+      "symbol": "SOL",
+      "id": "54e666a7-58d9-48c2-860d-94596f7253dc",
+      "timestamp": "2026-02-17T19:48:57.789Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "tp": 0,
+      "sl": 0,
+      "entryPrice": 1690.96,
+      "potentialRoi": 0,
+      "symbol": "ETH",
+      "id": "35c32cb2-53d2-46af-aec9-bb8af722b04d",
+      "timestamp": "2026-02-17T19:48:47.872Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "tp": 0,
+      "sl": 0,
+      "entryPrice": 57357.8,
+      "potentialRoi": 0,
+      "symbol": "BTC",
+      "id": "f129e3f6-acd9-4cae-96cd-e2190acc0385",
+      "timestamp": "2026-02-17T19:48:37.937Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "tp": 0,
+      "sl": 0,
+      "entryPrice": 0.1449,
+      "potentialRoi": 0,
+      "symbol": "FET",
+      "id": "ec74e0f8-367b-4058-9a7e-a5081b7c0f97",
+      "timestamp": "2026-02-17T19:48:28.024Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "tp": 0,
+      "sl": 0,
+      "entryPrice": 0.8844,
+      "potentialRoi": 0,
+      "symbol": "NEAR",
+      "id": "ed89143e-bf09-4ec7-b77e-5cbc9b12c22c",
+      "timestamp": "2026-02-17T19:48:17.829Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "API_KEY_MISSING",
+      "confidence": 0,
+      "tp": 0,
+      "sl": 0,
+      "entryPrice": 7.757,
+      "potentialRoi": 0,
+      "symbol": "AVAX",
+      "id": "3807def1-697c-4ab4-96f1-aadb9fa7763e",
+      "timestamp": "2026-02-17T19:48:08.020Z"
     }
   ],
   "executionLogs": [],
@@ -566,9 +616,9 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": -0.3671384356294397,
-      "pnl": -0.036713843562943965,
-      "currentPrice": 57930.81
+      "pnlPercent": -1.4941108566483203,
+      "pnl": -0.14941108566483202,
+      "currentPrice": 57275.54
     }
   ],
   "liquidity": {
@@ -581,8 +631,8 @@
     "fees": 0,
     "dailyGoal": 50
   },
-  "currentStatus": "HUNTING_ETH_ENTRY",
-  "scanIndex": 986,
+  "currentStatus": "ANALYZING_NEAR_SMC",
+  "scanIndex": 1097,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

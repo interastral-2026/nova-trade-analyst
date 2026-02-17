@@ -25,6 +25,7 @@ export interface TradeSignal {
   tp: number;
   sl: number;
   confidence: number;
+  potentialRoi: number;
   analysis: string;
   timestamp: string;
   isPaper?: boolean;
@@ -44,6 +45,8 @@ export interface ActivePosition {
   quantity: number;
   tp: number;
   sl: number;
+  confidence: number;
+  potentialRoi: number;
   pnl: number;
   pnlPercent: number;
   isPaper: boolean;
