@@ -38,18 +38,6 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
     }
   };
 
-  const handlePurge = async () => {
-    if (!confirm("Remove all simulated history and legacy data?")) return;
-    try {
-      const res = await fetch(`${getApiBase()}/api/ghost/clear-history`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clearPositions: true })
-      });
-      if (res.ok) fetchState();
-    } catch (e) {}
-  };
-
   useEffect(() => {
     fetchState();
     const i = setInterval(fetchState, 3000);
@@ -60,46 +48,39 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
   return (
     <div className="flex flex-col space-y-6 h-full font-mono">
-      {/* Daily Goal Tracker */}
-      <div className="bg-zinc-900/40 border border-indigo-500/20 rounded-[2rem] p-6 relative overflow-hidden">
-         <div className="flex justify-between items-end mb-3">
-            <div>
-              <p className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-1">UNLEASHED_DIRECTIVE_V24</p>
-              <h3 className="text-xl font-black text-white">€{stats.profit.toFixed(2)} / <span className="text-slate-500">€{stats.dailyGoal}</span></h3>
-            </div>
-            <div className="text-right flex flex-col items-end">
-              <span className={`text-[10px] font-black ${goalProgress >= 100 ? 'text-emerald-400' : 'text-indigo-400'}`}>
-                {goalProgress.toFixed(1)}% SUCCESS
-              </span>
-              <div className="flex items-center space-x-2 mt-1">
-                 <span className="text-[7px] text-slate-600 uppercase font-black tracking-tighter">Engine Status:</span>
-                 <span className={`text-[7px] font-black uppercase ${stats.diag.includes('OK') || stats.diag.includes('STABLE') ? 'text-emerald-500' : 'text-amber-500'}`}>
-                   {stats.diag}
-                 </span>
+      {/* Hyper-Active Status Header */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="col-span-2 bg-zinc-900/40 border border-indigo-500/20 rounded-[2rem] p-6 relative overflow-hidden">
+           <div className="flex justify-between items-end mb-3">
+              <div>
+                <p className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-1">PROFIT_DIRECTIVE_V25</p>
+                <h3 className="text-xl font-black text-white">€{stats.profit.toFixed(2)} / <span className="text-slate-500">€{stats.dailyGoal}</span></h3>
               </div>
-            </div>
-         </div>
-         <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-            <div 
-              className={`h-full transition-all duration-1000 ${goalProgress >= 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-indigo-600 to-cyan-400 shadow-[0_0_15px_rgba(99,102,241,0.5)]'}`}
-              style={{ width: `${goalProgress}%` }}
-            ></div>
-         </div>
-      </div>
+              <div className="text-right">
+                <span className={`text-[10px] font-black ${goalProgress >= 100 ? 'text-emerald-400' : 'text-indigo-400'}`}>
+                  {goalProgress.toFixed(1)}% SUCCESS
+                </span>
+              </div>
+           </div>
+           <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-1000 ${goalProgress >= 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-indigo-600 to-cyan-400 shadow-[0_0_15px_rgba(99,102,241,0.5)]'}`}
+                style={{ width: `${goalProgress}%` }}
+              ></div>
+           </div>
+        </div>
+        
+        <div className="bg-zinc-900/40 border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center">
+           <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-1">LIQUIDITY</p>
+           <h2 className="text-xl font-black text-white">€{stats.eur.toLocaleString()}</h2>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className={`p-5 rounded-3xl border transition-all ${stats.isPaper ? 'bg-zinc-900/50 border-white/5 opacity-80' : 'bg-emerald-950/20 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.1)]'}`}>
-           <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">AVAILABLE_LIQUIDITY</p>
-           <h2 className="text-2xl font-black text-white">€{stats.eur.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h2>
-        </div>
-        <div className="bg-zinc-900/50 border border-white/5 p-5 rounded-3xl">
-           <p className="text-[8px] font-black text-cyan-400 uppercase tracking-widest mb-1">COMPLETED_TRADES</p>
-           <h2 className="text-2xl font-black text-white">{stats.trades} <span className="text-[10px] text-slate-500">SNIPES</span></h2>
-        </div>
-        <div className="bg-zinc-900/50 border border-white/5 p-5 rounded-3xl flex flex-col justify-center relative overflow-hidden">
-           <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500 animate-pulse"></div>
-           <p className="text-[8px] font-black text-rose-500 uppercase tracking-widest mb-1">ACTIVE_RADAR_SCAN</p>
-           <h2 className="text-[10px] font-black text-white truncate uppercase">{liveActivity}</h2>
+        <div className="bg-zinc-900/40 border border-white/5 p-6 rounded-[2rem] flex flex-col justify-center relative overflow-hidden">
+           <div className="absolute top-0 right-0 p-2">
+              <span className="flex h-2 w-2 rounded-full bg-rose-500 animate-ping"></span>
+           </div>
+           <p className="text-[8px] font-black text-rose-500 uppercase tracking-widest mb-1">RADAR_LINK</p>
+           <h2 className="text-[9px] font-black text-white truncate uppercase">{liveActivity}</h2>
         </div>
       </div>
 
@@ -107,9 +88,9 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
         <div className="px-8 py-5 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
            <div className="flex space-x-6">
               {[
-                { id: 'stream', label: 'Neural Intelligence' },
-                { id: 'activity', label: 'Sniping History' },
-                { id: 'holdings', label: 'Open Positions', count: holdings.length }
+                { id: 'stream', label: 'Intelligence Stream' },
+                { id: 'activity', label: 'Sniper History' },
+                { id: 'holdings', label: 'Active Hunts', count: holdings.length }
               ].map((tab) => (
                 <button 
                   key={tab.id}
@@ -131,17 +112,18 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                 {thoughtHistory.length === 0 ? (
                    <div className="h-64 flex flex-col items-center justify-center opacity-20 text-center">
                       <div className="w-12 h-12 border-2 border-indigo-500 rounded-full border-t-transparent animate-spin mb-4"></div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.5em]">Aggressive Scan Initiated...</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.5em]">Establishing Neural Connection...</p>
                    </div>
                 ) : (
                   thoughtHistory.map((t, i) => (
-                    <div key={t.id || i} className={`border-l-2 pl-6 py-4 transition-all hover:bg-white/[0.02] cursor-default ${t.side === 'BUY' ? 'border-emerald-500 bg-emerald-500/5' : 'border-white/5'}`}>
+                    <div key={t.id || i} className={`border-l-2 pl-6 py-4 transition-all hover:bg-white/[0.02] ${t.side === 'BUY' ? 'border-emerald-500 bg-emerald-500/5' : 'border-white/5'}`}>
                        <div className="flex items-center space-x-4 mb-2">
                           <span className="text-[8px] font-black text-indigo-500/60">[{new Date(t.timestamp).toLocaleTimeString()}]</span>
                           <span className="text-sm font-black text-white uppercase">{t.symbol}</span>
-                          <span className={`text-[9px] font-black px-2 py-0.5 rounded border ${t.side === 'BUY' ? 'border-emerald-500/40 text-emerald-400' : 'text-slate-600'}`}>
-                            {t.side} ({t.confidence}%)
+                          <span className={`text-[9px] font-black px-2 py-0.5 rounded border ${t.side === 'BUY' ? 'border-emerald-500/40 text-emerald-400' : t.side === 'SELL' ? 'border-rose-500/40 text-rose-400' : 'text-slate-600'}`}>
+                            {t.side} {t.confidence > 0 ? `(${t.confidence}%)` : ''}
                           </span>
+                          {t.entryPrice && <span className="text-[10px] text-slate-500 font-bold">€{t.entryPrice.toLocaleString()}</span>}
                        </div>
                        <p className="text-[11px] text-slate-300 pr-10 italic leading-relaxed font-medium">"{t.analysis}"</p>
                     </div>
@@ -153,7 +135,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
            {activeTab === 'activity' && (
              <div className="space-y-3">
                 {logs.length === 0 ? (
-                  <div className="h-48 flex items-center justify-center opacity-20 uppercase text-[10px] font-black tracking-widest">Waiting for Force Fills...</div>
+                  <div className="h-48 flex items-center justify-center opacity-20 uppercase text-[10px] font-black tracking-widest">Waiting for Sniper Activity...</div>
                 ) : (
                   logs.map((log) => (
                     <div key={log.id} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl group hover:border-indigo-500/30 transition-all">
@@ -189,51 +171,21 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                    </div>
                 ) : (
                   holdings.map((pos) => {
-                    const entry = pos.entryPrice;
-                    const current = pos.currentPrice;
-                    const tp = pos.tp;
-                    const sl = pos.sl;
-                    
-                    const distTP = Math.max(0, Math.min(100, ((current - entry) / (tp - entry)) * 100));
-                    const distSL = Math.max(0, Math.min(100, ((current - entry) / (sl - entry)) * 100));
-
+                    const distTP = Math.max(0, Math.min(100, ((pos.currentPrice - pos.entryPrice) / (pos.tp - pos.entryPrice)) * 100));
                     return (
-                      <div key={pos.symbol} className={`bg-zinc-900/30 border p-6 rounded-[2.5rem] group transition-all relative overflow-hidden ${pos.isPaper ? 'border-white/5' : 'border-emerald-500/30 shadow-2xl shadow-emerald-500/5'}`}>
+                      <div key={pos.symbol} className="bg-zinc-900/30 border border-emerald-500/30 p-6 rounded-[2.5rem] relative overflow-hidden">
                          <div className="flex justify-between items-center mb-6">
-                            <div>
-                              <h4 className="text-lg font-black text-white flex items-center">
-                                {pos.symbol}
-                                <span className={`text-[7px] ${pos.isPaper ? 'bg-slate-700 text-slate-300' : 'bg-emerald-500 text-black'} px-1.5 py-0.5 ml-3 rounded font-black tracking-widest uppercase`}>
-                                  {pos.isPaper ? 'SIM' : 'LIVE'}
-                                </span>
-                              </h4>
-                              <p className="text-[9px] text-slate-500 uppercase mt-1 font-black">Tracking: <span className="text-white">€{pos.currentPrice?.toLocaleString()}</span></p>
-                            </div>
+                            <h4 className="text-lg font-black text-white">{pos.symbol}</h4>
                             <div className={`px-4 py-2 rounded-2xl font-black text-[12px] border ${pos.pnlPercent >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
                                {pos.pnlPercent >= 0 ? '+' : ''}{pos.pnlPercent.toFixed(2)}%
                             </div>
                          </div>
-                         
-                         <div className="grid grid-cols-2 gap-y-4 text-[10px] mb-6 border-b border-white/5 pb-6">
-                            <div><span className="text-slate-600 uppercase block text-[7px] mb-1 font-black">Entry</span>€{pos.entryPrice?.toLocaleString()}</div>
-                            <div><span className="text-emerald-500 uppercase block text-[7px] mb-1 font-black">Target</span>€{pos.tp?.toLocaleString()}</div>
-                            <div><span className="text-indigo-400 uppercase block text-[7px] mb-1 font-black">Size</span>€{pos.amount?.toFixed(2)}</div>
-                            <div><span className="text-rose-500 uppercase block text-[7px] mb-1 font-black">Stop</span>€{pos.sl?.toLocaleString()}</div>
+                         <div className="grid grid-cols-2 gap-4 text-[10px] mb-6">
+                            <div><span className="text-slate-600 block text-[7px] font-black uppercase">Entry</span>€{pos.entryPrice.toLocaleString()}</div>
+                            <div><span className="text-emerald-500 block text-[7px] font-black uppercase">Target</span>€{pos.tp.toLocaleString()}</div>
                          </div>
-
-                         <div className="space-y-4">
-                           <div className="space-y-1">
-                              <div className="flex justify-between text-[7px] font-black uppercase tracking-widest text-emerald-500">
-                                <span>Profit Hunt</span>
-                                <span>{distTP.toFixed(0)}%</span>
-                              </div>
-                              <div className="relative h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                <div 
-                                  className={`h-full transition-all duration-700 ${pos.pnlPercent >= 0 ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-slate-700'}`}
-                                  style={{ width: `${distTP}%` }}
-                                ></div>
-                              </div>
-                           </div>
+                         <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-full bg-emerald-500 shadow-[0_0_10px_#10b981]" style={{ width: `${distTP}%` }}></div>
                          </div>
                       </div>
                     )

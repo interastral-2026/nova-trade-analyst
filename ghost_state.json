@@ -586,9 +586,9 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": 0.13352990182353175,
-      "pnl": 0.013352990182353176,
-      "currentPrice": 58221.92
+      "pnlPercent": 0.20483528216360844,
+      "pnl": 0.020483528216360843,
+      "currentPrice": 58263.38
     }
   ],
   "liquidity": {
@@ -601,9 +601,9 @@
     "fees": 0,
     "dailyGoal": 50
   },
-  "currentStatus": "SNIPING_SOL",
-  "scanIndex": 849,
-  "diag": "SIM_MODE_ACTIVE",
+  "currentStatus": "ANALYZING_ETH_LIVE",
+  "scanIndex": 878,
+  "diag": "ENGINE_HEARTBEAT_OK",
   "lastScans": [],
   "lastSync": null,
   "cooldownUntil": 0,
