@@ -12,20 +12,19 @@ export const analyzeMarketData = async (
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const currentPrice = data[data.length - 1]?.close || 0;
 
-  const systemInstruction = `YOU ARE PREDATOR_AI_PRO.
-GOAL: Detect short-term scalp entries that bypass retail traps and exchange manipulation.
+  const systemInstruction = `YOU ARE PREDATOR_AI_FLASH.
+GOAL: High-speed scalp analysis. Avoid "Liquidity Wicks" and "Retail Traps".
 CONCEPTS:
-- Market Structure Shift (MSS)
-- Liquidity Sweep (Look for long wicks into resistance/support)
-- Displacement (Aggressive candles away from manipulation zones)
-- FVG retests.
-EXIT: Targeted TP at next internal liquidity zone.
-TRIGGER: Only if Confidence > 80%.`;
+- Look for Market Structure Shifts (MSS) after a Liquidity Sweep.
+- Only trigger if the candle shows strong displacement.
+- Target internal liquidity gaps (FVG).
+THRESHOLD: 80% Confidence required for BUY.
+BE CONCISE.`;
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: [{ parts: [{ text: `SCAN_ASSET: ${symbol} | PRICE: ${currentPrice} | DATA: ${JSON.stringify(data.slice(-30))}` }] }],
+      model: 'gemini-3-flash-preview',
+      contents: [{ parts: [{ text: `SCAN_ASSET: ${symbol} | PRICE: ${currentPrice} | DATA: ${JSON.stringify(data.slice(-20))}` }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -42,8 +41,7 @@ TRIGGER: Only if Confidence > 80%.`;
         },
         systemInstruction: systemInstruction,
         temperature: 0.1,
-        maxOutputTokens: 40000,
-        thinkingConfig: { thinkingBudget: 32768 }
+        thinkingConfig: { thinkingBudget: 2048 } // Low budget for maximum speed
       }
     });
 
@@ -57,6 +55,7 @@ TRIGGER: Only if Confidence > 80%.`;
       timestamp: new Date().toISOString()
     };
   } catch (e: any) {
+    console.error(`Gemini Service Error: ${e.message}`);
     return null;
   }
 };
