@@ -6,6 +6,11 @@ import cors from 'cors';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import { GoogleGenAI, Type } from "@google/genai";
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const STATE_FILE = './ghost_state.json';
@@ -232,6 +237,15 @@ app.post('/api/ghost/toggle', (req, res) => {
   if (req.body.auto !== undefined) ghostState.autoPilot = !!req.body.auto;
   saveState();
   res.json({ success: true });
+});
+
+// Serve static files in production
+app.use(express.static(path.join(__dirname, 'dist')));
+
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
