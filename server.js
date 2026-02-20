@@ -94,18 +94,18 @@ async function syncCoinbaseBalance() {
  * EXECUTE REAL TRADE ON COINBASE
  */
 async function executeTrade(symbol, side, amount, quantity) {
-  if (ghostState.isPaperMode) return true; // Simulate success in paper mode
+  console.log(`[REAL TRADE INITIATED] Attempting to ${side} ${symbol} | Amount: €${amount} | Qty: ${quantity}`);
   
   const token = generateCoinbaseJWT('POST', '/api/v3/brokerage/orders');
   if (!token) {
-    console.error("Cannot execute trade: Missing Coinbase API credentials.");
+    console.error("[REAL TRADE FAILED] Missing or invalid Coinbase API credentials.");
     return false;
   }
 
   try {
     const orderConfig = side === 'BUY' 
-      ? { market_market_ioc: { quote_size: Number(amount).toFixed(2) } } // Buy with EUR (2 decimals)
-      : { market_market_ioc: { base_size: Number(quantity).toFixed(6) } }; // Sell crypto (6 decimals)
+      ? { market_market_ioc: { quote_size: Number(amount).toFixed(2).toString() } } // Buy with EUR (2 decimals)
+      : { market_market_ioc: { base_size: Number(quantity).toFixed(6).toString() } }; // Sell crypto (6 decimals)
 
     const payload = {
       client_order_id: crypto.randomUUID(),
@@ -118,10 +118,11 @@ async function executeTrade(symbol, side, amount, quantity) {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    console.log(`Real Trade Executed: ${side} ${symbol}`, response.data);
+    console.log(`[REAL TRADE SUCCESS] ${side} ${symbol}`, response.data);
     return true;
   } catch (e) {
-    console.error(`Real Trade Failed (${side} ${symbol}):`, e.response?.data?.message || e.message);
+    console.error(`[REAL TRADE ERROR] (${side} ${symbol}):`, e.response?.data?.message || e.message);
+    if (e.response?.data) console.error("Coinbase API Response:", JSON.stringify(e.response.data));
     return false;
   }
 }
@@ -202,6 +203,7 @@ function loadState() {
 }
 
 let ghostState = loadState();
+ghostState.isPaperMode = false; // FORCE REAL TRADING ALWAYS
 
 async function loop() {
   if (!ghostState.isEngineActive) return;
