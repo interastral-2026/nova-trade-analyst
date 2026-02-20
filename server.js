@@ -217,28 +217,40 @@ async function loop() {
       // AUTO-EXECUTION (SMC PROTOCOL)
       if (signal.side === 'BUY' && signal.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
         if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
-          const qty = ghostState.settings.defaultTradeSize / (price || 1);
           
-          // Execute real trade
-          const tradeSuccess = await executeTrade(symbol, 'BUY', ghostState.settings.defaultTradeSize, qty);
+          // Use the available EUR balance or the default trade size, whichever is smaller
+          const availableEur = ghostState.liquidity.eur;
+          const tradeAmount = Math.min(ghostState.settings.defaultTradeSize, availableEur);
           
-          if (tradeSuccess) {
-            ghostState.activePositions.push({
-              symbol, entryPrice: price || 0, currentPrice: price || 0, amount: ghostState.settings.defaultTradeSize,
-              quantity: qty, tp: signal.tp, sl: signal.sl, confidence: signal.confidence, 
-              potentialRoi: signal.potentialRoi,
-              pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
-            });
-            ghostState.executionLogs.unshift({ 
-              id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
-              status: 'SUCCESS', details: `AUTO_SMC_HIT_${signal.confidence}%`, timestamp: new Date().toISOString() 
-            });
-            ghostState.dailyStats.trades++;
+          if (tradeAmount >= 5) { // Minimum trade size for Coinbase is usually around 5 EUR
+            const qty = tradeAmount / (price || 1);
+            
+            // Execute real trade
+            const tradeSuccess = await executeTrade(symbol, 'BUY', tradeAmount, qty);
+            
+            if (tradeSuccess) {
+              ghostState.activePositions.push({
+                symbol, entryPrice: price || 0, currentPrice: price || 0, amount: tradeAmount,
+                quantity: qty, tp: signal.tp, sl: signal.sl, confidence: signal.confidence, 
+                potentialRoi: signal.potentialRoi,
+                pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
+              });
+              ghostState.executionLogs.unshift({ 
+                id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
+                status: 'SUCCESS', details: `AUTO_SMC_HIT_${signal.confidence}%`, timestamp: new Date().toISOString() 
+              });
+              ghostState.dailyStats.trades++;
+            } else {
+              ghostState.executionLogs.unshift({ 
+                id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
+                status: 'FAILED', details: `API_EXECUTION_FAILED`, timestamp: new Date().toISOString() 
+              });
+            }
           } else {
-            ghostState.executionLogs.unshift({ 
-              id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
-              status: 'FAILED', details: `API_EXECUTION_FAILED`, timestamp: new Date().toISOString() 
-            });
+             ghostState.executionLogs.unshift({ 
+                id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
+                status: 'FAILED', details: `INSUFFICIENT_EUR_BALANCE`, timestamp: new Date().toISOString() 
+              });
           }
         }
       }
