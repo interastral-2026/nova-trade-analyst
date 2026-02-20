@@ -4,13 +4,13 @@ import { TradeSignal, AccountBalance, ExecutionLog } from "../types.ts";
 export const getApiBase = () => {
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
-      const url = localStorage.getItem('NOVA_BRIDGE_URL') || "http://localhost:3001";
-      return url.endsWith('/') ? url.slice(0, -1) : url;
+      const url = localStorage.getItem('NOVA_BRIDGE_URL');
+      if (url) return url.endsWith('/') ? url.slice(0, -1) : url;
     }
   } catch (e) {
     console.warn("Storage access restricted:", e);
   }
-  return "http://localhost:3001";
+  return typeof window !== 'undefined' && window.location.hostname === 'localhost' ? "http://localhost:3001" : "";
 };
 
 export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {

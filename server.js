@@ -8,6 +8,11 @@ import jwt from 'jsonwebtoken';
 import { GoogleGenAI, Type } from "@google/genai";
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env.local if it exists
+dotenv.config({ path: '.env.local' });
+dotenv.config(); // fallback to .env
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,13 +26,8 @@ app.use(express.json());
 
 // --- ENVIRONMENT CONFIG ---
 const API_KEY = process.env.API_KEY ? process.env.API_KEY.trim() : null;
-// Use the exact keys provided by the user
-const CB_API_KEY = "organizations/d90bac52-0e8a-4999-b156-7491091ffb5e/apiKeys/d2588804-6b9a-4c58-a81c-006d705648de";
-const CB_API_SECRET = `-----BEGIN EC PRIVATE KEY-----
-MHcCAQEEIBBkeIqleUaSEr1vWhFuI2I62cECUzvi19U9cnU4RPKAoAoGCCqGSM49
-AwEHoUQDQgAEDG28kGC8WnwJf5jLwpHhp0j7AOzCLaVLPjP+8N1kyXIHjo2Hojsn
-rwu/5Us6D0T7yEfXtupYoXXhOJLWV+8dxg==
------END EC PRIVATE KEY-----`;
+const CB_API_KEY = process.env.CB_API_KEY ? process.env.CB_API_KEY.trim() : null;
+const CB_API_SECRET = process.env.CB_API_SECRET ? process.env.CB_API_SECRET.replace(/\\n/g, '\n').trim() : null;
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'NEAR', 'FET'];
 
@@ -83,6 +83,42 @@ async function syncCoinbaseBalance() {
 }
 
 /**
+ * EXECUTE REAL TRADE ON COINBASE
+ */
+async function executeTrade(symbol, side, amount, quantity) {
+  if (ghostState.isPaperMode) return true; // Simulate success in paper mode
+  
+  const token = generateCoinbaseJWT();
+  if (!token) {
+    console.error("Cannot execute trade: Missing Coinbase API credentials.");
+    return false;
+  }
+
+  try {
+    const orderConfig = side === 'BUY' 
+      ? { market_market_ioc: { quote_size: Number(amount).toFixed(2) } } // Buy with EUR (2 decimals)
+      : { market_market_ioc: { base_size: Number(quantity).toFixed(6) } }; // Sell crypto (6 decimals)
+
+    const payload = {
+      client_order_id: crypto.randomUUID(),
+      product_id: `${symbol}-EUR`,
+      side: side,
+      order_configuration: orderConfig
+    };
+
+    const response = await axios.post('https://api.coinbase.com/api/v3/brokerage/orders', payload, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    console.log(`Real Trade Executed: ${side} ${symbol}`, response.data);
+    return true;
+  } catch (e) {
+    console.error(`Real Trade Failed (${side} ${symbol}):`, e.response?.data?.message || e.message);
+    return false;
+  }
+}
+
+/**
  * AI CORE - SMC ANALYSIS (FIXED FOR "AI ANALYSIS ERROR")
  */
 async function getAdvancedAnalysis(symbol, price, candles) {
@@ -94,10 +130,10 @@ async function getAdvancedAnalysis(symbol, price, candles) {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30H: ${JSON.stringify(history)}` }] }],
+      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}` }] }],
       config: {
         systemInstruction: `YOU ARE THE GHOST_SMC_BOT. 
-Scan for Fair Value Gaps (FVG) and Market Structure Shifts (MSS). 
+Scan for Fair Value Gaps (FVG) and Market Structure Shifts (MSS) for short-term trades (e.g., 30 minutes). 
 Confidence 0-100. PotentialRoi is a number representing percentage. 
 ALWAYS RETURN VALID JSON.`,
         responseMimeType: "application/json",
@@ -139,7 +175,7 @@ ALWAYS RETURN VALID JSON.`,
 
 function loadState() {
   const defaults = {
-    isEngineActive: true, autoPilot: true, isPaperMode: true,
+    isEngineActive: true, autoPilot: true, isPaperMode: false, // Set to false to enable real trading
     settings: { confidenceThreshold: 80, defaultTradeSize: 50.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 0, usdc: 0 }, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0 },
@@ -163,7 +199,8 @@ async function loop() {
   ghostState.currentStatus = `SNIPING_${symbol}`;
   
   try {
-    const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=EUR&limit=40`);
+    // Fetch 30-minute candles for short-term analysis
+    const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`);
     const candles = res.data?.Data?.Data || [];
     if (candles.length === 0) return;
     const price = candles[candles.length - 1].close;
@@ -174,19 +211,31 @@ async function loop() {
       const signal = { ...analysis, symbol, id: crypto.randomUUID(), timestamp: new Date().toISOString() };
       
       // AUTO-EXECUTION (SMC PROTOCOL)
-      if (signal.side === 'BUY' && signal.confidence >= ghostState.settings.confidenceThreshold) {
+      if (signal.side === 'BUY' && signal.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
         if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
           const qty = ghostState.settings.defaultTradeSize / (price || 1);
-          ghostState.activePositions.push({
-            symbol, entryPrice: price || 0, currentPrice: price || 0, amount: ghostState.settings.defaultTradeSize,
-            quantity: qty, tp: signal.tp, sl: signal.sl, confidence: signal.confidence, 
-            potentialRoi: signal.potentialRoi,
-            pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
-          });
-          ghostState.executionLogs.unshift({ 
-            id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
-            status: 'SUCCESS', details: `AUTO_SMC_HIT_${signal.confidence}%`, timestamp: new Date().toISOString() 
-          });
+          
+          // Execute real trade
+          const tradeSuccess = await executeTrade(symbol, 'BUY', ghostState.settings.defaultTradeSize, qty);
+          
+          if (tradeSuccess) {
+            ghostState.activePositions.push({
+              symbol, entryPrice: price || 0, currentPrice: price || 0, amount: ghostState.settings.defaultTradeSize,
+              quantity: qty, tp: signal.tp, sl: signal.sl, confidence: signal.confidence, 
+              potentialRoi: signal.potentialRoi,
+              pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
+            });
+            ghostState.executionLogs.unshift({ 
+              id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
+              status: 'SUCCESS', details: `AUTO_SMC_HIT_${signal.confidence}%`, timestamp: new Date().toISOString() 
+            });
+            ghostState.dailyStats.trades++;
+          } else {
+            ghostState.executionLogs.unshift({ 
+              id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
+              status: 'FAILED', details: `API_EXECUTION_FAILED`, timestamp: new Date().toISOString() 
+            });
+          }
         }
       }
       ghostState.thoughts.unshift(signal);
@@ -214,12 +263,22 @@ async function monitor() {
       pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
       
       if (curPrice >= pos.tp || curPrice <= pos.sl) {
-        ghostState.dailyStats.profit += pos.pnl;
-        ghostState.executionLogs.unshift({ 
-          id: crypto.randomUUID(), symbol: pos.symbol, action: 'SELL', 
-          price: curPrice, pnl: pos.pnl, status: 'SUCCESS', timestamp: new Date().toISOString() 
-        });
-        ghostState.activePositions.splice(i, 1);
+        // Execute real sell trade
+        const tradeSuccess = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
+        
+        if (tradeSuccess) {
+          ghostState.dailyStats.profit += pos.pnl;
+          ghostState.executionLogs.unshift({ 
+            id: crypto.randomUUID(), symbol: pos.symbol, action: 'SELL', 
+            price: curPrice, pnl: pos.pnl, status: 'SUCCESS', timestamp: new Date().toISOString() 
+          });
+          ghostState.activePositions.splice(i, 1);
+        } else {
+          ghostState.executionLogs.unshift({ 
+            id: crypto.randomUUID(), symbol: pos.symbol, action: 'SELL', 
+            price: curPrice, pnl: pos.pnl, status: 'FAILED', details: 'API_EXECUTION_FAILED', timestamp: new Date().toISOString() 
+          });
+        }
       }
     }
   } catch (e) {}
@@ -250,6 +309,6 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n💎 NOVA PREDATOR V35 - QUANTUM SYNC`);
-  console.log(`📡 COINBASE CLOUD ACCOUNT: ${CB_API_KEY.slice(0, 20)}...`);
+  console.log(`📡 COINBASE CLOUD ACCOUNT: ${CB_API_KEY ? CB_API_KEY.slice(0, 20) + '...' : 'NOT CONFIGURED'}`);
   console.log(`🔥 AUTO-SNIPER: ENABLED (SMC 80%+)\n`);
 });
