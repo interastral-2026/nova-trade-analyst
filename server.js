@@ -313,6 +313,18 @@ function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostSt
 setInterval(monitor, 5000);
 setInterval(loop, 12000);
 
+// Self-ping to keep the server alive on platforms like Railway/Heroku
+setInterval(() => {
+  axios.get(`http://localhost:${PORT}/api/ghost/state`).catch(() => {});
+}, 5 * 60 * 1000); // Every 5 minutes
+
+// Autonomous background logging
+setInterval(() => {
+  if (ghostState.isEngineActive) {
+    console.log(`[AUTONOMOUS AI] 🤖 Running in background... Active Positions: ${ghostState.activePositions.length} | Daily Profit: €${ghostState.dailyStats.profit.toFixed(2)} / €${ghostState.dailyStats.dailyGoal}`);
+  }
+}, 60000); // Log every 1 minute
+
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
   if (req.body.engine !== undefined) ghostState.isEngineActive = !!req.body.engine;
