@@ -138,11 +138,14 @@ async function getAdvancedAnalysis(symbol, price, candles) {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}` }] }],
+      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR. DAILY_GOAL: ${ghostState.dailyStats.dailyGoal} EUR.` }] }],
       config: {
-        systemInstruction: `YOU ARE THE GHOST_SMC_BOT. 
-Scan for Fair Value Gaps (FVG) and Market Structure Shifts (MSS) for short-term trades (e.g., 30 minutes). 
-Confidence 0-100. PotentialRoi is a number representing percentage. 
+        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN AGGRESSIVE YET CALCULATED AI TRADER.
+Your goal is to reach a daily profit of 50 EUR. You must be aggressive in finding opportunities but strict with risk management.
+Scan for Fair Value Gaps (FVG) and Market Structure Shifts (MSS) for short-term trades (e.g., 30 minutes).
+CRITICAL: You MUST factor in exchange fees (approx 0.6% total for round trip) when calculating your Take Profit (tp) and Stop Loss (sl). Your tp MUST cover fees and still yield a profit.
+If you find a high-probability setup, set a tight SL and a realistic TP.
+Confidence 0-100. PotentialRoi is a number representing percentage.
 ALWAYS RETURN VALID JSON.`,
         responseMimeType: "application/json",
         responseSchema: {
