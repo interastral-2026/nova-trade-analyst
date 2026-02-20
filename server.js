@@ -146,7 +146,7 @@ Your goal is to reach a daily profit of 50 EUR. You must be aggressive in findin
 Scan for Fair Value Gaps (FVG) and Market Structure Shifts (MSS) for short-term trades (e.g., 30 minutes).
 CRITICAL: You MUST factor in exchange fees (approx 0.6% total for round trip) when calculating your Take Profit (tp) and Stop Loss (sl). Your tp MUST cover fees and still yield a profit.
 If you find a high-probability setup, set a tight SL and a realistic TP.
-Confidence 0-100. PotentialRoi is a number representing percentage.
+Confidence 0-100 (Assign 75-85 for good setups, 90+ for perfect ones). PotentialRoi is a number representing percentage.
 ALWAYS RETURN VALID JSON.`,
         responseMimeType: "application/json",
         responseSchema: {
@@ -204,6 +204,7 @@ function loadState() {
 
 let ghostState = loadState();
 ghostState.isPaperMode = false; // FORCE REAL TRADING ALWAYS
+ghostState.settings.confidenceThreshold = 75; // Lowered to 75% so user can test real trades
 
 async function loop() {
   if (!ghostState.isEngineActive) return;
