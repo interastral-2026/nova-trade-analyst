@@ -78,11 +78,16 @@ async function syncCoinbaseBalance() {
     });
 
     const accounts = response.data?.accounts || [];
+    ghostState.actualBalances = {}; // Reset to track current crypto balances
+
     accounts.forEach(acc => {
       const currency = acc.currency;
       const amount = parseFloat(acc.available_balance?.value || 0);
       if (currency === 'EUR') ghostState.liquidity.eur = amount;
-      if (currency === 'USDC' || currency === 'USD') ghostState.liquidity.usdc = amount;
+      else if (currency === 'USDC' || currency === 'USD') ghostState.liquidity.usdc = amount;
+      else if (amount > 0) {
+        ghostState.actualBalances[currency] = amount;
+      }
     });
   } catch (e) {
     // Silent fail to keep app running if API is blocked/invalid
@@ -190,7 +195,7 @@ function loadState() {
     isEngineActive: true, autoPilot: true, isPaperMode: false, // Set to false to enable real trading
     settings: { confidenceThreshold: 80, defaultTradeSize: 50.0 },
     thoughts: [], executionLogs: [], activePositions: [],
-    liquidity: { eur: 0, usdc: 0 }, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0 },
+    liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0 },
     currentStatus: "INITIALIZING", scanIndex: 0
   };
   try { 
@@ -273,6 +278,32 @@ async function loop() {
 
 async function monitor() {
   await syncCoinbaseBalance();
+  
+  // RECONCILE BALANCES WITH ACTIVE POSITIONS
+  if (ghostState.actualBalances) {
+    // 1. Remove positions that are no longer in Coinbase (sold manually)
+    ghostState.activePositions = ghostState.activePositions.filter(p => {
+      const actualAmount = ghostState.actualBalances[p.symbol] || 0;
+      return actualAmount > 0.00000001; // Ignore dust
+    });
+
+    // 2. Add assets from Coinbase that are not in activePositions
+    for (const [symbol, amount] of Object.entries(ghostState.actualBalances)) {
+      if (WATCHLIST.includes(symbol) && amount > 0.00000001) {
+        let pos = ghostState.activePositions.find(p => p.symbol === symbol);
+        if (!pos) {
+          ghostState.activePositions.push({
+            symbol, entryPrice: 0, currentPrice: 0, amount: 0, quantity: amount,
+            tp: 0, sl: 0, confidence: 99, potentialRoi: 0, pnl: 0, pnlPercent: 0,
+            isPaper: false, timestamp: new Date().toISOString()
+          });
+        } else {
+          pos.quantity = amount; // Sync quantity in case user bought more manually
+        }
+      }
+    }
+  }
+
   if (ghostState.activePositions.length === 0) return;
   
   const symbols = ghostState.activePositions.map(p => p.symbol).join(',');
@@ -284,6 +315,14 @@ async function monitor() {
       const curPrice = prices[pos.symbol]?.EUR;
       if (!curPrice) continue;
       
+      // Initialize newly synced positions
+      if (pos.entryPrice === 0) {
+        pos.entryPrice = curPrice;
+        pos.amount = pos.quantity * curPrice;
+        pos.tp = curPrice * 1.02; // Default 2% TP for externally bought assets
+        pos.sl = curPrice * 0.95; // Default 5% SL
+      }
+
       pos.currentPrice = curPrice;
       pos.pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
       pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
