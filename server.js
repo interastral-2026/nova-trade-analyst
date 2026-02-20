@@ -38,14 +38,18 @@ const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'NEAR', 'FET'];
 /**
  * GENERATE JWT FOR COINBASE CLOUD (V3 API)
  */
-function generateCoinbaseJWT() {
+function generateCoinbaseJWT(request_method, request_path) {
   if (!CB_API_KEY || !CB_API_SECRET) return null;
   try {
+    const request_host = 'api.coinbase.com';
+    const uri = request_method + ' ' + request_host + request_path;
+    
     const payload = {
-      iss: "coinbase-cloud",
+      iss: "cdp",
       nbf: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 120,
       sub: CB_API_KEY,
+      uri: uri,
     };
 
     const header = {
@@ -65,7 +69,7 @@ function generateCoinbaseJWT() {
  * SYNC REAL BALANCES FROM COINBASE
  */
 async function syncCoinbaseBalance() {
-  const token = generateCoinbaseJWT();
+  const token = generateCoinbaseJWT('GET', '/api/v3/brokerage/accounts');
   if (!token) return;
 
   try {
@@ -92,7 +96,7 @@ async function syncCoinbaseBalance() {
 async function executeTrade(symbol, side, amount, quantity) {
   if (ghostState.isPaperMode) return true; // Simulate success in paper mode
   
-  const token = generateCoinbaseJWT();
+  const token = generateCoinbaseJWT('POST', '/api/v3/brokerage/orders');
   if (!token) {
     console.error("Cannot execute trade: Missing Coinbase API credentials.");
     return false;
