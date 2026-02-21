@@ -70,7 +70,7 @@ function generateCoinbaseJWT(request_method, request_path) {
  */
 async function syncCoinbaseBalance() {
   const token = generateCoinbaseJWT('GET', '/api/v3/brokerage/accounts');
-  if (!token) return;
+  if (!token) return false;
 
   try {
     const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/accounts', {
@@ -78,20 +78,23 @@ async function syncCoinbaseBalance() {
     });
 
     const accounts = response.data?.accounts || [];
-    ghostState.actualBalances = {}; // Reset to track current crypto balances
+    const newBalances = {}; 
 
     accounts.forEach(acc => {
       const currency = acc.currency;
       const amount = parseFloat(acc.available_balance?.value || 0);
       if (currency === 'EUR') ghostState.liquidity.eur = amount;
       else if (currency === 'USDC' || currency === 'USD') ghostState.liquidity.usdc = amount;
-      else if (amount > 0) {
-        ghostState.actualBalances[currency] = amount;
+      else if (amount > 0.00000001) {
+        newBalances[currency] = amount;
       }
     });
+    
+    ghostState.actualBalances = newBalances;
+    return true;
   } catch (e) {
-    // Silent fail to keep app running if API is blocked/invalid
     console.warn("CB_SYNC_FAIL:", e.response?.data?.message || e.message);
+    return false;
   }
 }
 
@@ -195,7 +198,7 @@ function loadState() {
     isEngineActive: true, autoPilot: true, isPaperMode: false, // Set to false to enable real trading
     settings: { confidenceThreshold: 80, defaultTradeSize: 50.0 },
     thoughts: [], executionLogs: [], activePositions: [],
-    liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0 },
+    liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
     currentStatus: "INITIALIZING", scanIndex: 0
   };
   try { 
@@ -284,10 +287,10 @@ async function loop() {
 }
 
 async function monitor() {
-  await syncCoinbaseBalance();
+  const syncSuccess = await syncCoinbaseBalance();
   
-  // RECONCILE BALANCES WITH ACTIVE POSITIONS
-  if (ghostState.actualBalances) {
+  // ONLY RECONCILE IF SYNC WAS SUCCESSFUL to prevent wiping positions on API failure
+  if (syncSuccess && ghostState.actualBalances) {
     // 1. Remove positions that are no longer in Coinbase (sold manually)
     ghostState.activePositions = ghostState.activePositions.filter(p => {
       const actualAmount = ghostState.actualBalances[p.symbol] || 0;
@@ -309,6 +312,15 @@ async function monitor() {
         }
       }
     }
+  }
+
+  // Daily Reset Logic
+  const today = new Date().toISOString().split('T')[0];
+  if (ghostState.dailyStats.lastResetDate !== today) {
+    console.log(`[SYSTEM] New day detected (${today}). Resetting daily stats.`);
+    ghostState.dailyStats.profit = 0;
+    ghostState.dailyStats.trades = 0;
+    ghostState.dailyStats.lastResetDate = today;
   }
 
   if (ghostState.activePositions.length === 0) return;
