@@ -5,12 +5,13 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev:server": "node server.js",
+    "dev:server": "tsx server.js",
     "dev:client": "vite",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server.js"
+    "start": "tsx server.js",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@google/genai": "^1.41.0",
@@ -26,8 +27,13 @@
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.56.0",
+    "@typescript-eslint/parser": "^8.56.0",
     "@vitejs/plugin-react": "^4.3.0",
     "concurrently": "^8.2.2",
+    "eslint": "^9.39.3",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.0",
     "typescript": "^5.4.5",
     "vite": "^5.2.11"
   }

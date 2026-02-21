@@ -10,7 +10,7 @@ export const getApiBase = () => {
   } catch (e) {
     console.warn("Storage access restricted:", e);
   }
-  return typeof window !== 'undefined' && window.location.hostname === 'localhost' ? "http://localhost:3001" : "";
+  return typeof window !== 'undefined' && window.location.hostname === 'localhost' ? "http://localhost:3000" : "";
 };
 
 export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {

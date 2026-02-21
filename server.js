@@ -23,7 +23,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const STATE_FILE = './ghost_state.json';
-const PORT = process.env.PORT || 3001;
+const PORT = 3000; // Hardcoded to 3000 as per platform requirements
 
 app.use(cors());
 app.use(express.json());
@@ -33,7 +33,7 @@ const API_KEY = process.env.API_KEY ? process.env.API_KEY.trim() : null;
 const CB_API_KEY = process.env.CB_API_KEY ? process.env.CB_API_KEY.trim() : null;
 const CB_API_SECRET = process.env.CB_API_SECRET ? process.env.CB_API_SECRET.replace(/\\n/g, '\n').trim() : null;
 
-const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'NEAR', 'FET'];
+const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'NEAR-EUR', 'FET-EUR'];
 
 /**
  * GENERATE JWT FOR COINBASE CLOUD (V3 API)
@@ -70,7 +70,7 @@ function generateCoinbaseJWT(request_method, request_path) {
  */
 async function syncCoinbaseBalance() {
   const token = generateCoinbaseJWT('GET', '/api/v3/brokerage/accounts');
-  if (!token) return;
+  if (!token) return false;
 
   try {
     const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/accounts', {
@@ -78,20 +78,23 @@ async function syncCoinbaseBalance() {
     });
 
     const accounts = response.data?.accounts || [];
-    ghostState.actualBalances = {}; // Reset to track current crypto balances
+    const newBalances = {}; 
 
     accounts.forEach(acc => {
       const currency = acc.currency;
       const amount = parseFloat(acc.available_balance?.value || 0);
       if (currency === 'EUR') ghostState.liquidity.eur = amount;
       else if (currency === 'USDC' || currency === 'USD') ghostState.liquidity.usdc = amount;
-      else if (amount > 0) {
-        ghostState.actualBalances[currency] = amount;
+      else if (amount > 0.00000001) {
+        newBalances[currency] = amount;
       }
     });
+    
+    ghostState.actualBalances = newBalances;
+    return true;
   } catch (e) {
-    // Silent fail to keep app running if API is blocked/invalid
     console.warn("CB_SYNC_FAIL:", e.response?.data?.message || e.message);
+    return false;
   }
 }
 
@@ -114,7 +117,7 @@ async function executeTrade(symbol, side, amount, quantity) {
 
     const payload = {
       client_order_id: crypto.randomUUID(),
-      product_id: `${symbol}-EUR`,
+      product_id: symbol,
       side: side,
       order_configuration: orderConfig
     };
@@ -195,7 +198,7 @@ function loadState() {
     isEngineActive: true, autoPilot: true, isPaperMode: false, // Set to false to enable real trading
     settings: { confidenceThreshold: 80, defaultTradeSize: 50.0 },
     thoughts: [], executionLogs: [], activePositions: [],
-    liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0 },
+    liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
     currentStatus: "INITIALIZING", scanIndex: 0
   };
   try { 
@@ -212,7 +215,10 @@ ghostState.isPaperMode = false; // FORCE REAL TRADING ALWAYS
 ghostState.settings.confidenceThreshold = 75; // Lowered to 75% so user can test real trades
 
 async function loop() {
-  if (!ghostState.isEngineActive) return;
+  if (!ghostState.isEngineActive) {
+    console.log("[IDLE] Engine is inactive.");
+    return;
+  }
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
   ghostState.scanIndex++;
   ghostState.currentStatus = `SNIPING_${symbol}`;
@@ -221,26 +227,32 @@ async function loop() {
     // Fetch 30-minute candles for short-term analysis
     const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`);
     const candles = res.data?.Data?.Data || [];
-    if (candles.length === 0) return;
+    if (candles.length === 0) {
+      console.warn(`[SCAN] No data for ${symbol}`);
+      return;
+    }
     const price = candles[candles.length - 1].close;
     
+    console.log(`[SCAN] Analyzing ${symbol} @ ${price} EUR...`);
     const analysis = await getAdvancedAnalysis(symbol, price, candles);
     
     if (analysis) {
+      console.log(`[ANALYSIS] ${symbol}: ${analysis.side} | Confidence: ${analysis.confidence}% | ROI: ${analysis.potentialRoi}%`);
       const signal = { ...analysis, symbol, id: crypto.randomUUID(), timestamp: new Date().toISOString() };
       
       // AUTO-EXECUTION (SMC PROTOCOL)
       if (signal.side === 'BUY' && signal.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
+        console.log(`[SIGNAL] 🎯 High confidence BUY signal for ${symbol} (${signal.confidence}%)`);
         if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
           
           // Use the available EUR balance or the default trade size, whichever is smaller
           const availableEur = ghostState.liquidity.eur;
           const tradeAmount = Math.min(ghostState.settings.defaultTradeSize, availableEur);
           
-          if (tradeAmount >= 5) { // Minimum trade size for Coinbase is usually around 5 EUR
+          if (tradeAmount >= 5) { 
             const qty = tradeAmount / (price || 1);
+            console.log(`[EXECUTION] Buying ${qty.toFixed(6)} ${symbol} for €${tradeAmount.toFixed(2)}`);
             
-            // Execute real trade
             const tradeSuccess = await executeTrade(symbol, 'BUY', tradeAmount, qty);
             
             if (tradeSuccess) {
@@ -256,31 +268,29 @@ async function loop() {
               });
               ghostState.dailyStats.trades++;
             } else {
-              ghostState.executionLogs.unshift({ 
-                id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
-                status: 'FAILED', details: `API_EXECUTION_FAILED`, timestamp: new Date().toISOString() 
-              });
+              console.error(`[EXECUTION FAILED] Trade for ${symbol} failed.`);
             }
           } else {
-             ghostState.executionLogs.unshift({ 
-                id: crypto.randomUUID(), symbol, action: 'BUY', price: price || 0, 
-                status: 'FAILED', details: `INSUFFICIENT_EUR_BALANCE`, timestamp: new Date().toISOString() 
-              });
+             console.warn(`[EXECUTION SKIPPED] Insufficient EUR balance for ${symbol}. Available: €${availableEur}`);
           }
+        } else {
+          console.log(`[SCAN] Position already active for ${symbol}. Skipping.`);
         }
       }
       ghostState.thoughts.unshift(signal);
       if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error(`[LOOP ERROR] Failed to analyze ${symbol}:`, e.message);
+  }
   saveState();
 }
 
 async function monitor() {
-  await syncCoinbaseBalance();
+  const syncSuccess = await syncCoinbaseBalance();
   
-  // RECONCILE BALANCES WITH ACTIVE POSITIONS
-  if (ghostState.actualBalances) {
+  // ONLY RECONCILE IF SYNC WAS SUCCESSFUL to prevent wiping positions on API failure
+  if (syncSuccess && ghostState.actualBalances) {
     // 1. Remove positions that are no longer in Coinbase (sold manually)
     ghostState.activePositions = ghostState.activePositions.filter(p => {
       const actualAmount = ghostState.actualBalances[p.symbol] || 0;
@@ -302,6 +312,15 @@ async function monitor() {
         }
       }
     }
+  }
+
+  // Daily Reset Logic
+  const today = new Date().toISOString().split('T')[0];
+  if (ghostState.dailyStats.lastResetDate !== today) {
+    console.log(`[SYSTEM] New day detected (${today}). Resetting daily stats.`);
+    ghostState.dailyStats.profit = 0;
+    ghostState.dailyStats.trades = 0;
+    ghostState.dailyStats.lastResetDate = today;
   }
 
   if (ghostState.activePositions.length === 0) return;
@@ -346,18 +365,26 @@ async function monitor() {
         }
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error(`[MONITOR ERROR] Failed to check prices:`, e.message);
+  }
   saveState();
 }
 
-function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {} }
+function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) { console.error("[SAVE ERROR]", e.message); } }
 
-setInterval(monitor, 5000);
-setInterval(loop, 12000);
+// Start autonomous cycles
+monitor();
+loop();
+
+setInterval(monitor, 10000); // Increased to 10s to avoid rate limits
+setInterval(loop, 30000);    // Increased to 30s for more stable analysis
 
 // Self-ping to keep the server alive on platforms like Railway/Heroku
 setInterval(() => {
-  axios.get(`http://localhost:${PORT}/api/ghost/state`).catch(() => {});
+  axios.get(`http://127.0.0.1:${PORT}/api/ghost/state`).catch((e) => {
+    console.error("[SELF-PING ERROR]", e.message);
+  });
 }, 5 * 60 * 1000); // Every 5 minutes
 
 // Autonomous background logging

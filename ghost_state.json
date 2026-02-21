@@ -9,606 +9,3729 @@
   "thoughts": [
     {
       "side": "SELL",
-      "tp": 57250,
-      "sl": 57750,
-      "entryPrice": 57673.02,
+      "tp": 57100,
+      "sl": 57850,
+      "entryPrice": 57692.2,
       "confidence": 82,
-      "potentialRoi": 0.73,
-      "analysis": "Market Structure Shift (MSS) confirmed after price failed to sustain levels above 57744 and broke below the 57691 swing low. A bearish trend is forming on the 30m timeframe. The Take Profit is set at 57250 to account for the 0.6% round-trip exchange fees (approx 346 EUR) and secure the 50 EUR daily profit target. Stop Loss is placed tightly above the recent swing high to maintain a calculated risk-to-reward ratio.",
+      "potentialRoi": 1.02,
+      "analysis": "Market structure shift to bearish confirmed after breaking 57714. Significant bearish FVG observed between 57711 and 57725. Current momentum is strongly downward. TP set at 57100 to account for 0.6% round-trip fees and secure the daily 50 EUR profit goal. SL placed above the recent swing high to manage risk.",
       "symbol": "BTC",
-      "id": "31f582c7-d12a-4d24-be3f-0279c8af80ff",
-      "timestamp": "2026-02-21T00:06:31.670Z"
+      "id": "c0ae5932-3c2f-4263-8ca0-9e55aa1f5824",
+      "timestamp": "2026-02-21T02:53:10.236Z"
     },
     {
       "side": "BUY",
-      "tp": 0.1442,
-      "sl": 0.141,
-      "entryPrice": 0.1421,
-      "confidence": 82,
-      "potentialRoi": 0.87,
-      "analysis": "Detected a liquidity sweep below the 0.1425 support level, reaching a low of 0.1421. This aggressive move indicates a potential stop-run before a mean reversion. Market structure on the 30m timeframe shows a previous consolidation zone between 0.1426 and 0.1428. The TP is set at 0.1442 to ensure a net profit of approximately 0.87% after accounting for the 0.6% round-trip exchange fees. SL is placed tightly at 0.1410 to manage risk against further downside expansion.",
+      "tp": 0.1428,
+      "sl": 0.1402,
+      "entryPrice": 0.1411,
+      "confidence": 78,
+      "potentialRoi": 0.6,
+      "analysis": "Price is testing the range low at 0.1411 after a liquidity sweep at 0.1416. Market structure remains intact on the 30m timeframe. Entry at 0.1411 targets a breakout above the recent high to 0.1428, accounting for the 0.6% exchange fee overhead. SL is placed at 0.1402 to minimize risk in case of a breakdown.",
       "symbol": "FET",
-      "id": "f1195f84-8768-4adc-98b9-79e0add084e3",
-      "timestamp": "2026-02-21T00:05:59.528Z"
+      "id": "563424c2-3838-4f5d-8245-ca96d8a7eddd",
+      "timestamp": "2026-02-21T02:52:57.434Z"
     },
     {
       "side": "BUY",
-      "tp": 0.912,
-      "sl": 0.8915,
-      "entryPrice": 0.8961,
+      "tp": 0.915,
+      "sl": 0.895,
+      "entryPrice": 0.8984,
       "confidence": 82,
-      "potentialRoi": 1.77,
-      "analysis": "Bullish Market Structure Shift (MSS) confirmed after breaking 0.8930. Price is currently in a momentum phase following a Fair Value Gap (FVG) creation between 0.8931 and 0.8971. Entry at 0.8961 targets the next liquidity pool at 0.9120. SL placed below the breakout candle base to manage risk. TP accounts for 0.6% exchange fees and net profit.",
+      "potentialRoi": 1.84,
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed by recent higher highs at 0.8991. Price is holding above the 0.8960 support zone. A Fair Value Gap (FVG) exists between 0.8974 and 0.8991. Entry at 0.8984 targets 0.9150 to ensure a net profit after accounting for the 0.6% round-trip exchange fees. Stop loss is positioned aggressively below the 0.8960 liquidity pool to maintain a high risk-reward ratio.",
       "symbol": "NEAR",
-      "id": "dd10bbcb-032f-40bf-95e2-f6f629cc6171",
-      "timestamp": "2026-02-21T00:05:25.359Z"
+      "id": "65ce6072-f651-4a8c-add9-b3ed3f59600e",
+      "timestamp": "2026-02-21T02:52:43.050Z"
     },
     {
       "side": "BUY",
-      "tp": 72.6,
-      "sl": 71.65,
-      "entryPrice": 71.78,
-      "confidence": 82,
-      "potentialRoi": 1.14,
-      "analysis": "Market Structure Shift (MSS) confirmed after breaking 71.71. Bullish Fair Value Gap (FVG) identified between 71.66 and 71.74. Current price at 71.78 represents a retracement into the premium-to-discount zone of the recent impulsive move. TP set at 72.60 to ensure net profitability after 0.6% round-trip fees (approx 0.43 EUR). SL placed tightly below the FVG to maintain a high risk-to-reward ratio.",
-      "symbol": "SOL",
-      "id": "3cf9603f-18d9-44cc-8c19-bbf282f0c413",
-      "timestamp": "2026-02-21T00:04:25.495Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 1681.5,
-      "sl": 1666.8,
-      "entryPrice": 1669.25,
-      "confidence": 82,
-      "potentialRoi": 0.73,
-      "analysis": "Bullish Market Structure Shift (MSS) confirmed after breaking 1669.93 and reaching 1671.15. Price is currently retracing into a bullish Fair Value Gap (FVG) and discount zone. Entry at 1669.25 targets buy-side liquidity above the recent high. TP at 1681.50 accounts for the 0.6% exchange fee round-trip while securing a portion of the daily 50 EUR goal. SL is tight at 1666.80, just below the recent consolidation base.",
-      "symbol": "ETH",
-      "id": "259d09b9-f85b-4f30-9640-1f15d57a7cd0",
-      "timestamp": "2026-02-21T00:03:56.182Z"
+      "tp": 7.88,
+      "sl": 7.775,
+      "entryPrice": 7.794,
+      "confidence": 78,
+      "potentialRoi": 1.1,
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed as price reclaimed the 7.793 level. A small Fair Value Gap (FVG) exists between 7.785 and 7.788. The entry at 7.794 targets the previous local high with a TP of 7.88, which accounts for the 0.6% round-trip exchange fees and provides a net profit. SL is placed tightly below the recent swing low at 7.775 to maintain a high risk-reward ratio.",
+      "symbol": "AVAX",
+      "id": "2d8a14d8-79e1-4d50-95af-7051f6b80932",
+      "timestamp": "2026-02-21T02:52:29.665Z"
     },
     {
       "side": "SELL",
-      "tp": 57150,
-      "sl": 57750,
-      "entryPrice": 57673.85,
+      "tp": 71.25,
+      "sl": 72.12,
+      "entryPrice": 72.01,
       "confidence": 78,
-      "potentialRoi": 0.91,
-      "analysis": "Market Structure Shift (MSS) confirmed on the 30M timeframe after breaking the 57689.38 support level. The recent rejection at 57744.30 created a bearish displacement. TP is set at 57150.00 to ensure the move covers the 0.6% round-trip exchange fees (approx 346 EUR) while targeting lower liquidity zones. SL is positioned strictly above the recent swing high to manage risk aggressively.",
-      "symbol": "BTC",
-      "id": "2970c7f5-d122-449d-b1d2-706746d00c02",
-      "timestamp": "2026-02-21T00:03:27.690Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.912,
-      "sl": 0.8905,
-      "entryPrice": 0.8939,
-      "confidence": 82,
-      "potentialRoi": 2.02,
-      "analysis": "Bullish Market Structure Shift (MSS) confirmed as price broke the 0.8926 resistance level with strong momentum. A Fair Value Gap (FVG) exists in the 0.8891-0.8925 range, providing support. Current price action shows a clear upward trend. The Take Profit is set at 0.9120 to ensure the 0.6% round-trip exchange fees are covered while securing a net profit to recover the daily deficit and move toward the 50 EUR goal. Stop Loss is placed tightly below the recent swing low at 0.8905 to manage risk aggressively.",
-      "symbol": "NEAR",
-      "id": "83b0336d-0a0c-438e-bcf5-8cb3e0350871",
-      "timestamp": "2026-02-21T00:02:42.151Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 7.88,
-      "sl": 7.765,
-      "entryPrice": 7.777,
-      "confidence": 82,
-      "potentialRoi": 1.32,
-      "analysis": "Detected Market Structure Shift (MSS) as price broke above 7.772 resistance. Bullish momentum is evident after the bounce from 7.757. A Fair Value Gap (FVG) exists in the 7.768-7.772 range, providing support. The TP of 7.88 accounts for the 0.6% round-trip exchange fees (approx 0.047 EUR) while targeting a net profit. SL is placed aggressively below the FVG to maintain a tight risk-to-reward ratio.",
-      "symbol": "AVAX",
-      "id": "75edb4ba-acef-49bb-a527-08024857e97d",
-      "timestamp": "2026-02-21T00:02:12.791Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 72.85,
-      "sl": 71.68,
-      "entryPrice": 71.81,
-      "confidence": 82,
-      "potentialRoi": 0.85,
-      "analysis": "Bullish Market Structure Shift (MSS) identified after breaking 71.74. Price is currently retracing into a bullish Fair Value Gap (FVG) formed between 71.66 and 71.74. The trend is strongly upward in the 30m window. Take Profit is set at 72.85 to account for the 0.6% round-trip exchange fees (approx 0.43 EUR) while securing a net profit to reach the daily goal. Stop Loss is placed tightly below the breakout consolidation zone at 71.68.",
+      "potentialRoi": 1.05,
+      "analysis": "Detected Market Structure Shift (MSS) following a rejection at the 72.11 resistance level. A bearish Fair Value Gap (FVG) was created during the impulse move from 72.10 down to 72.01. Current price action shows consolidation at the range low, suggesting a potential breakdown. The Take Profit is set at 71.25 to account for the 0.6% round-trip exchange fees (0.432 EUR) while securing a net profit. Stop Loss is placed tightly above the recent swing high to maintain a high risk-to-reward ratio.",
       "symbol": "SOL",
-      "id": "9749c36c-dbc5-4ab2-a922-fa6cfa586a2d",
-      "timestamp": "2026-02-21T00:01:44.472Z"
+      "id": "7277ffe5-03b0-40f5-909e-7547a792432d",
+      "timestamp": "2026-02-21T02:52:24.935Z"
     },
     {
-      "side": "BUY",
-      "tp": 1692.5,
-      "sl": 1664.5,
-      "entryPrice": 1670.12,
+      "side": "SELL",
+      "tp": 1645,
+      "sl": 1675.5,
+      "entryPrice": 1667.84,
       "confidence": 82,
-      "potentialRoi": 1.34,
-      "analysis": "Bullish Market Structure Shift (MSS) confirmed after breaking the 1669.93 resistance level. Price is currently in a minor retracement phase, providing an entry opportunity within the bullish impulse. A Fair Value Gap (FVG) is noted between 1668.96 and 1670.48. The Take Profit is set at 1692.50 to ensure the 0.6% exchange fees are covered while moving toward the daily 50 EUR profit goal. Stop Loss is positioned below the recent swing low of 1665.59 to maintain a calculated risk-to-reward ratio.",
+      "potentialRoi": 0.77,
+      "analysis": "Bearish Market Structure Shift (MSS) confirmed as price broke below the 1669.19 support level. A clear downward trend is established with Fair Value Gaps (FVG) visible in the recent 30-minute candles. The Take Profit is set at 1645.00 to account for the 0.6% round-trip exchange fees and secure a net profit toward the 50 EUR daily goal. Stop Loss is placed above the recent swing high of 1671.67 to protect against a reversal.",
       "symbol": "ETH",
-      "id": "dfaa27da-2256-42ae-a348-ba51a5f5b19c",
-      "timestamp": "2026-02-21T00:01:14.601Z"
+      "id": "c4db5464-202b-4bf1-bc1e-91124fc0bf32",
+      "timestamp": "2026-02-21T02:52:06.228Z"
     },
     {
-      "side": "BUY",
-      "tp": 58250,
-      "sl": 57620,
-      "entryPrice": 57713.97,
+      "side": "SELL",
+      "tp": 57250,
+      "sl": 57765,
+      "entryPrice": 57690.39,
       "confidence": 82,
-      "potentialRoi": 0.93,
-      "analysis": "Bullish Market Structure Shift (MSS) confirmed on the 30m timeframe after reclaiming the 57700 level. Price action shows a series of higher lows, and a bullish Fair Value Gap (FVG) was identified between 57661 and 57708. The Take Profit is set at 58250 to aggressively cover the 0.6% round-trip exchange fees and secure the daily 50 EUR profit target. Stop Loss is placed tightly below the recent swing low at 57620 to maintain a calculated risk-to-reward ratio.",
+      "potentialRoi": 0.76,
+      "analysis": "MSS CONFIRMED. TREND IS BEARISH. FVG AT 57720 UNFILLED. CALCULATED TP AT 57250 TO OFFSET 0.6% FEES AND HIT 50 EUR TARGET. SL TIGHT AT 57765.",
       "symbol": "BTC",
-      "id": "a070a7a7-5026-4a61-a169-da61a14489c8",
-      "timestamp": "2026-02-21T00:00:45.752Z"
+      "id": "dc3b9f59-0ab8-4bdd-818b-a84cf6271553",
+      "timestamp": "2026-02-21T02:52:06.185Z"
     },
     {
       "side": "BUY",
-      "tp": 0.1455,
-      "sl": 0.1415,
-      "entryPrice": 0.1426,
+      "tp": 0.1435,
+      "sl": 0.1402,
+      "entryPrice": 0.1411,
       "confidence": 78,
-      "potentialRoi": 1.43,
-      "analysis": "Detected Market Structure Shift (MSS) following a recovery from the 0.1422 liquidity sweep. Price is currently consolidating above the 0.1425 support zone. A Fair Value Gap (FVG) was identified between 0.1425 and 0.1428. This setup targets the next liquidity pool at 0.1455. The Take Profit level is calculated to ensure a net profit after accounting for the 0.6% round-trip exchange fees.",
+      "potentialRoi": 1.7,
+      "analysis": "Price is currently testing the 0.1411 support level after a liquidity sweep at 0.1416. Market structure remains intact as long as 0.1410 holds. A Fair Value Gap (FVG) is identified above the 0.1420 level, suggesting a potential move towards 0.1435. The Take Profit is set to account for the 0.6% round-trip exchange fees, ensuring a net positive gain. Stop Loss is placed tightly below the recent swing low to manage risk aggressively.",
       "symbol": "FET",
-      "id": "af0fa8d8-a786-4819-ac90-a36d631b8a7b",
-      "timestamp": "2026-02-21T00:00:15.223Z"
+      "id": "065b46ac-6e6a-4325-bf7e-ae9ce4b9f2e4",
+      "timestamp": "2026-02-21T02:51:46.799Z"
     },
     {
       "side": "BUY",
-      "tp": 0.912,
-      "sl": 0.887,
-      "entryPrice": 0.8939,
+      "tp": 7.95,
+      "sl": 7.74,
+      "entryPrice": 7.79,
       "confidence": 82,
-      "potentialRoi": 1.42,
-      "analysis": "Bullish Market Structure Shift (MSS) confirmed as price broke the 0.8909 resistance level with strong momentum. A Fair Value Gap (FVG) was created between 0.8891 and 0.8925. The current trend is aggressively bullish. Take Profit is set at 0.9120 to ensure a net profit after accounting for the 0.6% round-trip exchange fees. Stop Loss is placed tightly at 0.8870, just below the recent swing low and liquidity zone to maintain a high risk-reward ratio.",
-      "symbol": "NEAR",
-      "id": "d53add79-59ab-4c2e-ac1c-f804151b30df",
-      "timestamp": "2026-02-20T23:59:43.041Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 7.88,
-      "sl": 7.75,
-      "entryPrice": 7.78,
-      "confidence": 82,
-      "potentialRoi": 1.28,
-      "analysis": "AVAX shows a clear bullish Market Structure Shift (MSS) on the 30M timeframe, breaking above the 7.779 resistance level. A Fair Value Gap (FVG) was created between 7.765 and 7.772, providing a solid support base. The current momentum is aggressive, and the target of 7.88 accounts for the 0.6% round-trip exchange fees while maintaining a healthy risk-to-reward ratio to recover the daily loss and push toward the 50 EUR goal.",
+      "potentialRoi": 2.05,
+      "analysis": "Price action shows a recovery from 7.783 with a bullish MSS at 7.79. FVG identified between 7.785 and 7.791. Aggressive entry at 7.79 targeting 7.95 to clear local resistance while covering 0.6% fees. SL placed at 7.74 below recent swing lows to protect capital.",
       "symbol": "AVAX",
-      "id": "47a2c506-0912-4db9-9e13-7a9d766b4010",
-      "timestamp": "2026-02-20T23:59:11.721Z"
+      "id": "8a48fcf7-ebba-4678-b2a3-14451bab3602",
+      "timestamp": "2026-02-21T02:51:32.478Z"
     },
     {
       "side": "BUY",
-      "tp": 72.85,
-      "sl": 71.55,
-      "entryPrice": 71.84,
+      "tp": 0.915,
+      "sl": 0.8945,
+      "entryPrice": 0.8984,
+      "confidence": 82,
+      "potentialRoi": 1.84,
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed on the 30m timeframe as price breached the 0.8978 resistance level. A Fair Value Gap (FVG) exists between 0.8974 and 0.8991, suggesting strong buying pressure. The entry at 0.8984 targets a continuation of the upward momentum toward 0.9150. The Take Profit level accounts for the 0.6% round-trip exchange fees, ensuring a net profit. Stop Loss is placed below the 0.8950 support cluster to manage risk against a potential retracement into the lower liquidity zone.",
+      "symbol": "NEAR",
+      "id": "b4ab0305-a1e8-426a-9bc2-a37421cc5a5e",
+      "timestamp": "2026-02-21T02:51:30.246Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 72.95,
+      "sl": 71.9,
+      "entryPrice": 72.01,
+      "confidence": 78,
+      "potentialRoi": 1.3,
+      "analysis": "SOL is currently consolidating at a critical support level of 72.01 after a retracement from the 72.11 local high. We are observing a demand cluster between 71.98 and 72.01. The trade is structured to capture a momentum bounce that clears the 0.6% round-trip fee hurdle. A Market Structure Shift (MSS) is anticipated upon a break of 72.06, which would confirm the reversal toward our target of 72.95.",
+      "symbol": "SOL",
+      "id": "d5b4ae77-08a2-4586-a1ae-882ce8b66d29",
+      "timestamp": "2026-02-21T02:51:16.417Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 1645.5,
+      "sl": 1674.2,
+      "entryPrice": 1668.11,
+      "confidence": 82,
+      "potentialRoi": 1.35,
+      "analysis": "Market structure shift detected after break of 1670.20 support. Bearish FVG present between 1669.77 and 1670.40. Aggressive sell at current price targeting lower liquidity at 1645.50. SL placed above recent swing high to manage risk. TP covers 0.6% exchange fees and provides net profit.",
+      "symbol": "ETH",
+      "id": "6b6bcf0e-ca2b-44f1-8954-00987f3b73fc",
+      "timestamp": "2026-02-21T02:51:01.333Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 57300,
+      "sl": 57750,
+      "entryPrice": 57698.11,
+      "confidence": 85,
+      "potentialRoi": 0.69,
+      "analysis": "Market structure shifted bearish after failing to sustain levels above 57762. A clear break of the 57711 support level indicates a Market Structure Shift (MSS). A Fair Value Gap (FVG) exists between 57743 and 57717, providing resistance for any retracement. The target of 57300 is calculated to cover the 0.6% round-trip exchange fees (approx 346 EUR) while securing the 50 EUR daily profit goal. Tight SL placed above the recent swing high to maintain a high risk-to-reward ratio.",
+      "symbol": "BTC",
+      "id": "cd37a629-7378-4023-9173-9409c8b5f639",
+      "timestamp": "2026-02-21T02:50:56.984Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 0.1435,
+      "sl": 0.1405,
+      "entryPrice": 0.1412,
+      "confidence": 78,
+      "potentialRoi": 1.02,
+      "analysis": "FET is currently consolidating at the 0.1412 level, showing strong support around 0.1411. A recent liquidity sweep to 0.1416 indicates bullish intent. I am entering at 0.1412, targeting 0.1435 to clear the 0.6% round-trip fee barrier and capture a net profit. Stop loss is placed aggressively tight at 0.1405, just below the recent swing lows to maintain a high R:R ratio while hunting the daily 50 EUR goal.",
+      "symbol": "FET",
+      "id": "dba52bab-3fcf-48c1-b3c2-4812f5eed539",
+      "timestamp": "2026-02-21T02:50:30.645Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 0.916,
+      "sl": 0.894,
+      "entryPrice": 0.898,
       "confidence": 82,
       "potentialRoi": 1.4,
-      "analysis": "Bullish Market Structure Shift (MSS) confirmed on the 30m timeframe with a strong impulse from 71.66 to 71.85. Price is currently consolidating near the high. Expecting a continuation towards 72.85. TP set to cover 0.6% exchange fees and secure net profit. SL placed below the recent swing low at 71.55 to manage risk aggressively.",
-      "symbol": "SOL",
-      "id": "5697e65e-0d56-499e-b2e1-9debdbb61fbd",
-      "timestamp": "2026-02-20T23:58:41.988Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 1688.5,
-      "sl": 1663.5,
-      "entryPrice": 1670.47,
-      "confidence": 82,
-      "potentialRoi": 1.08,
-      "analysis": "Market Structure Shift (MSS) detected as price broke 1669.93 resistance with strong momentum. Bullish trend confirmed on 30m timeframe. Entry at 1670.47 targets 1688.50 to account for 0.6% round-trip fees and secure net profit. SL placed below the 1665.59 swing low to manage risk.",
-      "symbol": "ETH",
-      "id": "1d45de44-f40d-49d8-9416-754a47acc7d2",
-      "timestamp": "2026-02-20T23:58:14.476Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 58200,
-      "sl": 57640,
-      "entryPrice": 57709,
-      "confidence": 82,
-      "potentialRoi": 0.85,
-      "analysis": "Bullish market structure shift detected with consistent higher lows on the 30m timeframe. A prominent bullish Fair Value Gap (FVG) exists between 57661 and 57701, acting as a support zone. Current price action is testing the 57730 resistance; a successful breach targets the 58200 level. The take-profit level is calculated to cover the 0.6% round-trip exchange fees while securing the daily profit goal.",
-      "symbol": "BTC",
-      "id": "bf3b6d8e-71f6-495c-902a-c3aa3d7c4387",
-      "timestamp": "2026-02-20T23:57:48.163Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.1455,
-      "sl": 0.1421,
-      "entryPrice": 0.1428,
-      "confidence": 82,
-      "potentialRoi": 1.28,
-      "analysis": "Detected a liquidity sweep at 0.1422 followed by a bullish Market Structure Shift (MSS) breaking above 0.1426. The recovery to 0.1428 indicates strong buying pressure. Take Profit is set at 0.1455 to ensure the 0.6% round-trip exchange fees are covered while targeting the next overhead liquidity zone. Stop Loss is placed tightly below the recent swing low at 0.1421 to maintain a high Risk-to-Reward ratio.",
-      "symbol": "FET",
-      "id": "78034181-dc50-41df-b777-f7bb0654ff4c",
-      "timestamp": "2026-02-20T23:57:14.893Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.912,
-      "sl": 0.888,
-      "entryPrice": 0.8939,
-      "confidence": 82,
-      "potentialRoi": 1.42,
-      "analysis": "Detected Market Structure Shift (MSS) with strong bullish momentum breaking the 0.891 resistance level. Price is currently in a discovery phase after clearing local liquidity. A Fair Value Gap (FVG) was identified between 0.8909 and 0.8912. Setting TP at 0.912 to account for 0.6% round-trip fees and capture a 1.42% net profit. SL is placed tightly below the recent swing low at 0.888 to maintain a strict risk-to-reward ratio.",
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed as price breaks 0.8979 resistance. Strong upward momentum observed in the 30M history with a clear Fair Value Gap (FVG) between 0.8953 and 0.8978. Entry at 0.898 targets a 2% gross move to 0.916, which covers the 0.6% round-trip exchange fees and provides a 1.4% net profit. Stop loss is placed tightly at 0.894, just below the recent consolidation support to maintain a high risk-reward ratio.",
       "symbol": "NEAR",
-      "id": "bae007d6-d39e-491a-8193-3683d5284c27",
-      "timestamp": "2026-02-20T23:56:43.763Z"
+      "id": "fe9114be-d0f5-4019-bf7d-bad4f09a6fa4",
+      "timestamp": "2026-02-21T02:50:18.054Z"
     },
     {
       "side": "BUY",
       "tp": 7.92,
-      "sl": 7.755,
-      "entryPrice": 7.78,
-      "confidence": 82,
-      "potentialRoi": 1.8,
-      "analysis": "AVAX has executed a bullish Market Structure Shift (MSS) on the 30m timeframe, breaking above the 7.776 resistance level with strong momentum. The recent price action shows a series of higher lows (7.765 to 7.772). A Fair Value Gap (FVG) is identified between 7.765 and 7.775. Entry at 7.78 targets the next liquidity pool at 7.92. The Stop Loss is placed aggressively below the recent swing low to maintain a high R:R ratio. Take Profit is calculated to exceed the 0.6% round-trip fee threshold and contribute toward the 50 EUR daily goal.",
-      "symbol": "AVAX",
-      "id": "62a8a38d-383d-40b6-9050-de1f66813364",
-      "timestamp": "2026-02-20T23:56:14.230Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 73.55,
-      "sl": 71.35,
-      "entryPrice": 71.79,
-      "confidence": 82,
-      "potentialRoi": 2.45,
-      "analysis": "Bullish Market Structure Shift (MSS) confirmed after breaking 71.71 resistance. A clear Fair Value Gap (FVG) exists between 71.66 and 71.74. Momentum is strong with consecutive higher highs. The Take Profit is set at 73.55 to account for the 0.6% round-trip exchange fees (approx 0.43 EUR) and secure a net profit towards the 50 EUR daily goal. Stop Loss is placed tightly below the recent swing low and FVG origin at 71.35.",
-      "symbol": "SOL",
-      "id": "472167e9-78f3-41bc-a8ea-813e296e56db",
-      "timestamp": "2026-02-20T23:55:42.587Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 1695,
-      "sl": 1665,
-      "entryPrice": 1670.52,
-      "confidence": 82,
-      "potentialRoi": 1.465,
-      "analysis": "Bullish Market Structure Shift (MSS) confirmed on the 30m timeframe as price broke previous resistance at 1669.93. Strong impulsive move from 1666.17 indicates buyer dominance. Entry at current market price with a tight SL below the recent swing low. TP set to 1695.00 to account for 0.6% exchange fees and target a net profit towards the 50 EUR daily goal.",
-      "symbol": "ETH",
-      "id": "cc1055be-69a2-44db-a199-753d553257d1",
-      "timestamp": "2026-02-20T23:55:15.364Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 58150,
-      "sl": 57550,
-      "entryPrice": 57682.39,
+      "sl": 7.74,
+      "entryPrice": 7.79,
       "confidence": 78,
-      "potentialRoi": 0.81,
-      "analysis": "Detected Market Structure Shift (MSS) following the bounce from 57620.78. Price established a higher high at 57707.21 and is currently consolidating above the 57650 support zone. A bullish Fair Value Gap (FVG) was identified near the 57640 level. The Take Profit is set at 58150 to ensure the 0.6% round-trip exchange fees are covered while securing the daily profit target. Stop Loss is positioned aggressively below the recent swing low to maintain a favorable risk-to-reward ratio.",
-      "symbol": "BTC",
-      "id": "4e562f2e-8da0-4c3a-91f5-767f56de282c",
-      "timestamp": "2026-02-20T23:54:44.388Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.1445,
-      "sl": 0.1421,
-      "entryPrice": 0.1426,
-      "confidence": 78,
-      "potentialRoi": 0.73,
-      "analysis": "Detected a bullish Market Structure Shift (MSS) following a consolidation phase between 0.1422 and 0.1424. The price recently spiked to 0.1428 and retraced to 0.1426, creating a potential entry point. The Take Profit is set at 0.1445 to account for the 0.6% round-trip exchange fees and secure a net profit. Stop Loss is placed tightly at 0.1421, just below the recent swing low, maintaining a strong risk-to-reward ratio.",
-      "symbol": "FET",
-      "id": "4a79e4c6-2c77-41c2-916f-c5354ebd177a",
-      "timestamp": "2026-02-20T23:54:14.426Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.9077,
-      "sl": 0.8885,
-      "entryPrice": 0.8933,
-      "confidence": 82,
-      "potentialRoi": 1.01,
-      "analysis": "Strong bullish breakout observed on the 30m timeframe, clearing the 0.891 resistance level. Market Structure Shift (MSS) confirmed. Entry at current price with a tight SL below the breakout candle low. TP set to capture momentum while accounting for 0.6% round-trip fees.",
-      "symbol": "NEAR",
-      "id": "be0ba26d-4dc7-4662-9daa-13a83ae11382",
-      "timestamp": "2026-02-20T23:53:43.704Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 7.62,
-      "sl": 7.79,
-      "entryPrice": 7.76,
-      "confidence": 82,
-      "potentialRoi": 1.2,
-      "analysis": "Market Structure Shift (MSS) detected following a break of the 7.766 level. Bearish momentum is increasing as price creates lower highs. A Fair Value Gap (FVG) exists near 7.77, providing resistance. Target set at 7.62 to capture a breakdown extension, with SL at 7.79 to protect against a reversal into the FVG. ROI calculation includes 0.6% round-trip fee deduction.",
+      "potentialRoi": 1.07,
+      "analysis": "Detected bullish Market Structure Shift (MSS) on the 30M timeframe as price cleared the 7.788 resistance. Current consolidation at 7.79 provides an entry point. TP set at 7.92 to account for 0.6% round-trip fees and target the next liquidity pool. SL at 7.74 protects against a reversal below the recent 7.77 support level.",
       "symbol": "AVAX",
-      "id": "1b26b989-3e7d-4754-ae2e-ed0b9b4ed027",
-      "timestamp": "2026-02-20T23:53:22.005Z"
+      "id": "8efee8d1-9ed8-44dc-b9aa-972325e63ff6",
+      "timestamp": "2026-02-21T02:50:11.150Z"
     },
     {
       "side": "BUY",
       "tp": 72.85,
-      "sl": 71.45,
-      "entryPrice": 71.69,
+      "sl": 71.65,
+      "entryPrice": 72,
       "confidence": 78,
-      "potentialRoi": 1.62,
-      "analysis": "Detected bullish Market Structure Shift (MSS) after a strong recovery from the 71.58 low. Price has cleared the 71.67 resistance level with increasing volume. A small Fair Value Gap (FVG) is present between 71.64 and 71.68. The Take Profit is set at 72.85 to account for the 0.6% round-trip exchange fees and ensure a net profit contribution toward the 50 EUR daily goal. Stop Loss is placed tightly below the recent swing low to maintain a disciplined risk-to-reward ratio.",
+      "potentialRoi": 1.18,
+      "analysis": "Price has retraced to the 72.00 psychological support level after a sweep of liquidity at 72.11. A Fair Value Gap (FVG) is present between 72.01 and 72.10. The setup anticipates a bullish reversal from this support to fill the overhead gap and target the next liquidity pool. The Take Profit is set at 72.85 to ensure a net profit after accounting for the 0.6% round-trip exchange fees (0.432 EUR).",
       "symbol": "SOL",
-      "id": "9cb8550f-7924-4bf7-bf96-a00775aeaf1a",
-      "timestamp": "2026-02-20T23:52:42.878Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 1684.5,
-      "sl": 1664.8,
-      "entryPrice": 1669.35,
-      "confidence": 82,
-      "potentialRoi": 0.91,
-      "analysis": "Market structure shift confirmed as price reclaimed 1668.50 after a liquidity sweep at 1665.59. Bullish FVG identified between 1667.20 and 1668.10. The trend shows higher lows on the 30m timeframe. Take profit is set to clear the 0.6% exchange fee threshold and capture the next liquidity pool near 1685.",
-      "symbol": "ETH",
-      "id": "38345e59-bec7-4baa-bb13-9b6fcfa37e67",
-      "timestamp": "2026-02-20T23:52:19.957Z"
+      "id": "e52ae7a1-43d1-42ed-8e73-23b69027c405",
+      "timestamp": "2026-02-21T02:49:56.275Z"
     },
     {
       "side": "SELL",
-      "tp": 57200,
-      "sl": 57725,
-      "entryPrice": 57658.11,
-      "confidence": 82,
-      "potentialRoi": 0.79,
-      "analysis": "Bearish Market Structure Shift (MSS) confirmed on the 30M timeframe after breaking below the 57680 support level. Price rejected the 57700 resistance zone twice, indicating strong selling pressure. A Fair Value Gap (FVG) exists between 57682 and 57702. The target is the liquidity pool below the recent low of 57620. The Take Profit is set at 57200 to ensure a net profit after accounting for the 0.6% round-trip exchange fees.",
-      "symbol": "BTC",
-      "id": "2e3bad12-7907-467d-847a-ed3cdb216189",
-      "timestamp": "2026-02-20T23:51:43.805Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.1445,
-      "sl": 0.1418,
-      "entryPrice": 0.1425,
-      "confidence": 78,
-      "potentialRoi": 1.4,
-      "analysis": "Price has stabilized at the 0.1424-0.1425 level following a bearish displacement from 0.1431. A Market Structure Shift (MSS) is forming on the lower timeframe as the 0.1422 support holds. The target is the Fair Value Gap (FVG) located near 0.1429-0.1431. The Take Profit is set at 0.1445 to ensure the 0.6% exchange fees are covered while securing a net profit towards the daily goal.",
-      "symbol": "FET",
-      "id": "d7839ae8-72b9-435c-81f8-a4e84d7d623e",
-      "timestamp": "2026-02-20T23:51:15.840Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.9045,
-      "sl": 0.8885,
-      "entryPrice": 0.8912,
-      "confidence": 82,
-      "potentialRoi": 1.49,
-      "analysis": "Detected Market Structure Shift (MSS) on the 30m timeframe as price breached the 0.8909 resistance level with strong momentum. A bullish Fair Value Gap (FVG) was created between 0.8898 and 0.8912. Setting TP at 0.9045 to cover the 0.6% round-trip exchange fees and secure a net profit. SL is placed below the 0.8889 liquidity sweep to manage risk effectively.",
-      "symbol": "NEAR",
-      "id": "e9da8fb3-1e3d-4775-bf11-6c26865006a3",
-      "timestamp": "2026-02-20T23:50:43.128Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 7.65,
-      "sl": 7.785,
-      "entryPrice": 7.761,
-      "confidence": 78,
-      "potentialRoi": 0.83,
-      "analysis": "Detected bearish Market Structure Shift (MSS) after price failed to sustain levels above 7.772. A Fair Value Gap (FVG) is present in the recent impulsive move down to 7.761. Taking an aggressive short position targeting 7.65 to ensure net profitability after accounting for the 0.6% round-trip exchange fees. Stop Loss is positioned strictly above the recent swing high at 7.785 to maintain a high Risk-to-Reward ratio.",
-      "symbol": "AVAX",
-      "id": "370180eb-044e-4e16-acb2-3cbe31460fa7",
-      "timestamp": "2026-02-20T23:50:20.140Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 73.1,
-      "sl": 71.2,
-      "entryPrice": 71.66,
-      "confidence": 78,
-      "potentialRoi": 2.01,
-      "analysis": "Price action shows a recovery from the 71.58 low, indicating a potential bullish continuation. A minor Market Structure Shift (MSS) is observed as price stabilizes above 71.65. The Take Profit is set at 73.10 to ensure the 0.6% round-trip exchange fees are covered while securing a net profit. Stop Loss is placed below the recent swing low at 71.20 to manage risk effectively in this tight range.",
-      "symbol": "SOL",
-      "id": "aecbe83f-ccfb-428d-a1bb-8a3b1055b0ab",
-      "timestamp": "2026-02-20T23:49:46.392Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 57290,
-      "sl": 57745,
-      "entryPrice": 57688.63,
-      "confidence": 82,
-      "potentialRoi": 0.69,
-      "analysis": "Market Structure Shift (MSS) confirmed after failure to break 57735.31, followed by a lower high at 57708.29. Bearish momentum is evident as price breaks local support. Entry at 57688.63 targets liquidity below 57620.78. TP set at 57290.0 to cover 0.6% round-trip fees and achieve the 50 EUR profit goal. SL is positioned above the recent swing high to maintain a tight risk-to-reward ratio.",
-      "symbol": "BTC",
-      "id": "e866b28a-181b-4008-a611-25a46c0d167a",
-      "timestamp": "2026-02-20T23:48:54.513Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 0.1408,
-      "sl": 0.1432,
-      "entryPrice": 0.1424,
-      "confidence": 78,
-      "potentialRoi": 0.52,
-      "analysis": "Market structure shifted bearish after 0.1431 rejection. Price is currently stalling at 0.1424 support, but the lack of buy pressure and the presence of a bearish FVG at 0.1426 suggests a breakdown. Setting TP at 0.1408 to clear the 0.6% fee hurdle and secure a net gain toward the 50 EUR daily goal.",
-      "symbol": "FET",
-      "id": "8be1f9a5-cf99-430a-bd45-9bee83667470",
-      "timestamp": "2026-02-20T23:48:25.727Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.905,
-      "sl": 0.886,
-      "entryPrice": 0.8908,
-      "confidence": 78,
-      "potentialRoi": 1,
-      "analysis": "Detected Market Structure Shift (MSS) following a liquidity sweep at 0.8878. Price action shows a strong recovery above the 0.8900 psychological level. A bullish Fair Value Gap (FVG) is present between 0.8892 and 0.8904. The Take Profit is set at 0.9050 to account for the 0.6% round-trip exchange fees while targeting a net 1% gain. Stop Loss is placed below the recent swing low to maintain a tight risk-to-reward ratio.",
-      "symbol": "NEAR",
-      "id": "b1b0cce9-1ae1-4d1e-837c-8a33d68ed25e",
-      "timestamp": "2026-02-20T23:47:31.172Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 7.925,
-      "sl": 7.715,
-      "entryPrice": 7.768,
-      "confidence": 82,
-      "potentialRoi": 2.02,
-      "analysis": "Price is consolidating above the 7.76 support level after a sweep of internal liquidity at 7.759. Market Structure Shift (MSS) observed as price holds the 7.768 level despite minor pullbacks. Target is the buy-side liquidity pool above 7.85. The Take Profit (TP) is set at 7.925 to ensure a net profit after accounting for the 0.6% round-trip exchange fees. Stop Loss (SL) is placed tightly below the recent swing low to maintain a high risk-to-reward ratio.",
-      "symbol": "AVAX",
-      "id": "c05b7d36-c0c1-4704-bff0-eb785046d867",
-      "timestamp": "2026-02-20T23:47:22.581Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 70.55,
-      "sl": 71.78,
-      "entryPrice": 71.62,
-      "confidence": 78,
-      "potentialRoi": 0.89,
-      "analysis": "Detected a bearish Market Structure Shift (MSS) after the rejection at 71.74. The price has failed to reclaim the 71.68 level and is showing signs of distribution. A bearish Fair Value Gap (FVG) was formed between 71.70 and 71.66. The entry at 71.62 targets a liquidity sweep below the 71.55 support level. The Take Profit is positioned at 70.55 to secure a net gain after accounting for the 0.6% round-trip exchange fees. Stop Loss is placed aggressively above the recent swing high to maintain a high Risk/Reward ratio.",
-      "symbol": "SOL",
-      "id": "d95c0178-e3cd-4129-894a-d3b921b64d2c",
-      "timestamp": "2026-02-20T23:47:13.554Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 1652.45,
-      "sl": 1673.12,
-      "entryPrice": 1668.59,
+      "tp": 1652,
+      "sl": 1671.8,
+      "entryPrice": 1668.22,
       "confidence": 82,
       "potentialRoi": 0.97,
-      "analysis": "Market exhibits a bearish trend with a recent minor retracement. MSS observed at 1667.83 on the micro-scale, but the macro 30m trend remains heavy. Entry at 1668.59 targets the liquidity below 1665.59. TP set at 1652.45 to ensure 0.6% round-trip fees are covered while pursuing the 50 EUR daily target. SL placed above the 1671.33 swing high to maintain a calculated risk-reward ratio.",
+      "analysis": "Detected Market Structure Shift (MSS) to the downside after breaking 1669.03. Bearish momentum is strong with a clear Fair Value Gap (FVG) created during the recent impulsive drop. Entry at current market price to capture the continuation. TP set at 1652.00 to account for 0.6% round-trip fees and secure net profit. SL placed above the recent swing high at 1671.80 for risk mitigation.",
       "symbol": "ETH",
-      "id": "02890ed3-985a-420d-9f03-363481c26584",
-      "timestamp": "2026-02-20T23:47:00.934Z"
+      "id": "6b629e9e-b85e-460c-95d5-97b07588b90f",
+      "timestamp": "2026-02-21T02:49:44.310Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 0.1392,
+      "sl": 0.1421,
+      "entryPrice": 0.1411,
+      "confidence": 80,
+      "potentialRoi": 0.75,
+      "analysis": "Aggressive SELL initiated following a clear Swing Failure Pattern (SFP) at 0.1416. Candle 30 shows heavy selling pressure. Targeting the 0.1392 level to offset the 0.6% round-trip fees. SL placed at 0.1421, above the recent liquidity grab zone.",
+      "symbol": "FET",
+      "id": "4e4a7be5-f9a9-4cd5-8784-916a0dfb7ca3",
+      "timestamp": "2026-02-21T02:49:43.109Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 57250,
+      "sl": 57785,
+      "entryPrice": 57698.62,
+      "confidence": 82,
+      "potentialRoi": 0.77,
+      "analysis": "Detected Bearish Market Structure Shift (MSS) after price failed to sustain levels above 57760. A Fair Value Gap (FVG) exists in the 57740-57715 range. Aggressive SELL entry to target lower liquidity pools. TP set at 57250 to ensure 0.6% round-trip fees are covered while securing the 50 EUR daily profit goal.",
+      "symbol": "BTC",
+      "id": "d5438801-70f5-4141-8f51-65824442d5da",
+      "timestamp": "2026-02-21T02:49:37.455Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 7.685,
+      "sl": 7.825,
+      "entryPrice": 7.786,
+      "confidence": 82,
+      "potentialRoi": 1.3,
+      "analysis": "Detected Market Structure Shift (MSS) as price broke below the 7.790 support level with bearish momentum. A Fair Value Gap (FVG) is identified between 7.792 and 7.786. The trade targets the liquidity zone at 7.685, which provides sufficient margin to cover the 0.6% round-trip exchange fees and contribute to the 50 EUR daily profit goal. Stop Loss is placed strictly above the recent swing high to maintain a calculated risk-to-reward ratio.",
+      "symbol": "AVAX",
+      "id": "f8077965-b52a-4ad7-bc79-5f572c62f225",
+      "timestamp": "2026-02-21T02:49:06.742Z"
     },
     {
       "side": "BUY",
-      "tp": 58250,
-      "sl": 57610,
-      "entryPrice": 57705.96,
+      "tp": 0.915,
+      "sl": 0.894,
+      "entryPrice": 0.8982,
       "confidence": 82,
-      "potentialRoi": 0.94,
-      "analysis": "Detected a bullish Market Structure Shift (MSS) following the bounce from 57620.78. Price action shows a recovery trend with a small bullish Fair Value Gap (FVG) between 57655 and 57661. The entry at 57705.96 targets 58250.0 to account for the 0.6% round-trip exchange fees (approx 346 EUR on a full BTC) and secure the 50 EUR daily profit goal. Stop loss is placed tightly below the recent swing low to maintain a high risk-to-reward ratio.",
+      "potentialRoi": 1.87,
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed as price consistently breaks previous highs. Strong momentum observed in the 30m history with a clear upward trend from 0.8917. Entry at 0.8982 with a TP at 0.9150 to account for 0.6% round-trip fees and target a net profit. SL set at 0.8940 below the recent consolidation zone to manage risk while maintaining an aggressive stance toward the daily goal.",
+      "symbol": "NEAR",
+      "id": "be965648-91ca-40f3-8d05-dec9d91f63ea",
+      "timestamp": "2026-02-21T02:49:06.160Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 73.15,
+      "sl": 71.8,
+      "entryPrice": 72.02,
+      "confidence": 78,
+      "potentialRoi": 1.57,
+      "analysis": "SOL is showing a bullish market structure shift (MSS) after rebounding from 71.85 to 72.11. The current retracement to 72.01 has found support at the previous consolidation zone. A small Fair Value Gap (FVG) was created during the impulse move. To achieve the daily profit goal of 50 EUR while accounting for the 0.6% round-trip exchange fees (approx 0.43 EUR), a target of 73.15 is set to capture a net move of ~1%. Tight stop loss placed below the 71.85 swing low to maintain a high risk-reward ratio.",
+      "symbol": "SOL",
+      "id": "3f516ac8-2429-4ead-a8fa-7504749986e1",
+      "timestamp": "2026-02-21T02:48:51.331Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 1653.5,
+      "sl": 1671.5,
+      "entryPrice": 1668.78,
+      "confidence": 82,
+      "potentialRoi": 0.92,
+      "analysis": "Bearish Market Structure Shift (MSS) confirmed after breaking the 1670.20 support level. The price action shows a clear sequence of lower highs and lower lows on the 30M timeframe. A bearish Fair Value Gap (FVG) exists near the 1670.00 level, acting as resistance. The target is set at 1653.50 to capture liquidity while accounting for the 0.6% round-trip exchange fees. Stop loss is placed tightly above the recent swing high at 1671.50 to maintain a high risk-reward ratio.",
+      "symbol": "ETH",
+      "id": "cee33b21-d7f6-4521-9108-06ce6cc9ebf7",
+      "timestamp": "2026-02-21T02:48:34.229Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 57280,
+      "sl": 57765,
+      "entryPrice": 57695.37,
+      "confidence": 80,
+      "potentialRoi": 0.72,
+      "analysis": "Detected Market Structure Shift (MSS) at 57708.8 following a rejection at the 57762.98 peak. A bearish Fair Value Gap (FVG) was created during the impulsive move downward. The current price action indicates a weak corrective bounce, providing an aggressive entry for a trend continuation. The Take Profit is positioned at 57280.0 to account for the 0.6% round-trip exchange fees and secure the daily profit goal.",
       "symbol": "BTC",
-      "id": "1b1cd6c8-902a-4181-ac30-134803e2c675",
-      "timestamp": "2026-02-20T23:46:48.117Z"
+      "id": "1403ee8d-2d99-4286-967f-efd11d6d5838",
+      "timestamp": "2026-02-21T02:48:26.453Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 0.1432,
+      "sl": 0.1402,
+      "entryPrice": 0.1411,
+      "confidence": 78,
+      "potentialRoi": 0.9,
+      "analysis": "Price is currently testing the lower boundary of the 30M range (0.1409-0.1416). Observed a minor FVG between 0.1413 and 0.1416 that was recently mitigated. Expecting a bounce from the 0.1410 support level to target the next liquidity pool at 0.1432. TP accounts for 0.6% round-trip fees.",
+      "symbol": "FET",
+      "id": "8a8ba225-1f80-45e0-b627-16f58960d00e",
+      "timestamp": "2026-02-21T02:48:08.696Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 0.9125,
+      "sl": 0.8925,
+      "entryPrice": 0.8984,
+      "confidence": 82,
+      "potentialRoi": 0.97,
+      "analysis": "Strong bullish momentum observed with a clear Market Structure Shift (MSS) breaking above 0.8979. Price is currently at a local high, but the trend is aggressive. FVG identified in the 0.8960-0.8970 range. Setting TP at 0.9125 to ensure fee coverage (0.6%) and net profit. SL placed below the 0.8930 support level to manage risk against a deep retracement.",
+      "symbol": "NEAR",
+      "id": "477755d7-8a2d-4af8-84bb-5036536854ec",
+      "timestamp": "2026-02-21T02:47:55.657Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 7.935,
+      "sl": 7.74,
+      "entryPrice": 7.789,
+      "confidence": 80,
+      "potentialRoi": 1.87,
+      "analysis": "Bullish MSS confirmed at 7.788. Price retraced to 7.789, mitigating the demand zone. FVG at 7.783-7.789 provides support. Target set at 7.935 to ensure net profitability after 0.6% round-trip fees, targeting a 1.87% gross move.",
+      "symbol": "AVAX",
+      "id": "24012560-1e8e-4866-bb61-9ae7d9162643",
+      "timestamp": "2026-02-21T02:47:51.827Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 73.25,
+      "sl": 71.75,
+      "entryPrice": 72.03,
+      "confidence": 82,
+      "potentialRoi": 1.69,
+      "analysis": "Detected MSS at 72.11 followed by a liquidity sweep at 72.01. Price is holding above the 50% retracement of the recent leg. Bullish FVG observed on lower timeframes. TP set at 73.25 to offset 0.6% exchange fees and target the next liquidity pool, aiming for the daily 50 EUR goal.",
+      "symbol": "SOL",
+      "id": "81836d9b-f16d-4634-a27a-b9b7f6fc8892",
+      "timestamp": "2026-02-21T02:47:45.061Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 1645,
+      "sl": 1672.5,
+      "entryPrice": 1668.94,
+      "confidence": 82,
+      "potentialRoi": 1.43,
+      "analysis": "Market Structure Shift (MSS) confirmed bearish after breaking the 1670.73 level. Price is currently testing local support at 1668.90 with strong downward momentum. A Fair Value Gap (FVG) is present between 1670.21 and 1669.77, suggesting any retracement will likely be met with selling pressure. Take Profit is set at 1645.00 to capture a 1.43% move, which comfortably covers the 0.6% round-trip exchange fees and contributes to the daily profit goal.",
+      "symbol": "ETH",
+      "id": "a9e47669-96ef-4e52-8c53-a425f1239c26",
+      "timestamp": "2026-02-21T02:47:22.636Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 57280,
+      "sl": 57820,
+      "entryPrice": 57715.05,
+      "confidence": 82,
+      "potentialRoi": 0.75,
+      "analysis": "Bearish Market Structure Shift (MSS) confirmed after price broke below the 57734.64 swing low. A bearish Fair Value Gap (FVG) is identified between 57743.56 and 57721.32. Price rejected the 57762.98 resistance level with strong selling pressure. The Take Profit is set at 57280.0 to account for the 0.6% round-trip exchange fee (approx 346 EUR) and secure a net profit toward the 50 EUR daily goal. Stop Loss is placed above the recent swing high to maintain a tight risk-to-reward ratio.",
+      "symbol": "BTC",
+      "id": "18eb02bd-6fbd-41a3-b00b-884895244c96",
+      "timestamp": "2026-02-21T02:47:14.035Z"
     },
     {
       "side": "SELL",
       "tp": 0.1395,
-      "sl": 0.1432,
-      "entryPrice": 0.1424,
-      "confidence": 85,
-      "potentialRoi": 1.43,
-      "analysis": "Market structure shift (MSS) confirmed after the rejection at 0.1431. The price is consistently printing lower highs (0.1429, 0.1428) and has broken below the 0.1425 support level. A bearish Fair Value Gap (FVG) exists between 0.1427 and 0.1425. We are targeting the liquidity pool near 0.1395. The Take Profit level is calculated to cover the 0.6% round-trip exchange fees while securing a net profit of approximately 1.43%.",
-      "symbol": "FET",
-      "id": "63356944-630a-4034-a566-789b65531d76",
-      "timestamp": "2026-02-20T23:46:35.774Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 7.68,
-      "sl": 7.785,
-      "entryPrice": 7.768,
+      "sl": 0.1418,
+      "entryPrice": 0.1411,
       "confidence": 82,
-      "potentialRoi": 0.53,
-      "analysis": "Market Structure Shift (MSS) identified after rejection at 7.778. The subsequent break of the 7.763 level confirms bearish displacement. Current price at 7.768 represents a retracement into a bearish Fair Value Gap (FVG) and premium pricing of the local range. Take Profit is set at 7.680 to target external liquidity while covering the 0.6% round-trip exchange fees. Stop Loss is placed tightly above the recent swing high at 7.785 to maintain a high Risk-to-Reward ratio.",
-      "symbol": "AVAX",
-      "id": "2d385acf-dd6b-47c0-8312-e554eb37e708",
-      "timestamp": "2026-02-20T23:46:23.460Z"
+      "potentialRoi": 1.13,
+      "analysis": "Detected a sharp rejection at 0.1416 forming a bearish engulfing pattern on the 30m chart. Market structure shift (MSS) confirmed as price closed at the low of the range. Targeting liquidity below 0.1400. Take profit set at 0.1395 to ensure net profitability after 0.6% round-trip fees.",
+      "symbol": "FET",
+      "id": "13e04876-6368-42e5-8249-0c475f9b7e29",
+      "timestamp": "2026-02-21T02:47:00.809Z"
     },
     {
       "side": "BUY",
-      "tp": 0.904,
-      "sl": 0.8861,
-      "entryPrice": 0.8906,
-      "confidence": 78,
-      "potentialRoi": 0.9,
-      "analysis": "Detected a Market Structure Shift (MSS) on the 30m timeframe following a bounce from the 0.8878 support level. A Fair Value Gap (FVG) is present between 0.8892 and 0.8904, suggesting bullish momentum. The Take Profit is set at 0.9040 to account for the 0.6% round-trip exchange fees and secure a net profit, while the Stop Loss is placed tightly below the recent swing low to maintain a disciplined risk-to-reward ratio.",
+      "tp": 0.9185,
+      "sl": 0.8935,
+      "entryPrice": 0.8983,
+      "confidence": 82,
+      "potentialRoi": 1.65,
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed after breaking 0.8978. Strong upward momentum with higher lows. Fair Value Gap (FVG) present in the 0.8953-0.8978 range. TP set at 0.9185 to ensure net profit after 0.6% exchange fees. SL placed below recent support at 0.8935.",
       "symbol": "NEAR",
-      "id": "3048f840-8258-40bc-90d2-071595848126",
-      "timestamp": "2026-02-20T23:46:21.641Z"
+      "id": "fb87a8f1-d0e3-4349-8aa7-611683830f5c",
+      "timestamp": "2026-02-21T02:46:43.707Z"
     },
     {
-      "side": "SELL",
-      "tp": 70.55,
-      "sl": 71.88,
-      "entryPrice": 71.62,
+      "side": "BUY",
+      "tp": 7.915,
+      "sl": 7.775,
+      "entryPrice": 7.795,
       "confidence": 82,
-      "potentialRoi": 0.89,
-      "analysis": "Bearish MSS detected after rejection at 71.74. Price forming a series of lower highs. FVG identified at 71.66. Aggressive sell at 71.62 targeting 70.55 to clear the 0.6% fee threshold and capture downside momentum toward daily goal.",
+      "potentialRoi": 1.54,
+      "analysis": "Bullish Market Structure Shift (MSS) identified after breaking the 7.789 resistance level. Price is currently respecting a small Fair Value Gap (FVG) formed between 7.788 and 7.791. Aggressive entry at 7.795 with a target of 7.915 to ensure a net profit after accounting for the 0.6% round-trip exchange fees. Stop loss is placed tightly below the recent swing low at 7.775 to maintain a high risk-to-reward ratio.",
+      "symbol": "AVAX",
+      "id": "01911817-62ef-44b3-aded-e804dc3a0fc2",
+      "timestamp": "2026-02-21T02:46:31.329Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 72.95,
+      "sl": 71.75,
+      "entryPrice": 72.05,
+      "confidence": 82,
+      "potentialRoi": 1.25,
+      "analysis": "Market structure remains bullish despite the sharp retracement to 72.01, which functioned as a liquidity sweep of internal lows. The quick recovery to 72.05 suggests strong demand. A Fair Value Gap (FVG) was identified between 71.94 and 72.02, which has been partially filled and is now acting as support. The Take Profit is set at 72.95 to account for the 0.6% round-trip exchange fees (approx 0.43 EUR) and ensure a net profit contribution toward the 50 EUR daily goal. Stop Loss is placed tightly below the recent swing low at 71.75.",
       "symbol": "SOL",
-      "id": "b1e75eda-fcf1-4e37-8e5a-c78f4c202925",
-      "timestamp": "2026-02-20T23:46:07.407Z"
+      "id": "fda4bce3-52a8-4962-8069-a083c3fb5f54",
+      "timestamp": "2026-02-21T02:46:25.911Z"
     },
     {
       "side": "SELL",
-      "tp": 1648.5,
+      "tp": 1654.5,
       "sl": 1672.1,
-      "entryPrice": 1668.62,
-      "confidence": 80,
-      "potentialRoi": 1.21,
-      "analysis": "Market structure shifted bearish after the break of 1668.97. The recent bounce to 1668.62 represents a retracement into a bearish Fair Value Gap (FVG) and a premium pricing zone. Expecting a continuation of the downward trend to sweep liquidity below the 1665.59 swing low. Take Profit is set aggressively at 1648.50 to ensure the 0.6% round-trip exchange fees are covered while moving toward the daily profit goal.",
-      "symbol": "ETH",
-      "id": "44f6035c-0024-476b-927b-f2ae2a591647",
-      "timestamp": "2026-02-20T23:45:54.287Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 58300,
-      "sl": 57580,
-      "entryPrice": 57693.47,
+      "entryPrice": 1669.52,
       "confidence": 82,
-      "potentialRoi": 0.45,
-      "analysis": "Market structure shift (MSS) identified on the 30M timeframe following a liquidity sweep at 57620.78. The recent candle sequence shows a strong bullish displacement reclaiming the 57680 level. Entry at 57693.47 targets the liquidity pool above 57735 and extends to 58300 to account for the 0.6% round-trip exchange fees while securing a net profit. Stop loss is positioned below the recent consolidation base to maintain a high risk-to-reward ratio.",
-      "symbol": "BTC",
-      "id": "c422647c-9531-4c47-baf7-03e2b7fe698f",
-      "timestamp": "2026-02-20T23:45:39.562Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.1458,
-      "sl": 0.1415,
-      "entryPrice": 0.1424,
-      "confidence": 78,
-      "potentialRoi": 1.75,
-      "analysis": "Price is consolidating at a local support level of 0.1422-0.1424 after a minor retracement from 0.1431. Observed a potential MSS if 0.1426 is reclaimed. Setting TP at 0.1458 to clear the 0.6% round-trip fee and capture a 1.75% net move. SL is tight at 0.1415 to manage risk aggressively.",
-      "symbol": "FET",
-      "id": "18100039-2ac3-4e2e-9a35-8505f5709974",
-      "timestamp": "2026-02-20T23:45:20.631Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.9025,
-      "sl": 0.8865,
-      "entryPrice": 0.8897,
-      "confidence": 78,
-      "potentialRoi": 0.84,
-      "analysis": "Detected support at 0.8878 with a minor MSS at 0.8892. Price is consolidating for a move to clear liquidity above 0.8937. TP set at 0.9025 to account for 0.6% round-trip fees and secure net profit. SL placed below recent swing low.",
-      "symbol": "NEAR",
-      "id": "df604040-542d-404d-8f94-e0a58e93b211",
-      "timestamp": "2026-02-20T23:45:12.438Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 7.885,
-      "sl": 7.725,
-      "entryPrice": 7.762,
-      "confidence": 78,
-      "potentialRoi": 0.98,
-      "analysis": "Detected bullish Market Structure Shift (MSS) after price successfully tested the 7.755 support level. The current retracement to 7.762 aligns with a bullish Fair Value Gap (FVG) identified on the 30m timeframe. Take Profit is positioned at 7.885 to ensure the 0.6% round-trip exchange fees are covered while targeting a continuation of the upward trend. Stop Loss is tightly set at 7.725, just below the recent swing low, to maintain a disciplined risk-to-reward ratio.",
-      "symbol": "AVAX",
-      "id": "d339fe83-8dba-425b-bbee-0f2fa6fb9725",
-      "timestamp": "2026-02-20T23:44:57.924Z"
+      "potentialRoi": 0.9,
+      "analysis": "Market structure shift (MSS) detected after break below 1670.20. Bearish momentum confirmed by lower highs. Entry at 1669.52 targets liquidity at 1654.50. TP accounts for 0.6% exchange fees plus profit margin to reach daily goal. SL set tight at 1672.10 above recent swing high.",
+      "symbol": "ETH",
+      "id": "b8a03277-80a4-4915-b590-80fc38c59ce4",
+      "timestamp": "2026-02-21T02:46:17.814Z"
     },
     {
       "side": "SELL",
-      "tp": 70.85,
-      "sl": 71.78,
-      "entryPrice": 71.59,
+      "tp": 57200,
+      "sl": 57850,
+      "entryPrice": 57725.34,
+      "confidence": 85,
+      "potentialRoi": 0.91,
+      "analysis": "Market structure shifted bearish after breaking 57714. Bearish FVG identified between 57745 and 57721. Price is currently retracing into the FVG. Expecting rejection and continuation towards 57200. TP set to cover 0.6% fees and hit daily target.",
+      "symbol": "BTC",
+      "id": "5a08fb2e-b397-4cca-b925-9dabdb185c93",
+      "timestamp": "2026-02-21T02:46:14.384Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "tp": 0.1412,
+      "sl": 0.1412,
+      "entryPrice": 0.1412,
+      "confidence": 85,
+      "potentialRoi": 0,
+      "analysis": "The asset is currently consolidating within a very tight range of 0.1409 to 0.1416. Calculated round-trip exchange fees of 0.6% (approx. 0.00085 EUR) currently exceed the total 30-minute price volatility (0.0007 EUR). No clear Market Structure Shift (MSS) or Fair Value Gap (FVG) is present to indicate an imminent breakout. Aggressive trading in this low-volatility environment would result in a net loss due to fee friction. Standing aside until a clear expansion occurs.",
+      "symbol": "FET",
+      "id": "f9453e69-8752-4483-bf05-d9969506d80f",
+      "timestamp": "2026-02-21T02:45:54.722Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 0.9165,
+      "sl": 0.8915,
+      "entryPrice": 0.8986,
+      "confidence": 82,
+      "potentialRoi": 1.99,
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed as price broke and closed above the 0.8978 resistance level. Strong upward momentum in the 30M history with higher lows established at 0.8950. Entry at 0.8986 accounts for the current breakout. TP is set at 0.9165 to comfortably cover the 0.6% round-trip exchange fees and secure a net profit towards the 50 EUR daily goal. SL is placed at 0.8915, below the recent swing low, maintaining a calculated risk-to-reward ratio.",
+      "symbol": "NEAR",
+      "id": "656b2512-30ff-4502-8df1-b871fc90382b",
+      "timestamp": "2026-02-21T02:45:31.018Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 7.96,
+      "sl": 7.74,
+      "entryPrice": 7.797,
+      "confidence": 82,
+      "potentialRoi": 1.49,
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed after breaking 7.795 resistance. Price is trending upwards with higher lows established at 7.790. Fair Value Gap (FVG) identified in the 7.783-7.789 zone. Aggressive entry at 7.797 targeting 7.96 to ensure net profit after 0.6% fees. SL placed below recent consolidation to manage risk.",
+      "symbol": "AVAX",
+      "id": "4223f9d8-0852-4682-af17-2cd88dd7f42a",
+      "timestamp": "2026-02-21T02:45:18.551Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 72.65,
+      "sl": 71.95,
+      "entryPrice": 72.05,
+      "confidence": 78,
+      "potentialRoi": 0.83,
+      "analysis": "SOL exhibits a bullish trend with a clear Market Structure Shift (MSS) after holding the 72.01 level as a higher low. A Fair Value Gap (FVG) exists between 72.05 and 72.11. The entry at 72.05 targets a move to 72.65, which accounts for the 0.6% round-trip exchange fees (approx 0.43 EUR) while maintaining a positive net return. Stop loss is tightly placed at 71.95, just below the recent liquidity grab at 72.01.",
+      "symbol": "SOL",
+      "id": "9e2f14ae-b7a6-4e9e-931c-e38706d716b8",
+      "timestamp": "2026-02-21T02:45:09.312Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 1652.45,
+      "sl": 1672.85,
+      "entryPrice": 1669.56,
+      "confidence": 82,
+      "potentialRoi": 1.02,
+      "analysis": "Detected Market Structure Shift (MSS) on the 30m timeframe following a rejection at 1671.67. Bearish momentum is confirmed by consecutive lower highs and a break below the 1670.20 support level. Entry at 1669.56 targets the 1652.45 liquidity zone. The Take Profit is calculated to exceed the 0.6% round-trip exchange fees, ensuring a net positive contribution toward the 50 EUR daily goal. Stop Loss is positioned tightly above the recent swing high to manage risk aggressively.",
+      "symbol": "ETH",
+      "id": "56ab0d29-50bd-43b1-b67c-fd3dbb54d50e",
+      "timestamp": "2026-02-21T02:45:01.323Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 57280,
+      "sl": 57785,
+      "entryPrice": 57708.8,
+      "confidence": 82,
+      "potentialRoi": 0.74,
+      "analysis": "Detected Market Structure Shift (MSS) below 57714.0 with a bearish FVG identified between 57741.0 and 57721.0. Price is showing bearish displacement. TP is set at 57280.0 to cover the 0.6% round-trip exchange fees and secure the 50 EUR daily profit goal. SL is positioned tightly above the recent swing high at 57785.0.",
+      "symbol": "BTC",
+      "id": "b52f2e34-0b67-4d9d-b93c-30ac10abc293",
+      "timestamp": "2026-02-21T02:44:53.556Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 0.1435,
+      "sl": 0.1405,
+      "entryPrice": 0.1412,
       "confidence": 78,
       "potentialRoi": 1.03,
-      "analysis": "Detected bearish Market Structure Shift (MSS) on the 30m timeframe following a rejection at 71.74. Price is consistently printing lower highs and is currently testing local support at 71.58. A breakdown below this level targets the 70.85 liquidity pool. The Take Profit is set to 70.85 to ensure a gross move of 1.03%, which covers the 0.6% round-trip exchange fees and secures a net profit towards the 50 EUR daily goal.",
+      "analysis": "FET is currently consolidating within a tight range between 0.1409 and 0.1416. A minor Fair Value Gap (FVG) exists above the current price level. The entry at 0.1412 anticipates a bullish Market Structure Shift (MSS) following the recent liquidity sweep at 0.1416. The Take Profit is set at 0.1435 to account for the 0.6% round-trip exchange fees and secure a net profit toward the 50 EUR daily goal. Stop Loss is placed aggressively below the recent swing low of 0.1409 to maintain a high risk-reward ratio.",
+      "symbol": "FET",
+      "id": "a0e6bcdf-9ad9-4bbe-aff8-6c0ca172cfca",
+      "timestamp": "2026-02-21T02:44:30.587Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 0.912,
+      "sl": 0.8935,
+      "entryPrice": 0.8962,
+      "confidence": 82,
+      "potentialRoi": 1.16,
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed as price breaks above the 0.8960 resistance level. A Fair Value Gap (FVG) exists in the 0.8950-0.8953 range, providing a liquidity cushion. The trend is strongly upward in the 30M timeframe. Take Profit is set at 0.9120 to account for the 0.6% round-trip exchange fees while securing a net profit towards the 50 EUR daily goal. Stop Loss is placed tightly below the recent consolidation zone at 0.8935 to manage risk aggressively.",
+      "symbol": "NEAR",
+      "id": "56f2ea2b-f3b2-4d50-ab3a-508455c020b3",
+      "timestamp": "2026-02-21T02:44:19.976Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 7.98,
+      "sl": 7.74,
+      "entryPrice": 7.79,
+      "confidence": 78,
+      "potentialRoi": 1.84,
+      "analysis": "Detected bullish Market Structure Shift (MSS) as price cleared 7.78. Fair Value Gap (FVG) present in the 7.78-7.79 zone. Current consolidation at 7.79 provides a high-probability entry for a continuation move. TP at 7.98 accounts for 0.6% round-trip fees and targets the next liquidity pool. SL at 7.74 protects against structure invalidation.",
+      "symbol": "AVAX",
+      "id": "79ab23b0-f9eb-4048-9c12-1b3aee3c1d7b",
+      "timestamp": "2026-02-21T02:44:11.733Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 72.95,
+      "sl": 71.82,
+      "entryPrice": 72.03,
+      "confidence": 82,
+      "potentialRoi": 1.27,
+      "analysis": "The overall market structure remains bullish with a series of higher highs and higher lows. The recent retracement from 72.11 to 72.01 successfully tested the previous breakout zone and filled a micro-FVG. Current price at 72.03 provides a high-probability entry point as it holds above the 72.00 psychological level. The Take Profit is set at 72.95 to account for the 0.6% round-trip exchange fees (approx 0.43 EUR) and secure a net gain towards the 50 EUR daily goal. Stop Loss is placed tightly below the 71.82 swing low to maintain a disciplined risk-to-reward ratio.",
       "symbol": "SOL",
-      "id": "1820d333-2088-45cc-b8eb-f91f534d5aec",
-      "timestamp": "2026-02-20T23:44:55.304Z"
+      "id": "90dfb61e-7c67-49bd-8195-8a763e4a439a",
+      "timestamp": "2026-02-21T02:43:58.262Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 1652,
+      "sl": 1673.5,
+      "entryPrice": 1669.58,
+      "confidence": 82,
+      "potentialRoi": 1.05,
+      "analysis": "Detected bearish Market Structure Shift (MSS) following a rejection at 1671.67. A Fair Value Gap (FVG) exists between 1671.1 and 1669.8, suggesting downward continuation. TP is set at 1652.0 to account for the 0.6% round-trip fee and target daily profit goals. SL is tight at 1673.5 to protect capital against a reversal.",
+      "symbol": "ETH",
+      "id": "4bb9375c-66c3-4ce9-b457-2250dd199faf",
+      "timestamp": "2026-02-21T02:43:52.818Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 57100,
+      "sl": 57880,
+      "entryPrice": 57719.08,
+      "confidence": 78,
+      "potentialRoi": 1.07,
+      "analysis": "Detected liquidity sweep at 57762.98 followed by a Market Structure Shift (MSS). A bearish Fair Value Gap (FVG) has formed between 57741.73 and 57721.32. Price is currently rejecting the 57720 level. Targeting a move to 57100 to offset the 0.6% round-trip exchange fees and secure the 50 EUR daily profit goal. Stop Loss is placed strictly above the recent swing high to maintain a tight risk-to-reward ratio.",
+      "symbol": "BTC",
+      "id": "18b634dd-d8cd-4a16-90ec-b926ea124ac7",
+      "timestamp": "2026-02-21T02:43:38.599Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 0.1438,
+      "sl": 0.1402,
+      "entryPrice": 0.1413,
+      "confidence": 78,
+      "potentialRoi": 1.17,
+      "analysis": "BULLISH MSS CONFIRMED ON 30M TIMEFRAME. PRICE IS HOLDING ABOVE THE 0.1411 SUPPORT LEVEL AFTER A LIQUIDITY SWEEP. FVG IDENTIFIED BETWEEN 0.1411 AND 0.1414. TARGETING 0.1438 TO CLEAR UPPER LIQUIDITY WHILE ACCOUNTING FOR 0.6% ROUND-TRIP FEES. AGGRESSIVE STANCE TAKEN TO REACH DAILY PROFIT GOAL.",
+      "symbol": "FET",
+      "id": "8b952b71-26df-4339-aa24-6b124e76d5ed",
+      "timestamp": "2026-02-21T02:43:22.092Z"
     }
   ],
   "executionLogs": [
+    {
+      "id": "21fbdeb9-8184-4ca0-9e7d-d4bc1b0bc5c0",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:52:57.751Z"
+    },
+    {
+      "id": "e193a138-c506-445b-aba2-8026e733e320",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8984,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:52:43.351Z"
+    },
+    {
+      "id": "bbab3489-3b49-49b4-88e2-997cd1efcd17",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.794,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T02:52:30.070Z"
+    },
+    {
+      "id": "da86044e-3691-414b-9eaa-b64b3eeeaf0d",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:51:47.585Z"
+    },
+    {
+      "id": "0891399c-49ab-4977-bcef-f274d5d66dec",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.79,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:51:33.005Z"
+    },
+    {
+      "id": "68a1982d-de9e-47d6-8657-6962cfc07aa1",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8984,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:51:30.550Z"
+    },
+    {
+      "id": "b5595497-ad6d-4dcc-9413-b814a8fac689",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:50:30.905Z"
+    },
+    {
+      "id": "f980b0db-a015-4147-a928-bfca2009dd05",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.898,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:50:18.657Z"
+    },
+    {
+      "id": "9f5a5fcc-2378-4a1f-9cc5-1e25be339f2f",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.79,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T02:50:11.507Z"
+    },
+    {
+      "id": "2afe2c34-090e-42cd-83dd-75e83f0ebbb5",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8982,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:49:06.739Z"
+    },
+    {
+      "id": "b83f6051-cb75-4455-8176-f522379e16ec",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:48:08.966Z"
+    },
+    {
+      "id": "bbb727f0-c17c-404e-b251-20d474e33df2",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8984,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:47:55.984Z"
+    },
+    {
+      "id": "b66531c6-0357-4eae-8696-d8843bfca3b4",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.789,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_80%",
+      "timestamp": "2026-02-21T02:47:52.461Z"
+    },
+    {
+      "id": "f89bd8e1-0385-4fd6-9579-a9dabbfc8907",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8983,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:46:43.966Z"
+    },
+    {
+      "id": "033a0dca-ff92-4b8a-bd54-56948de087fc",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.795,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:46:31.666Z"
+    },
+    {
+      "id": "9ac5956a-378b-4a62-8f0a-88c70e38464c",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8986,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:45:31.340Z"
+    },
+    {
+      "id": "9981c77a-9799-4050-85ec-3a89f4ad6ecf",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.797,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:45:18.864Z"
+    },
+    {
+      "id": "910c9439-6868-4008-bfc1-0983d00e9950",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:44:30.863Z"
+    },
+    {
+      "id": "482f282f-44d9-44cb-8c87-752f77dab0c8",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8962,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:44:20.243Z"
+    },
+    {
+      "id": "33b266b4-584c-4b4a-9dd6-cee76a79d9fe",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.79,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T02:44:12.402Z"
+    },
+    {
+      "id": "39d71025-f9e3-4910-be3a-5e5d44e39646",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:43:22.376Z"
+    },
+    {
+      "id": "1359187b-21e4-4f4e-af81-21e3c6c4c02c",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8965,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:43:06.778Z"
+    },
+    {
+      "id": "c1e4f8ba-50ac-4af3-aff2-1dc7c10c8dce",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.785,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:43:04.914Z"
+    },
+    {
+      "id": "21987009-fbbc-4127-bbe9-31c23daddced",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8963,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:41:54.849Z"
+    },
+    {
+      "id": "2850408d-36cf-4072-bd33-49c55dbf25c2",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.786,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:41:43.165Z"
+    },
+    {
+      "id": "6ce2aa56-ee1a-4d5e-95e5-6aca90330645",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:41:12.697Z"
+    },
+    {
+      "id": "93a2bd10-e83c-4e12-8f7b-e5cb0999335b",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.11,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:40:48.792Z"
+    },
+    {
+      "id": "b6070120-4ca8-44c8-8fca-ef53fd936670",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8966,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:40:45.718Z"
+    },
+    {
+      "id": "cf226b23-291f-4af2-8dd4-2d18c7e55dcc",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.792,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:40:32.455Z"
+    },
+    {
+      "id": "f4f23248-bb02-4d9b-a9ea-606b864ef4ee",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:39:45.727Z"
+    },
+    {
+      "id": "332e2152-deab-46bb-9f8a-0c76b1f9d511",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8967,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:39:31.489Z"
+    },
+    {
+      "id": "c61abecb-2468-4fb8-99fc-11a3705d4903",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.796,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:39:18.071Z"
+    },
+    {
+      "id": "f2424dea-02e9-476c-b2fa-7680fe866e47",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.3,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:38:59.670Z"
+    },
+    {
+      "id": "45a9f342-0e36-4082-b964-1b1db0786a92",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:38:34.683Z"
+    },
+    {
+      "id": "b05398bb-4891-472d-94ba-136139131d16",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8965,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:38:20.454Z"
+    },
+    {
+      "id": "ce22c662-d7a3-4ba1-88f5-0c95580715d5",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.796,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:38:07.062Z"
+    },
+    {
+      "id": "bd3995a9-fbd5-4446-b23a-5fe76aaf9926",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.54,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T02:37:47.696Z"
+    },
+    {
+      "id": "55560e84-0de4-4230-abd3-7a83ab56c6e1",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1414,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:37:19.719Z"
+    },
+    {
+      "id": "4c374d54-0cc6-403c-b6d2-d09c49b1f24c",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.896,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:37:05.560Z"
+    },
+    {
+      "id": "89f01d9f-3ef3-44e7-a175-34c2aa397270",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.795,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:36:54.698Z"
+    },
+    {
+      "id": "0294b0ad-281b-4d92-8b9e-fd288daf0948",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1671.14,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:36:35.036Z"
+    },
+    {
+      "id": "c68b4986-e0be-4f8b-81f8-ccc39d975582",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1415,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:36:06.968Z"
+    },
+    {
+      "id": "b5536155-50ff-4362-97ac-508fbc9a88a6",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8967,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:35:56.948Z"
+    },
+    {
+      "id": "c63fc33f-1e06-4794-82fe-bccacc5e6ff6",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.794,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:35:42.813Z"
+    },
+    {
+      "id": "515a5acb-86d5-4de6-980d-69ebf1278284",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1671.37,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:35:20.125Z"
+    },
+    {
+      "id": "3b5a03d9-639d-4434-9651-efb378e5e5e1",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1415,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:34:53.437Z"
+    },
+    {
+      "id": "6cbaa6f7-d645-4c42-b8a9-a4d65d8cab63",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8965,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:34:41.486Z"
+    },
+    {
+      "id": "3a8c2a72-0680-4bab-8b83-6426e37cb15e",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.797,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:34:31.244Z"
+    },
+    {
+      "id": "4af5b18f-47b1-4afd-bc4a-93968403cd0b",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1671.44,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_85%",
+      "timestamp": "2026-02-21T02:34:08.683Z"
+    },
+    {
+      "id": "ff32b678-c10d-4b11-af55-cfd6cdf14867",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1416,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:33:42.728Z"
+    },
+    {
+      "id": "ec39b5f7-ea1e-409f-90cf-5e1b91d88d38",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8966,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:33:31.623Z"
+    },
+    {
+      "id": "44d7045d-33e2-461d-bfc9-38bb25c37d7c",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.798,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:33:18.262Z"
+    },
+    {
+      "id": "021d9566-c7c2-40df-a377-a3d7221c5753",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1671.18,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:32:56.569Z"
+    },
+    {
+      "id": "f56d5be1-169e-4476-a55d-a686b6ff17b1",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1414,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:32:31.405Z"
+    },
+    {
+      "id": "bdf6ce0e-20d2-455b-af30-babd716a7f8e",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8954,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:32:18.425Z"
+    },
+    {
+      "id": "e24b15a2-d24a-400c-b0b2-d75291b478e4",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.797,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:32:07.763Z"
+    },
+    {
+      "id": "31e0816f-c7a2-47d3-81d8-54b4b1c16c1d",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.83,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:31:43.202Z"
+    },
+    {
+      "id": "6f9cf93c-83df-49f6-8435-a63b0c643b4d",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:31:17.207Z"
+    },
+    {
+      "id": "6ef0bc15-926c-44b7-801b-c594331eabf2",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8935,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:31:05.997Z"
+    },
+    {
+      "id": "b0926e95-5435-4985-8cc3-39d47086c5fc",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.79,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:30:54.038Z"
+    },
+    {
+      "id": "59898b24-e2de-46ae-a426-30426dd17105",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.95,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:30:32.240Z"
+    },
+    {
+      "id": "e11fa215-7ba7-4a25-ac49-b3bb6a7b7163",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:30:09.423Z"
+    },
+    {
+      "id": "d798e9fa-01c1-4406-ad24-604cb13c84b4",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8938,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:29:54.758Z"
+    },
+    {
+      "id": "a339a2d3-eba9-40fb-bdac-c3ccaff63698",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.794,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:29:42.937Z"
+    },
+    {
+      "id": "d57104b9-56c0-485f-93f1-23f0c8c1e03f",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.67,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:29:21.348Z"
+    },
+    {
+      "id": "d60af28c-2073-41ef-8539-df9c160769bf",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1414,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:28:54.708Z"
+    },
+    {
+      "id": "50d555e6-f362-4024-a320-91f3f4404b36",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8932,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:28:43.083Z"
+    },
+    {
+      "id": "362983f3-7800-43dd-814d-d8d9928e3f15",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.793,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:28:29.590Z"
+    },
+    {
+      "id": "e509bf42-08a1-45e4-90c7-ff6fd3b3b523",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1671.1,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:28:07.545Z"
+    },
+    {
+      "id": "17fd83ff-ca47-4326-9cf3-44e3f700fa65",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1414,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:27:42.942Z"
+    },
+    {
+      "id": "da49a111-d3c9-4021-960c-8d39cadc195f",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8938,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:27:31.348Z"
+    },
+    {
+      "id": "c2137c2b-5a4a-4a54-b10a-8dcd60e61798",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.793,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:27:19.890Z"
+    },
+    {
+      "id": "38e5e158-c2f2-4494-a94b-803c776d90d9",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1671.08,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:26:56.779Z"
+    },
+    {
+      "id": "3645cb05-a8e7-46f7-a526-e308970b491b",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1414,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:26:30.550Z"
+    },
+    {
+      "id": "0065b6e2-5e0d-4dc0-8cae-b17d75945792",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8941,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:26:19.278Z"
+    },
+    {
+      "id": "95fd4fc7-bf4a-4681-9544-e7eeac19ed26",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.794,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:26:06.810Z"
+    },
+    {
+      "id": "dff79c4b-09fe-4a79-a267-d3a0c9ec3f79",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.85,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:25:44.121Z"
+    },
+    {
+      "id": "6075220d-7fd3-4bbf-a343-270ddef15961",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:25:18.838Z"
+    },
+    {
+      "id": "c2dcb0c4-f310-4b4a-919e-e64eafbfeae3",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8928,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:25:09.667Z"
+    },
+    {
+      "id": "956ec2d1-3667-4b32-9247-7ece1e226521",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.782,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:24:55.230Z"
+    },
+    {
+      "id": "0db3cc18-bea4-4da3-b01e-163133ac5e98",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.99,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:24:31.270Z"
+    },
+    {
+      "id": "ae0577a7-f453-485e-9ce2-76705e988093",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1414,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:24:06.970Z"
+    },
+    {
+      "id": "59306bed-b7d7-4612-b60a-981918e6919b",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8932,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:23:55.078Z"
+    },
+    {
+      "id": "78ee2fde-4190-44d9-81e1-a2931f54069a",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.785,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:23:42.681Z"
+    },
+    {
+      "id": "49458e94-36f4-448b-a980-94159d3e1f37",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.99,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:23:19.510Z"
+    },
+    {
+      "id": "76cf7d17-c783-4bc9-8873-c9c4760288d8",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:22:55.944Z"
+    },
+    {
+      "id": "7889c07b-4bcc-4f4c-9d60-22f77415f9a2",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8929,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:22:42.422Z"
+    },
+    {
+      "id": "9c6e4bcb-f9f4-4034-b3fa-8e2e593956f8",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.779,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:22:31.141Z"
+    },
+    {
+      "id": "3bbc5749-711f-45b5-9c7f-90086a7a035f",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.21,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:22:07.822Z"
+    },
+    {
+      "id": "89725217-a23b-485e-9b41-dfea6b004fa6",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:21:45.271Z"
+    },
+    {
+      "id": "14a138d4-841d-47c6-80b7-ada6c6f20c46",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8926,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:21:30.667Z"
+    },
+    {
+      "id": "043bc075-01e5-4b6f-83cd-ebf9b30209d9",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.776,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:21:18.157Z"
+    },
+    {
+      "id": "62db0163-1538-44f2-baa2-27a7c934fa09",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.93,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:21:00.936Z"
+    },
+    {
+      "id": "dd7246c1-e772-4b7c-a4c6-c8b802f18fde",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:20:40.238Z"
+    },
+    {
+      "id": "0e806415-2a01-4b9c-b0d5-6947c7bdf9b7",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8928,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:20:22.119Z"
+    },
+    {
+      "id": "4aede7eb-aac6-4e6b-a1ec-c747991606a4",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.777,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:20:07.387Z"
+    },
+    {
+      "id": "8389d760-e71a-4f9d-b716-5d6d6d73bb60",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.19,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:19:45.082Z"
+    },
+    {
+      "id": "8e17745d-c282-455d-a529-911d27c21c64",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:19:21.894Z"
+    },
+    {
+      "id": "0aeee05d-9aa8-48c3-b067-f54475f3051f",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8921,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:19:07.422Z"
+    },
+    {
+      "id": "8001c9ce-e7c6-40bd-b71f-e74a908bc10c",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.772,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:18:55.175Z"
+    },
+    {
+      "id": "e740cfc7-2f6e-47af-93d2-12009e522044",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.96,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T02:18:35.415Z"
+    },
+    {
+      "id": "8f6108f7-612a-4f26-9785-e7ccc3784a02",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:18:08.770Z"
+    },
+    {
+      "id": "15c59f8b-67e6-4358-aeb6-66c91735a13c",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8915,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:17:59.614Z"
+    },
+    {
+      "id": "4b9ff64a-e080-42db-ba72-5912e4451113",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.772,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:17:42.691Z"
+    },
+    {
+      "id": "1afbadc2-5bf1-4639-b2bc-5dfe6c06273a",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.23,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:17:21.974Z"
+    },
+    {
+      "id": "bb29003c-54e1-4008-a611-367634f3d70a",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:17:02.062Z"
+    },
+    {
+      "id": "250dd320-0562-4116-ab12-0bef3ecae619",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8906,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:16:45.420Z"
+    },
+    {
+      "id": "707219f3-e3ac-4235-9595-0d59570a5721",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.771,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:16:34.315Z"
+    },
+    {
+      "id": "a69b3550-fce2-405b-8658-eab179c4c7df",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8913,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:15:29.244Z"
+    },
+    {
+      "id": "c56f318c-1cf6-430d-ad17-2c6bba10d019",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.78,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:15:17.893Z"
+    },
+    {
+      "id": "8c58af1a-df38-4970-a712-a663c2c34aaa",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.08,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:14:54.206Z"
+    },
+    {
+      "id": "e33fcbc5-996f-4b5f-8f6e-5461a98be664",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:14:34.025Z"
+    },
+    {
+      "id": "b79ec62c-69b3-4286-80f3-f74b9ef7d898",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8913,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:14:20.284Z"
+    },
+    {
+      "id": "ff3dba48-e271-47a1-9189-79aea267c141",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.775,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:14:06.855Z"
+    },
+    {
+      "id": "47467202-4182-44f5-b5ec-c22a2b8f0ddb",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1670.08,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:13:43.673Z"
+    },
+    {
+      "id": "2995d9d9-7f4d-4f1b-bcc0-22503e1dec9c",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:13:22.578Z"
+    },
+    {
+      "id": "9c7a62a3-9a19-430c-82f0-a4d98b3671f5",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8911,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:13:06.604Z"
+    },
+    {
+      "id": "c2f1f699-f34a-473f-83bc-de0a99afe98d",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.774,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:12:53.959Z"
+    },
+    {
+      "id": "bb5d28ca-f773-479f-b0cb-104277ced228",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.78,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T02:12:31.931Z"
+    },
+    {
+      "id": "4962c2d5-1ce8-4689-b2a7-1f1476e2f6d3",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:12:08.695Z"
+    },
+    {
+      "id": "b0e0f9c6-b959-4915-ae84-edb1462e8a67",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8907,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:11:54.039Z"
+    },
+    {
+      "id": "c3518786-5456-4b1b-8b3b-e3ecedb9d6ae",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.778,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:11:43.532Z"
+    },
+    {
+      "id": "626e5d8d-e4e6-4bc4-8666-6ccbf309bc92",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.16,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:11:23.871Z"
+    },
+    {
+      "id": "2012b9da-03a1-48db-a1fb-9b2ab7ea234d",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1409,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:10:54.609Z"
+    },
+    {
+      "id": "0787d082-1672-4aa8-964a-120fd6a43c49",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8907,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:10:42.469Z"
+    },
+    {
+      "id": "c033a4e8-273b-4069-b816-eb2e7abe3146",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.772,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:10:29.213Z"
+    },
+    {
+      "id": "d828c6af-5650-4008-baa6-64ceb3c763fd",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.08,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:10:07.318Z"
+    },
+    {
+      "id": "be7a6322-5289-4d0e-941b-24489fc716fb",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8909,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:09:32.357Z"
+    },
+    {
+      "id": "f1ce010b-5f72-48e3-bda0-c89df03b21d5",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.77,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:09:19.769Z"
+    },
+    {
+      "id": "fdd874d5-909d-4eae-a029-c8d11d5bb642",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.23,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:08:57.557Z"
+    },
+    {
+      "id": "19ee95e1-041b-461b-ad38-b2d6c78b26a5",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8904,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:08:20.383Z"
+    },
+    {
+      "id": "7b4749e9-feb5-4625-a4b2-8b4e48396477",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.766,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T02:08:06.949Z"
+    },
+    {
+      "id": "8950a138-2313-423a-8cc0-23cf988e1ed1",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.43,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:07:44.840Z"
+    },
+    {
+      "id": "1b9887db-352b-4f9d-b88c-23c3bfbf7650",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:07:21.788Z"
+    },
+    {
+      "id": "b5a198b8-8120-4488-8600-3c2bda09ee60",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8901,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:07:11.927Z"
+    },
+    {
+      "id": "5b255a4b-b928-4f2e-b506-09802c9580b4",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.765,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_80%",
+      "timestamp": "2026-02-21T02:06:58.163Z"
+    },
+    {
+      "id": "9af5c318-6e5e-433d-ba4e-e38cd165dc8d",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.759,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:05:58.532Z"
+    },
+    {
+      "id": "6813ce14-5413-4a84-b5ce-e028fdc0661d",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.89,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:05:54.197Z"
+    },
+    {
+      "id": "794e9f9d-70a9-42c2-bfa5-c166c1167356",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:04:56.645Z"
+    },
+    {
+      "id": "25319ba4-733c-4c3b-ab14-3731062e2df9",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8914,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:04:42.794Z"
+    },
+    {
+      "id": "a83b1c01-64ad-4291-971a-c480899121ed",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.763,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:04:32.408Z"
+    },
+    {
+      "id": "01bf3ac1-34ff-40c4-bff4-d55c19defcc8",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:03:42.384Z"
+    },
+    {
+      "id": "fc011232-dc13-4e93-9f61-6ad2e470c3a0",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8918,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:03:31.428Z"
+    },
+    {
+      "id": "c328d3c3-bea1-4fb5-995f-dab438534a6d",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.765,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T02:03:22.187Z"
+    },
+    {
+      "id": "d4f9bdb2-f3c5-4b9b-abd1-8eafd3c17cbb",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:02:31.748Z"
+    },
+    {
+      "id": "11537651-3859-4cbd-baf1-1ea94ae59347",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8931,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:02:18.106Z"
+    },
+    {
+      "id": "07ffc2ca-b49b-476a-98a1-a40638bb59b8",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.765,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:02:05.691Z"
+    },
+    {
+      "id": "0ab5e002-a783-47b3-a75c-8e90d0bad80f",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:01:18.995Z"
+    },
+    {
+      "id": "755e51b8-8d6a-43e6-8dfe-a7e72fae572e",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8924,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T02:01:06.298Z"
+    },
+    {
+      "id": "d4d0ed18-c546-4c36-9276-7fab5d15765b",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.769,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T02:00:53.986Z"
+    },
+    {
+      "id": "ec51b780-0f55-4a0f-ac52-113600b48ab2",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.28,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T02:00:36.894Z"
+    },
+    {
+      "id": "4128c9a7-9b9d-47dd-9fb3-4e998030aa97",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:58:55.629Z"
+    },
+    {
+      "id": "f18f74c6-13a5-44d1-9545-431debec1cee",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8905,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:58:42.896Z"
+    },
+    {
+      "id": "d81ab66a-4208-4644-8c6b-0abc170f74ca",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.762,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:58:29.726Z"
+    },
+    {
+      "id": "1d1729a9-d5f6-4eba-8ec7-f3613d81797e",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:57:42.464Z"
+    },
+    {
+      "id": "237edc8c-d098-4894-a8d8-bca398596a2c",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8892,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:57:30.056Z"
+    },
+    {
+      "id": "e4b23ddb-af0b-452d-819c-2965c4a0f964",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.761,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:57:17.880Z"
+    },
+    {
+      "id": "0af5391b-27bc-4fd3-bf88-93a2e60fdcf5",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.32,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:56:58.100Z"
+    },
+    {
+      "id": "fc9b9eab-1c48-42df-9dcc-384efcca56d7",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:56:29.784Z"
+    },
+    {
+      "id": "5328a3f6-e940-424b-9327-1fc0c3b00ff2",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8894,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:56:18.622Z"
+    },
+    {
+      "id": "aee1b30b-b16e-403f-b0bf-17a04e3b4929",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.762,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:56:05.857Z"
+    },
+    {
+      "id": "2815ca1f-c2a5-4527-98c1-98f12c148a4c",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.36,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:55:42.603Z"
+    },
+    {
+      "id": "995e8e7f-5808-4173-88f4-e5d2f34afa81",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1414,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:55:19.149Z"
+    },
+    {
+      "id": "0aac1843-8577-4ca7-8821-bb51ac742206",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8895,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:55:06.658Z"
+    },
+    {
+      "id": "732b4961-a1d6-4033-9e45-e1af54f2aa06",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.76,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:54:53.777Z"
+    },
+    {
+      "id": "d54f4cc4-d8f6-4c80-bb33-fe8e2567e726",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.67,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:54:32.011Z"
+    },
+    {
+      "id": "42c9da15-b82e-4472-a24d-306294606cd5",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:54:05.841Z"
+    },
+    {
+      "id": "d62eff75-39ab-4528-985a-dcc4a03964e5",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8882,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:53:54.418Z"
+    },
+    {
+      "id": "c62d829b-5565-4b96-aa75-dfa33b0c5d7b",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.762,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:53:42.350Z"
+    },
+    {
+      "id": "8f2df6ba-bf89-4fa2-826a-4bed39a19f66",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.41,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:53:18.653Z"
+    },
+    {
+      "id": "bc5a5ef7-77bc-4381-b2e2-3a27001def9a",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:52:54.440Z"
+    },
+    {
+      "id": "a30e67ea-d714-4b09-ba7f-c2e476526f56",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8883,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:52:42.519Z"
+    },
+    {
+      "id": "d1b973a9-153d-4419-ba04-3eb2a7ef1450",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.756,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:52:33.373Z"
+    },
+    {
+      "id": "cc858111-bb9e-4f92-b0ff-8a4433721dcf",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.1,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:52:07.188Z"
+    },
+    {
+      "id": "3110561d-38c0-4a45-8995-2c6b562851bc",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:51:41.255Z"
+    },
+    {
+      "id": "c0b3c824-f8ed-43d1-ac72-50688c7805bc",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.889,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:51:29.209Z"
+    },
+    {
+      "id": "f0a6de59-b89e-4e6c-b6ae-0582f2d7f7b3",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.762,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:51:18.085Z"
+    },
+    {
+      "id": "ec4098f3-32af-4db8-a8c6-8c88f4de4b75",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.44,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:50:58.091Z"
+    },
+    {
+      "id": "83c6cdf3-7e4d-473f-b56d-9728e90b1c21",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:50:30.126Z"
+    },
+    {
+      "id": "3af05e9f-f381-4c56-9001-6ea34b578de5",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8897,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:50:19.071Z"
+    },
+    {
+      "id": "12ae6c98-a012-480a-b326-fb8c40187439",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.764,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:50:06.240Z"
+    },
+    {
+      "id": "87ee1be3-fade-4cb8-8c3d-cf5db8ae9dbf",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.41,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:49:43.318Z"
+    },
+    {
+      "id": "270c9a7b-d68f-42d3-b714-02f84118ad1e",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:49:18.414Z"
+    },
+    {
+      "id": "ea9900ab-0f28-4ddd-bf56-5d3c7f6a4039",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8888,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:49:06.478Z"
+    },
+    {
+      "id": "98a068e4-ab26-457f-9029-3ad565d68712",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.764,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:48:53.627Z"
+    },
+    {
+      "id": "3518d723-0b5b-4a50-bddd-7fe333213cb9",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.59,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:48:33.445Z"
+    },
+    {
+      "id": "97bfc6eb-bd0d-461c-ad9e-0dffb55d66a3",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:48:05.067Z"
+    },
+    {
+      "id": "46bcd9ef-1928-4f29-8a3f-860841b78c5c",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8893,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:47:53.763Z"
+    },
+    {
+      "id": "e50e7f70-41ed-4252-924e-0f2790e30054",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.767,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:47:42.335Z"
+    },
+    {
+      "id": "1fb77281-c803-4cdb-b6a4-171c48720204",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.59,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:47:20.227Z"
+    },
+    {
+      "id": "404af398-8a96-414d-8614-c7555e837fed",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:46:54.577Z"
+    },
+    {
+      "id": "960add2a-20d8-4c9f-931b-03b5d4ea3623",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8888,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:46:43.126Z"
+    },
+    {
+      "id": "d41ad465-fc01-4b65-ac2c-234a631091b1",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.76,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:46:30.634Z"
+    },
+    {
+      "id": "32c67d39-7693-4329-91b8-ebd64b6491ab",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.36,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:46:12.732Z"
+    },
+    {
+      "id": "b7fb4bf9-93fc-4a1b-8822-ee1909b87017",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1411,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:45:41.384Z"
+    },
+    {
+      "id": "8ca7afcf-3a6a-4c26-9c5c-e1409ef11801",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8891,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:45:31.467Z"
+    },
+    {
+      "id": "44a8d761-a772-4cd9-9b80-31a2fcbf103d",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.76,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:45:19.215Z"
+    },
+    {
+      "id": "befdb05d-c083-4407-be33-ac353a1ced91",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.61,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:44:53.518Z"
+    },
+    {
+      "id": "ee1c0403-4733-4a26-b3f6-fb61d7a0cdae",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:44:30.042Z"
+    },
+    {
+      "id": "86dae853-13ac-4d16-b81e-8f3b5857c46f",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8896,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:44:17.131Z"
+    },
+    {
+      "id": "110bb7e2-0eba-406b-92a7-6df2e967c941",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.76,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:44:04.252Z"
+    },
+    {
+      "id": "e21b9117-2f37-4611-98cd-67585d028d58",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.48,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:43:43.592Z"
+    },
+    {
+      "id": "9f3ebc20-8ace-49f9-8edd-72e8a8cebb48",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1409,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:43:20.328Z"
+    },
+    {
+      "id": "8d6cc2e9-47b8-4492-97e7-901846da7a5d",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.89,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:43:05.262Z"
+    },
+    {
+      "id": "6e1ae733-f3b5-42a1-923f-02feed40ebdf",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.757,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:42:55.115Z"
+    },
+    {
+      "id": "d3f8a7ef-f92e-49da-8757-fc4794817922",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.44,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:42:29.580Z"
+    },
+    {
+      "id": "22dcbba3-1180-4cf4-8d8f-10b7dc3780e2",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8898,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:41:55.296Z"
+    },
+    {
+      "id": "16d578e1-1ecd-473e-a2f3-c0029819e66c",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.761,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:41:42.282Z"
+    },
+    {
+      "id": "362f1d2b-51e7-4014-a1af-2df1087ba2de",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.78,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:41:20.388Z"
+    },
+    {
+      "id": "8d336642-8cbf-4730-86be-a9f36de38149",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1409,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:40:55.898Z"
+    },
+    {
+      "id": "0956a243-1115-4115-b912-cfc518aed328",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8908,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:40:43.852Z"
+    },
+    {
+      "id": "51fcf519-619a-4da5-8769-93ddc900176b",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.761,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:40:30.841Z"
+    },
+    {
+      "id": "04a83a76-a215-447e-bf8d-7125e488eb57",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.92,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:40:07.675Z"
+    },
+    {
+      "id": "e748bea3-0484-4b09-88f9-d40650e80b20",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:39:40.743Z"
+    },
+    {
+      "id": "67075cbc-1025-4bf6-8aa1-d9c14b246061",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.89,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:39:29.318Z"
+    },
+    {
+      "id": "eb3a731b-521b-4a5d-8473-b16370acc21e",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.754,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:39:19.527Z"
+    },
+    {
+      "id": "d51080fc-dcdf-4159-aabf-e17fef07682b",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.99,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:38:55.246Z"
+    },
+    {
+      "id": "ad52d153-9a53-4405-90ff-2d1ef1ed1171",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:38:35.357Z"
+    },
+    {
+      "id": "d9be76ca-00e5-45a6-ba91-7dbe535f4b07",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8887,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:38:17.734Z"
+    },
+    {
+      "id": "f6a415dc-6a57-41b5-b231-a74927cccfec",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.752,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:38:06.899Z"
+    },
+    {
+      "id": "a9950d71-ab19-417b-ab5d-9466e975c52d",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.78,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:37:44.071Z"
+    },
+    {
+      "id": "bf8ac029-307a-4fe8-a12a-110b13cfe3da",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8879,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:37:06.872Z"
+    },
+    {
+      "id": "104ae3b7-05b8-42b7-8eb8-5621745cd0b8",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.753,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:36:54.525Z"
+    },
+    {
+      "id": "0f0a05e7-4954-4482-b866-11576fc5c4ae",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.68,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:36:31.893Z"
+    },
+    {
+      "id": "96b680e1-da45-46df-8745-0bccd172fbb3",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.141,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:36:05.746Z"
+    },
+    {
+      "id": "43882b8b-73f1-44c7-8e89-05dd37fb966f",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8868,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:35:55.013Z"
+    },
+    {
+      "id": "319100ca-155a-44af-b470-576b04412f1e",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.751,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:35:47.552Z"
+    },
+    {
+      "id": "d4d22a4b-d8ef-4e79-aee9-489afbe821ab",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.46,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:35:19.908Z"
+    },
+    {
+      "id": "fc0620f9-e3dc-4fa0-a99a-6ec07fe04fb8",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1408,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:34:53.822Z"
+    },
+    {
+      "id": "1b52797a-325d-4be5-915e-5a88829368f4",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.887,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:34:41.792Z"
+    },
+    {
+      "id": "a56bfe69-8c96-47d9-bfa0-18bf6b9e71e5",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.752,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:34:30.967Z"
+    },
+    {
+      "id": "50d2fc1e-db27-4e5f-b68c-bcdd122be777",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.57,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:34:06.880Z"
+    },
+    {
+      "id": "eadf8e16-1c22-45f7-af4c-4cb153930e9e",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8863,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:33:31.945Z"
+    },
+    {
+      "id": "411cc7fc-902e-4b0a-bdf4-7111a3199479",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.44,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:32:59.245Z"
+    },
+    {
+      "id": "02491049-1f58-4d5f-9eb2-517975143a2f",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8855,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:32:37.844Z"
+    },
+    {
+      "id": "e976b17e-49e0-430f-96d3-1ac758c4e671",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1406,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:32:31.362Z"
+    },
+    {
+      "id": "cc0f1e8f-6074-42b8-85d5-4af2be310b17",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.06,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:31:46.929Z"
+    },
+    {
+      "id": "3c0c94ca-cda7-4f0a-8470-105a2f8af5a0",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8842,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:28:44.820Z"
+    },
+    {
+      "id": "84c269a6-dc3d-4c9a-a8af-fef954604589",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1666.72,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:28:12.358Z"
+    },
+    {
+      "id": "d345db31-7c75-4c5e-92d1-caa6300240b9",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8851,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:27:31.485Z"
+    },
+    {
+      "id": "6aa3d960-f66b-469f-86de-2edf96142473",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8854,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:26:18.441Z"
+    },
+    {
+      "id": "c8de5458-768d-4af7-aa04-89858155baa6",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1666.25,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:26:04.759Z"
+    },
+    {
+      "id": "dce78b47-888a-408c-9252-bff58315da09",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8852,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:25:17.091Z"
+    },
+    {
+      "id": "235f652a-1641-4944-90da-ecde43b4f988",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1666.7,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:24:38.662Z"
+    },
+    {
+      "id": "8f1aae30-33ce-49a6-b39a-8d7d052d3f79",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.885,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:23:53.834Z"
+    },
+    {
+      "id": "3d484670-6324-4982-8ae8-048bc4d65ea1",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.739,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:23:46.653Z"
+    },
+    {
+      "id": "842751cc-44a3-400a-aa37-1c364f0a42aa",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1666.61,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:23:22.168Z"
+    },
+    {
+      "id": "a3a4e166-6ce8-4f94-a38b-439a3b605d57",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.885,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:22:43.067Z"
+    },
+    {
+      "id": "66e10f1f-844c-4ef2-a7da-edcdfef931aa",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.14,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:22:08.185Z"
+    },
+    {
+      "id": "7a56efc6-3a47-44ab-b5db-711a45cca045",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.885,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:21:35.962Z"
+    },
+    {
+      "id": "c3ae9c1e-4cc2-4c7f-b435-98436019b2a2",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1666.85,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:20:57.257Z"
+    },
+    {
+      "id": "e7872ffa-a148-456c-bc73-58a704d33ba9",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1412,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:20:30.792Z"
+    },
+    {
+      "id": "a9fccd80-a015-4f42-a17f-fbf5fa253e3b",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.14,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:19:42.758Z"
+    },
+    {
+      "id": "0c768d06-6720-4dec-9503-a2ffddcbdb68",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:19:21.138Z"
+    },
+    {
+      "id": "48a20597-3b63-4810-add4-cb3c99516238",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8853,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:19:06.591Z"
+    },
+    {
+      "id": "dc24e590-2433-4b77-837a-70c71328c597",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.15,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:18:33.157Z"
+    },
+    {
+      "id": "3d04d5b4-e3cd-44ae-912f-ea931c302000",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1416,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:18:06.448Z"
+    },
+    {
+      "id": "c22dadd6-fea0-4ea4-b2c1-ed3cc6bab33f",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.885,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:17:53.162Z"
+    },
+    {
+      "id": "c08a153d-9ad1-4b89-87fc-6ce94b34a61f",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.1,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:17:18.527Z"
+    },
+    {
+      "id": "60775c21-2854-455a-88d7-386139810d80",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1417,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:16:54.566Z"
+    },
+    {
+      "id": "1efef082-ae07-424e-82a8-dd500df5d923",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8854,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:16:44.019Z"
+    },
+    {
+      "id": "1d1e1597-6989-4fdf-a7d1-98970ac36a85",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.47,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:16:07.562Z"
+    },
+    {
+      "id": "87e46ea7-8372-47b8-b08a-8d3ed380a485",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.744,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:15:49.624Z"
+    },
+    {
+      "id": "3494e46b-242e-4dc9-bf5d-7c9567d26191",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1418,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:15:41.302Z"
+    },
+    {
+      "id": "6e50e33e-de4e-43b7-9ea5-c670e10445ca",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8856,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:15:32.642Z"
+    },
+    {
+      "id": "fed25b89-9943-4b88-9950-9c748c0e5d41",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.24,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:14:56.069Z"
+    },
+    {
+      "id": "a1c1595d-674f-4014-a3bb-667094be3915",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1417,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:14:29.822Z"
+    },
+    {
+      "id": "f5e7cf91-362f-4098-b9f8-4d7758381c27",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8854,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:14:19.387Z"
+    },
+    {
+      "id": "091660ad-b7ae-4ae8-a07d-f007a9eca331",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.751,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:14:07.720Z"
+    },
+    {
+      "id": "4d429689-fd62-477f-bfe8-6060c65c9e87",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.09,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:13:42.254Z"
+    },
+    {
+      "id": "896114f5-6f20-491e-b25b-ac6cf866ad70",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1417,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:13:17.266Z"
+    },
+    {
+      "id": "55ab5235-1672-45b0-9de5-ed082fe7e449",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8854,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:13:06.622Z"
+    },
+    {
+      "id": "fb6920d2-f2ad-4816-9e1e-04de5b63c9a2",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.6,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:12:31.061Z"
+    },
+    {
+      "id": "634bc37b-aa3f-4b57-8f01-1897d2f5601b",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1415,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:12:05.745Z"
+    },
+    {
+      "id": "aebda151-b776-4bac-b96d-6c21b4441959",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8848,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:11:57.459Z"
+    },
+    {
+      "id": "e7d35143-e4c2-4f80-b656-1c63ddfa3347",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.39,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:11:18.731Z"
+    },
+    {
+      "id": "e00cde28-df6c-43e0-8f3c-e81da5342421",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.5,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:10:06.426Z"
+    },
+    {
+      "id": "f6c40a6a-ef0a-4da8-9df6-04d83e911949",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1415,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:09:44.163Z"
+    },
+    {
+      "id": "b61ea12e-c9f4-4ecc-b203-3c73d711418a",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.26,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:08:55.987Z"
+    },
+    {
+      "id": "cd5aa626-af97-4643-b2ee-1a5a904fc77e",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1416,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:08:29.522Z"
+    },
+    {
+      "id": "e86fa522-415f-4f97-bdc6-87850ce488e7",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.746,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:08:10.243Z"
+    },
+    {
+      "id": "36ebadf7-19ef-4d4d-a4f3-2f4e755d9b22",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.39,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:07:41.786Z"
+    },
+    {
+      "id": "9e6aa440-ea3a-4ae3-9f46-e4a13050a323",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1417,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:07:18.599Z"
+    },
+    {
+      "id": "17f181bb-da31-4d1e-b1c0-4a722726c81d",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.885,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:07:06.848Z"
+    },
+    {
+      "id": "d820c6eb-20aa-41cf-aadd-19bade659f32",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.751,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:06:52.831Z"
+    },
+    {
+      "id": "2a1ad812-b411-4024-b6fb-7328cf60c0ac",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1666.93,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:06:31.555Z"
+    },
+    {
+      "id": "9c13e858-8adc-4254-9260-c277567dcea7",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1416,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:06:05.043Z"
+    },
+    {
+      "id": "b9cf50b6-1c98-479d-86d0-79dde0422b52",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.748,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:05:41.787Z"
+    },
+    {
+      "id": "a5452794-519f-43fc-8e9e-1e97791c8bd1",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.12,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:05:18.135Z"
+    },
+    {
+      "id": "2c3a0666-e926-46c8-a364-933136b7c7bb",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1415,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:04:58.976Z"
+    },
+    {
+      "id": "93f8947f-57c0-4a87-81c5-b6a423509650",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.754,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:04:30.814Z"
+    },
+    {
+      "id": "46d75b07-21dd-4178-8988-13c013747f42",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1667.39,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:04:06.240Z"
+    },
+    {
+      "id": "e34fe39e-98bf-4d97-90e2-d7f5a1c54d1f",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1414,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:03:48.663Z"
+    },
+    {
+      "id": "95cdfa9f-9c0b-4261-90d0-0a52528c8f47",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.753,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:03:20.027Z"
+    },
+    {
+      "id": "8ab19484-b44a-451e-9d27-76cdba953dbc",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1414,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:03:06.960Z"
+    },
+    {
+      "id": "5fcdfeca-8b26-43d7-8237-4f2261874ee6",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1666.4,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:02:57.145Z"
+    },
+    {
+      "id": "cf173d64-3765-4b87-90d1-a0d9430e702c",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.752,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:02:05.778Z"
+    },
+    {
+      "id": "ac3dfa9e-148d-4244-b3f6-4cae9135a03b",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1666.34,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:01:46.578Z"
+    },
+    {
+      "id": "f0e0f554-952d-4230-afb3-1479e5f26f24",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1415,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:01:25.298Z"
+    },
+    {
+      "id": "4eaaa14a-0392-4e01-9505-eae5d4b5c53d",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.752,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T01:00:56.730Z"
+    },
+    {
+      "id": "a6254e85-d093-4763-8df9-934c3105c0ff",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1665.66,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T01:00:31.506Z"
+    },
+    {
+      "id": "f90f9821-da34-41a6-99f3-17711e7e4f98",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8858,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T01:00:01.881Z"
+    },
+    {
+      "id": "55cfa9c7-ff8d-4d36-b739-03b8d3a10847",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.747,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T00:59:41.096Z"
+    },
+    {
+      "id": "5bde5b44-cc92-42bc-8c8a-34b51c0d17bd",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:58:54.160Z"
+    },
+    {
+      "id": "2929bbe7-f7dc-4ca2-948f-f30ccc399afe",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:56:31.833Z"
+    },
+    {
+      "id": "c698fc44-a5c4-4f88-922a-65584a949795",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8862,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:56:17.689Z"
+    },
+    {
+      "id": "9796e7b7-27a2-4bf5-bb60-c1b78d440794",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1415,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:54:06.189Z"
+    },
+    {
+      "id": "52bd1959-72b3-42f0-af03-f1ff82c4141f",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8896,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:51:33.265Z"
+    },
+    {
+      "id": "9aa44655-716d-44ab-b7ce-2b54c9b3cdb9",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1665.92,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T00:49:42.870Z"
+    },
+    {
+      "id": "2ac2b3bf-8aec-4e03-bf03-879057f4af47",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1416,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:49:19.289Z"
+    },
+    {
+      "id": "176feb2a-ee35-470c-988a-c2fdc8ded594",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1415,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:48:05.843Z"
+    },
+    {
+      "id": "2f8988b4-5237-4605-be84-d6fcdad615b1",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1418,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:45:42.472Z"
+    },
+    {
+      "id": "901e70b3-0309-4d0d-a88a-3f673b2a7681",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1418,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:44:50.697Z"
+    },
+    {
+      "id": "069df72f-2cd8-42ba-872f-ab183fb9f7f6",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.142,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:43:18.315Z"
+    },
+    {
+      "id": "9ae584db-55c5-47b7-84fe-fb5057a91773",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1416,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:42:07.025Z"
+    },
+    {
+      "id": "6f0e647d-7f14-4e91-bba0-f38bb51259fd",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1415,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:40:57.376Z"
+    },
+    {
+      "id": "0429c05d-cf50-4bd6-9391-5d6476a4fff5",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1413,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:34:04.163Z"
+    },
+    {
+      "id": "6ef23027-6fa2-44c8-8389-4ac5b00b5ad0",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8941,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:33:34.600Z"
+    },
+    {
+      "id": "2adde4b6-07cf-4ec9-9ae3-08500185f159",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1668.13,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_76%",
+      "timestamp": "2026-02-21T00:31:58.882Z"
+    },
+    {
+      "id": "16bb1fa8-11d1-4332-b2c6-9e7c1d7d8bfe",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8954,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:29:56.939Z"
+    },
+    {
+      "id": "9683cf54-2bfe-4d61-bda2-d11ff5626e63",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8948,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:27:30.771Z"
+    },
+    {
+      "id": "02256b72-10a2-44c7-b6ff-a9803723b6cc",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.895,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:25:06.504Z"
+    },
+    {
+      "id": "aa2bdd38-65ef-47cf-8615-380b1baa6614",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1421,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:24:06.444Z"
+    },
+    {
+      "id": "b79dcb84-5928-45c4-9008-aa3b23271816",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8954,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:23:53.957Z"
+    },
+    {
+      "id": "662424d3-6c52-434c-9ff8-b22b0576a312",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1421,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:22:55.302Z"
+    },
+    {
+      "id": "ebaa52cf-6b2e-4636-8535-078f6a68dc71",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8946,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:22:42.392Z"
+    },
+    {
+      "id": "2f246852-06d4-402e-9807-63c5996aae34",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.777,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T00:22:31.375Z"
+    },
+    {
+      "id": "47a432f8-37e0-411b-9899-644078a6c564",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.06,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_85%",
+      "timestamp": "2026-02-21T00:22:18.459Z"
+    },
+    {
+      "id": "c91ab93a-b1d6-4c59-8a7e-b401cf43ec98",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8956,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:21:34.438Z"
+    },
+    {
+      "id": "18c60e6d-c37c-4de3-87ac-a23133e24097",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.772,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T00:21:28.524Z"
+    },
+    {
+      "id": "7f024940-7a33-4c75-b6a9-36b647f136c1",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8949,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:20:19.717Z"
+    },
+    {
+      "id": "411a648f-43a5-4246-96d6-bb753b421f67",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.778,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T00:20:06.213Z"
+    },
+    {
+      "id": "1b9a19ba-cd74-4d78-aa91-5d16833ca447",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1421,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:19:17.322Z"
+    },
+    {
+      "id": "a0b8d6e8-acac-4551-83a1-1631544a8369",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8945,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:19:06.742Z"
+    },
+    {
+      "id": "abedcc3a-dd1c-40e3-8b7b-21ec71900396",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.779,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T00:18:55.245Z"
+    },
+    {
+      "id": "b7f0b475-7e0d-4e67-b0d8-f9c1fa9e231a",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8953,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:17:56.603Z"
+    },
+    {
+      "id": "30226308-57c8-4955-8a13-154ca462daec",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.779,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T00:17:41.515Z"
+    },
+    {
+      "id": "4eba0c0c-3cc2-4617-8a09-193c5470f65d",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.38,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T00:17:25.958Z"
+    },
+    {
+      "id": "de4f44dd-f1e9-4086-9969-48fb024779f2",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1422,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:16:55.199Z"
+    },
+    {
+      "id": "3666da6d-73ef-4773-b4e3-42826662d7be",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8951,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:16:46.272Z"
+    },
+    {
+      "id": "ddc6abc7-7743-49d7-8479-3cbec6d58816",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.777,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T00:16:30.924Z"
+    },
+    {
+      "id": "8b7fc4d3-27d0-44e0-a289-4b7a0d52096f",
+      "symbol": "FET",
+      "action": "BUY",
+      "price": 0.1423,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:15:42.431Z"
+    },
+    {
+      "id": "911c2b6a-7005-4c8b-a7e7-87fdb5ddc0e8",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8949,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:15:31.997Z"
+    },
+    {
+      "id": "233282ca-da6d-49ea-84c0-b378b06ddb5a",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.771,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T00:15:18.813Z"
+    },
+    {
+      "id": "9ab1dfa4-bc12-47a8-b772-d10e5c72c3d5",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.53,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T00:14:58.123Z"
+    },
+    {
+      "id": "2ee76472-05d5-4594-9c33-ea0d18fac7b2",
+      "symbol": "NEAR",
+      "action": "BUY",
+      "price": 0.8955,
+      "status": "FAILED",
+      "details": "API_EXECUTION_FAILED",
+      "timestamp": "2026-02-21T00:14:18.925Z"
+    },
+    {
+      "id": "94e8c793-c606-4be3-9f62-f66f1b8df2a5",
+      "symbol": "AVAX",
+      "action": "BUY",
+      "price": 7.771,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_78%",
+      "timestamp": "2026-02-21T00:14:18.280Z"
+    },
     {
       "id": "b3cf905c-3a57-4122-85c2-ee307ccf09fe",
       "symbol": "ETH",
@@ -1175,23 +4298,23 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": -0.8435051564831434,
-      "pnl": -0.08327840999999951,
-      "currentPrice": 57653.83,
+      "pnlPercent": -0.7750031473431184,
+      "pnl": -0.07651527599999922,
+      "currentPrice": 57693.66,
       "quantity": 0.0001698
     },
     {
       "symbol": "SOL",
       "entryPrice": 70.94,
-      "currentPrice": 71.79,
+      "currentPrice": 72,
       "amount": 9.5769,
       "quantity": 0.135,
       "tp": 72.3588,
       "sl": 67.393,
       "confidence": 99,
       "potentialRoi": 0,
-      "pnl": 0.11475000000000116,
-      "pnlPercent": 1.1981956583028033,
+      "pnl": 0.1431000000000003,
+      "pnlPercent": 1.494220468001131,
       "isPaper": false,
       "timestamp": "2026-02-20T03:12:33.506Z"
     }
@@ -1203,17 +4326,18 @@
   "actualBalances": {
     "EURC": 0.00265,
     "SOL": 0.135,
-    "BTC": 0.0001698
+    "BTC": 0.0001698,
+    "ETH": 5.43370093e-9
   },
   "dailyStats": {
-    "trades": 1,
+    "trades": 162,
     "profit": 0,
     "fees": 0,
     "dailyGoal": 50,
     "lastResetDate": "2026-02-21"
   },
-  "currentStatus": "SNIPING_ETH",
-  "scanIndex": 3590,
+  "currentStatus": "SNIPING_AVAX",
+  "scanIndex": 4528,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
