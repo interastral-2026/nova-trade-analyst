@@ -8,6 +8,78 @@
   },
   "thoughts": [
     {
+      "side": "SELL",
+      "tp": 57250,
+      "sl": 57750,
+      "entryPrice": 57673.02,
+      "confidence": 82,
+      "potentialRoi": 0.73,
+      "analysis": "Market Structure Shift (MSS) confirmed after price failed to sustain levels above 57744 and broke below the 57691 swing low. A bearish trend is forming on the 30m timeframe. The Take Profit is set at 57250 to account for the 0.6% round-trip exchange fees (approx 346 EUR) and secure the 50 EUR daily profit target. Stop Loss is placed tightly above the recent swing high to maintain a calculated risk-to-reward ratio.",
+      "symbol": "BTC",
+      "id": "31f582c7-d12a-4d24-be3f-0279c8af80ff",
+      "timestamp": "2026-02-21T00:06:31.670Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 0.1442,
+      "sl": 0.141,
+      "entryPrice": 0.1421,
+      "confidence": 82,
+      "potentialRoi": 0.87,
+      "analysis": "Detected a liquidity sweep below the 0.1425 support level, reaching a low of 0.1421. This aggressive move indicates a potential stop-run before a mean reversion. Market structure on the 30m timeframe shows a previous consolidation zone between 0.1426 and 0.1428. The TP is set at 0.1442 to ensure a net profit of approximately 0.87% after accounting for the 0.6% round-trip exchange fees. SL is placed tightly at 0.1410 to manage risk against further downside expansion.",
+      "symbol": "FET",
+      "id": "f1195f84-8768-4adc-98b9-79e0add084e3",
+      "timestamp": "2026-02-21T00:05:59.528Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 0.912,
+      "sl": 0.8915,
+      "entryPrice": 0.8961,
+      "confidence": 82,
+      "potentialRoi": 1.77,
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed after breaking 0.8930. Price is currently in a momentum phase following a Fair Value Gap (FVG) creation between 0.8931 and 0.8971. Entry at 0.8961 targets the next liquidity pool at 0.9120. SL placed below the breakout candle base to manage risk. TP accounts for 0.6% exchange fees and net profit.",
+      "symbol": "NEAR",
+      "id": "dd10bbcb-032f-40bf-95e2-f6f629cc6171",
+      "timestamp": "2026-02-21T00:05:25.359Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 72.6,
+      "sl": 71.65,
+      "entryPrice": 71.78,
+      "confidence": 82,
+      "potentialRoi": 1.14,
+      "analysis": "Market Structure Shift (MSS) confirmed after breaking 71.71. Bullish Fair Value Gap (FVG) identified between 71.66 and 71.74. Current price at 71.78 represents a retracement into the premium-to-discount zone of the recent impulsive move. TP set at 72.60 to ensure net profitability after 0.6% round-trip fees (approx 0.43 EUR). SL placed tightly below the FVG to maintain a high risk-to-reward ratio.",
+      "symbol": "SOL",
+      "id": "3cf9603f-18d9-44cc-8c19-bbf282f0c413",
+      "timestamp": "2026-02-21T00:04:25.495Z"
+    },
+    {
+      "side": "BUY",
+      "tp": 1681.5,
+      "sl": 1666.8,
+      "entryPrice": 1669.25,
+      "confidence": 82,
+      "potentialRoi": 0.73,
+      "analysis": "Bullish Market Structure Shift (MSS) confirmed after breaking 1669.93 and reaching 1671.15. Price is currently retracing into a bullish Fair Value Gap (FVG) and discount zone. Entry at 1669.25 targets buy-side liquidity above the recent high. TP at 1681.50 accounts for the 0.6% exchange fee round-trip while securing a portion of the daily 50 EUR goal. SL is tight at 1666.80, just below the recent consolidation base.",
+      "symbol": "ETH",
+      "id": "259d09b9-f85b-4f30-9640-1f15d57a7cd0",
+      "timestamp": "2026-02-21T00:03:56.182Z"
+    },
+    {
+      "side": "SELL",
+      "tp": 57150,
+      "sl": 57750,
+      "entryPrice": 57673.85,
+      "confidence": 78,
+      "potentialRoi": 0.91,
+      "analysis": "Market Structure Shift (MSS) confirmed on the 30M timeframe after breaking the 57689.38 support level. The recent rejection at 57744.30 created a bearish displacement. TP is set at 57150.00 to ensure the move covers the 0.6% round-trip exchange fees (approx 346 EUR) while targeting lower liquidity zones. SL is positioned strictly above the recent swing high to manage risk aggressively.",
+      "symbol": "BTC",
+      "id": "2970c7f5-d122-449d-b1d2-706746d00c02",
+      "timestamp": "2026-02-21T00:03:27.690Z"
+    },
+    {
       "side": "BUY",
       "tp": 0.912,
       "sl": 0.8905,
@@ -534,81 +606,18 @@
       "symbol": "SOL",
       "id": "1820d333-2088-45cc-b8eb-f91f534d5aec",
       "timestamp": "2026-02-20T23:44:55.304Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 1652,
-      "sl": 1671.5,
-      "entryPrice": 1667.93,
-      "confidence": 82,
-      "potentialRoi": 0.95,
-      "analysis": "Market structure shifted bearish after the rejection at 1671.33. A bearish Fair Value Gap (FVG) was identified between 1668.18 and 1666.75. Current price action shows a retracement into this FVG, providing a high-probability entry for a short position. The Take Profit is set at 1652.00 to ensure the 0.6% round-trip fee is covered while securing a net profit towards the daily goal.",
-      "symbol": "ETH",
-      "id": "10e94543-0288-40a5-9f70-fb902ad9424d",
-      "timestamp": "2026-02-20T23:44:32.893Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 57150,
-      "sl": 57750,
-      "entryPrice": 57649.84,
-      "confidence": 82,
-      "potentialRoi": 0.86,
-      "analysis": "Bearish market structure shift observed after breaking 57670. Price rejected the 57680 resistance zone, which coincides with a bearish FVG. Setting TP at 57150 to ensure 0.6% fee coverage and net profit. SL placed above the recent swing high.",
-      "symbol": "BTC",
-      "id": "cb3443cc-9880-4c05-83c3-cee6f4ef9a03",
-      "timestamp": "2026-02-20T23:44:21.225Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 0.1442,
-      "sl": 0.1415,
-      "entryPrice": 0.1423,
-      "confidence": 78,
-      "potentialRoi": 1.33,
-      "analysis": "Detected a bearish Market Structure Shift (MSS) on the 30m timeframe, but price is currently stalling at a historical demand level near 0.1422. A Fair Value Gap (FVG) exists between 0.1427 and 0.1430. I am entering a long position to capture a mean reversion move to fill that gap and hunt liquidity at 0.1440. The TP is calculated to cover the 0.6% round-trip exchange fees while securing a net profit to recover the current daily loss.",
-      "symbol": "FET",
-      "id": "ffc09eb4-7978-435e-afea-2cc18defc1ab",
-      "timestamp": "2026-02-20T23:44:08.953Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 0.875,
-      "sl": 0.892,
-      "entryPrice": 0.8885,
-      "confidence": 82,
-      "potentialRoi": 0.92,
-      "analysis": "Bearish market structure confirmed with a break of 0.8892. Price is currently in a distribution phase following a series of lower highs. FVG identified between 0.8900 and 0.8908. Entry at 0.8885 targeting liquidity at 0.8750. SL set above recent swing high to manage risk. TP accounts for 0.6% round-trip fees.",
-      "symbol": "NEAR",
-      "id": "4286657b-4a2c-4f7f-9fb0-3a6f15334d0d",
-      "timestamp": "2026-02-20T23:43:55.938Z"
-    },
-    {
-      "side": "SELL",
-      "tp": 7.68,
-      "sl": 7.81,
-      "entryPrice": 7.763,
-      "confidence": 78,
-      "potentialRoi": 1.07,
-      "analysis": "Market Structure Shift (MSS) confirmed after rejection at 7.778 and a break below the 7.768 support level. A bearish Fair Value Gap (FVG) is visible between 7.776 and 7.764. The Take Profit is set at 7.68 to clear the 0.6% round-trip exchange fees (approx 0.046 EUR) and secure a net profit. Stop Loss is placed tightly above the recent swing high to manage risk aggressively while chasing the daily goal.",
-      "symbol": "AVAX",
-      "id": "51e77970-563c-44fa-aaba-bf7faeb13e0d",
-      "timestamp": "2026-02-20T23:43:50.372Z"
-    },
-    {
-      "side": "BUY",
-      "tp": 72.85,
-      "sl": 71.25,
-      "entryPrice": 71.62,
-      "confidence": 78,
-      "potentialRoi": 1.71,
-      "analysis": "Price is currently testing a support zone at 71.60 after a minor liquidity sweep. A bullish Fair Value Gap (FVG) is identified on the lower timeframe near 71.58. The trade targets a breakout above the recent 71.74 resistance to reach the next liquidity pool at 72.85. The TP is set to ensure a net profit after accounting for the 0.6% round-trip exchange fees (approx 0.43 EUR). SL is placed strictly below the recent swing low to manage risk aggressively.",
-      "symbol": "SOL",
-      "id": "7db0fa89-7757-42ce-bc2e-2f5fb5fd01e4",
-      "timestamp": "2026-02-20T23:43:33.959Z"
     }
   ],
   "executionLogs": [
+    {
+      "id": "b3cf905c-3a57-4122-85c2-ee307ccf09fe",
+      "symbol": "ETH",
+      "action": "BUY",
+      "price": 1669.25,
+      "status": "SUCCESS",
+      "details": "AUTO_SMC_HIT_82%",
+      "timestamp": "2026-02-21T00:03:56.989Z"
+    },
     {
       "id": "212b9727-66cf-4e40-a7b5-e8a05f9ce67c",
       "symbol": "AVAX",
@@ -1166,23 +1175,23 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": -0.7614850506361108,
-      "pnl": -0.07518064800000035,
-      "currentPrice": 57701.52,
+      "pnlPercent": -0.8435051564831434,
+      "pnl": -0.08327840999999951,
+      "currentPrice": 57653.83,
       "quantity": 0.0001698
     },
     {
       "symbol": "SOL",
       "entryPrice": 70.94,
-      "currentPrice": 71.8,
+      "currentPrice": 71.79,
       "amount": 9.5769,
       "quantity": 0.135,
       "tp": 72.3588,
       "sl": 67.393,
       "confidence": 99,
       "potentialRoi": 0,
-      "pnl": 0.11609999999999993,
-      "pnlPercent": 1.212292077812235,
+      "pnl": 0.11475000000000116,
+      "pnlPercent": 1.1981956583028033,
       "isPaper": false,
       "timestamp": "2026-02-20T03:12:33.506Z"
     }
@@ -1194,17 +1203,17 @@
   "actualBalances": {
     "EURC": 0.00265,
     "SOL": 0.135,
-    "BTC": 0.0001698,
-    "ETH": 5.43370093e-9
+    "BTC": 0.0001698
   },
   "dailyStats": {
-    "trades": 30,
-    "profit": -0.04236091499576351,
+    "trades": 1,
+    "profit": 0,
     "fees": 0,
-    "dailyGoal": 50
+    "dailyGoal": 50,
+    "lastResetDate": "2026-02-21"
   },
-  "currentStatus": "SNIPING_FET",
-  "scanIndex": 3582,
+  "currentStatus": "SNIPING_ETH",
+  "scanIndex": 3590,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
