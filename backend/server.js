@@ -336,23 +336,34 @@ async function monitor() {
       if (pos.entryPrice === 0) {
         pos.entryPrice = curPrice;
         pos.amount = pos.quantity * curPrice;
-        pos.tp = curPrice * 1.02;
-        pos.sl = curPrice * 0.95;
+        pos.tp = curPrice * 1.015; // Aggressive 1.5% TP for external assets
+        pos.sl = curPrice * 0.96;  // 4% SL
       }
 
       pos.currentPrice = curPrice;
       pos.pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
       pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
       
-      if (curPrice >= pos.tp || curPrice <= pos.sl) {
+      const isTakeProfitHit = curPrice >= pos.tp;
+      const isStopLossHit = curPrice <= pos.sl;
+
+      if (isTakeProfitHit || isStopLossHit) {
+        const reason = isTakeProfitHit ? "TAKE_PROFIT" : "STOP_LOSS";
+        console.log(`[TARGET HIT] ${pos.symbol} hit ${reason} at ${curPrice}. Executing liquidation...`);
+        
         const tradeSuccess = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
+        
         if (tradeSuccess) {
           ghostState.dailyStats.profit += pos.pnl;
+          console.log(`[PROFIT SECURED] +€${pos.pnl.toFixed(2)} from ${pos.symbol}`);
           ghostState.executionLogs.unshift({ 
             id: crypto.randomUUID(), symbol: pos.symbol, action: 'SELL', 
-            price: curPrice, pnl: pos.pnl, status: 'SUCCESS', timestamp: new Date().toISOString() 
+            price: curPrice, pnl: pos.pnl, status: 'SUCCESS', 
+            details: `TARGET_${reason}_REACHED`, timestamp: new Date().toISOString() 
           });
           ghostState.activePositions.splice(i, 1);
+        } else {
+          console.error(`[LIQUIDATION FAILED] Could not close ${pos.symbol}. Will retry in 10s.`);
         }
       }
     }
