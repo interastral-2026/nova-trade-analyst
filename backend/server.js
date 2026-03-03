@@ -8,14 +8,34 @@ import jwt from 'jsonwebtoken';
 import { GoogleGenAI, Type } from "@google/genai";
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-// Load environment variables
 import dotenv from 'dotenv';
-dotenv.config(); // Load from current directory .env
-dotenv.config({ path: '../.env' }); // Also try parent directory
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Try to load from multiple locations to be safe
+const envPaths = [
+  path.join(process.cwd(), '.env.local'),
+  path.join(process.cwd(), '.env'),
+  path.join(__dirname, '.env.local'),
+  path.join(__dirname, '.env'),
+  path.join(__dirname, '../.env.local'),
+  path.join(__dirname, '../.env')
+];
+
+envPaths.forEach(envPath => {
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+    console.log(`[ENV] Successfully loaded: ${envPath}`);
+  }
+});
+
+if (!process.env.CB_API_KEY) {
+  console.warn("⚠️  WARNING: CB_API_KEY not found in process.env after searching all .env files.");
+}
+if (!process.env.CB_API_SECRET) {
+  console.warn("⚠️  WARNING: CB_API_SECRET not found in process.env after searching all .env files.");
+}
 
 const app = express();
 const STATE_FILE = './ghost_state.json';
