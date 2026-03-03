@@ -1,6 +1,5 @@
-
 {
-  "name": "NovaTrade AI Analyst",
+  "name": "NovaTrade AI Suite",
   "description": "A professional AI-powered financial market analyzer that monitors crypto assets, identifies profitable opportunities, and generates technical signals with stop-loss and take-profit targets using Gemini 3 Pro and Coinbase data.",
   "requestFramePermissions": [
     "geolocation"
