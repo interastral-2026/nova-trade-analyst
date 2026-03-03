@@ -2,18 +2,22 @@
 import { TradeSignal, AccountBalance, ExecutionLog } from "../types";
 
 export const getApiBase = () => {
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const url = localStorage.getItem('NOVA_BRIDGE_URL');
-      if (url) return url.endsWith('/') ? url.slice(0, -1) : url;
-    }
-  } catch (e) {
-    console.warn("Storage access restricted:", e);
+  if (typeof window === 'undefined') return "";
+  
+  // 1. Check localStorage (User override)
+  const savedUrl = localStorage.getItem('NOVA_BRIDGE_URL');
+  if (savedUrl) return savedUrl.endsWith('/') ? savedUrl.slice(0, -1) : savedUrl;
+
+  // 2. If on localhost, default to the local proxy
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return ""; 
   }
+
+  // 3. Fallback to env var
   const envUrl = import.meta.env.VITE_API_BASE;
   if (envUrl) return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
 
-  return typeof window !== 'undefined' && window.location.hostname === 'localhost' ? "http://localhost:3000" : "";
+  return "";
 };
 
 export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {

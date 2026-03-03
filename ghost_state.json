@@ -4305,7 +4305,7 @@
       "pnl": 0,
       "pnlPercent": 0,
       "isPaper": false,
-      "timestamp": "2026-03-03T23:01:00.066Z"
+      "timestamp": "2026-03-03T23:35:34.910Z"
     },
     {
       "symbol": "BTC-EUR",
@@ -4320,17 +4320,33 @@
       "pnl": 0,
       "pnlPercent": 0,
       "isPaper": false,
-      "timestamp": "2026-03-03T23:01:00.066Z"
+      "timestamp": "2026-03-03T23:35:34.910Z"
+    },
+    {
+      "symbol": "ETH-EUR",
+      "entryPrice": 0,
+      "currentPrice": 0,
+      "amount": 0,
+      "quantity": 0.00549746543370093,
+      "tp": 0,
+      "sl": 0,
+      "confidence": 99,
+      "potentialRoi": 0,
+      "pnl": 0,
+      "pnlPercent": 0,
+      "isPaper": false,
+      "timestamp": "2026-03-03T23:35:34.910Z"
     }
   ],
   "liquidity": {
-    "eur": 9.7260012258604,
+    "eur": 0.1964028010524,
     "usdc": 8.764328e-7
   },
   "actualBalances": {
     "EURC": 0.00265,
     "SOL": 0.135,
-    "BTC": 0.0001698
+    "BTC": 0.0001698,
+    "ETH": 0.00549746543370093
   },
   "dailyStats": {
     "trades": 0,
@@ -4340,7 +4356,7 @@
     "lastResetDate": "2026-03-03"
   },
   "currentStatus": "SNIPING_NEAR-EUR",
-  "scanIndex": 4667,
+  "scanIndex": 4733,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

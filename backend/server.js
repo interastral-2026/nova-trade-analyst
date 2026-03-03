@@ -52,11 +52,31 @@ const CB_API_SECRET = process.env.CB_API_SECRET
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
   : null;
 
-const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'NEAR-EUR', 'FET-EUR'];
+const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX'];
 
 /**
- * GENERATE JWT FOR COINBASE CLOUD (V3 API)
+ * FETCH VALID PRODUCTS FROM COINBASE
  */
+async function listAvailableProducts() {
+  const token = generateCoinbaseJWT('GET', '/api/v3/brokerage/products');
+  if (!token) return;
+  try {
+    const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/products?product_type=SPOT', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const products = response.data?.products || [];
+    const eurPairs = products
+      .filter(p => p.quote_currency_id === 'EUR' && p.is_disabled === false)
+      .map(p => p.product_id);
+    
+    console.log("--------------------------------------------------");
+    console.log("✅ VALID EUR TRADING PAIRS FOR YOUR ACCOUNT:");
+    console.log(eurPairs.join(', '));
+    console.log("--------------------------------------------------");
+  } catch (e) {
+    console.warn("[PRODUCTS ERROR] Could not fetch valid pairs:", e.message);
+  }
+}
 function generateCoinbaseJWT(request_method, request_path) {
   if (!CB_API_KEY) {
     console.error("[JWT ERROR] CB_API_KEY is missing.");
@@ -128,7 +148,8 @@ async function syncCoinbaseBalance() {
  * EXECUTE REAL TRADE ON COINBASE
  */
 async function executeTrade(symbol, side, amount, quantity) {
-  console.log(`[REAL TRADE INITIATED] Attempting to ${side} ${symbol} | Amount: €${amount} | Qty: ${quantity}`);
+  const productId = symbol.includes('-') ? symbol : `${symbol}-EUR`;
+  console.log(`[REAL TRADE INITIATED] Attempting to ${side} ${productId} | Amount: €${amount} | Qty: ${quantity}`);
   
   const token = generateCoinbaseJWT('POST', '/api/v3/brokerage/orders');
   if (!token) {
@@ -143,7 +164,7 @@ async function executeTrade(symbol, side, amount, quantity) {
 
     const payload = {
       client_order_id: crypto.randomUUID(),
-      product_id: symbol,
+      product_id: productId,
       side: side,
       order_configuration: orderConfig
     };
@@ -152,10 +173,13 @@ async function executeTrade(symbol, side, amount, quantity) {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    console.log(`[REAL TRADE SUCCESS] ${side} ${symbol}`, response.data);
+    console.log(`[REAL TRADE SUCCESS] ${side} ${productId}`, response.data);
     return true;
   } catch (e) {
-    console.error("[REAL TRADE ERROR] (", side, symbol, "):", e.response?.data?.message || e.message);
+    console.error("[REAL TRADE ERROR] (", side, productId, "):", e.response?.data?.message || e.message);
+    if (e.response?.data) {
+      console.error("[REAL TRADE ERROR DETAILS]:", JSON.stringify(e.response.data, null, 2));
+    }
     return false;
   }
 }
@@ -240,12 +264,13 @@ function loadState() {
 
 let ghostState = loadState();
 
-// --- MIGRATION: FIX OLD SYMBOLS (e.g., SOL -> SOL-EUR) ---
+// --- MIGRATION: CLEAN SYMBOLS (e.g., SOL-EUR -> SOL) ---
 if (ghostState.activePositions && ghostState.activePositions.length > 0) {
   ghostState.activePositions = ghostState.activePositions.map(pos => {
-    if (pos.symbol && !pos.symbol.includes('-')) {
-      console.log(`[MIGRATION] Fixing symbol: ${pos.symbol} -> ${pos.symbol}-EUR`);
-      return { ...pos, symbol: `${pos.symbol}-EUR` };
+    if (pos.symbol && pos.symbol.includes('-')) {
+      const base = pos.symbol.split('-')[0];
+      console.log(`[MIGRATION] Cleaning symbol: ${pos.symbol} -> ${base}`);
+      return { ...pos, symbol: base };
     }
     return pos;
   });
@@ -270,7 +295,8 @@ async function loop() {
       
       if (signal.side === 'BUY' && signal.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
         if (!ghostState.activePositions.some((p) => p.symbol === symbol)) {
-          const availableEur = ghostState.liquidity.eur;
+          // Add a 2% buffer to avoid INSUFFICIENT_FUND due to fees or price fluctuations
+          const availableEur = ghostState.liquidity.eur * 0.98; 
           const tradeAmount = Math.min(ghostState.settings.defaultTradeSize, availableEur);
           
           if (tradeAmount >= 5) { 
@@ -290,6 +316,8 @@ async function loop() {
               });
               ghostState.dailyStats.trades++;
             }
+          } else {
+            console.warn(`[FUNDS] Insufficient EUR for ${symbol}. Available: €${ghostState.liquidity.eur.toFixed(2)} (Buffer applied)`);
           }
         }
       }
@@ -312,13 +340,11 @@ async function monitor() {
     });
 
     for (const [symbol, amount_val] of Object.entries(ghostState.actualBalances)) {
-      const productId = symbol === 'EUR' || symbol === 'USDC' ? null : `${symbol}-EUR`;
-      
-      if (productId && WATCHLIST.includes(productId) && amount_val > 0.00000001) {
-        let pos = ghostState.activePositions.find((p) => p.symbol === productId);
+      if (WATCHLIST.includes(symbol) && amount_val > 0.00000001) {
+        let pos = ghostState.activePositions.find((p) => p.symbol === symbol);
         if (!pos) {
           ghostState.activePositions.push({
-            symbol: productId, entryPrice: 0, currentPrice: 0, amount: 0, quantity: amount_val,
+            symbol: symbol, entryPrice: 0, currentPrice: 0, amount: 0, quantity: amount_val,
             tp: 0, sl: 0, confidence: 99, potentialRoi: 0, pnl: 0, pnlPercent: 0,
             isPaper: false, timestamp: new Date().toISOString()
           });
@@ -395,6 +421,7 @@ setInterval(monitor, 10000);
 setInterval(loop, 30000);
 
 app.get('/', (req, res) => res.send('🚀 NovaTrade AI Backend is Running. Use /api/ghost/state for data.'));
+app.get('/api/ping', (req, res) => res.json({ status: 'pong', timestamp: new Date().toISOString() }));
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
   if (req.body.engine !== undefined) ghostState.isEngineActive = !!req.body.engine;
@@ -408,4 +435,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔑 GEMINI_API: ${API_KEY ? '✅ LOADED' : '❌ MISSING'}`);
   console.log(`📡 COINBASE_KEY: ${CB_API_KEY ? '✅ LOADED' : '❌ MISSING'}`);
   console.log(`🔐 COINBASE_SECRET: ${CB_API_SECRET ? '✅ LOADED' : '❌ MISSING'}`);
+  
+  // Discover valid products on startup
+  listAvailableProducts();
 });
