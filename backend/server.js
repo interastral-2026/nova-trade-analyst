@@ -340,6 +340,7 @@ loop();
 setInterval(monitor, 10000);
 setInterval(loop, 30000);
 
+app.get('/', (req, res) => res.send('🚀 NovaTrade AI Backend is Running. Use /api/ghost/state for data.'));
 app.get('/api/ghost/state', (req, res) => res.json(ghostState));
 app.post('/api/ghost/toggle', (req, res) => {
   if (req.body.engine !== undefined) ghostState.isEngineActive = !!req.body.engine;

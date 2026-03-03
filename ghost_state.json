@@ -4298,23 +4298,23 @@
       "amount": 10,
       "tp": 59888.61,
       "sl": 56981.39,
-      "pnlPercent": -0.7750031473431184,
-      "pnl": -0.07651527599999922,
-      "currentPrice": 57693.66,
+      "pnlPercent": 1.2858530538171622,
+      "pnl": 0.12695097000000025,
+      "currentPrice": 58891.93,
       "quantity": 0.0001698
     },
     {
       "symbol": "SOL",
       "entryPrice": 70.94,
-      "currentPrice": 72,
+      "currentPrice": 73.26,
       "amount": 9.5769,
       "quantity": 0.135,
       "tp": 72.3588,
       "sl": 67.393,
       "confidence": 99,
       "potentialRoi": 0,
-      "pnl": 0.1431000000000003,
-      "pnlPercent": 1.494220468001131,
+      "pnl": 0.31320000000000103,
+      "pnlPercent": 3.270369326191158,
       "isPaper": false,
       "timestamp": "2026-02-20T03:12:33.506Z"
     }
@@ -4330,14 +4330,14 @@
     "ETH": 5.43370093e-9
   },
   "dailyStats": {
-    "trades": 162,
+    "trades": 0,
     "profit": 0,
     "fees": 0,
     "dailyGoal": 50,
-    "lastResetDate": "2026-02-21"
+    "lastResetDate": "2026-03-03"
   },
-  "currentStatus": "SNIPING_AVAX",
-  "scanIndex": 4528,
+  "currentStatus": "SNIPING_BTC-EUR",
+  "scanIndex": 4561,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

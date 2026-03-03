@@ -37,7 +37,8 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🌐 FRONTEND SERVER RUNNING ON PORT ${PORT}`);
-    console.log(`🔗 PROXYING /api TO http://localhost:3001\n`);
+    console.log(`🔗 PROXYING /api TO http://localhost:3001`);
+    console.log(`💡 Ensure your backend is running on port 3001 or set VITE_API_BASE in your environment.\n`);
   });
 }
 
