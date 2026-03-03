@@ -11,8 +11,8 @@ import { fileURLToPath } from 'url';
 
 // Load environment variables
 import dotenv from 'dotenv';
-dotenv.config({ path: '../.env.local' });
-dotenv.config({ path: '../.env' });
+dotenv.config(); // Load from current directory .env
+dotenv.config({ path: '../.env' }); // Also try parent directory
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,7 +35,14 @@ const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'NEAR-EUR', 'FET
  * GENERATE JWT FOR COINBASE CLOUD (V3 API)
  */
 function generateCoinbaseJWT(request_method, request_path) {
-  if (!CB_API_KEY || !CB_API_SECRET) return null;
+  if (!CB_API_KEY) {
+    console.error("[JWT ERROR] CB_API_KEY is missing.");
+    return null;
+  }
+  if (!CB_API_SECRET) {
+    console.error("[JWT ERROR] CB_API_SECRET is missing.");
+    return null;
+  }
   try {
     const request_host = 'api.coinbase.com';
     const uri = request_method + ' ' + request_host + request_path;
@@ -351,4 +358,7 @@ app.post('/api/ghost/toggle', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 STANDALONE BACKEND RUNNING ON PORT ${PORT}`);
+  console.log(`🔑 GEMINI_API: ${API_KEY ? '✅ LOADED' : '❌ MISSING'}`);
+  console.log(`📡 COINBASE_KEY: ${CB_API_KEY ? '✅ LOADED' : '❌ MISSING'}`);
+  console.log(`🔐 COINBASE_SECRET: ${CB_API_SECRET ? '✅ LOADED' : '❌ MISSING'}`);
 });
