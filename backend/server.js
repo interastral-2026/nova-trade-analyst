@@ -240,6 +240,17 @@ function loadState() {
 
 let ghostState = loadState();
 
+// --- MIGRATION: FIX OLD SYMBOLS (e.g., SOL -> SOL-EUR) ---
+if (ghostState.activePositions && ghostState.activePositions.length > 0) {
+  ghostState.activePositions = ghostState.activePositions.map(pos => {
+    if (pos.symbol && !pos.symbol.includes('-')) {
+      console.log(`[MIGRATION] Fixing symbol: ${pos.symbol} -> ${pos.symbol}-EUR`);
+      return { ...pos, symbol: `${pos.symbol}-EUR` };
+    }
+    return pos;
+  });
+}
+
 async function loop() {
   if (!ghostState.isEngineActive) return;
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
