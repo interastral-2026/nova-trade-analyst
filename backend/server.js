@@ -27,7 +27,9 @@ app.use(express.json());
 // --- ENVIRONMENT CONFIG ---
 const API_KEY = process.env.API_KEY ? process.env.API_KEY.trim() : null;
 const CB_API_KEY = process.env.CB_API_KEY ? process.env.CB_API_KEY.trim() : null;
-const CB_API_SECRET = process.env.CB_API_SECRET ? process.env.CB_API_SECRET.replace(/\\n/g, '\n').trim() : null;
+const CB_API_SECRET = process.env.CB_API_SECRET 
+  ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
+  : null;
 
 const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'NEAR-EUR', 'FET-EUR'];
 
