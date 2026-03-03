@@ -39,7 +39,8 @@ if (!process.env.CB_API_SECRET) {
 
 const app = express();
 const STATE_FILE = './ghost_state.json';
-const PORT = process.env.PORT || 3001;
+// Force backend to 3001 to avoid conflict with frontend on 3000
+const PORT = 3001; 
 
 app.use(cors());
 app.use(express.json());
@@ -300,11 +301,13 @@ async function monitor() {
     });
 
     for (const [symbol, amount_val] of Object.entries(ghostState.actualBalances)) {
-      if (WATCHLIST.includes(symbol) && amount_val > 0.00000001) {
-        let pos = ghostState.activePositions.find((p) => p.symbol === symbol);
+      const productId = symbol === 'EUR' || symbol === 'USDC' ? null : `${symbol}-EUR`;
+      
+      if (productId && WATCHLIST.includes(productId) && amount_val > 0.00000001) {
+        let pos = ghostState.activePositions.find((p) => p.symbol === productId);
         if (!pos) {
           ghostState.activePositions.push({
-            symbol, entryPrice: 0, currentPrice: 0, amount: 0, quantity: amount_val,
+            symbol: productId, entryPrice: 0, currentPrice: 0, amount: 0, quantity: amount_val,
             tp: 0, sl: 0, confidence: 99, potentialRoi: 0, pnl: 0, pnlPercent: 0,
             isPaper: false, timestamp: new Date().toISOString()
           });

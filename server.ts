@@ -10,11 +10,11 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = 3000; // Frontend server always on 3000
 
   // Proxy API requests to the standalone backend on port 3001
   app.use('/api', createProxyMiddleware({
-    target: 'http://localhost:3001',
+    target: 'http://127.0.0.1:3001',
     changeOrigin: true,
   }));
 
