@@ -10,8 +10,10 @@ export const getApiBase = () => {
   } catch (e) {
     console.warn("Storage access restricted:", e);
   }
-  const defaultUrl = import.meta.env.VITE_API_BASE || "";
-  return typeof window !== 'undefined' && window.location.hostname === 'localhost' ? "http://localhost:3000" : defaultUrl;
+  const envUrl = import.meta.env.VITE_API_BASE;
+  if (envUrl) return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+
+  return typeof window !== 'undefined' && window.location.hostname === 'localhost' ? "http://localhost:3000" : "";
 };
 
 export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
