@@ -1,6 +1,5 @@
 
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
@@ -274,6 +273,7 @@ async function startServer() {
   app.use(express.json());
 
   // API Routes
+  app.get('/api/ping', (req, res) => res.json({ status: 'pong', timestamp: new Date().toISOString() }));
   app.get('/api/ghost/state', (req, res) => res.json(ghostState));
   app.post('/api/ghost/toggle', (req, res) => {
     if (req.body.engine !== undefined) ghostState.isEngineActive = !!req.body.engine;
@@ -284,6 +284,7 @@ async function startServer() {
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
