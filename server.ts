@@ -100,8 +100,10 @@ async function syncCoinbaseBalance() {
       else if (amount > 0.00000001) newBalances[currency] = amount;
     });
     ghostState.actualBalances = newBalances;
+    console.log(`[SYNC] Coinbase Balance Updated. EUR: ${ghostState.liquidity.eur}, Assets: ${Object.keys(newBalances).join(', ')}`);
     return true;
   } catch (e) {
+    console.error("[SYNC ERROR] Failed to fetch Coinbase balances:", e.message);
     return false;
   }
 }
@@ -172,7 +174,7 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence, 
 function loadState() {
   const defaults = {
     isEngineActive: true, autoPilot: true, isPaperMode: false,
-    settings: { confidenceThreshold: 75, defaultTradeSize: 50.0 },
+    settings: { confidenceThreshold: 70, defaultTradeSize: 50.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
     currentStatus: "INITIALIZING", scanIndex: 0
@@ -210,7 +212,10 @@ async function loop() {
     const analysis = await getAdvancedAnalysis(symbol, price, candles);
     if (analysis) {
       if (analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
-        if (!ghostState.activePositions.some((p) => p.symbol === symbol)) {
+        const hasPosition = ghostState.activePositions.some((p) => p.symbol === symbol);
+        const hasBalance = (ghostState.actualBalances[symbol] || 0) > 0.001;
+
+        if (!hasPosition && !hasBalance) {
           const availableEur = ghostState.liquidity.eur * 0.98; 
           const tradeAmount = Math.min(ghostState.settings.defaultTradeSize, availableEur);
           if (tradeAmount >= 5) { 
@@ -233,13 +238,13 @@ async function loop() {
               if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
               ghostState.dailyStats.trades++;
             } else {
-              console.log(`[LOOP] Trade execution failed for ${symbol}`);
+              console.log(`[LOOP] Trade execution failed for ${symbol} - Check API permissions/funds.`);
             }
           } else {
-            console.log(`[LOOP] Insufficient trade amount for ${symbol}: ${tradeAmount.toFixed(2)} EUR (Min 5 EUR)`);
+            console.log(`[LOOP] Insufficient EUR for ${symbol}: ${availableEur.toFixed(2)} EUR available (Min 5 EUR needed).`);
           }
         } else {
-          console.log(`[LOOP] Already holding ${symbol}, skipping buy.`);
+          console.log(`[LOOP] Already holding ${symbol} (Pos: ${hasPosition}, Bal: ${hasBalance}), skipping buy.`);
         }
       } else if (analysis.side === 'BUY') {
         console.log(`[LOOP] BUY signal for ${symbol} skipped. Confidence: ${analysis.confidence}% (Threshold: ${ghostState.settings.confidenceThreshold}%), AutoPilot: ${ghostState.autoPilot}`);
