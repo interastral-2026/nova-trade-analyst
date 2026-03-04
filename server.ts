@@ -303,20 +303,34 @@ async function monitor() {
     const pos = ghostState.activePositions[i];
     const actualQty = ghostState.actualBalances[pos.symbol] || 0;
     
-    // If Coinbase says we don't have this asset anymore, remove it from active hunts
-    if (actualQty < (pos.quantity * 0.1)) { // Less than 10% of expected quantity remains
+    if (actualQty < (pos.quantity * 0.1)) {
       console.log(`[RECONCILE] Removing ${pos.symbol} - Position no longer exists on Coinbase.`);
-      ghostState.executionLogs.unshift({ 
-        id: crypto.randomUUID(), 
-        symbol: pos.symbol, 
-        action: 'SYNC_EXIT', 
-        price: pos.currentPrice, 
-        status: 'SUCCESS', 
-        details: `EXTERNAL_EXIT_DETECTED`,
-        timestamp: new Date().toISOString() 
-      });
-      if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
       ghostState.activePositions.splice(i, 1);
+    }
+  }
+
+  // ADOPT MISSING POSITIONS: If Coinbase has it but we don't track it, add it.
+  for (const symbol of Object.keys(ghostState.actualBalances)) {
+    if (WATCHLIST.includes(symbol) && !ghostState.activePositions.some(p => p.symbol === symbol)) {
+      const qty = ghostState.actualBalances[symbol];
+      if (qty > 0.0001) {
+        console.log(`[RECONCILE] Adopting missing position: ${symbol} (${qty})`);
+        ghostState.activePositions.push({
+          symbol,
+          entryPrice: 0, // Will be updated by price fetch below
+          currentPrice: 0,
+          amount: 0,
+          quantity: qty,
+          tp: 0,
+          sl: 0,
+          confidence: 100,
+          potentialRoi: 0,
+          pnl: 0,
+          pnlPercent: 0,
+          isPaper: false,
+          timestamp: new Date().toISOString()
+        });
+      }
     }
   }
 
@@ -329,6 +343,14 @@ async function monitor() {
       const pos = ghostState.activePositions[i];
       const curPrice = prices[pos.symbol]?.EUR;
       if (!curPrice) continue;
+      
+      // If it's a newly adopted position, set initial prices and default targets
+      if (pos.entryPrice === 0) {
+        pos.entryPrice = curPrice;
+        pos.tp = curPrice * 1.03; // Default 3% TP
+        pos.sl = curPrice * 0.98; // Default 2% SL
+      }
+
       pos.currentPrice = curPrice;
       const pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
       pos.pnlPercent = pnlPercent;
