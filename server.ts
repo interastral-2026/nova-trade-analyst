@@ -34,7 +34,7 @@ const CB_API_SECRET = process.env.CB_API_SECRET
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
   : null;
 
-const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX'];
+const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'DOT', 'MATIC', 'ADA', 'NEAR', 'FET'];
 const STATE_FILE = './ghost_state.json';
 
 // --- TRADING ENGINE LOGIC ---
@@ -147,6 +147,12 @@ Use Smart Money Concepts (SMC), FVG, and MSS.
 Goal: Front-run retail traders and identify institutional traps.
 Speed is critical. Capture quick profits and exit before reversals.
 Factor in 0.6% round-trip fees. Ensure net profit after fees.
+
+STRATEGY:
+1. Identify "Liquidity Sweeps" and "Market Structure Shifts" (MSS).
+2. If we hold a position, look for "Liquidity Targets" or "Reversal Signs" to issue a SELL signal.
+3. If we don't hold, look for "Discount Zones" or "FVG" for a BUY signal.
+
 IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
 Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence, potentialRoi, analysis.`,
         responseMimeType: "application/json",
@@ -211,6 +217,32 @@ async function loop() {
     const price = candles[candles.length - 1].close;
     const analysis = await getAdvancedAnalysis(symbol, price, candles);
     if (analysis) {
+      const posIndex = ghostState.activePositions.findIndex(p => p.symbol === symbol);
+      
+      // AI SELL SIGNAL HANDLING
+      if (analysis.side === 'SELL' && posIndex !== -1) {
+        const pos = ghostState.activePositions[posIndex];
+        const pnlPercent = ((price - pos.entryPrice) / pos.entryPrice) * 100;
+        
+        // Exit if profitable OR if AI is very confident about a drop
+        if (pnlPercent > 0.3 || analysis.confidence > 80) {
+          console.log(`[LOOP] AI SELL SIGNAL for ${symbol}. PNL: ${pnlPercent.toFixed(2)}%. Exiting...`);
+          if (await executeTrade(symbol, 'SELL', 0, pos.quantity)) {
+            ghostState.executionLogs.unshift({
+              id: crypto.randomUUID(),
+              symbol,
+              action: 'SELL',
+              price,
+              pnl: (price - pos.entryPrice) * pos.quantity,
+              status: 'SUCCESS',
+              details: `AI_SIGNAL_EXIT_CONF_${analysis.confidence}%`,
+              timestamp: new Date().toISOString()
+            });
+            ghostState.activePositions.splice(posIndex, 1);
+          }
+        }
+      }
+
       if (analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
         const hasPosition = ghostState.activePositions.some((p) => p.symbol === symbol);
         const hasBalance = (ghostState.actualBalances[symbol] || 0) > 0.001;
