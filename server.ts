@@ -117,33 +117,65 @@ async function syncCoinbaseBalance() {
 async function executeTrade(symbol, side, amount, quantity) {
   if (ghostState.isPaperMode) {
     console.log(`[PAPER TRADE SUCCESS] ${side} ${symbol} (Amount: ${amount}, Qty: ${quantity})`);
-    return true;
+    return { success: true };
   }
 
   const productId = symbol.includes('-') ? symbol : `${symbol}-EUR`;
+  
+  if (!CB_API_KEY || !CB_API_SECRET) {
+    console.error("[REAL TRADE ERROR] Missing Coinbase API credentials.");
+    return { success: false, reason: "MISSING_API_KEYS" };
+  }
+
   const token = generateCoinbaseJWT('POST', '/api/v3/brokerage/orders');
   if (!token) {
-    console.error("[REAL TRADE ERROR] Missing Coinbase API credentials.");
-    return false;
+    console.error("[REAL TRADE ERROR] Failed to generate JWT.");
+    return { success: false, reason: "JWT_GENERATION_FAILED" };
   }
+
   try {
     const orderConfig = side === 'BUY' 
       ? { market_market_ioc: { quote_size: Number(amount).toFixed(2).toString() } }
       : { market_market_ioc: { base_size: Number(quantity).toFixed(6).toString() } };
+    
     const payload = {
       client_order_id: crypto.randomUUID(),
       product_id: productId,
       side: side,
       order_configuration: orderConfig
     };
+
     const response = await axios.post('https://api.coinbase.com/api/v3/brokerage/orders', payload, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
+
+    // Check if order was actually created or rejected by Coinbase
+    if (response.data?.success === false || response.data?.error_response) {
+      const errorResponse = response.data?.error_response;
+      const errorMsg = errorResponse?.message || errorResponse?.error || response.data?.failure_reason || "COINBASE_REJECTION";
+      console.error("[REAL TRADE REJECTED]", response.data);
+      return { success: false, reason: `CB_REJECT: ${errorMsg}` };
+    }
+
     console.log(`[REAL TRADE SUCCESS] ${side} ${productId}`);
-    return true;
-  } catch (e) {
-    console.error("[REAL TRADE ERROR]", e.response?.data || e.message);
-    return false;
+    return { success: true };
+  } catch (e: any) {
+    const errorData = e.response?.data;
+    let errorMsg = errorData?.message || errorData?.error || e.message || "UNKNOWN_API_ERROR";
+    
+    console.error("[REAL TRADE API ERROR]", errorData || e.message);
+    
+    // Check for specific "insufficient funds" errors from Coinbase
+    const lowerError = errorMsg.toLowerCase();
+    if (lowerError.includes('insufficient') || lowerError.includes('balance') || lowerError.includes('funds')) {
+      return { success: false, reason: "INSUFFICIENT_FUNDS_ON_COINBASE" };
+    }
+
+    if (lowerError.includes('401') || lowerError.includes('unauthorized')) {
+      return { success: false, reason: "INVALID_API_KEYS" };
+    }
+    
+    return { success: false, reason: `API_ERR: ${errorMsg}` };
   }
 }
 
@@ -255,7 +287,9 @@ async function loop() {
         if (pnlPercent > 0.3 || analysis.confidence > 80) {
           const tradePnl = (price - pos.entryPrice) * pos.quantity;
           console.log(`[LOOP] AI SELL SIGNAL for ${symbol}. PNL: ${pnlPercent.toFixed(2)}%. Exiting...`);
-          if (await executeTrade(symbol, 'SELL', 0, pos.quantity)) {
+          const tradeResult = await executeTrade(symbol, 'SELL', 0, pos.quantity);
+          
+          if (tradeResult.success) {
             ghostState.dailyStats.profit += tradePnl;
             ghostState.totalProfit += tradePnl;
             ghostState.executionLogs.unshift({
@@ -269,6 +303,8 @@ async function loop() {
               timestamp: new Date().toISOString()
             });
             ghostState.activePositions.splice(posIndex, 1);
+          } else {
+            console.error(`[LOOP] Failed AI SELL for ${symbol}: ${tradeResult.reason}`);
           }
         }
       }
@@ -288,7 +324,9 @@ async function loop() {
           
           if (tradeAmount >= 5) { 
             const qty = tradeAmount / (price || 1);
-            if (await executeTrade(symbol, 'BUY', tradeAmount, qty)) {
+            const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
+            
+            if (tradeResult.success) {
               analysis.decision = `EXECUTED: BUY_${symbol}_AT_${price}`;
               ghostState.activePositions.push({
                 symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
@@ -307,14 +345,15 @@ async function loop() {
               if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
               ghostState.dailyStats.trades++;
             } else {
-              analysis.decision = `FAILED: EXECUTION_ERROR`;
+              const failReason = tradeResult.reason || "UNKNOWN_FAILURE";
+              analysis.decision = `FAILED: ${failReason}`;
               ghostState.executionLogs.unshift({ 
                 id: crypto.randomUUID(), 
                 symbol, 
                 action: 'BUY', 
                 price, 
                 status: 'FAILED', 
-                details: `API_ERROR_OR_NO_FUNDS`,
+                details: failReason,
                 timestamp: new Date().toISOString() 
               });
             }
@@ -427,7 +466,9 @@ async function monitor() {
 
       if (curPrice >= pos.tp || curPrice <= pos.sl) {
         const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : 'STOP_LOSS';
-        if (await executeTrade(pos.symbol, 'SELL', 0, pos.quantity)) {
+        const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
+        
+        if (tradeResult.success) {
           ghostState.dailyStats.profit += pos.pnl;
           ghostState.totalProfit += pos.pnl;
           ghostState.executionLogs.unshift({ 
@@ -442,6 +483,9 @@ async function monitor() {
           });
           if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
           ghostState.activePositions.splice(i, 1);
+        } else {
+          console.error(`[MONITOR] Failed to exit ${pos.symbol}: ${tradeResult.reason}`);
+          // Don't remove from activePositions so we can retry next loop
         }
       }
     }
