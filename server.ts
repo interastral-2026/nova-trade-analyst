@@ -84,6 +84,12 @@ function generateCoinbaseJWT(request_method, request_path) {
 }
 
 async function syncCoinbaseBalance() {
+  if (ghostState.isPaperMode) {
+    if (ghostState.liquidity.eur === 0) ghostState.liquidity.eur = 1000; // Fake 1000 EUR
+    if (ghostState.liquidity.usdc === 0) ghostState.liquidity.usdc = 1000; // Fake 1000 USDC
+    return true;
+  }
+
   const token = generateCoinbaseJWT('GET', '/api/v3/brokerage/accounts');
   if (!token) return false;
   try {
@@ -109,9 +115,17 @@ async function syncCoinbaseBalance() {
 }
 
 async function executeTrade(symbol, side, amount, quantity) {
+  if (ghostState.isPaperMode) {
+    console.log(`[PAPER TRADE SUCCESS] ${side} ${symbol} (Amount: ${amount}, Qty: ${quantity})`);
+    return true;
+  }
+
   const productId = symbol.includes('-') ? symbol : `${symbol}-EUR`;
   const token = generateCoinbaseJWT('POST', '/api/v3/brokerage/orders');
-  if (!token) return false;
+  if (!token) {
+    console.error("[REAL TRADE ERROR] Missing Coinbase API credentials.");
+    return false;
+  }
   try {
     const orderConfig = side === 'BUY' 
       ? { market_market_ioc: { quote_size: Number(amount).toFixed(2).toString() } }
@@ -182,7 +196,9 @@ function loadState() {
     isEngineActive: true, autoPilot: true, isPaperMode: false,
     settings: { confidenceThreshold: 70, defaultTradeSize: 50.0, minRoi: 1.5 },
     thoughts: [], executionLogs: [], activePositions: [],
-    liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
+    liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, 
+    dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
+    totalProfit: 0,
     currentStatus: "INITIALIZING", scanIndex: 0
   };
   try { 
@@ -233,14 +249,17 @@ async function loop() {
         
         // Exit if profitable OR if AI is very confident about a drop
         if (pnlPercent > 0.3 || analysis.confidence > 80) {
+          const tradePnl = (price - pos.entryPrice) * pos.quantity;
           console.log(`[LOOP] AI SELL SIGNAL for ${symbol}. PNL: ${pnlPercent.toFixed(2)}%. Exiting...`);
           if (await executeTrade(symbol, 'SELL', 0, pos.quantity)) {
+            ghostState.dailyStats.profit += tradePnl;
+            ghostState.totalProfit += tradePnl;
             ghostState.executionLogs.unshift({
               id: crypto.randomUUID(),
               symbol,
               action: 'SELL',
               price,
-              pnl: (price - pos.entryPrice) * pos.quantity,
+              pnl: tradePnl,
               status: 'SUCCESS',
               details: `AI_SIGNAL_EXIT_CONF_${analysis.confidence}%`,
               timestamp: new Date().toISOString()
@@ -264,7 +283,7 @@ async function loop() {
               ghostState.activePositions.push({
                 symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
                 tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
-                pnl: 0, pnlPercent: 0, isPaper: false, timestamp: new Date().toISOString()
+                pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
               });
               ghostState.executionLogs.unshift({ 
                 id: crypto.randomUUID(), 
@@ -279,9 +298,29 @@ async function loop() {
               ghostState.dailyStats.trades++;
             } else {
               console.log(`[LOOP] Trade execution failed for ${symbol} - Check API permissions/funds.`);
+              ghostState.executionLogs.unshift({ 
+                id: crypto.randomUUID(), 
+                symbol, 
+                action: 'BUY', 
+                price, 
+                status: 'FAILED', 
+                details: `API_ERROR_OR_NO_FUNDS`,
+                timestamp: new Date().toISOString() 
+              });
+              if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
             }
           } else {
             console.log(`[LOOP] Insufficient EUR for ${symbol}: ${availableEur.toFixed(2)} EUR available (Min 5 EUR needed).`);
+            ghostState.executionLogs.unshift({ 
+              id: crypto.randomUUID(), 
+              symbol, 
+              action: 'BUY', 
+              price, 
+              status: 'FAILED', 
+              details: `INSUFFICIENT_FUNDS_MIN_5_EUR`,
+              timestamp: new Date().toISOString() 
+            });
+            if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
           }
         } else if (!isProfitableEnough && !hasPosition && !hasBalance) {
           console.log(`[LOOP] BUY signal for ${symbol} ignored. ROI too low: ${analysis.potentialRoi}% (Min: ${ghostState.settings.minRoi}%)`);
@@ -312,6 +351,19 @@ async function monitor() {
     
     if (actualQty < (pos.quantity * 0.1)) {
       console.log(`[RECONCILE] Removing ${pos.symbol} - Position no longer exists on Coinbase.`);
+      ghostState.executionLogs.unshift({
+        id: crypto.randomUUID(),
+        symbol: pos.symbol,
+        action: 'SELL',
+        price: pos.currentPrice,
+        pnl: pos.pnl,
+        status: 'SUCCESS',
+        details: `EXTERNAL_EXIT_DETECTED`,
+        timestamp: new Date().toISOString()
+      });
+      if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
+      ghostState.dailyStats.profit += pos.pnl; // Assume exit at last known price
+      ghostState.totalProfit += pos.pnl;
       ghostState.activePositions.splice(i, 1);
     }
   }
@@ -376,6 +428,7 @@ async function monitor() {
         const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : 'STOP_LOSS';
         if (await executeTrade(pos.symbol, 'SELL', 0, pos.quantity)) {
           ghostState.dailyStats.profit += pos.pnl;
+          ghostState.totalProfit += pos.pnl;
           ghostState.executionLogs.unshift({ 
             id: crypto.randomUUID(), 
             symbol: pos.symbol, 
@@ -412,6 +465,7 @@ async function startServer() {
   app.post('/api/ghost/toggle', (req, res) => {
     if (req.body.engine !== undefined) ghostState.isEngineActive = !!req.body.engine;
     if (req.body.auto !== undefined) ghostState.autoPilot = !!req.body.auto;
+    if (req.body.paper !== undefined) ghostState.isPaperMode = !!req.body.paper;
     saveState();
     res.json({ success: true });
   });
