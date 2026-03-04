@@ -34,7 +34,7 @@ const CB_API_SECRET = process.env.CB_API_SECRET
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
   : null;
 
-const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'DOT', 'ADA', 'NEAR'];
+const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'DOT', 'ADA', 'NEAR', 'MATIC', 'XRP', 'LTC', 'BCH', 'SHIB', 'DOGE', 'UNI', 'AAVE'];
 const STATE_FILE = './ghost_state.json';
 
 let availableEurPairs: string[] = [];
@@ -204,12 +204,15 @@ Only issue BUY if you see a clear institutional "Discount Zone" or "Liquidity Sw
 Issue SELL early if you see "Distribution" or "SFP" (Swing Failure Pattern) to lock in profit before reversals.
 BE SMART: Avoid "Bull Traps" and "Bear Traps" set by exchanges.
 
-${entryPrice ? `CURRENT POSITION: You bought ${symbol} at ${entryPrice}. Current price is ${price}.` : ''}
+${entryPrice ? `CURRENT POSITION: You bought ${symbol} at ${entryPrice}. Current price is ${price}. 
+If we are in profit (>0.5%), be very sensitive to any sign of reversal and issue SELL to secure gains. 
+If we are in loss, look for MSS to decide if we should hold or cut loss early.` : ''}
 
 STRATEGY:
 1. Identify "Liquidity Sweeps" and "Market Structure Shifts" (MSS).
 2. If we hold a position, look for "Liquidity Targets" or "Reversal Signs" to issue a SELL signal.
 3. If we don't hold, look for "Discount Zones" or "FVG" for a BUY signal.
+4. ALWAYS prioritize liquidity. If the market looks stagnant, exit and wait for better volatility.
 
 IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
 Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, analysis.`,
@@ -327,9 +330,14 @@ async function monitorPositionsAI() {
 async function scanWatchlist() {
   if (!ghostState.isEngineActive) return;
   
-  // Scan 3 symbols per cycle for faster discovery
-  for (let i = 0; i < 3; i++) {
-    const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
+  // Use availableEurPairs if we have them, otherwise fallback to WATCHLIST
+  const currentWatchlist = availableEurPairs.length > 0 
+    ? availableEurPairs.map(p => p.split('-')[0]) 
+    : WATCHLIST;
+
+  // Scan 5 symbols per cycle for faster discovery
+  for (let i = 0; i < 5; i++) {
+    const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
     ghostState.scanIndex++;
     
     if (ghostState.activePositions.some(p => p.symbol === symbol)) continue;
@@ -350,10 +358,13 @@ async function scanWatchlist() {
         const isProfitableEnough = analysis.potentialRoi >= (ghostState.settings.minRoi || 1.0);
         
         if (isProfitableEnough) {
-          const availableEur = ghostState.liquidity.eur * 0.98; 
-          const tradeAmount = Math.min(ghostState.settings.defaultTradeSize, availableEur);
+          // Calculate available liquidity for this specific trade
+          // We allow using up to 33% of total EUR per trade to allow multiple concurrent trades (up to 3)
+          const totalEur = ghostState.liquidity.eur;
+          const maxPerTrade = totalEur * 0.33;
+          const tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
           
-          if (tradeAmount >= 5) { 
+          if (totalEur >= tradeAmount && tradeAmount >= 5) { 
             const qty = tradeAmount / (price || 1);
             const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
             
@@ -364,6 +375,10 @@ async function scanWatchlist() {
                 tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
                 pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
               });
+              
+              // Optimistically update liquidity so next scan in this loop knows we spent money
+              ghostState.liquidity.eur -= tradeAmount;
+
               ghostState.executionLogs.unshift({ 
                 id: crypto.randomUUID(), 
                 symbol, 
@@ -383,7 +398,7 @@ async function scanWatchlist() {
         if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
       }
     } catch (e) {}
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 500)); // Reduced delay
   }
   saveState();
 }
@@ -395,51 +410,53 @@ async function monitor() {
     ghostState.dailyStats.profit = 0; ghostState.dailyStats.trades = 0; ghostState.dailyStats.lastResetDate = today;
   }
   
-  // Reconcile active positions with actual Coinbase balances
-  for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
-    const pos = ghostState.activePositions[i];
-    const actualQty = ghostState.actualBalances[pos.symbol] || 0;
-    
-    if (actualQty < (pos.quantity * 0.1)) {
-      console.log(`[RECONCILE] Removing ${pos.symbol} - Position no longer exists on Coinbase.`);
-      ghostState.executionLogs.unshift({
-        id: crypto.randomUUID(),
-        symbol: pos.symbol,
-        action: 'SELL',
-        price: pos.currentPrice,
-        pnl: pos.pnl,
-        status: 'SUCCESS',
-        details: `EXTERNAL_EXIT_DETECTED`,
-        timestamp: new Date().toISOString()
-      });
-      if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
-      ghostState.dailyStats.profit += pos.pnl; // Assume exit at last known price
-      ghostState.totalProfit += pos.pnl;
-      ghostState.activePositions.splice(i, 1);
-    }
-  }
-
-  // ADOPT MISSING POSITIONS: If Coinbase has it but we don't track it, add it.
-  for (const symbol of Object.keys(ghostState.actualBalances)) {
-    if (WATCHLIST.includes(symbol) && !ghostState.activePositions.some(p => p.symbol === symbol)) {
-      const qty = ghostState.actualBalances[symbol];
-      if (qty > 0.0001) {
-        console.log(`[RECONCILE] Adopting missing position: ${symbol} (${qty})`);
-        ghostState.activePositions.push({
-          symbol,
-          entryPrice: 0, // Will be updated by price fetch below
-          currentPrice: 0,
-          amount: 0,
-          quantity: qty,
-          tp: 0,
-          sl: 0,
-          confidence: 100,
-          potentialRoi: 0,
-          pnl: 0,
-          pnlPercent: 0,
-          isPaper: false,
+  // Reconcile active positions with actual Coinbase balances (ONLY IN REAL MODE)
+  if (!ghostState.isPaperMode) {
+    for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
+      const pos = ghostState.activePositions[i];
+      const actualQty = ghostState.actualBalances[pos.symbol] || 0;
+      
+      if (actualQty < (pos.quantity * 0.1)) {
+        console.log(`[RECONCILE] Removing ${pos.symbol} - Position no longer exists on Coinbase.`);
+        ghostState.executionLogs.unshift({
+          id: crypto.randomUUID(),
+          symbol: pos.symbol,
+          action: 'SELL',
+          price: pos.currentPrice,
+          pnl: pos.pnl,
+          status: 'SUCCESS',
+          details: `EXTERNAL_EXIT_DETECTED`,
           timestamp: new Date().toISOString()
         });
+        if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
+        ghostState.dailyStats.profit += pos.pnl; 
+        ghostState.totalProfit += pos.pnl;
+        ghostState.activePositions.splice(i, 1);
+      }
+    }
+
+    // ADOPT MISSING POSITIONS: If Coinbase has it but we don't track it, add it.
+    for (const symbol of Object.keys(ghostState.actualBalances)) {
+      if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
+        const qty = ghostState.actualBalances[symbol];
+        if (qty > 0.00001) {
+          console.log(`[RECONCILE] Adopting position: ${symbol} (${qty})`);
+          ghostState.activePositions.push({
+            symbol,
+            entryPrice: 0, 
+            currentPrice: 0,
+            amount: 0,
+            quantity: qty,
+            tp: 0,
+            sl: 0,
+            confidence: 100,
+            potentialRoi: 0,
+            pnl: 0,
+            pnlPercent: 0,
+            isPaper: false,
+            timestamp: new Date().toISOString()
+          });
+        }
       }
     }
   }
@@ -557,6 +574,7 @@ async function startServer() {
     setInterval(monitor, 5000);           // Hard TP/SL check (5s)
     setInterval(monitorPositionsAI, 15000); // AI Position Analysis (15s)
     setInterval(scanWatchlist, 10000);      // New Signal Scanning (10s)
+    setInterval(listAvailableProducts, 300000); // Refresh products every 5m
   });
 }
 
