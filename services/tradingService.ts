@@ -8,15 +8,7 @@ export const getApiBase = () => {
   const savedUrl = localStorage.getItem('NOVA_BRIDGE_URL');
   if (savedUrl) return savedUrl.endsWith('/') ? savedUrl.slice(0, -1) : savedUrl;
 
-  // 2. If on localhost, default to the local proxy
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return ""; 
-  }
-
-  // 3. Fallback to env var
-  const envUrl = import.meta.env.VITE_API_BASE;
-  if (envUrl) return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-
+  // 2. Default to relative path (works for unified server)
   return "";
 };
 
