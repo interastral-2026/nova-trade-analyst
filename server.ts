@@ -34,8 +34,10 @@ const CB_API_SECRET = process.env.CB_API_SECRET
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
   : null;
 
-const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'DOT', 'MATIC', 'ADA', 'NEAR', 'FET'];
+const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'DOT', 'POL', 'ADA', 'NEAR', 'FET'];
 const STATE_FILE = './ghost_state.json';
+
+let availableEurPairs: string[] = [];
 
 // --- TRADING ENGINE LOGIC ---
 
@@ -47,14 +49,14 @@ async function listAvailableProducts() {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const products = response.data?.products || [];
-    const eurPairs = products
+    availableEurPairs = products
       .filter(p => p.quote_currency_id === 'EUR' && p.is_disabled === false)
       .map(p => p.product_id);
     console.log("--------------------------------------------------");
     console.log("✅ VALID EUR TRADING PAIRS FOR YOUR ACCOUNT:");
-    console.log(eurPairs.join(', '));
+    console.log(availableEurPairs.join(', '));
     console.log("--------------------------------------------------");
-  } catch (e) {
+  } catch (e: any) {
     console.warn("[PRODUCTS ERROR] Could not fetch valid pairs:", e.message);
   }
 }
@@ -121,6 +123,11 @@ async function executeTrade(symbol, side, amount, quantity) {
   }
 
   const productId = symbol.includes('-') ? symbol : `${symbol}-EUR`;
+  
+  if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) {
+    console.error(`[REAL TRADE ERROR] Invalid product ID: ${productId}`);
+    return { success: false, reason: `INVALID_PRODUCT: ${productId}` };
+  }
   
   if (!CB_API_KEY || !CB_API_SECRET) {
     console.error("[REAL TRADE ERROR] Missing Coinbase API credentials.");
@@ -268,6 +275,13 @@ async function loop() {
   if (!ghostState.isEngineActive) return;
   const symbol = WATCHLIST[ghostState.scanIndex % WATCHLIST.length];
   ghostState.scanIndex++;
+  
+  const productId = `${symbol}-EUR`;
+  if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) {
+    console.warn(`[LOOP] Skipping ${symbol} - No valid EUR pair found on Coinbase.`);
+    return;
+  }
+
   ghostState.currentStatus = `SNIPING_${symbol}`;
   try {
     const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`);
