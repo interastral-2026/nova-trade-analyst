@@ -168,7 +168,7 @@ STRATEGY:
 3. If we don't hold, look for "Discount Zones" or "FVG" for a BUY signal.
 
 IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
-Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence, potentialRoi, analysis.`,
+Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, analysis.`,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -187,6 +187,10 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence, 
       }
     });
     const result = JSON.parse(response.text?.trim() || '{}');
+    // Normalize confidence if AI returns decimal (e.g. 0.85 -> 85)
+    if (result.confidence !== undefined && result.confidence > 0 && result.confidence <= 1) {
+      result.confidence = Math.round(result.confidence * 100);
+    }
     return { ...result, id: crypto.randomUUID(), symbol, timestamp: new Date().toISOString() };
   } catch (e) { return null; }
 }
