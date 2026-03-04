@@ -144,6 +144,7 @@ async function getAdvancedAnalysis(symbol, price, candles) {
 Use Smart Money Concepts (SMC), FVG, and MSS. 
 Goal: High profit in short time. Be aggressive but factor in 0.6% round-trip fees.
 Identify high-probability scalping opportunities.
+IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
 Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence, potentialRoi, analysis.`,
         responseMimeType: "application/json",
         responseSchema: {
@@ -230,9 +231,17 @@ async function loop() {
               });
               if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
               ghostState.dailyStats.trades++;
+            } else {
+              console.log(`[LOOP] Trade execution failed for ${symbol}`);
             }
+          } else {
+            console.log(`[LOOP] Insufficient trade amount for ${symbol}: ${tradeAmount.toFixed(2)} EUR (Min 5 EUR)`);
           }
+        } else {
+          console.log(`[LOOP] Already holding ${symbol}, skipping buy.`);
         }
+      } else if (analysis.side === 'BUY') {
+        console.log(`[LOOP] BUY signal for ${symbol} skipped. Confidence: ${analysis.confidence}% (Threshold: ${ghostState.settings.confidenceThreshold}%), AutoPilot: ${ghostState.autoPilot}`);
       }
       ghostState.thoughts.unshift(analysis);
       if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();

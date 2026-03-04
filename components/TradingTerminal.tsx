@@ -175,7 +175,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                           {t.side} | {getSafeNum(t.confidence)}% CONFIDENCE
                         </div>
                      </div>
-                     <p className="text-[16px] text-slate-400 leading-relaxed font-medium mb-8 italic pr-20 opacity-90">"{t.analysis || "No analysis data."}"</p>
+                     <p className="text-[16px] text-slate-400 leading-relaxed font-medium mb-8 italic pr-20 opacity-90" dir="auto">"{t.analysis || "No analysis data."}"</p>
                      
                      {t.side !== 'NEUTRAL' && (
                        <div className="grid grid-cols-3 gap-8 max-w-2xl p-6 bg-black/40 border border-white/5 rounded-[2rem] shadow-xl">
