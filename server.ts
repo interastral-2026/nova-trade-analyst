@@ -180,7 +180,7 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence, 
 function loadState() {
   const defaults = {
     isEngineActive: true, autoPilot: true, isPaperMode: false,
-    settings: { confidenceThreshold: 70, defaultTradeSize: 50.0 },
+    settings: { confidenceThreshold: 70, defaultTradeSize: 50.0, minRoi: 1.5 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
     currentStatus: "INITIALIZING", scanIndex: 0
@@ -246,8 +246,9 @@ async function loop() {
       if (analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
         const hasPosition = ghostState.activePositions.some((p) => p.symbol === symbol);
         const hasBalance = (ghostState.actualBalances[symbol] || 0) > 0.001;
+        const isProfitableEnough = analysis.potentialRoi >= (ghostState.settings.minRoi || 1.0);
 
-        if (!hasPosition && !hasBalance) {
+        if (!hasPosition && !hasBalance && isProfitableEnough) {
           const availableEur = ghostState.liquidity.eur * 0.98; 
           const tradeAmount = Math.min(ghostState.settings.defaultTradeSize, availableEur);
           if (tradeAmount >= 5) { 
@@ -275,6 +276,8 @@ async function loop() {
           } else {
             console.log(`[LOOP] Insufficient EUR for ${symbol}: ${availableEur.toFixed(2)} EUR available (Min 5 EUR needed).`);
           }
+        } else if (!isProfitableEnough && !hasPosition && !hasBalance) {
+          console.log(`[LOOP] BUY signal for ${symbol} ignored. ROI too low: ${analysis.potentialRoi}% (Min: ${ghostState.settings.minRoi}%)`);
         } else {
           console.log(`[LOOP] Already holding ${symbol} (Pos: ${hasPosition}, Bal: ${hasBalance}), skipping buy.`);
         }
