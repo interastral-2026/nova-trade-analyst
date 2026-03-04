@@ -140,10 +140,11 @@ async function getAdvancedAnalysis(symbol, price, candles) {
       model: 'gemini-3-flash-preview',
       contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN AGGRESSIVE AI SCALPER.
+        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, A HIGH-FREQUENCY AI SCALPER.
 Use Smart Money Concepts (SMC), FVG, and MSS. 
-Goal: High profit in short time. Be aggressive but factor in 0.6% round-trip fees.
-Identify high-probability scalping opportunities.
+Goal: Front-run retail traders and identify institutional traps.
+Speed is critical. Capture quick profits and exit before reversals.
+Factor in 0.6% round-trip fees. Ensure net profit after fees.
 IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
 Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence, potentialRoi, analysis.`,
         responseMimeType: "application/json",
@@ -289,8 +290,19 @@ async function monitor() {
       const curPrice = prices[pos.symbol]?.EUR;
       if (!curPrice) continue;
       pos.currentPrice = curPrice;
-      pos.pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
+      const pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
+      pos.pnlPercent = pnlPercent;
       pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
+
+      // Dynamic Trailing Stop: If profit > 1%, move SL to entry + 0.3% to lock in fees
+      if (pnlPercent > 1.0) {
+        const newSl = pos.entryPrice * 1.003;
+        if (newSl > pos.sl) {
+          pos.sl = newSl;
+          console.log(`[MONITOR] Trailing Stop activated for ${pos.symbol} @ ${newSl.toFixed(2)}`);
+        }
+      }
+
       if (curPrice >= pos.tp || curPrice <= pos.sl) {
         const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : 'STOP_LOSS';
         if (await executeTrade(pos.symbol, 'SELL', 0, pos.quantity)) {
@@ -357,8 +369,8 @@ async function startServer() {
     listAvailableProducts();
     monitor();
     loop();
-    setInterval(monitor, 10000);
-    setInterval(loop, 30000);
+    setInterval(monitor, 5000); // Check positions every 5s
+    setInterval(loop, 15000);    // Scan for new trades every 15s
   });
 }
 
