@@ -8,7 +8,12 @@ export const getApiBase = () => {
   const savedUrl = localStorage.getItem('NOVA_BRIDGE_URL');
   if (savedUrl) return savedUrl.endsWith('/') ? savedUrl.slice(0, -1) : savedUrl;
 
-  // 2. Default to relative path (works for unified server)
+  // 2. Localhost fallback: If on port 5173 (Vite), point to 3000 (Express)
+  if (window.location.hostname === 'localhost' && window.location.port === '5173') {
+    return "http://localhost:3000";
+  }
+
+  // 3. Default to relative path (works for unified server)
   return "";
 };
 

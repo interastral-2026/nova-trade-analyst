@@ -186,7 +186,14 @@ function loadState() {
     currentStatus: "INITIALIZING", scanIndex: 0
   };
   try { 
-    if (fs.existsSync(STATE_FILE)) return { ...defaults, ...JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) };
+    if (fs.existsSync(STATE_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      return { 
+        ...defaults, 
+        ...parsed,
+        settings: { ...defaults.settings, ...(parsed.settings || {}) }
+      };
+    }
   } catch (e) {}
   return defaults;
 }
