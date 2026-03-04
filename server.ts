@@ -218,7 +218,16 @@ async function loop() {
                 tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
                 pnl: 0, pnlPercent: 0, isPaper: false, timestamp: new Date().toISOString()
               });
-              ghostState.executionLogs.unshift({ id: crypto.randomUUID(), symbol, action: 'BUY', price, status: 'SUCCESS', timestamp: new Date().toISOString() });
+              ghostState.executionLogs.unshift({ 
+                id: crypto.randomUUID(), 
+                symbol, 
+                action: 'BUY', 
+                price, 
+                status: 'SUCCESS', 
+                details: `SMC_BUY_CONF_${analysis.confidence}%`,
+                timestamp: new Date().toISOString() 
+              });
+              if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
               ghostState.dailyStats.trades++;
             }
           }
@@ -250,9 +259,20 @@ async function monitor() {
       pos.pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
       pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
       if (curPrice >= pos.tp || curPrice <= pos.sl) {
+        const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : 'STOP_LOSS';
         if (await executeTrade(pos.symbol, 'SELL', 0, pos.quantity)) {
           ghostState.dailyStats.profit += pos.pnl;
-          ghostState.executionLogs.unshift({ id: crypto.randomUUID(), symbol: pos.symbol, action: 'SELL', price: curPrice, pnl: pos.pnl, status: 'SUCCESS', timestamp: new Date().toISOString() });
+          ghostState.executionLogs.unshift({ 
+            id: crypto.randomUUID(), 
+            symbol: pos.symbol, 
+            action: 'SELL', 
+            price: curPrice, 
+            pnl: pos.pnl, 
+            status: 'SUCCESS', 
+            details: `EXIT_${reason}_PNL_${pos.pnl.toFixed(2)}`,
+            timestamp: new Date().toISOString() 
+          });
+          if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
           ghostState.activePositions.splice(i, 1);
         }
       }

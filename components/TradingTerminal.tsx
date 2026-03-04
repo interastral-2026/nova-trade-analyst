@@ -122,7 +122,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                       <p className="uppercase text-[14px] font-black tracking-[0.5em]">Establishing Target Nodes...</p>
                    </div>
                 ) : (
-                  holdings.map((pos) => {
+                   holdings.map((pos) => {
                     const isProfit = getSafeNum(pos.pnlPercent) >= 0;
                     return (
                       <div key={pos.symbol} className={`group bg-[#0a0a14] border-2 p-10 rounded-[3rem] relative overflow-hidden transition-all hover:scale-[1.01] ${isProfit ? 'border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.05)]' : 'border-rose-500/20 shadow-[0_0_50px_rgba(244,63,94,0.05)]'}`}>
@@ -199,26 +199,41 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
            )}
 
            {activeTab === 'activity' && (
-             <div className="space-y-4 max-w-5xl mx-auto">
-                {logs.length === 0 ? (
-                  <p className="text-slate-600 text-[10px] uppercase font-black text-center py-20">No execution logs found.</p>
-                ) : (
-                  logs.map(log => (
-                    <div key={log.id} className="bg-[#0a0a14] border border-white/5 p-6 rounded-2xl flex justify-between items-center">
-                       <div>
-                          <p className="text-[10px] text-slate-500 mb-1">{new Date(log.timestamp).toLocaleString()}</p>
-                          <h5 className="text-sm font-black text-white uppercase tracking-tight">{log.symbol} / {log.action}</h5>
-                       </div>
-                       <div className="text-right">
-                          <span className={`text-[10px] font-black px-2 py-1 rounded ${log.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                            {log.status}
-                          </span>
-                       </div>
-                    </div>
-                  ))
-                )}
-             </div>
-           )}
+              <div className="space-y-4 max-w-5xl mx-auto">
+                 {logs.length === 0 ? (
+                   <p className="text-slate-600 text-[10px] uppercase font-black text-center py-20">No execution logs found.</p>
+                 ) : (
+                   logs.map(log => (
+                     <div key={log.id} className="bg-[#0a0a14] border border-white/5 p-6 rounded-2xl flex justify-between items-center group hover:border-indigo-500/30 transition-all">
+                        <div className="flex items-center space-x-6">
+                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${log.action === 'BUY' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                              <i className={`fas ${log.action === 'BUY' ? 'fa-shopping-cart' : 'fa-hand-holding-usd'}`}></i>
+                           </div>
+                           <div>
+                              <p className="text-[10px] text-slate-500 mb-1">{new Date(log.timestamp).toLocaleString()}</p>
+                              <h5 className="text-sm font-black text-white uppercase tracking-tight">
+                                {log.symbol} / {log.action} @ €{formatPrice(log.price)}
+                              </h5>
+                              {log.details && (
+                                <p className="text-[10px] text-indigo-400/70 mt-1 font-black uppercase tracking-widest">{log.details}</p>
+                              )}
+                           </div>
+                        </div>
+                        <div className="text-right">
+                           {log.pnl !== undefined && log.pnl !== 0 && (
+                             <p className={`text-sm font-black mb-1 ${log.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                               {log.pnl >= 0 ? '+' : ''}€{log.pnl.toFixed(2)}
+                             </p>
+                           )}
+                           <span className={`text-[9px] font-black px-2 py-1 rounded uppercase tracking-widest ${log.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                             {log.status}
+                           </span>
+                        </div>
+                     </div>
+                   ))
+                 )}
+              </div>
+            )}
         </div>
       </div>
     </div>
