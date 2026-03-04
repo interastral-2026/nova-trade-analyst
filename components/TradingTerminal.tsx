@@ -206,8 +206,8 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                    logs.map(log => (
                      <div key={log.id} className="bg-[#0a0a14] border border-white/5 p-6 rounded-2xl flex justify-between items-center group hover:border-indigo-500/30 transition-all">
                         <div className="flex items-center space-x-6">
-                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${log.action === 'BUY' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                              <i className={`fas ${log.action === 'BUY' ? 'fa-shopping-cart' : 'fa-hand-holding-usd'}`}></i>
+                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${log.action === 'BUY' ? 'bg-emerald-500/10 text-emerald-400' : log.action === 'SELL' ? 'bg-rose-500/10 text-rose-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
+                              <i className={`fas ${log.action === 'BUY' ? 'fa-shopping-cart' : log.action === 'SELL' ? 'fa-hand-holding-usd' : 'fa-sync-alt'}`}></i>
                            </div>
                            <div>
                               <p className="text-[10px] text-slate-500 mb-1">{new Date(log.timestamp).toLocaleString()}</p>

@@ -140,9 +140,10 @@ async function getAdvancedAnalysis(symbol, price, candles) {
       model: 'gemini-3-flash-preview',
       contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN AGGRESSIVE AI TRADER.
+        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN AGGRESSIVE AI SCALPER.
 Use Smart Money Concepts (SMC), FVG, and MSS. 
-Daily Goal: 50 EUR. Be aggressive but factor in 0.6% round-trip fees.
+Goal: High profit in short time. Be aggressive but factor in 0.6% round-trip fees.
+Identify high-probability scalping opportunities.
 Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence, potentialRoi, analysis.`,
         responseMimeType: "application/json",
         responseSchema: {
@@ -246,6 +247,29 @@ async function monitor() {
   if (ghostState.dailyStats.lastResetDate !== today) {
     ghostState.dailyStats.profit = 0; ghostState.dailyStats.trades = 0; ghostState.dailyStats.lastResetDate = today;
   }
+  
+  // Reconcile active positions with actual Coinbase balances
+  for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
+    const pos = ghostState.activePositions[i];
+    const actualQty = ghostState.actualBalances[pos.symbol] || 0;
+    
+    // If Coinbase says we don't have this asset anymore, remove it from active hunts
+    if (actualQty < (pos.quantity * 0.1)) { // Less than 10% of expected quantity remains
+      console.log(`[RECONCILE] Removing ${pos.symbol} - Position no longer exists on Coinbase.`);
+      ghostState.executionLogs.unshift({ 
+        id: crypto.randomUUID(), 
+        symbol: pos.symbol, 
+        action: 'SYNC_EXIT', 
+        price: pos.currentPrice, 
+        status: 'SUCCESS', 
+        details: `EXTERNAL_EXIT_DETECTED`,
+        timestamp: new Date().toISOString() 
+      });
+      if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
+      ghostState.activePositions.splice(i, 1);
+    }
+  }
+
   if (ghostState.activePositions.length === 0) return;
   const symbols = ghostState.activePositions.map((p) => p.symbol).join(',');
   try {
