@@ -85,8 +85,8 @@ function generateCoinbaseJWT(request_method, request_path) {
 
 async function syncCoinbaseBalance() {
   if (ghostState.isPaperMode) {
-    if (ghostState.liquidity.eur === 0) ghostState.liquidity.eur = 1000; // Fake 1000 EUR
-    if (ghostState.liquidity.usdc === 0) ghostState.liquidity.usdc = 1000; // Fake 1000 USDC
+    if (ghostState.liquidity.eur < 10) ghostState.liquidity.eur = 1000; // Auto-refill paper money
+    if (ghostState.liquidity.usdc < 10) ghostState.liquidity.usdc = 1000;
     return true;
   }
 
@@ -274,12 +274,18 @@ async function loop() {
         const hasBalance = (ghostState.actualBalances[symbol] || 0) > 0.001;
         const isProfitableEnough = analysis.potentialRoi >= (ghostState.settings.minRoi || 1.0);
 
-        if (!hasPosition && !hasBalance && isProfitableEnough) {
+        if (hasPosition || hasBalance) {
+          analysis.decision = `SKIPPED: ALREADY_HOLDING_${symbol}`;
+        } else if (!isProfitableEnough) {
+          analysis.decision = `SKIPPED: ROI_${analysis.potentialRoi}%_BELOW_MIN_${ghostState.settings.minRoi}%`;
+        } else {
           const availableEur = ghostState.liquidity.eur * 0.98; 
           const tradeAmount = Math.min(ghostState.settings.defaultTradeSize, availableEur);
+          
           if (tradeAmount >= 5) { 
             const qty = tradeAmount / (price || 1);
             if (await executeTrade(symbol, 'BUY', tradeAmount, qty)) {
+              analysis.decision = `EXECUTED: BUY_${symbol}_AT_${price}`;
               ghostState.activePositions.push({
                 symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
                 tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
@@ -297,7 +303,7 @@ async function loop() {
               if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
               ghostState.dailyStats.trades++;
             } else {
-              console.log(`[LOOP] Trade execution failed for ${symbol} - Check API permissions/funds.`);
+              analysis.decision = `FAILED: EXECUTION_ERROR`;
               ghostState.executionLogs.unshift({ 
                 id: crypto.randomUUID(), 
                 symbol, 
@@ -307,28 +313,19 @@ async function loop() {
                 details: `API_ERROR_OR_NO_FUNDS`,
                 timestamp: new Date().toISOString() 
               });
-              if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
             }
           } else {
-            console.log(`[LOOP] Insufficient EUR for ${symbol}: ${availableEur.toFixed(2)} EUR available (Min 5 EUR needed).`);
-            ghostState.executionLogs.unshift({ 
-              id: crypto.randomUUID(), 
-              symbol, 
-              action: 'BUY', 
-              price, 
-              status: 'FAILED', 
-              details: `INSUFFICIENT_FUNDS_MIN_5_EUR`,
-              timestamp: new Date().toISOString() 
-            });
-            if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
+            analysis.decision = `SKIPPED: INSUFFICIENT_FUNDS_(${availableEur.toFixed(2)} EUR)`;
           }
-        } else if (!isProfitableEnough && !hasPosition && !hasBalance) {
-          console.log(`[LOOP] BUY signal for ${symbol} ignored. ROI too low: ${analysis.potentialRoi}% (Min: ${ghostState.settings.minRoi}%)`);
-        } else {
-          console.log(`[LOOP] Already holding ${symbol} (Pos: ${hasPosition}, Bal: ${hasBalance}), skipping buy.`);
         }
       } else if (analysis.side === 'BUY') {
-        console.log(`[LOOP] BUY signal for ${symbol} skipped. Confidence: ${analysis.confidence}% (Threshold: ${ghostState.settings.confidenceThreshold}%), AutoPilot: ${ghostState.autoPilot}`);
+        if (!ghostState.autoPilot) {
+          analysis.decision = "SKIPPED: AUTOPILOT_OFF";
+        } else {
+          analysis.decision = `SKIPPED: CONFIDENCE_${analysis.confidence}%_BELOW_${ghostState.settings.confidenceThreshold}%`;
+        }
+      } else {
+        analysis.decision = "NEUTRAL_OBSERVATION";
       }
       ghostState.thoughts.unshift(analysis);
       if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();

@@ -1,4 +1,30 @@
 
+export interface GhostState {
+  isEngineActive: boolean;
+  autoPilot: boolean;
+  isPaperMode: boolean;
+  settings: {
+    confidenceThreshold: number;
+    defaultTradeSize: number;
+  };
+  thoughts: TradeSignal[];
+  executionLogs: ExecutionLog[];
+  activePositions: ActivePosition[];
+  liquidity: {
+    eur: number;
+    usdc: number;
+  };
+  actualBalances: Record<string, number>;
+  dailyStats: {
+    trades: number;
+    profit: number;
+    dailyGoal: number;
+    lastResetDate: string;
+  };
+  currentStatus: string;
+  scanIndex: number;
+}
+
 export interface AssetInfo {
   id: string;
   name: string;
@@ -27,6 +53,7 @@ export interface TradeSignal {
   confidence: number;
   potentialRoi: number;
   analysis: string;
+  decision?: string;
   timestamp: string;
   isPaper?: boolean;
 }

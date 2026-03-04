@@ -174,6 +174,15 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                         <div className={`px-4 py-1.5 rounded-full text-[10px] font-black ${t.side === 'BUY' ? 'bg-emerald-500 text-black shadow-[0_0_20px_#10b981]' : 'bg-slate-800 text-slate-500'}`}>
                           {t.side} | {getSafeNum(t.confidence)}% CONFIDENCE
                         </div>
+                        {t.decision && (
+                          <div className={`px-4 py-1.5 rounded-full text-[9px] font-black border uppercase tracking-widest ${
+                            t.decision.includes('EXECUTED') ? 'border-emerald-500/50 text-emerald-400 bg-emerald-500/5' : 
+                            t.decision.includes('FAILED') ? 'border-rose-500/50 text-rose-400 bg-rose-500/5' : 
+                            'border-white/10 text-slate-500 bg-white/5'
+                          }`}>
+                            {t.decision}
+                          </div>
+                        )}
                      </div>
                      <p className="text-[16px] text-slate-400 leading-relaxed font-medium mb-8 italic pr-20 opacity-90" dir="auto">"{t.analysis || "No analysis data."}"</p>
                      
