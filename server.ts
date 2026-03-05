@@ -29,6 +29,7 @@ envPaths.forEach(envPath => {
 });
 
 const API_KEY = (process.env.GEMINI_API_KEY || process.env.API_KEY || "").trim();
+fs.appendFileSync('debug.log', `[INIT] API_KEY starts with: ${API_KEY.substring(0, 5)}... (Length: ${API_KEY.length})\n`);
 const CB_API_KEY = (process.env.CB_API_KEY || "").trim();
 const CB_API_SECRET = process.env.CB_API_SECRET 
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
@@ -213,14 +214,15 @@ async function executeTrade(symbol, side, amount, quantity) {
 }
 
 async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
-  if (!API_KEY) {
+  if (!API_KEY || API_KEY.startsWith('MY_GE') || API_KEY === 'YOUR_API_KEY') {
     return {
       side: "NEUTRAL",
-      analysis: "خطا: کلید API هوش مصنوعی (GEMINI_API_KEY) تنظیم نشده است. لطفاً در بخش تنظیمات محیطی آن را وارد کنید.",
+      analysis: "خطا: کلید API هوش مصنوعی نامعتبر است. لطفاً کلید معتبر خود را در تنظیمات وارد کنید.",
       symbol,
       timestamp: new Date().toISOString(),
       confidence: 0,
-      potentialRoi: 0
+      potentialRoi: 0,
+      id: crypto.randomUUID()
     };
   }
 
@@ -295,10 +297,17 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
     }
     return { ...result, id: crypto.randomUUID(), symbol, timestamp: new Date().toISOString() };
   } catch (e: any) { 
-    console.error(`[AI ERROR] ${symbol}:`, e.message);
+    let errorMsg = e.message;
+    if (errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('API key not valid')) {
+      errorMsg = "کلید API نامعتبر است. لطفاً کلید معتبر وارد کنید.";
+    } else if (errorMsg.includes('AI_TIMEOUT')) {
+      errorMsg = "پاسخ هوش مصنوعی بیش از حد طول کشید (تایم‌اوت).";
+    }
+    
+    console.error(`[AI ERROR] ${symbol}:`, errorMsg);
     return {
       side: "NEUTRAL",
-      analysis: `خطا در تحلیل هوش مصنوعی برای ${symbol}: ${e.message}`,
+      analysis: `خطا در تحلیل هوش مصنوعی برای ${symbol}: ${errorMsg}`,
       symbol,
       timestamp: new Date().toISOString(),
       confidence: 0,
@@ -422,9 +431,8 @@ async function scanWatchlist() {
       }
 
       const productId = `${symbol}-EUR`;
-      // Fix: availableEurPairs contains base symbols (e.g. "BTC"), not full product IDs
-      if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(symbol)) {
-        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: Not in availableEurPairs (Length: ${availableEurPairs.length})\n`);
+      if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) {
+        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: ${productId} not in availableEurPairs. First 3: ${availableEurPairs.slice(0,3).join(',')}\n`);
         continue;
       }
 

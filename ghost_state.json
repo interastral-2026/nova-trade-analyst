@@ -611,6 +611,16 @@
   ],
   "executionLogs": [
     {
+      "id": "b699cc30-774a-41f9-8560-570a0d321586",
+      "symbol": "FIL",
+      "action": "SELL",
+      "price": 0.8781,
+      "pnl": -0.004489199999999506,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T04:33:47.867Z"
+    },
+    {
       "id": "0f8d81e2-9627-4c3a-93a6-798fedfde8ab",
       "symbol": "DOT",
       "action": "SELL",
@@ -4339,66 +4349,57 @@
       "status": "FAILED",
       "details": "INSUFFICIENT_EUR_BALANCE",
       "timestamp": "2026-02-20T02:48:02.106Z"
-    },
-    {
-      "id": "c5993e3e-52b9-4b8e-8f05-76ae7e68207c",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1661.91,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:47:24.893Z"
     }
   ],
   "activePositions": [
     {
       "symbol": "BTC",
       "entryPrice": 62845.78,
-      "currentPrice": 62602.2,
+      "currentPrice": 61401.81,
       "amount": 0,
       "quantity": 0.0001698,
       "tp": 64731.1534,
       "sl": 61588.8644,
       "confidence": 100,
       "potentialRoi": 0,
-      "pnl": -0.0413598840000003,
-      "pnlPercent": -0.38758370092630207,
+      "pnl": -0.2451861060000002,
+      "pnlPercent": -2.2976403507124923,
       "isPaper": false,
       "timestamp": "2026-03-04T21:05:41.920Z"
     },
     {
       "symbol": "EURC",
       "entryPrice": 1,
-      "currentPrice": 1,
+      "currentPrice": 0.9999,
       "amount": 0,
       "quantity": 0.00265,
       "tp": 1.03,
       "sl": 0.98,
       "confidence": 100,
       "potentialRoi": 0,
-      "pnl": 0,
-      "pnlPercent": 0,
+      "pnl": -2.6499999999997083e-7,
+      "pnlPercent": -0.009999999999998899,
       "isPaper": false,
       "timestamp": "2026-03-04T23:52:15.240Z"
     },
     {
       "symbol": "FIL",
-      "entryPrice": 0.8785,
-      "currentPrice": 0.8781,
+      "entryPrice": 0.8721,
+      "currentPrice": 0.8748,
       "amount": 0,
       "quantity": 11.223,
-      "tp": 0.904855,
-      "sl": 0.86093,
+      "tp": 0.898263,
+      "sl": 0.8546579999999999,
       "confidence": 100,
       "potentialRoi": 0,
-      "pnl": -0.004489199999999506,
-      "pnlPercent": -0.045532157085936935,
+      "pnl": 0.030302100000000404,
+      "pnlPercent": 0.3095975232198183,
       "isPaper": false,
-      "timestamp": "2026-03-05T00:12:50.268Z"
+      "timestamp": "2026-03-05T18:51:07.639Z"
     }
   ],
   "liquidity": {
-    "eur": 6.6914728615916,
+    "eur": 6.4544431015916,
     "usdc": 8.764328e-7
   },
   "actualBalances": {
@@ -4410,14 +4411,14 @@
   },
   "dailyStats": {
     "trades": 0,
-    "profit": -0.08591977594068684,
+    "profit": -0.09040897594068634,
     "fees": 0,
     "dailyGoal": 50,
     "lastResetDate": "2026-03-05"
   },
-  "totalProfit": -0.12848977594068356,
-  "currentStatus": "SCAN_BATCH_DONE_9610",
-  "scanIndex": 9610,
+  "totalProfit": -0.13297897594068306,
+  "currentStatus": "SCAN_BATCH_DONE_33916",
+  "scanIndex": 33916,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
