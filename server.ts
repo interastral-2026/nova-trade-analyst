@@ -36,6 +36,8 @@ const CB_API_SECRET = process.env.CB_API_SECRET
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'DOT', 'ADA', 'NEAR', 'MATIC', 'XRP', 'LTC', 'BCH', 'SHIB', 'DOGE', 'UNI', 'AAVE'];
 const STATE_FILE = './ghost_state.json';
+const FEE_RATE = 0.006; // 0.6% conservative round-trip fee (0.3% buy + 0.3% sell)
+const MIN_NET_PROFIT = 0.001; // 0.1% minimum net profit after fees
 
 let availableEurPairs: string[] = [];
 
@@ -214,16 +216,18 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
       config: {
         systemInstruction: `YOU ARE THE GHOST_SMC_BOT, A HIGH-FREQUENCY AI SCALPER.
 Use Smart Money Concepts (SMC), FVG, and MSS. 
-Goal: Capture quick 1% - 2% ROI scalps. 
+Goal: Capture quick 1% - 3% ROI scalps. 
 Speed and liquidity are everything. Do not hold for long-term.
-Factor in 0.6% round-trip fees. A 1% price move is actually ~0.4% net profit.
+Factor in ${FEE_RATE * 100}% round-trip fees. A trade is only valid if potential net profit > 0.5%.
 Only issue BUY if you see a clear institutional "Discount Zone" or "Liquidity Sweep".
 Issue SELL early if you see "Distribution" or "SFP" (Swing Failure Pattern) to lock in profit before reversals.
 BE SMART: Avoid "Bull Traps" and "Bear Traps" set by exchanges.
+NEVER RECOMMEND A TRADE THAT DOES NOT COVER FEES.
 
 ${entryPrice ? `CURRENT POSITION: You bought ${symbol} at ${entryPrice}. Current price is ${price}. 
-If we are in profit (>0.5%), be very sensitive to any sign of reversal and issue SELL to secure gains. 
-If we are in loss, look for MSS to decide if we should hold or cut loss early.` : ''}
+Break-even price (including fees) is ${entryPrice * (1 + FEE_RATE)}.
+If we are above break-even, be very sensitive to any sign of reversal and issue SELL to secure gains. 
+If we are in loss, look for MSS to decide if we should hold or cut loss early (only if trend is clearly broken).` : ''}
 
 STRATEGY:
 1. Identify "Liquidity Sweeps" and "Market Structure Shifts" (MSS).
@@ -312,12 +316,14 @@ async function monitorPositionsAI() {
       const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
       
       if (analysis && analysis.side === 'SELL') {
-        const pnlPercent = ((price - pos.entryPrice) / pos.entryPrice) * 100;
+        const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
+        const isProfitable = price > (breakEvenPrice * (1 + MIN_NET_PROFIT));
         
-        // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop
-        if (pnlPercent > 0.2 || analysis.confidence > 85) {
+        // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop (emergency exit)
+        if (isProfitable || analysis.confidence > 90) {
           const tradePnl = (price - pos.entryPrice) * pos.quantity;
-          console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. PNL: ${pnlPercent.toFixed(2)}%. Reason: ${analysis.analysis}`);
+          const netPnl = tradePnl - (pos.amount * FEE_RATE);
+          console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
           
           const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
           if (tradeResult.success) {
@@ -373,7 +379,8 @@ async function scanWatchlist() {
       const analysis = await getAdvancedAnalysis(symbol, price, candles);
       
       if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
-        const isProfitableEnough = analysis.potentialRoi >= (ghostState.settings.minRoi || 1.0);
+        // Ensure potential ROI covers fees + minimum net profit
+        const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100) + 0.5);
         
         if (isProfitableEnough) {
           // Calculate available liquidity for this specific trade
@@ -506,16 +513,19 @@ async function monitor() {
       const pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
       pos.pnlPercent = pnlPercent;
       pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
+      
+      const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
+      const netPnlPercent = pnlPercent - (FEE_RATE * 100);
 
       // Dynamic Trailing Stop & Break Even
-      if (pnlPercent > 0.5 && pos.sl < pos.entryPrice) {
-        // Move to Break Even + small buffer for fees
-        pos.sl = pos.entryPrice * 1.001;
-        console.log(`[MONITOR] Break-Even activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
+      // If we are in net profit (after fees), move SL to break-even + tiny buffer
+      if (netPnlPercent > 0.2 && pos.sl < breakEvenPrice) {
+        pos.sl = breakEvenPrice * (1 + MIN_NET_PROFIT);
+        console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
       }
 
-      if (pnlPercent > 1.0) {
-        const newSl = curPrice * 0.995; // 0.5% trailing stop once in 1% profit
+      if (netPnlPercent > 1.0) {
+        const newSl = curPrice * 0.996; // 0.4% trailing stop once in 1% net profit
         if (newSl > pos.sl) {
           pos.sl = newSl;
           console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
@@ -526,7 +536,10 @@ async function monitor() {
       const tpDistance = pos.tp - pos.entryPrice;
       const earlyExitPrice = pos.entryPrice + (tpDistance * 0.9);
 
-      if (curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && pnlPercent > 1.0)) {
+      // Only exit if we are actually in profit after fees
+      const canExitSafely = curPrice > (breakEvenPrice * (1 + MIN_NET_PROFIT));
+
+      if ((curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.5)) && canExitSafely) {
         const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_90%_TP');
         const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
         
