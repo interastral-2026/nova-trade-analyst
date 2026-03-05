@@ -90,7 +90,7 @@ const SignalList: React.FC<SignalListProps> = ({ signals = [] }) => {
                   </div>
                 </div>
 
-                <p className="text-[10px] text-slate-400 leading-tight italic font-medium border-t border-white/5 pt-3">
+                <p className="text-[10px] text-slate-400 leading-tight italic font-medium border-t border-white/5 pt-3 whitespace-pre-wrap">
                   "{signal.analysis || "No analysis details provided."}"
                 </p>
                 

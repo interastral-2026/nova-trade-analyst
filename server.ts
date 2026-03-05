@@ -219,6 +219,14 @@ Use Smart Money Concepts (SMC), FVG, and MSS.
 Goal: Capture quick 1% - 3% ROI scalps. 
 Speed and liquidity are everything. Do not hold for long-term.
 Factor in ${FEE_RATE * 100}% round-trip fees. A trade is only valid if potential net profit > 0.5%.
+
+INTERNAL REASONING PROTOCOL:
+For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'analysis' field.
+1. Market Context: Trend (Bullish/Bearish/Sideways).
+2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks.
+3. Decision Logic: Why you are choosing BUY, SELL, or WAIT.
+4. If WAIT: Explicitly state what is missing (e.g., "Waiting for MSS confirmation", "No clear FVG", "Spread too high").
+
 Only issue BUY if you see a clear institutional "Discount Zone" or "Liquidity Sweep".
 Issue SELL early if you see "Distribution" or "SFP" (Swing Failure Pattern) to lock in profit before reversals.
 BE SMART: Avoid "Bull Traps" and "Bear Traps" set by exchanges.

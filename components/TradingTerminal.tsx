@@ -172,12 +172,20 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
            {activeTab === 'stream' && (
              <div className="space-y-8 max-w-5xl mx-auto">
                 {thoughtHistory.map((t, i) => (
-                  <div key={t.id || i} className={`border-l-4 pl-10 py-8 bg-white/[0.01] border-white/5 rounded-r-[2.5rem] transition-all hover:bg-white/[0.03] ${t.side === 'BUY' ? 'border-emerald-500 bg-emerald-500/[0.02]' : 'border-slate-800'}`}>
+                  <div key={t.id || i} className={`border-l-4 pl-10 py-8 bg-white/[0.01] border-white/5 rounded-r-[2.5rem] transition-all hover:bg-white/[0.03] ${
+                    t.side === 'BUY' ? 'border-emerald-500 bg-emerald-500/[0.02]' : 
+                    t.side === 'SELL' ? 'border-rose-500 bg-rose-500/[0.02]' : 
+                    'border-slate-800 bg-slate-800/[0.01]'
+                  }`}>
                      <div className="flex items-center space-x-8 mb-4">
                         <span className="text-[12px] font-black text-slate-600">[{t.timestamp ? new Date(t.timestamp).toLocaleTimeString() : "00:00"}]</span>
                         <span className="text-2xl font-black text-white uppercase tracking-tighter">{t.symbol}</span>
-                        <div className={`px-4 py-1.5 rounded-full text-[10px] font-black ${t.side === 'BUY' ? 'bg-emerald-500 text-black shadow-[0_0_20px_#10b981]' : 'bg-slate-800 text-slate-500'}`}>
-                          {t.side} | {getSafeNum(t.confidence)}% CONFIDENCE
+                        <div className={`px-4 py-1.5 rounded-full text-[10px] font-black ${
+                          t.side === 'BUY' ? 'bg-emerald-500 text-black shadow-[0_0_20px_#10b981]' : 
+                          t.side === 'SELL' ? 'bg-rose-500 text-white shadow-[0_0_20px_#f43f5e]' : 
+                          'bg-slate-800 text-slate-500'
+                        }`}>
+                          {t.side === 'NEUTRAL' ? 'WAIT' : t.side} | {getSafeNum(t.confidence)}% CONFIDENCE
                         </div>
                         {t.decision && (
                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black border uppercase tracking-widest ${
@@ -189,7 +197,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                           </div>
                         )}
                      </div>
-                     <p className="text-[16px] text-slate-400 leading-relaxed font-medium mb-8 italic pr-20 opacity-90" dir="auto">"{t.analysis || "No analysis data."}"</p>
+                     <p className="text-[16px] text-slate-400 leading-relaxed font-medium mb-8 italic pr-20 opacity-90 whitespace-pre-wrap" dir="auto">"{t.analysis || "No analysis data."}"</p>
                      
                      {t.side !== 'NEUTRAL' && (
                        <div className="grid grid-cols-3 gap-8 max-w-2xl p-6 bg-black/40 border border-white/5 rounded-[2rem] shadow-xl">
