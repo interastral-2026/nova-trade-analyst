@@ -608,6 +608,66 @@
   ],
   "executionLogs": [
     {
+      "id": "730ce8a5-e6f2-4881-bdcb-595fd443a585",
+      "symbol": "AAVE",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T21:46:19.451Z"
+    },
+    {
+      "id": "ffebf640-cf83-4ca6-8e84-d3bee060885f",
+      "symbol": "ANKR",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T21:39:37.363Z"
+    },
+    {
+      "id": "c87e9acd-eeff-4d7c-a337-c7b965fd0b7d",
+      "symbol": "XTZ",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T21:30:12.956Z"
+    },
+    {
+      "id": "8834ee89-b9e9-42de-81f2-c3c0f2a435a8",
+      "symbol": "ANKR",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T21:28:22.888Z"
+    },
+    {
+      "id": "4c4235f9-eba8-4a6f-94fb-9a320441b7e5",
+      "symbol": "CHZ",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T21:23:50.889Z"
+    },
+    {
+      "id": "c67b7992-c640-41aa-9a66-712896dabe08",
+      "symbol": "CHZ",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T21:22:00.752Z"
+    },
+    {
       "id": "01f0be9f-2531-4e82-9da6-f65d230d318e",
       "symbol": "MINA",
       "action": "SELL",
@@ -4313,60 +4373,6 @@
       "status": "FAILED",
       "details": "INSUFFICIENT_EUR_BALANCE",
       "timestamp": "2026-02-20T02:52:38.341Z"
-    },
-    {
-      "id": "b16a252f-4220-4818-9baf-a95c217f143e",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8615,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:51:59.074Z"
-    },
-    {
-      "id": "b07ff0d0-aad8-40ed-936f-7aee606abb72",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1396,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:50:39.221Z"
-    },
-    {
-      "id": "1f7013eb-7bba-41eb-9123-b78d482d82c9",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.862,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:50:27.432Z"
-    },
-    {
-      "id": "aa589c83-9f53-46fa-9f39-3f8698b9762a",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1661.44,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:49:49.341Z"
-    },
-    {
-      "id": "6652e0a2-578d-4e50-a6ec-7d69acd3d835",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.862,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:49:11.460Z"
-    },
-    {
-      "id": "0126c025-f60b-4c80-9a24-22aee66b0a2a",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1661.44,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:48:38.125Z"
     }
   ],
   "activePositions": [
@@ -4401,11 +4407,11 @@
       "timestamp": "2026-03-04T23:52:15.240Z"
     },
     {
-      "symbol": "CHZ",
+      "symbol": "ENS",
       "entryPrice": 0,
       "currentPrice": 0,
       "amount": 0,
-      "quantity": 300.2,
+      "quantity": 1.867,
       "tp": 0,
       "sl": 0,
       "confidence": 100,
@@ -4413,15 +4419,15 @@
       "pnl": 0,
       "pnlPercent": 0,
       "isPaper": false,
-      "timestamp": "2026-03-05T21:08:29.318Z"
+      "timestamp": "2026-03-05T21:46:29.419Z"
     }
   ],
   "liquidity": {
-    "eur": 5.8491085787916,
+    "eur": 4.1771852827916,
     "usdc": 8.764328e-7
   },
   "actualBalances": {
-    "CHZ": 300.2,
+    "ENS": 1.867,
     "EURC": 0.00265,
     "BTC": 0.0001698,
     "ETC": 3.2e-7,
@@ -4435,8 +4441,8 @@
     "lastResetDate": "2026-03-05"
   },
   "totalProfit": -0.055329935940682175,
-  "currentStatus": "IDLE_SCAN_COMPLETE",
-  "scanIndex": 36263,
+  "currentStatus": "SCAN_BATCH_DONE_38441",
+  "scanIndex": 38441,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

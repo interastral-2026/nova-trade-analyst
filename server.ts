@@ -38,7 +38,7 @@ const CB_API_SECRET = process.env.CB_API_SECRET
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'DOT', 'ADA', 'NEAR', 'MATIC', 'XRP', 'LTC', 'BCH', 'SHIB', 'DOGE', 'UNI', 'AAVE'];
 const STATE_FILE = './ghost_state.json';
 const FEE_RATE = 0.005; // 0.5% round-trip fee (0.25% buy + 0.25% sell, assuming advanced trade tier)
-const MIN_NET_PROFIT = 0.002; // 0.2% minimum net profit after fees
+const MIN_NET_PROFIT = 0.005; // 0.5% minimum net profit after fees (Total required move = 1.0%)
 
 let availableEurPairs: string[] = [];
 
@@ -249,14 +249,14 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
       config: {
         systemInstruction: `YOU ARE THE GHOST_SMC_BOT, A HIGH-FREQUENCY AI SCALPER.
 Use Smart Money Concepts (SMC), FVG, and MSS. 
-Goal: Capture quick 1% - 5% ROI scalps. 
+Goal: Capture quick 1.5% - 5% ROI scalps. 
 Speed and liquidity are everything. Do not hold for long-term. DO NOT WASTE TIME.
 Factor in ${FEE_RATE * 100}% round-trip fees. A trade is only valid if potential net profit > 0.5%.
 
 CRITICAL DIRECTIVES:
-- BE AGGRESSIVE BUT PRECISE: Look for high-probability setups with strong momentum.
+- BE EXTREMELY CONSERVATIVE. ACT LIKE A SNIPER. ONLY TAKE HIGH-PROBABILITY A+ SETUPS.
+- DO NOT OVERTRADE. If the market is choppy, ranging, or unclear, YOU MUST CHOOSE 'NEUTRAL'.
 - DO NOT LET CAPITAL SLEEP. If a position is stagnant or moving against us, cut it (SELL) and free up liquidity for better opportunities.
-- CONSTANTLY HUNT for new high-volatility setups.
 - ACTIVE POSITIONS: If we are in profit, be ruthless about taking it before the market reverses. If we are stuck in a slow market, exit to find a faster one.
 
 INTERNAL REASONING PROTOCOL:
@@ -470,8 +470,8 @@ async function scanWatchlist() {
           if (isProfitableEnough) {
             // Calculate available liquidity for this specific trade
             const totalEur = ghostState.liquidity.eur;
-            // Be more aggressive: use up to 50% of available liquidity per trade if confidence is very high
-            const maxPerTrade = analysis.confidence >= 85 ? totalEur * 0.50 : totalEur * 0.33;
+            // Be conservative: use up to 20% of available liquidity per trade to minimize risk
+            const maxPerTrade = totalEur * 0.20;
             let tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
             
             if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 5) { 
@@ -735,9 +735,9 @@ async function startServer() {
     monitorPositionsAI();
     scanWatchlist();
     
-    setInterval(monitor, 2000);           // Hard TP/SL check (2s)
-    setInterval(monitorPositionsAI, 8000); // AI Position Analysis (8s)
-    setInterval(scanWatchlist, 5000);      // New Signal Scanning (5s)
+    setInterval(monitor, 3000);           // Hard TP/SL check (3s)
+    setInterval(monitorPositionsAI, 15000); // AI Position Analysis (15s)
+    setInterval(scanWatchlist, 15000);      // New Signal Scanning (15s)
     setInterval(listAvailableProducts, 300000); // Refresh products every 5m
   });
 }
