@@ -608,6 +608,46 @@
   ],
   "executionLogs": [
     {
+      "id": "70a7b57c-4319-4fb1-990c-889e701482c7",
+      "symbol": "ADA",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T22:48:06.103Z"
+    },
+    {
+      "id": "30bdc48b-f2ae-41b1-88de-e0f8833ba8fc",
+      "symbol": "FIL",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T22:28:59.742Z"
+    },
+    {
+      "id": "fdf12fb4-4fc3-4d2e-bae4-7471808c400f",
+      "symbol": "SHIB",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T22:12:14.441Z"
+    },
+    {
+      "id": "2eaf6c35-a1a7-475d-a0fa-4f22877e7b5d",
+      "symbol": "ENS",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T21:53:38.066Z"
+    },
+    {
       "id": "730ce8a5-e6f2-4881-bdcb-595fd443a585",
       "symbol": "AAVE",
       "action": "SELL",
@@ -4337,42 +4377,6 @@
       "status": "SUCCESS",
       "details": "AUTO_SMC_HIT_82%",
       "timestamp": "2026-02-20T08:48:51.341Z"
-    },
-    {
-      "id": "3a96826a-e261-4452-8073-9a8a8a7b34fe",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1660.09,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:53:48.981Z"
-    },
-    {
-      "id": "42681220-01db-4c14-a593-3a7d6a8c1ca9",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1397,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:53:22.639Z"
-    },
-    {
-      "id": "95dbc083-647f-4194-87b2-c6db9caaae8d",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8616,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:53:11.096Z"
-    },
-    {
-      "id": "e7c00b2a-6353-463b-8776-c5c7be69dcf6",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1661.22,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:52:38.341Z"
     }
   ],
   "activePositions": [
@@ -4407,11 +4411,11 @@
       "timestamp": "2026-03-04T23:52:15.240Z"
     },
     {
-      "symbol": "ENS",
+      "symbol": "BCH",
       "entryPrice": 0,
       "currentPrice": 0,
       "amount": 0,
-      "quantity": 1.867,
+      "quantity": 0.02478778,
       "tp": 0,
       "sl": 0,
       "confidence": 100,
@@ -4419,15 +4423,15 @@
       "pnl": 0,
       "pnlPercent": 0,
       "isPaper": false,
-      "timestamp": "2026-03-05T21:46:29.419Z"
+      "timestamp": "2026-03-05T22:51:36.170Z"
     }
   ],
   "liquidity": {
-    "eur": 4.1771852827916,
+    "eur": 3.0320692596332,
     "usdc": 8.764328e-7
   },
   "actualBalances": {
-    "ENS": 1.867,
+    "BCH": 0.02478778,
     "EURC": 0.00265,
     "BTC": 0.0001698,
     "ETC": 3.2e-7,
@@ -4441,8 +4445,8 @@
     "lastResetDate": "2026-03-05"
   },
   "totalProfit": -0.055329935940682175,
-  "currentStatus": "SCAN_BATCH_DONE_38441",
-  "scanIndex": 38441,
+  "currentStatus": "IDLE_SCAN_COMPLETE",
+  "scanIndex": 40571,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

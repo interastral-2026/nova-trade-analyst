@@ -35,10 +35,10 @@ const CB_API_SECRET = process.env.CB_API_SECRET
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
   : "";
 
-const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'DOT', 'ADA', 'NEAR', 'MATIC', 'XRP', 'LTC', 'BCH', 'SHIB', 'DOGE', 'UNI', 'AAVE'];
+const WATCHLIST = ['SOL', 'AVAX', 'LINK', 'NEAR', 'MATIC', 'XRP', 'DOGE', 'SHIB', 'PEPE', 'WIF', 'BONK', 'FLOKI', 'RNDR', 'INJ', 'FET', 'TIA'];
 const STATE_FILE = './ghost_state.json';
 const FEE_RATE = 0.005; // 0.5% round-trip fee (0.25% buy + 0.25% sell, assuming advanced trade tier)
-const MIN_NET_PROFIT = 0.005; // 0.5% minimum net profit after fees (Total required move = 1.0%)
+const MIN_NET_PROFIT = 0.003; // 0.3% minimum net profit after fees (Total required move = 0.8%)
 
 let availableEurPairs: string[] = [];
 
@@ -464,7 +464,7 @@ async function scanWatchlist() {
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
         
         if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
-          // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 0.2% net = 0.7%)
+          // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 0.3% net = 0.8%)
           const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100));
           
           if (isProfitableEnough) {
