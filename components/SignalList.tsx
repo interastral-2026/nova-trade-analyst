@@ -9,12 +9,12 @@ interface SignalListProps {
 const SignalList: React.FC<SignalListProps> = ({ signals = [] }) => {
   const safeSignals = Array.isArray(signals) ? signals : [];
   
+  // Show all signals, sorted by time (newest first)
   const activeSignals = safeSignals
-    .filter(s => s && s.side !== 'NEUTRAL')
     .sort((a, b) => {
-      const scoreA = (a.confidence || 0) + (a.potentialRoi || 0);
-      const scoreB = (b.confidence || 0) + (b.potentialRoi || 0);
-      return scoreB - scoreA;
+      const timeA = new Date(a.timestamp || 0).getTime();
+      const timeB = new Date(b.timestamp || 0).getTime();
+      return timeB - timeA;
     });
 
   const formatPrice = (val: any) => {

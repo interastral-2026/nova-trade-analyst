@@ -12,7 +12,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
   thoughtHistory = [],
   liveActivity = "IDLE"
 }) => {
-  const [stats, setStats] = useState({ eur: 0, usdc: 0, trades: 0, profit: 0, isPaper: true, dailyGoal: 50 });
+  const [stats, setStats] = useState({ eur: 0, usdc: 0, trades: 0, profit: 0, totalProfit: 0, isPaper: true, dailyGoal: 50 });
   const [logs, setLogs] = useState<ExecutionLog[]>([]);
   const [holdings, setHoldings] = useState<ActivePosition[]>([]);
   const [activeTab, setActiveTab] = useState<'holdings' | 'stream' | 'activity'>('holdings');
@@ -27,6 +27,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
         usdc: Number(data.liquidity?.usdc) || 0,
         trades: Number(data.dailyStats?.trades) || 0, 
         profit: Number(data.dailyStats?.profit) || 0,
+        totalProfit: Number(data.totalProfit) || 0,
         isPaper: data.isPaperMode !== false,
         dailyGoal: Number(data.dailyStats?.dailyGoal) || 50
       });
@@ -56,11 +57,11 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
   return (
     <div className="flex flex-col space-y-6 h-full font-mono bg-black/50">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="col-span-1 md:col-span-2 bg-[#080812] border-2 border-indigo-500/20 rounded-[2.2rem] p-7 shadow-2xl relative overflow-hidden group">
            <div className="flex justify-between items-end mb-4 relative z-10">
               <div>
-                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] mb-1">PROFIT_HARVEST_V34</p>
+                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] mb-1">DAILY_PROFIT</p>
                 <h3 className="text-3xl font-black text-white">€{getSafeNum(stats.profit).toFixed(2)} <span className="text-slate-600 text-lg">/ €{stats.dailyGoal}</span></h3>
               </div>
               <div className="text-right">
@@ -77,6 +78,11 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
            </div>
         </div>
         
+        <div className="bg-[#080812] border border-white/10 p-7 rounded-[2.2rem] flex flex-col justify-center shadow-lg">
+           <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">TOTAL_PROFIT</p>
+           <h2 className="text-2xl font-black text-white tracking-tighter">€{formatPrice(stats.totalProfit)}</h2>
+        </div>
+
         <div className="bg-[#080812] border border-white/10 p-7 rounded-[2.2rem] flex flex-col justify-center shadow-lg">
            <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">LIQUIDITY_EUR</p>
            <h2 className="text-2xl font-black text-white tracking-tighter">€{formatPrice(stats.eur)}</h2>
