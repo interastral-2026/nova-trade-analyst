@@ -28,11 +28,11 @@ envPaths.forEach(envPath => {
   }
 });
 
-const API_KEY = process.env.API_KEY ? process.env.API_KEY.trim() : null;
-const CB_API_KEY = process.env.CB_API_KEY ? process.env.CB_API_KEY.trim() : null;
+const API_KEY = (process.env.GEMINI_API_KEY || process.env.API_KEY || "").trim();
+const CB_API_KEY = (process.env.CB_API_KEY || "").trim();
 const CB_API_SECRET = process.env.CB_API_SECRET 
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
-  : null;
+  : "";
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'DOT', 'ADA', 'NEAR', 'MATIC', 'XRP', 'LTC', 'BCH', 'SHIB', 'DOGE', 'UNI', 'AAVE'];
 const STATE_FILE = './ghost_state.json';
@@ -43,12 +43,17 @@ let availableEurPairs: string[] = [];
 
 // --- TRADING ENGINE LOGIC ---
 
+let isScanning = false;
+let isMonitoring = false;
+let isAiMonitoring = false;
+
 async function listAvailableProducts() {
   const token = generateCoinbaseJWT('GET', '/api/v3/brokerage/products');
   if (!token) return;
   try {
     const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/products?product_type=SPOT', {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 'Authorization': `Bearer ${token}` },
+      timeout: 10000
     });
     const products = response.data?.products || [];
     availableEurPairs = products
@@ -98,7 +103,8 @@ async function syncCoinbaseBalance() {
   if (!token) return false;
   try {
     const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/accounts', {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 'Authorization': `Bearer ${token}` },
+      timeout: 10000
     });
     const accounts = response.data?.accounts || [];
     const newBalances = {}; 
@@ -166,7 +172,8 @@ async function executeTrade(symbol, side, amount, quantity) {
     };
 
     const response = await axios.post('https://api.coinbase.com/api/v3/brokerage/orders', payload, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 'Authorization': `Bearer ${token}` },
+      timeout: 15000
     });
 
     // Check if order was actually created or rejected by Coinbase
@@ -206,12 +213,28 @@ async function executeTrade(symbol, side, amount, quantity) {
 }
 
 async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
-  if (!API_KEY) return null;
+  if (!API_KEY) {
+    return {
+      side: "NEUTRAL",
+      analysis: "خطا: کلید API هوش مصنوعی (GEMINI_API_KEY) تنظیم نشده است. لطفاً در بخش تنظیمات محیطی آن را وارد کنید.",
+      symbol,
+      timestamp: new Date().toISOString(),
+      confidence: 0,
+      potentialRoi: 0
+    };
+  }
+
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   const history = (candles || []).slice(-30).map(c => ({ h: c.high, l: c.low, c: c.close }));
+  
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('AI_TIMEOUT')), 25000);
+  });
+
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+    ghostState.currentStatus = `AI_REQ_${symbol}`;
+    const aiPromise = ai.models.generateContent({
+      model: 'gemini-3-flash-preview', 
       contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
         systemInstruction: `YOU ARE THE GHOST_SMC_BOT, A HIGH-FREQUENCY AI SCALPER.
@@ -262,13 +285,27 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
         temperature: 0.1
       }
     });
-    const result = JSON.parse(response.text?.trim() || '{}');
-    // Normalize confidence if AI returns decimal (e.g. 0.85 -> 85)
+
+    const response: any = await Promise.race([aiPromise, timeoutPromise]);
+    const rawText = response.text?.trim() || '{}';
+    ghostState.currentStatus = `AI_RESP_${symbol}_LEN_${rawText.length}`;
+    const result = JSON.parse(rawText);
     if (result.confidence !== undefined && result.confidence > 0 && result.confidence <= 1) {
       result.confidence = Math.round(result.confidence * 100);
     }
     return { ...result, id: crypto.randomUUID(), symbol, timestamp: new Date().toISOString() };
-  } catch (e) { return null; }
+  } catch (e: any) { 
+    console.error(`[AI ERROR] ${symbol}:`, e.message);
+    return {
+      side: "NEUTRAL",
+      analysis: `خطا در تحلیل هوش مصنوعی برای ${symbol}: ${e.message}`,
+      symbol,
+      timestamp: new Date().toISOString(),
+      confidence: 0,
+      potentialRoi: 0,
+      id: crypto.randomUUID()
+    }; 
+  }
 }
 
 function loadState() {
@@ -309,271 +346,313 @@ if (ghostState.activePositions && ghostState.activePositions.length > 0) {
 }
 
 async function monitorPositionsAI() {
-  if (!ghostState.isEngineActive || ghostState.activePositions.length === 0) return;
+  if (isAiMonitoring || !ghostState.isEngineActive || ghostState.activePositions.length === 0) return;
+  isAiMonitoring = true;
   
   console.log(`[AI-MONITOR] Checking ${ghostState.activePositions.length} active positions...`);
   
-  for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
-    const pos = ghostState.activePositions[i];
-    try {
-      const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=30`);
-      const candles = res.data?.Data?.Data || [];
-      if (candles.length === 0) continue;
-      
-      const price = candles[candles.length - 1].close;
-      const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
-      
-      if (analysis && analysis.side === 'SELL') {
-        const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
-        const isProfitable = price > (breakEvenPrice * (1 + MIN_NET_PROFIT));
+  try {
+    for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
+      const pos = ghostState.activePositions[i];
+      try {
+        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=30`, { timeout: 8000 });
+        const candles = res.data?.Data?.Data || [];
+        if (candles.length === 0) continue;
         
-        // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop (emergency exit)
-        if (isProfitable || analysis.confidence > 90) {
-          const tradePnl = (price - pos.entryPrice) * pos.quantity;
-          const netPnl = tradePnl - (pos.amount * FEE_RATE);
-          console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
+        const price = candles[candles.length - 1].close;
+        const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
+        
+        if (analysis && analysis.side === 'SELL') {
+          const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
+          const isProfitable = price > (breakEvenPrice * (1 + MIN_NET_PROFIT));
           
-          const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
-          if (tradeResult.success) {
-            ghostState.dailyStats.profit += tradePnl;
-            ghostState.totalProfit += tradePnl;
-            ghostState.executionLogs.unshift({
-              id: crypto.randomUUID(),
-              symbol: pos.symbol,
-              action: 'SELL',
-              price,
-              pnl: tradePnl,
-              status: 'SUCCESS',
-              details: `AI_EXIT_CONF_${analysis.confidence}%`,
-              timestamp: new Date().toISOString()
-            });
-            ghostState.activePositions.splice(i, 1);
-            saveState();
+          // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop (emergency exit)
+          if (isProfitable || analysis.confidence > 90) {
+            const tradePnl = (price - pos.entryPrice) * pos.quantity;
+            const netPnl = tradePnl - (pos.amount * FEE_RATE);
+            console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
+            
+            const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
+            if (tradeResult.success) {
+              ghostState.dailyStats.profit += tradePnl;
+              ghostState.totalProfit += tradePnl;
+              ghostState.executionLogs.unshift({
+                id: crypto.randomUUID(),
+                symbol: pos.symbol,
+                action: 'SELL',
+                price,
+                pnl: tradePnl,
+                status: 'SUCCESS',
+                details: `AI_EXIT_CONF_${analysis.confidence}%`,
+                timestamp: new Date().toISOString()
+              });
+              ghostState.activePositions.splice(i, 1);
+              saveState();
+            }
           }
         }
+      } catch (e: any) {
+        console.error(`[AI-MONITOR] Error checking ${pos.symbol}:`, e.message);
       }
-    } catch (e) {
-      console.error(`[AI-MONITOR] Error checking ${pos.symbol}:`, e.message);
+      await new Promise(r => setTimeout(r, 1000));
     }
-    await new Promise(r => setTimeout(r, 1000));
+  } finally {
+    isAiMonitoring = false;
   }
 }
 
 async function scanWatchlist() {
-  if (!ghostState.isEngineActive) return;
+  if (isScanning || !ghostState.isEngineActive) return;
+  isScanning = true;
   
-  // Use availableEurPairs if we have them, otherwise fallback to WATCHLIST
-  const currentWatchlist = availableEurPairs.length > 0 
-    ? availableEurPairs.map(p => p.split('-')[0]) 
-    : WATCHLIST;
+  try {
+    // Use availableEurPairs if we have them, otherwise fallback to WATCHLIST
+    const currentWatchlist = availableEurPairs.length > 0 
+      ? availableEurPairs.map(p => p.split('-')[0]) 
+      : WATCHLIST;
 
-  // Scan 8 symbols per cycle for faster discovery
-  for (let i = 0; i < 8; i++) {
-    const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
-    ghostState.scanIndex++;
-    
-    if (ghostState.activePositions.some(p => p.symbol === symbol)) continue;
-
-    const productId = `${symbol}-EUR`;
-    if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) continue;
-
-    ghostState.currentStatus = `ANALYZING_${symbol}_SMC`;
-    try {
-      const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`);
-      const candles = res.data?.Data?.Data || [];
-      if (candles.length === 0) continue;
+    // Scan 6 symbols per cycle for stability
+    for (let i = 0; i < 6; i++) {
+      const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
+      ghostState.scanIndex++;
       
-      const price = candles[candles.length - 1].close;
-      const analysis = await getAdvancedAnalysis(symbol, price, candles);
-      
-      if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
-        // Ensure potential ROI covers fees + minimum net profit
-        const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100) + 0.5);
+      if (ghostState.activePositions.some(p => p.symbol === symbol)) {
+        fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: Active position exists\n`);
+        continue;
+      }
+
+      const productId = `${symbol}-EUR`;
+      // Fix: availableEurPairs contains base symbols (e.g. "BTC"), not full product IDs
+      if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(symbol)) {
+        fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: Not in availableEurPairs (Length: ${availableEurPairs.length})\n`);
+        continue;
+      }
+
+      ghostState.currentStatus = `ANALYZING_${symbol}_SMC`;
+      try {
+        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`, { timeout: 8000 });
+        const candles = res.data?.Data?.Data || [];
+        if (candles.length === 0) {
+          fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: No candles from Cryptocompare\n`);
+          continue;
+        }
         
-        if (isProfitableEnough) {
-          // Calculate available liquidity for this specific trade
-          // We allow using up to 33% of total EUR per trade to allow multiple concurrent trades (up to 3)
-          const totalEur = ghostState.liquidity.eur;
-          const maxPerTrade = totalEur * 0.33;
-          // Leave 1.5% buffer for Coinbase fees to avoid INSUFFICIENT_FUND
-          let tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
+        const price = candles[candles.length - 1].close;
+        const analysis = await getAdvancedAnalysis(symbol, price, candles);
+        
+        if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
+          // Ensure potential ROI covers fees + minimum net profit
+          const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100) + 0.5);
           
-          if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 5) { 
-            const qty = tradeAmount / (price || 1);
-            const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
+          if (isProfitableEnough) {
+            // Calculate available liquidity for this specific trade
+            const totalEur = ghostState.liquidity.eur;
+            const maxPerTrade = totalEur * 0.33;
+            let tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
             
-            if (tradeResult.success) {
-              analysis.decision = `EXECUTED: BUY_${symbol}_AT_${price}`;
-              ghostState.activePositions.push({
-                symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
-                tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
-                pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
-              });
+            if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 5) { 
+              const qty = tradeAmount / (price || 1);
+              const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
               
-              // Optimistically update liquidity so next scan in this loop knows we spent money
-              ghostState.liquidity.eur -= tradeAmount;
+              if (tradeResult.success) {
+                analysis.decision = `EXECUTED: BUY_${symbol}_AT_${price}`;
+                ghostState.activePositions.push({
+                  symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
+                  tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
+                  pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
+                });
+                
+                ghostState.liquidity.eur -= tradeAmount;
 
-              ghostState.executionLogs.unshift({ 
-                id: crypto.randomUUID(), 
-                symbol, 
-                action: 'BUY', 
-                price, 
-                status: 'SUCCESS', 
-                details: `LIQUIDITY_BUY_CONF_${analysis.confidence}%`,
-                timestamp: new Date().toISOString() 
-              });
-              ghostState.dailyStats.trades++;
+                ghostState.executionLogs.unshift({ 
+                  id: crypto.randomUUID(), 
+                  symbol, 
+                  action: 'BUY', 
+                  price, 
+                  status: 'SUCCESS', 
+                  details: `LIQUIDITY_BUY_CONF_${analysis.confidence}%`,
+                  timestamp: new Date().toISOString() 
+                });
+                ghostState.dailyStats.trades++;
+              }
             }
           }
         }
+        if (analysis) {
+          const thoughtCount = ghostState.thoughts.length;
+          ghostState.currentStatus = `THOUGHT_OK_${symbol}_${analysis.side}_TC_${thoughtCount}`;
+          ghostState.lastThought = { symbol, side: analysis.side, time: new Date().toISOString() };
+          ghostState.thoughts.unshift(analysis);
+          if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
+          saveState();
+        } else {
+          ghostState.currentStatus = `THOUGHT_NULL_${symbol}`;
+          saveState();
+        }
+        
+        fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Analyzed ${symbol}: ${analysis ? analysis.side : 'NULL'}\n`);
+        
+        await new Promise(r => setTimeout(r, 2000));
+      } catch (e: any) {
+        fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Error scanning ${symbol}: ${e.message}\n`);
+        ghostState.currentStatus = `SCAN_ERR_${symbol}_${e.message.slice(0, 20)}`;
+        saveState();
+        await new Promise(r => setTimeout(r, 2000));
       }
-      if (analysis) {
-        ghostState.thoughts.unshift(analysis);
-        if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
-      }
-    } catch (e) {}
-    await new Promise(r => setTimeout(r, 500)); // Reduced delay
+    }
+  } finally {
+    fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Batch done. ScanIndex: ${ghostState.scanIndex}\n`);
+    isScanning = false;
+    // We keep the last status for a bit longer
+    setTimeout(() => {
+       if (ghostState.currentStatus.startsWith("SCAN_BATCH_DONE")) {
+          ghostState.currentStatus = "IDLE_SCAN_COMPLETE";
+          saveState();
+       }
+    }, 5000);
+    ghostState.currentStatus = `SCAN_BATCH_DONE_${ghostState.scanIndex}`;
+    saveState();
   }
-  saveState();
 }
 
 async function monitor() {
-  await syncCoinbaseBalance();
-  const today = new Date().toISOString().split('T')[0];
-  if (ghostState.dailyStats.lastResetDate !== today) {
-    ghostState.dailyStats.profit = 0; ghostState.dailyStats.trades = 0; ghostState.dailyStats.lastResetDate = today;
-  }
-  
-  // Reconcile active positions with actual Coinbase balances (ONLY IN REAL MODE)
-  if (!ghostState.isPaperMode) {
-    for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
-      const pos = ghostState.activePositions[i];
-      const actualQty = ghostState.actualBalances[pos.symbol] || 0;
-      
-      if (actualQty < (pos.quantity * 0.1)) {
-        console.log(`[RECONCILE] Removing ${pos.symbol} - Position no longer exists on Coinbase.`);
-        ghostState.executionLogs.unshift({
-          id: crypto.randomUUID(),
-          symbol: pos.symbol,
-          action: 'SELL',
-          price: pos.currentPrice,
-          pnl: pos.pnl,
-          status: 'SUCCESS',
-          details: `EXTERNAL_EXIT_DETECTED`,
-          timestamp: new Date().toISOString()
-        });
-        if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
-        ghostState.dailyStats.profit += pos.pnl; 
-        ghostState.totalProfit += pos.pnl;
-        ghostState.activePositions.splice(i, 1);
-      }
-    }
+  if (isMonitoring) return;
+  isMonitoring = true;
 
-    // ADOPT MISSING POSITIONS: If Coinbase has it but we don't track it, add it.
-    for (const symbol of Object.keys(ghostState.actualBalances)) {
-      if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
-        const qty = ghostState.actualBalances[symbol];
-        const productId = `${symbol}-EUR`;
+  try {
+    await syncCoinbaseBalance();
+    const today = new Date().toISOString().split('T')[0];
+    if (ghostState.dailyStats.lastResetDate !== today) {
+      ghostState.dailyStats.profit = 0; ghostState.dailyStats.trades = 0; ghostState.dailyStats.lastResetDate = today;
+    }
+    
+    // Reconcile active positions with actual Coinbase balances (ONLY IN REAL MODE)
+    if (!ghostState.isPaperMode) {
+      for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
+        const pos = ghostState.activePositions[i];
+        const actualQty = ghostState.actualBalances[pos.symbol] || 0;
         
-        // ONLY adopt if we can actually trade it against EUR
-        const canTrade = availableEurPairs.length === 0 || availableEurPairs.includes(productId);
-        
-        if (qty > 0.00001 && canTrade) {
-          console.log(`[RECONCILE] Adopting position: ${symbol} (${qty})`);
-          ghostState.activePositions.push({
-            symbol,
-            entryPrice: 0, 
-            currentPrice: 0,
-            amount: 0,
-            quantity: qty,
-            tp: 0,
-            sl: 0,
-            confidence: 100,
-            potentialRoi: 0,
-            pnl: 0,
-            pnlPercent: 0,
-            isPaper: false,
+        if (actualQty < (pos.quantity * 0.1)) {
+          console.log(`[RECONCILE] Removing ${pos.symbol} - Position no longer exists on Coinbase.`);
+          ghostState.executionLogs.unshift({
+            id: crypto.randomUUID(),
+            symbol: pos.symbol,
+            action: 'SELL',
+            price: pos.currentPrice,
+            pnl: pos.pnl,
+            status: 'SUCCESS',
+            details: `EXTERNAL_EXIT_DETECTED`,
             timestamp: new Date().toISOString()
           });
-        }
-      }
-    }
-  }
-
-  if (ghostState.activePositions.length === 0) return;
-  const symbols = ghostState.activePositions.map((p) => p.symbol).join(',');
-  try {
-    const res = await axios.get(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${symbols}&tsyms=EUR`);
-    const prices = res.data;
-    for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
-      const pos = ghostState.activePositions[i];
-      const curPrice = prices[pos.symbol]?.EUR;
-      if (!curPrice) continue;
-      
-      // If it's a newly adopted position, set initial prices and default targets
-      if (pos.entryPrice === 0) {
-        pos.entryPrice = curPrice;
-        pos.tp = curPrice * 1.03; // Default 3% TP
-        pos.sl = curPrice * 0.98; // Default 2% SL
-      }
-
-      pos.currentPrice = curPrice;
-      const pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
-      pos.pnlPercent = pnlPercent;
-      pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
-      
-      const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
-      const netPnlPercent = pnlPercent - (FEE_RATE * 100);
-
-      // Dynamic Trailing Stop & Break Even
-      // If we are in net profit (after fees), move SL to break-even + tiny buffer
-      if (netPnlPercent > 0.2 && pos.sl < breakEvenPrice) {
-        pos.sl = breakEvenPrice * (1 + MIN_NET_PROFIT);
-        console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
-      }
-
-      if (netPnlPercent > 1.0) {
-        const newSl = curPrice * 0.996; // 0.4% trailing stop once in 1% net profit
-        if (newSl > pos.sl) {
-          pos.sl = newSl;
-          console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
-        }
-      }
-
-      // EARLY EXIT: If price reaches 90% of TP, exit to ensure execution before reversal
-      const tpDistance = pos.tp - pos.entryPrice;
-      const earlyExitPrice = pos.entryPrice + (tpDistance * 0.9);
-
-      // Only exit if we are actually in profit after fees
-      const canExitSafely = curPrice > (breakEvenPrice * (1 + MIN_NET_PROFIT));
-
-      if ((curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.5)) && canExitSafely) {
-        const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_90%_TP');
-        const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
-        
-        if (tradeResult.success) {
-          ghostState.dailyStats.profit += pos.pnl;
-          ghostState.totalProfit += pos.pnl;
-          ghostState.executionLogs.unshift({ 
-            id: crypto.randomUUID(), 
-            symbol: pos.symbol, 
-            action: 'SELL', 
-            price: curPrice, 
-            pnl: pos.pnl, 
-            status: 'SUCCESS', 
-            details: `EXIT_${reason}_PNL_${pos.pnl.toFixed(2)}`,
-            timestamp: new Date().toISOString() 
-          });
           if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
+          ghostState.dailyStats.profit += pos.pnl; 
+          ghostState.totalProfit += pos.pnl;
           ghostState.activePositions.splice(i, 1);
-        } else {
-          console.error(`[MONITOR] Failed to exit ${pos.symbol}: ${tradeResult.reason}`);
-          // Don't remove from activePositions so we can retry next loop
+        }
+      }
+
+      // ADOPT MISSING POSITIONS: If Coinbase has it but we don't track it, add it.
+      for (const symbol of Object.keys(ghostState.actualBalances)) {
+        if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
+          const qty = ghostState.actualBalances[symbol];
+          const productId = `${symbol}-EUR`;
+          
+          // ONLY adopt if we can actually trade it against EUR
+          const canTrade = availableEurPairs.length === 0 || availableEurPairs.includes(productId);
+          
+          if (qty > 0.00001 && canTrade) {
+            console.log(`[RECONCILE] Adopting position: ${symbol} (${qty})`);
+            ghostState.activePositions.push({
+              symbol,
+              entryPrice: 0, 
+              currentPrice: 0,
+              amount: 0,
+              quantity: qty,
+              tp: 0,
+              sl: 0,
+              confidence: 100,
+              potentialRoi: 0,
+              pnl: 0,
+              pnlPercent: 0,
+              isPaper: false,
+              timestamp: new Date().toISOString()
+            });
+          }
         }
       }
     }
-  } catch (e) {}
-  saveState();
+
+    if (ghostState.activePositions.length === 0) return;
+    const symbols = ghostState.activePositions.map((p) => p.symbol).join(',');
+    try {
+      const res = await axios.get(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${symbols}&tsyms=EUR`, { timeout: 8000 });
+      const prices = res.data;
+      for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
+        const pos = ghostState.activePositions[i];
+        const curPrice = prices[pos.symbol]?.EUR;
+        if (!curPrice) continue;
+        
+        // If it's a newly adopted position, set initial prices and default targets
+        if (pos.entryPrice === 0) {
+          pos.entryPrice = curPrice;
+          pos.tp = curPrice * 1.03; // Default 3% TP
+          pos.sl = curPrice * 0.98; // Default 2% SL
+        }
+
+        pos.currentPrice = curPrice;
+        const pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
+        pos.pnlPercent = pnlPercent;
+        pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
+        
+        const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
+        const netPnlPercent = pnlPercent - (FEE_RATE * 100);
+
+        // Dynamic Trailing Stop & Break Even
+        if (netPnlPercent > 0.2 && pos.sl < breakEvenPrice) {
+          pos.sl = breakEvenPrice * (1 + MIN_NET_PROFIT);
+          console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
+        }
+
+        if (netPnlPercent > 1.0) {
+          const newSl = curPrice * 0.996; // 0.4% trailing stop once in 1% net profit
+          if (newSl > pos.sl) {
+            pos.sl = newSl;
+            console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
+          }
+        }
+
+        // EARLY EXIT: If price reaches 90% of TP
+        const tpDistance = pos.tp - pos.entryPrice;
+        const earlyExitPrice = pos.entryPrice + (tpDistance * 0.9);
+        const canExitSafely = curPrice > (breakEvenPrice * (1 + MIN_NET_PROFIT));
+
+        if ((curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.5)) && canExitSafely) {
+          const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_90%_TP');
+          const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
+          
+          if (tradeResult.success) {
+            ghostState.dailyStats.profit += pos.pnl;
+            ghostState.totalProfit += pos.pnl;
+            ghostState.executionLogs.unshift({ 
+              id: crypto.randomUUID(), 
+              symbol: pos.symbol, 
+              action: 'SELL', 
+              price: curPrice, 
+              pnl: pos.pnl, 
+              status: 'SUCCESS', 
+              details: `EXIT_${reason}_PNL_${pos.pnl.toFixed(2)}`,
+              timestamp: new Date().toISOString() 
+            });
+            if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
+            ghostState.activePositions.splice(i, 1);
+          }
+        }
+      }
+    } catch (e) {}
+  } finally {
+    isMonitoring = false;
+    saveState();
+  }
 }
 
 function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {} }
