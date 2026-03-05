@@ -150,20 +150,28 @@ async function executeTrade(symbol, side, amount, quantity) {
   }
 
   try {
+    let finalQty = Number(quantity);
+    
+    // If real trading and selling, ensure we don't exceed actual balance to avoid INSUFFICIENT_FUND
+    if (!ghostState.isPaperMode && side === 'SELL') {
+      // Force sync balance before selling to get the exact available amount
+      await syncCoinbaseBalance();
+      const actual = ghostState.actualBalances[symbol] || 0;
+      
+      if (actual <= 0) {
+        console.error(`[REAL TRADE REJECTED] No actual balance found for ${symbol} on Coinbase.`);
+        return { success: false, reason: "NO_BALANCE_ON_EXCHANGE" };
+      }
+      
+      if (finalQty > actual) {
+        console.log(`[TRADE] Adjusting SELL quantity for ${symbol}: ${finalQty} -> ${actual} (Max Available)`);
+        finalQty = actual;
+      }
+    }
+
     const orderConfig = side === 'BUY' 
       ? { market_market_ioc: { quote_size: Number(amount).toFixed(2).toString() } }
-      : { market_market_ioc: { base_size: (() => {
-          let qty = Number(quantity);
-          // If real trading, ensure we don't exceed actual balance to avoid INSUFFICIENT_FUND
-          if (!ghostState.isPaperMode && ghostState.actualBalances[symbol]) {
-            const actual = ghostState.actualBalances[symbol];
-            if (qty > actual) {
-              console.log(`[TRADE] Adjusting SELL quantity for ${symbol}: ${qty} -> ${actual} (Max Available)`);
-              qty = actual;
-            }
-          }
-          return qty.toFixed(6).toString();
-        })() } };
+      : { market_market_ioc: { base_size: finalQty.toFixed(6).toString() } };
     
     const payload = {
       client_order_id: crypto.randomUUID(),
