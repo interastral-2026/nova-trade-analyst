@@ -463,7 +463,7 @@ async function scanWatchlist() {
         
         if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
           // Ensure potential ROI covers fees + minimum net profit
-          const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100) + 0.5);
+          const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100));
           
           if (isProfitableEnough) {
             // Calculate available liquidity for this specific trade
