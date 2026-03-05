@@ -417,14 +417,14 @@ async function scanWatchlist() {
       ghostState.scanIndex++;
       
       if (ghostState.activePositions.some(p => p.symbol === symbol)) {
-        fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: Active position exists\n`);
+        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: Active position exists\n`);
         continue;
       }
 
       const productId = `${symbol}-EUR`;
       // Fix: availableEurPairs contains base symbols (e.g. "BTC"), not full product IDs
       if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(symbol)) {
-        fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: Not in availableEurPairs (Length: ${availableEurPairs.length})\n`);
+        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: Not in availableEurPairs (Length: ${availableEurPairs.length})\n`);
         continue;
       }
 
@@ -433,7 +433,7 @@ async function scanWatchlist() {
         const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) {
-          fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: No candles from Cryptocompare\n`);
+          fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: No candles from Cryptocompare\n`);
           continue;
         }
         
@@ -490,18 +490,18 @@ async function scanWatchlist() {
           saveState();
         }
         
-        fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Analyzed ${symbol}: ${analysis ? analysis.side : 'NULL'}\n`);
+        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Analyzed ${symbol}: ${analysis ? analysis.side : 'NULL'}\n`);
         
         await new Promise(r => setTimeout(r, 2000));
       } catch (e: any) {
-        fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Error scanning ${symbol}: ${e.message}\n`);
+        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Error scanning ${symbol}: ${e.message}\n`);
         ghostState.currentStatus = `SCAN_ERR_${symbol}_${e.message.slice(0, 20)}`;
         saveState();
         await new Promise(r => setTimeout(r, 2000));
       }
     }
   } finally {
-    fs.appendFileSync('/debug.log', `[${new Date().toISOString()}] Batch done. ScanIndex: ${ghostState.scanIndex}\n`);
+    fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Batch done. ScanIndex: ${ghostState.scanIndex}\n`);
     isScanning = false;
     // We keep the last status for a bit longer
     setTimeout(() => {
