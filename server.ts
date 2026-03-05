@@ -143,7 +143,18 @@ async function executeTrade(symbol, side, amount, quantity) {
   try {
     const orderConfig = side === 'BUY' 
       ? { market_market_ioc: { quote_size: Number(amount).toFixed(2).toString() } }
-      : { market_market_ioc: { base_size: Number(quantity).toFixed(6).toString() } };
+      : { market_market_ioc: { base_size: (() => {
+          let qty = Number(quantity);
+          // If real trading, ensure we don't exceed actual balance to avoid INSUFFICIENT_FUND
+          if (!ghostState.isPaperMode && ghostState.actualBalances[symbol]) {
+            const actual = ghostState.actualBalances[symbol];
+            if (qty > actual) {
+              console.log(`[TRADE] Adjusting SELL quantity for ${symbol}: ${qty} -> ${actual} (Max Available)`);
+              qty = actual;
+            }
+          }
+          return qty.toFixed(6).toString();
+        })() } };
     
     const payload = {
       client_order_id: crypto.randomUUID(),
@@ -160,6 +171,12 @@ async function executeTrade(symbol, side, amount, quantity) {
     if (response.data?.success === false || response.data?.error_response) {
       const errorResponse = response.data?.error_response;
       const errorMsg = errorResponse?.message || errorResponse?.error || response.data?.failure_reason || "COINBASE_REJECTION";
+      
+      if (errorMsg === 'INSUFFICIENT_FUND' || (typeof errorMsg === 'string' && errorMsg.includes('INSUFFICIENT'))) {
+        console.error("[REAL TRADE REJECTED] Insufficient funds on Coinbase.");
+        return { success: false, reason: "INSUFFICIENT_FUNDS_ON_COINBASE" };
+      }
+      
       console.error("[REAL TRADE REJECTED]", response.data);
       return { success: false, reason: `CB_REJECT: ${errorMsg}` };
     }
@@ -317,6 +334,7 @@ async function monitorPositionsAI() {
               timestamp: new Date().toISOString()
             });
             ghostState.activePositions.splice(i, 1);
+            saveState();
           }
         }
       }
@@ -335,8 +353,8 @@ async function scanWatchlist() {
     ? availableEurPairs.map(p => p.split('-')[0]) 
     : WATCHLIST;
 
-  // Scan 5 symbols per cycle for faster discovery
-  for (let i = 0; i < 5; i++) {
+  // Scan 8 symbols per cycle for faster discovery
+  for (let i = 0; i < 8; i++) {
     const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
     ghostState.scanIndex++;
     
@@ -345,7 +363,7 @@ async function scanWatchlist() {
     const productId = `${symbol}-EUR`;
     if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) continue;
 
-    ghostState.currentStatus = `SCANNING_${symbol}`;
+    ghostState.currentStatus = `ANALYZING_${symbol}_SMC`;
     try {
       const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`);
       const candles = res.data?.Data?.Data || [];
@@ -362,9 +380,10 @@ async function scanWatchlist() {
           // We allow using up to 33% of total EUR per trade to allow multiple concurrent trades (up to 3)
           const totalEur = ghostState.liquidity.eur;
           const maxPerTrade = totalEur * 0.33;
-          const tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
+          // Leave 1.5% buffer for Coinbase fees to avoid INSUFFICIENT_FUND
+          let tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
           
-          if (totalEur >= tradeAmount && tradeAmount >= 5) { 
+          if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 5) { 
             const qty = tradeAmount / (price || 1);
             const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
             
@@ -439,7 +458,12 @@ async function monitor() {
     for (const symbol of Object.keys(ghostState.actualBalances)) {
       if (!ghostState.activePositions.some(p => p.symbol === symbol)) {
         const qty = ghostState.actualBalances[symbol];
-        if (qty > 0.00001) {
+        const productId = `${symbol}-EUR`;
+        
+        // ONLY adopt if we can actually trade it against EUR
+        const canTrade = availableEurPairs.length === 0 || availableEurPairs.includes(productId);
+        
+        if (qty > 0.00001 && canTrade) {
           console.log(`[RECONCILE] Adopting position: ${symbol} (${qty})`);
           ghostState.activePositions.push({
             symbol,
@@ -483,12 +507,18 @@ async function monitor() {
       pos.pnlPercent = pnlPercent;
       pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
 
-      // Dynamic Trailing Stop: If profit > 0.8%, move SL to entry + 0.4% to lock in fees
-      if (pnlPercent > 0.8) {
-        const newSl = pos.entryPrice * 1.004;
+      // Dynamic Trailing Stop & Break Even
+      if (pnlPercent > 0.5 && pos.sl < pos.entryPrice) {
+        // Move to Break Even + small buffer for fees
+        pos.sl = pos.entryPrice * 1.001;
+        console.log(`[MONITOR] Break-Even activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
+      }
+
+      if (pnlPercent > 1.0) {
+        const newSl = curPrice * 0.995; // 0.5% trailing stop once in 1% profit
         if (newSl > pos.sl) {
           pos.sl = newSl;
-          console.log(`[MONITOR] Trailing Stop activated for ${pos.symbol} @ ${newSl.toFixed(2)}`);
+          console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
         }
       }
 
@@ -571,9 +601,9 @@ async function startServer() {
     monitorPositionsAI();
     scanWatchlist();
     
-    setInterval(monitor, 5000);           // Hard TP/SL check (5s)
-    setInterval(monitorPositionsAI, 15000); // AI Position Analysis (15s)
-    setInterval(scanWatchlist, 10000);      // New Signal Scanning (10s)
+    setInterval(monitor, 4000);           // Hard TP/SL check (4s)
+    setInterval(monitorPositionsAI, 12000); // AI Position Analysis (12s)
+    setInterval(scanWatchlist, 7000);      // New Signal Scanning (7s)
     setInterval(listAvailableProducts, 300000); // Refresh products every 5m
   });
 }

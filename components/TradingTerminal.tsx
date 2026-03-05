@@ -85,9 +85,14 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
         <div className="bg-[#080812] border border-white/10 p-7 rounded-[2.2rem] flex flex-col justify-center relative overflow-hidden shadow-lg">
            <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">RADAR_ACTIVITY</p>
            <div className="flex items-center space-x-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse shadow-[0_0_10px_#e11d48]"></span>
-              <h2 className="text-[11px] font-black text-white uppercase truncate tracking-tight">{liveActivity || "READY"}</h2>
+              <span className={`w-2.5 h-2.5 rounded-full ${liveActivity.includes('ANALYZING') ? 'bg-cyan-500 animate-ping' : 'bg-rose-600 animate-pulse'} shadow-[0_0_10px_#e11d48]`}></span>
+              <h2 className={`text-[11px] font-black uppercase truncate tracking-tight ${liveActivity.includes('ANALYZING') ? 'text-cyan-400' : 'text-white'}`}>
+                {liveActivity || "READY"}
+              </h2>
            </div>
+           {liveActivity.includes('ANALYZING') && (
+             <div className="absolute bottom-0 left-0 h-0.5 bg-cyan-500 animate-[shimmer_2s_infinite]" style={{ width: '100%' }}></div>
+           )}
         </div>
       </div>
 

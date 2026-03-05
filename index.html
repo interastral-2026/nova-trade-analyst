@@ -19,6 +19,10 @@
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: #1e1e2e; border-radius: 2px; }
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
     </style>
 <script type="importmap">
 {
@@ -35,7 +39,8 @@
     "vite": "https://esm.sh/vite@^7.3.1",
     "fs": "https://esm.sh/fs@^0.0.1-security",
     "cors": "https://esm.sh/cors@^2.8.6",
-    "crypto": "https://esm.sh/crypto@^1.0.1"
+    "crypto": "https://esm.sh/crypto@^1.0.1",
+    "jsonwebtoken": "https://esm.sh/jsonwebtoken@^9.0.3"
   }
 }
 </script>
