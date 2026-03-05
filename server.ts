@@ -230,7 +230,7 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
   const history = (candles || []).slice(-30).map(c => ({ h: c.high, l: c.low, c: c.close }));
   
   const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('AI_TIMEOUT')), 25000);
+    setTimeout(() => reject(new Error('AI_TIMEOUT')), 45000);
   });
 
   try {
