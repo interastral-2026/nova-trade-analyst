@@ -608,6 +608,16 @@
   ],
   "executionLogs": [
     {
+      "id": "01f0be9f-2531-4e82-9da6-f65d230d318e",
+      "symbol": "MINA",
+      "action": "SELL",
+      "price": 0.04891,
+      "pnl": 0.008066440000001071,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-05T21:07:49.065Z"
+    },
+    {
       "id": "3d47e5f4-1cbf-47ef-90a3-be1b161f6187",
       "symbol": "MINA",
       "action": "SELL",
@@ -4357,15 +4367,6 @@
       "status": "FAILED",
       "details": "INSUFFICIENT_EUR_BALANCE",
       "timestamp": "2026-02-20T02:48:38.125Z"
-    },
-    {
-      "id": "b3e00cf1-81d0-4e2a-951d-afc8ce754bf4",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1396,
-      "status": "FAILED",
-      "details": "INSUFFICIENT_EUR_BALANCE",
-      "timestamp": "2026-02-20T02:48:12.215Z"
     }
   ],
   "activePositions": [
@@ -4400,27 +4401,27 @@
       "timestamp": "2026-03-04T23:52:15.240Z"
     },
     {
-      "symbol": "MINA",
-      "entryPrice": 0.04887,
-      "currentPrice": 0.04891,
+      "symbol": "CHZ",
+      "entryPrice": 0,
+      "currentPrice": 0,
       "amount": 0,
-      "quantity": 201.661,
-      "tp": 0.050336099999999995,
-      "sl": 0.047892599999999994,
+      "quantity": 300.2,
+      "tp": 0,
+      "sl": 0,
       "confidence": 100,
       "potentialRoi": 0,
-      "pnl": 0.008066440000001071,
-      "pnlPercent": 0.08184980560672254,
+      "pnl": 0,
+      "pnlPercent": 0,
       "isPaper": false,
-      "timestamp": "2026-03-05T19:10:11.986Z"
+      "timestamp": "2026-03-05T21:08:29.318Z"
     }
   ],
   "liquidity": {
-    "eur": 6.1013193135916,
+    "eur": 5.8491085787916,
     "usdc": 8.764328e-7
   },
   "actualBalances": {
-    "MINA": 201.661,
+    "CHZ": 300.2,
     "EURC": 0.00265,
     "BTC": 0.0001698,
     "ETC": 3.2e-7,
@@ -4428,14 +4429,14 @@
   },
   "dailyStats": {
     "trades": 1,
-    "profit": -0.020826375940686523,
+    "profit": -0.012759935940685451,
     "fees": 0,
     "dailyGoal": 50,
     "lastResetDate": "2026-03-05"
   },
-  "totalProfit": -0.06339637594068324,
-  "currentStatus": "SCAN_BATCH_DONE_35285",
-  "scanIndex": 35285,
+  "totalProfit": -0.055329935940682175,
+  "currentStatus": "IDLE_SCAN_COMPLETE",
+  "scanIndex": 36263,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

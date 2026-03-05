@@ -37,8 +37,8 @@ const CB_API_SECRET = process.env.CB_API_SECRET
 
 const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'DOT', 'ADA', 'NEAR', 'MATIC', 'XRP', 'LTC', 'BCH', 'SHIB', 'DOGE', 'UNI', 'AAVE'];
 const STATE_FILE = './ghost_state.json';
-const FEE_RATE = 0.006; // 0.6% conservative round-trip fee (0.3% buy + 0.3% sell)
-const MIN_NET_PROFIT = 0.001; // 0.1% minimum net profit after fees
+const FEE_RATE = 0.005; // 0.5% round-trip fee (0.25% buy + 0.25% sell, assuming advanced trade tier)
+const MIN_NET_PROFIT = 0.002; // 0.2% minimum net profit after fees
 
 let availableEurPairs: string[] = [];
 
@@ -249,23 +249,24 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
       config: {
         systemInstruction: `YOU ARE THE GHOST_SMC_BOT, A HIGH-FREQUENCY AI SCALPER.
 Use Smart Money Concepts (SMC), FVG, and MSS. 
-Goal: Capture quick 1% - 3% ROI scalps. 
+Goal: Capture quick 1% - 5% ROI scalps. 
 Speed and liquidity are everything. Do not hold for long-term. DO NOT WASTE TIME.
 Factor in ${FEE_RATE * 100}% round-trip fees. A trade is only valid if potential net profit > 0.5%.
 
 CRITICAL DIRECTIVES:
+- BE AGGRESSIVE BUT PRECISE: Look for high-probability setups with strong momentum.
 - DO NOT LET CAPITAL SLEEP. If a position is stagnant or moving against us, cut it (SELL) and free up liquidity for better opportunities.
 - CONSTANTLY HUNT for new high-volatility setups.
 - ACTIVE POSITIONS: If we are in profit, be ruthless about taking it before the market reverses. If we are stuck in a slow market, exit to find a faster one.
 
 INTERNAL REASONING PROTOCOL:
 For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'analysis' field.
-1. Market Context: Trend (Bullish/Bearish/Sideways).
+1. Market Context: Trend (Bullish/Bearish/Sideways) and Momentum.
 2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks.
 3. Decision Logic: Why you are choosing BUY, SELL, or WAIT.
 4. If WAIT: Explicitly state what is missing (e.g., "Waiting for MSS confirmation", "No clear FVG", "Spread too high").
 
-Only issue BUY if you see a clear institutional "Discount Zone" or "Liquidity Sweep".
+Only issue BUY if you see a clear institutional "Discount Zone" or "Liquidity Sweep" with strong upward momentum.
 Issue SELL early if you see "Distribution" or "SFP" (Swing Failure Pattern) to lock in profit before reversals.
 BE SMART: Avoid "Bull Traps" and "Bear Traps" set by exchanges.
 NEVER RECOMMEND A TRADE THAT DOES NOT COVER FEES.
@@ -389,7 +390,8 @@ async function monitorPositionsAI() {
           const isProfitable = price > (breakEvenPrice * (1 + MIN_NET_PROFIT));
           
           // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop (emergency exit)
-          if (isProfitable || analysis.confidence > 90) {
+          // Be more aggressive: if confidence > 80, cut the loss to free liquidity.
+          if (isProfitable || analysis.confidence >= 80) {
             const tradePnl = (price - pos.entryPrice) * pos.quantity;
             const netPnl = tradePnl - (pos.amount * FEE_RATE);
             console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
@@ -462,13 +464,14 @@ async function scanWatchlist() {
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
         
         if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
-          // Ensure potential ROI covers fees + minimum net profit
+          // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 0.2% net = 0.7%)
           const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100));
           
           if (isProfitableEnough) {
             // Calculate available liquidity for this specific trade
             const totalEur = ghostState.liquidity.eur;
-            const maxPerTrade = totalEur * 0.33;
+            // Be more aggressive: use up to 50% of available liquidity per trade if confidence is very high
+            const maxPerTrade = analysis.confidence >= 85 ? totalEur * 0.50 : totalEur * 0.33;
             let tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
             
             if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 5) { 
@@ -495,8 +498,14 @@ async function scanWatchlist() {
                   timestamp: new Date().toISOString() 
                 });
                 ghostState.dailyStats.trades++;
+              } else {
+                analysis.decision = `FAILED: ${tradeResult.reason}`;
               }
+            } else {
+              analysis.decision = `SKIPPED: INSUFFICIENT_LIQUIDITY (Need: ${tradeAmount.toFixed(2)}, Have: ${totalEur.toFixed(2)})`;
             }
+          } else {
+            analysis.decision = `SKIPPED: ROI_TOO_LOW (Expected: ${analysis.potentialRoi}%, Min Required: ${((FEE_RATE * 100) + (MIN_NET_PROFIT * 100)).toFixed(2)}%)`;
           }
         }
         if (analysis) {
@@ -634,21 +643,25 @@ async function monitor() {
           console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
         }
 
-        if (netPnlPercent > 1.0) {
-          const newSl = curPrice * 0.996; // 0.4% trailing stop once in 1% net profit
+        if (netPnlPercent > 0.8) {
+          const newSl = curPrice * 0.997; // 0.3% trailing stop once in 0.8% net profit
           if (newSl > pos.sl) {
             pos.sl = newSl;
             console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
           }
         }
 
-        // EARLY EXIT: If price reaches 90% of TP
+        // EARLY EXIT: If price reaches 80% of TP
         const tpDistance = pos.tp - pos.entryPrice;
-        const earlyExitPrice = pos.entryPrice + (tpDistance * 0.9);
+        const earlyExitPrice = pos.entryPrice + (tpDistance * 0.8);
         const canExitSafely = curPrice > (breakEvenPrice * (1 + MIN_NET_PROFIT));
 
-        if ((curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.5)) && canExitSafely) {
-          const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_90%_TP');
+        // Trigger SELL if:
+        // 1. Reached TP
+        // 2. Reached SL (Hard stop loss, must execute even if in loss)
+        // 3. Reached 80% of TP and is safe to exit
+        if (curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.4 && canExitSafely)) {
+          const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_80%_TP');
           const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
           
           if (tradeResult.success) {
@@ -722,9 +735,9 @@ async function startServer() {
     monitorPositionsAI();
     scanWatchlist();
     
-    setInterval(monitor, 4000);           // Hard TP/SL check (4s)
-    setInterval(monitorPositionsAI, 12000); // AI Position Analysis (12s)
-    setInterval(scanWatchlist, 7000);      // New Signal Scanning (7s)
+    setInterval(monitor, 2000);           // Hard TP/SL check (2s)
+    setInterval(monitorPositionsAI, 8000); // AI Position Analysis (8s)
+    setInterval(scanWatchlist, 5000);      // New Signal Scanning (5s)
     setInterval(listAvailableProducts, 300000); // Refresh products every 5m
   });
 }
