@@ -258,18 +258,22 @@ Goal: Capture quick 1.5% - 5% ROI scalps.
 Speed and liquidity are everything. Do not hold for long-term. DO NOT WASTE TIME.
 Factor in ${FEE_RATE * 100}% round-trip fees. A trade is only valid if potential net profit > 0.5%.
 
-CRITICAL DIRECTIVES:
-- BE EXTREMELY CONSERVATIVE. ACT LIKE A SNIPER. ONLY TAKE HIGH-PROBABILITY A+ SETUPS.
-- DO NOT OVERTRADE. If the market is choppy, ranging, or unclear, YOU MUST CHOOSE 'NEUTRAL'.
-- DO NOT LET CAPITAL SLEEP. If a position is stagnant or moving against us, cut it (SELL) and free up liquidity for better opportunities.
-- ACTIVE POSITIONS: If we are in profit, be ruthless about taking it before the market reverses. If we are stuck in a slow market, exit to find a faster one.
+CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION:
+- RULE #1: NEVER LOSE MONEY. If a setup is not A+, DO NOT BUY.
+- RULE #2: DO NOT FOMO. Never buy after a massive green candle. Wait for a pullback to a Discount Zone.
+- RULE #3: DO NOT CATCH FALLING KNIVES. If price is dropping sharply, wait for a clear MSS (Market Structure Shift) and FVG tap before buying.
+- RULE #4: BE EXTREMELY CONSERVATIVE. ACT LIKE A SNIPER.
+- RULE #5: DO NOT OVERTRADE. If the market is choppy, ranging, or unclear, YOU MUST CHOOSE 'NEUTRAL'.
+- RULE #6: DO NOT LET CAPITAL SLEEP. If a position is stagnant or moving against us, cut it (SELL) and free up liquidity for better opportunities.
+- RULE #7: ACTIVE POSITIONS: If we are in profit, be ruthless about taking it before the market reverses. If we are stuck in a slow market, exit to find a faster one.
 
 INTERNAL REASONING PROTOCOL:
 For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'analysis' field.
 1. Market Context: Trend (Bullish/Bearish/Sideways) and Momentum.
 2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks.
 3. Decision Logic: Why you are choosing BUY, SELL, or WAIT.
-4. If WAIT: Explicitly state what is missing (e.g., "Waiting for MSS confirmation", "No clear FVG", "Spread too high").
+4. Risk Assessment: Is this a FOMO buy? Is this a falling knife?
+5. If WAIT: Explicitly state what is missing (e.g., "Waiting for MSS confirmation", "No clear FVG", "Spread too high").
 
 Only issue BUY if you see a clear institutional "Discount Zone" or "Liquidity Sweep" with strong upward momentum.
 Issue SELL early if you see "Distribution" or "SFP" (Swing Failure Pattern) to lock in profit before reversals.
@@ -446,6 +450,12 @@ async function scanWatchlist() {
 
     // Scan 6 symbols per cycle for stability
     for (let i = 0; i < 6; i++) {
+      // MAX 4 CONCURRENT TRADES TO PRESERVE LIQUIDITY
+      if (ghostState.activePositions.length >= 4) {
+        console.log(`[SCAN] Max concurrent trades (4) reached. Pausing scan.`);
+        break;
+      }
+
       const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
       ghostState.scanIndex++;
       
@@ -477,6 +487,13 @@ async function scanWatchlist() {
           const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100));
           
           if (isProfitableEnough) {
+            // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss to max 3% loss
+            const maxSlPrice = price * 0.97;
+            if (analysis.sl < maxSlPrice) {
+              console.log(`[RISK] Clamping SL for ${symbol} from ${analysis.sl} to ${maxSlPrice} (Max 3% loss)`);
+              analysis.sl = maxSlPrice;
+            }
+
             // Calculate available liquidity for this specific trade
             const totalEur = ghostState.liquidity.eur;
             // Be conservative: use up to 20% of available liquidity per trade to minimize risk
