@@ -5,7 +5,7 @@ export interface GhostState {
   isPaperMode: boolean;
   settings: {
     confidenceThreshold: number;
-    defaultTradeSize: number;
+    maxDailyDrawdown?: number;
   };
   thoughts: TradeSignal[];
   executionLogs: ExecutionLog[];
@@ -52,6 +52,7 @@ export interface TradeSignal {
   sl: number;
   confidence: number;
   potentialRoi: number;
+  tradePercentage?: number;
   analysis: string;
   decision?: string;
   timestamp: string;

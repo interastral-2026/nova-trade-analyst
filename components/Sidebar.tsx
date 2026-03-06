@@ -133,15 +133,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
             />
           </div>
-          <div>
-            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Default Trade Size (EUR)</p>
-            <input 
-              type="number" 
-              value={localSettings.defaultTradeSize || 50}
-              onChange={(e) => setLocalSettings({...localSettings, defaultTradeSize: parseFloat(e.target.value)})}
-              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
-            />
-          </div>
           <button 
             onClick={handleReconnect}
             className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[8px] font-black uppercase rounded-lg transition-all"

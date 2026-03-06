@@ -290,9 +290,10 @@ STRATEGY:
 2. If we hold a position, look for "Liquidity Targets" or "Reversal Signs" to issue a SELL signal.
 3. If we don't hold, look for "Discount Zones" or "FVG" for a BUY signal.
 4. ALWAYS prioritize liquidity. If the market looks stagnant, exit and wait for better volatility.
+5. If you issue a BUY signal, you MUST determine the 'tradePercentage' (1 to 100). This is the percentage of our available EUR liquidity to risk on this trade. High confidence = higher percentage (e.g., 20-30%), lower confidence = lower percentage (e.g., 5-10%).
 
 IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
-Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, analysis.`,
+Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, tradePercentage (1-100), analysis.`,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -303,6 +304,7 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
             entryPrice: { type: Type.NUMBER },
             confidence: { type: Type.NUMBER },
             potentialRoi: { type: Type.NUMBER },
+            tradePercentage: { type: Type.NUMBER, description: "Percentage of available capital to use (1-100)" },
             analysis: { type: Type.STRING }
           },
           required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'analysis']
@@ -343,7 +345,7 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
 function loadState() {
   const defaults = {
     isEngineActive: true, autoPilot: true, isPaperMode: false,
-    settings: { confidenceThreshold: 70, defaultTradeSize: 50.0, minRoi: 1.5, maxDailyDrawdown: -20.0 },
+    settings: { confidenceThreshold: 70, minRoi: 1.5, maxDailyDrawdown: -20.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, 
     dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
@@ -496,9 +498,15 @@ async function scanWatchlist() {
 
             // Calculate available liquidity for this specific trade
             const totalEur = ghostState.liquidity.eur;
-            // Be conservative: use up to 20% of available liquidity per trade to minimize risk
-            const maxPerTrade = totalEur * 0.20;
-            let tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
+            
+            // AI decides the percentage of available liquidity to use (fallback to 10% if not provided)
+            let aiPercentage = analysis.tradePercentage || 10;
+            // Clamp percentage between 1% and 50% to prevent reckless all-ins
+            aiPercentage = Math.max(1, Math.min(aiPercentage, 50));
+            
+            let tradeAmount = totalEur * (aiPercentage / 100);
+            // Ensure minimum trade size of 10 EUR
+            tradeAmount = Math.max(10, tradeAmount);
             
             if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 5) { 
               const qty = tradeAmount / (price || 1);
