@@ -283,7 +283,7 @@ STRATEGY:
 2. If we hold a position, look for "Liquidity Targets" or "Reversal Signs" to issue a SELL signal.
 3. If we don't hold, look for "Discount Zones" or "FVG" for a BUY signal.
 4. ALWAYS prioritize liquidity. If the market looks stagnant, exit and wait for better volatility.
-5. If you issue a BUY signal, you MUST determine the 'tradePercentage' (1 to 100). This is the percentage of our available EUR liquidity to risk on this trade. High confidence = higher percentage (e.g., 20-30%), lower confidence = lower percentage (e.g., 5-10%).
+5. If you issue a BUY signal, your confidence MUST be at least 85%. If you are not 85% sure, issue NEUTRAL. We are currently risking 50% of our capital per trade, so you must be extremely certain.
 
 IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
 Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, tradePercentage (1-100), analysis.`,
@@ -521,7 +521,10 @@ async function scanWatchlist() {
         const price = candles[candles.length - 1].close;
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
         
-        if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold && ghostState.autoPilot) {
+        // Enforce a minimum confidence of 85% for BUY signals
+        const requiredConfidence = Math.max(85, ghostState.settings.confidenceThreshold || 85);
+        
+        if (analysis && analysis.side === 'BUY' && analysis.confidence >= requiredConfidence && ghostState.autoPilot) {
           // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 0.3% net = 0.8%)
           const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100));
           
@@ -541,14 +544,12 @@ async function scanWatchlist() {
             // Calculate available liquidity for this specific trade
             const totalEur = ghostState.liquidity.eur;
             
-            // AI decides the percentage of available liquidity to use (fallback to 10% if not provided)
-            let aiPercentage = analysis.tradePercentage || 10;
-            // Clamp percentage between 1% and 50% to prevent reckless all-ins
-            aiPercentage = Math.max(1, Math.min(aiPercentage, 50));
+            // User requested to use 50% of available capital per trade
+            let tradeAmount = totalEur * 0.50;
             
-            let tradeAmount = totalEur * (aiPercentage / 100);
-            // Ensure minimum trade size of 10 EUR
+            // Ensure minimum trade size of 10 EUR, but don't exceed available EUR
             tradeAmount = Math.max(10, tradeAmount);
+            if (tradeAmount > totalEur) tradeAmount = totalEur;
             
             if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 5) { 
               const qty = tradeAmount / (price || 1);
