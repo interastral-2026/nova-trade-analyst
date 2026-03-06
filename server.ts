@@ -487,25 +487,28 @@ async function scanWatchlist() {
       ? availableEurPairs.map(p => p.split('-')[0]) 
       : WATCHLIST;
 
-    // Scan 6 symbols per cycle for stability
-    for (let i = 0; i < 6; i++) {
-      // MAX 4 CONCURRENT TRADES TO PRESERVE LIQUIDITY
-      if (ghostState.activePositions.length >= 4) {
-        console.log(`[SCAN] Max concurrent trades (4) reached. Pausing scan.`);
-        break;
-      }
+    // MAX 4 CONCURRENT TRADES TO PRESERVE LIQUIDITY
+    if (ghostState.activePositions.length >= 4) {
+      console.log(`[SCAN] Max concurrent trades (4) reached. Pausing scan.`);
+      return;
+    }
 
+    console.log(`[SCAN] Starting full market scan to find the best opportunity...`);
+    const potentialTrades = [];
+    
+    // Scan up to 10 symbols per cycle to avoid rate limits but still cover a good chunk
+    const scanLimit = Math.min(10, currentWatchlist.length);
+    
+    for (let i = 0; i < scanLimit; i++) {
       const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
       ghostState.scanIndex++;
       
       if (ghostState.activePositions.some(p => p.symbol === symbol)) {
-        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: Active position exists\n`);
         continue;
       }
 
       const productId = `${symbol}-EUR`;
       if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) {
-        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: ${productId} not in availableEurPairs. First 3: ${availableEurPairs.slice(0,3).join(',')}\n`);
         continue;
       }
 
@@ -514,7 +517,6 @@ async function scanWatchlist() {
         const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) {
-          fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Skipping ${symbol}: No candles from Cryptocompare\n`);
           continue;
         }
         
@@ -529,84 +531,102 @@ async function scanWatchlist() {
           const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100));
           
           if (isProfitableEnough) {
-            // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss
-            const maxSlPrice = price * 0.97; // Maximum 3% loss
-            const minSlPrice = price * 0.985; // Minimum 1.5% loss (give it room to breathe)
-            
-            if (analysis.sl < maxSlPrice) {
-              console.log(`[RISK] Clamping SL for ${symbol} from ${analysis.sl} to ${maxSlPrice} (Max 3% loss)`);
-              analysis.sl = maxSlPrice;
-            } else if (analysis.sl > minSlPrice) {
-              console.log(`[RISK] Widening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 1.5% loss to avoid noise)`);
-              analysis.sl = minSlPrice;
-            }
-
-            // Calculate available liquidity for this specific trade
-            const totalEur = ghostState.liquidity.eur;
-            
-            // User requested to use 50% of available capital per trade
-            let tradeAmount = totalEur * 0.50;
-            
-            // Ensure minimum trade size of 10 EUR, but don't exceed available EUR
-            tradeAmount = Math.max(10, tradeAmount);
-            if (tradeAmount > totalEur) tradeAmount = totalEur;
-            
-            if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 5) { 
-              const qty = tradeAmount / (price || 1);
-              const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
-              
-              if (tradeResult.success) {
-                analysis.decision = `EXECUTED: BUY_${symbol}_AT_${price}`;
-                ghostState.activePositions.push({
-                  symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
-                  tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
-                  pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
-                });
-                
-                ghostState.liquidity.eur -= tradeAmount;
-
-                ghostState.executionLogs.unshift({ 
-                  id: crypto.randomUUID(), 
-                  symbol, 
-                  action: 'BUY', 
-                  price, 
-                  status: 'SUCCESS', 
-                  details: `LIQUIDITY_BUY_CONF_${analysis.confidence}%`,
-                  timestamp: new Date().toISOString() 
-                });
-                ghostState.dailyStats.trades++;
-              } else {
-                analysis.decision = `FAILED: ${tradeResult.reason}`;
-              }
-            } else {
-              analysis.decision = `SKIPPED: INSUFFICIENT_LIQUIDITY (Need: ${tradeAmount.toFixed(2)}, Have: ${totalEur.toFixed(2)})`;
-            }
+            potentialTrades.push({ symbol, price, analysis });
+            console.log(`[SCAN] Found potential BUY for ${symbol} (Confidence: ${analysis.confidence}%, ROI: ${analysis.potentialRoi}%)`);
           } else {
             analysis.decision = `SKIPPED: ROI_TOO_LOW (Expected: ${analysis.potentialRoi}%, Min Required: ${((FEE_RATE * 100) + (MIN_NET_PROFIT * 100)).toFixed(2)}%)`;
           }
         }
+        
         if (analysis) {
-          const thoughtCount = ghostState.thoughts.length;
-          ghostState.currentStatus = `THOUGHT_OK_${symbol}_${analysis.side}_TC_${thoughtCount}`;
-          ghostState.lastThought = { symbol, side: analysis.side, time: new Date().toISOString() };
           ghostState.thoughts.unshift(analysis);
           if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
-          saveState();
-        } else {
-          ghostState.currentStatus = `THOUGHT_NULL_${symbol}`;
-          saveState();
         }
         
-        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Analyzed ${symbol}: ${analysis ? analysis.side : 'NULL'}\n`);
-        
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 1000)); // Rate limit protection
       } catch (e: any) {
-        fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Error scanning ${symbol}: ${e.message}\n`);
-        ghostState.currentStatus = `SCAN_ERR_${symbol}_${e.message.slice(0, 20)}`;
-        saveState();
-        await new Promise(r => setTimeout(r, 2000));
+        console.error(`[SCAN ERROR] ${symbol}: ${e.message}`);
+        await new Promise(r => setTimeout(r, 1000));
       }
     }
+    
+    if (potentialTrades.length > 0) {
+      // Sort by confidence first, then by potential ROI
+      potentialTrades.sort((a, b) => {
+        if (b.analysis.confidence !== a.analysis.confidence) {
+          return b.analysis.confidence - a.analysis.confidence;
+        }
+        return b.analysis.potentialRoi - a.analysis.potentialRoi;
+      });
+      
+      const bestTrade = potentialTrades[0];
+      console.log(`[SCAN] Selected BEST trade: ${bestTrade.symbol} (Conf: ${bestTrade.analysis.confidence}%, ROI: ${bestTrade.analysis.potentialRoi}%)`);
+      
+      const { symbol, price, analysis } = bestTrade;
+      
+      // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss
+      const maxSlPrice = price * 0.97; // Maximum 3% loss
+      const minSlPrice = price * 0.985; // Minimum 1.5% loss (give it room to breathe)
+      
+      if (analysis.sl < maxSlPrice) {
+        console.log(`[RISK] Clamping SL for ${symbol} from ${analysis.sl} to ${maxSlPrice} (Max 3% loss)`);
+        analysis.sl = maxSlPrice;
+      } else if (analysis.sl > minSlPrice) {
+        console.log(`[RISK] Widening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 1.5% loss to avoid noise)`);
+        analysis.sl = minSlPrice;
+      }
+
+      // Calculate available liquidity for this specific trade
+      const totalEur = ghostState.liquidity.eur;
+      
+      // User requested to use 50% of available capital per trade
+      let tradeAmount = totalEur * 0.50;
+      
+      // Ensure minimum trade size of 2 EUR (Coinbase minimum is usually around 1-2 EUR), but don't exceed available EUR
+      tradeAmount = Math.max(2, tradeAmount);
+      if (tradeAmount > totalEur) tradeAmount = totalEur;
+      
+      if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 2) { 
+        const qty = tradeAmount / (price || 1);
+        const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
+        
+        if (tradeResult.success) {
+          analysis.decision = `EXECUTED: BUY_${symbol}_AT_${price}`;
+          ghostState.activePositions.push({
+            symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
+            tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
+            pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
+          });
+          
+          ghostState.liquidity.eur -= tradeAmount;
+
+          ghostState.executionLogs.unshift({ 
+            id: crypto.randomUUID(), 
+            symbol, 
+            action: 'BUY', 
+            price, 
+            status: 'SUCCESS', 
+            details: `LIQUIDITY_BUY_CONF_${analysis.confidence}%`,
+            timestamp: new Date().toISOString() 
+          });
+          ghostState.dailyStats.trades++;
+        } else {
+          analysis.decision = `FAILED: ${tradeResult.reason}`;
+        }
+      } else {
+        analysis.decision = `SKIPPED: INSUFFICIENT_LIQUIDITY (Need: ${tradeAmount.toFixed(2)}, Have: ${totalEur.toFixed(2)})`;
+      }
+      
+      // Update the thought for the executed trade
+      const thoughtIndex = ghostState.thoughts.findIndex(t => t.symbol === symbol && t.side === 'BUY');
+      if (thoughtIndex !== -1) {
+        ghostState.thoughts[thoughtIndex].decision = analysis.decision;
+      }
+      saveState();
+    } else {
+      console.log(`[SCAN] No suitable trades found in this cycle.`);
+    }
+
   } finally {
     fs.appendFileSync('debug.log', `[${new Date().toISOString()}] Batch done. ScanIndex: ${ghostState.scanIndex}\n`);
     isScanning = false;
