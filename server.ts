@@ -263,7 +263,7 @@ CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION & AGGRESSIVE GROWTH:
 - RULE #1: PURE PROFIT ONLY. Calculate fees precisely. If the move isn't big enough to cover fees and yield at least 0.5% net profit, DO NOT BUY.
 - RULE #2: NO AMATEUR TRADES. Do not FOMO into massive green candles. Buy the dip (Discount Zones) or the breakout (MSS with volume).
 - RULE #3: AGGRESSIVE ON A+ SETUPS. If you see a perfect Liquidity Sweep followed by a strong Market Structure Shift (MSS) on a famous coin, ATTACK. Do not hesitate.
-- RULE #4: RUTHLESS EXITS. If price stalls, or shows weakness near resistance, SELL immediately. Lock in the profit. Do not let a winning trade turn into a loss.
+- RULE #4: RUTHLESS BUT PATIENT EXITS. If price stalls near resistance, SELL. BUT DO NOT PANIC SELL on tiny 0.2% - 1% drops. Give the trade room to breathe.
 - RULE #5: PROTECT THE ENTRY. If we are in a trade and in profit, your stop-loss logic must move to break-even + fees as soon as possible.
 
 INTERNAL REASONING PROTOCOL:
@@ -276,7 +276,7 @@ For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'an
 ${entryPrice ? `CURRENT POSITION: You bought ${symbol} at ${entryPrice}. Current price is ${price}. 
 Break-even price (including fees) is ${entryPrice * (1 + FEE_RATE)}.
 If current price > break-even, you MUST protect this profit. If momentum slows, issue SELL.
-If we are in loss, evaluate if the thesis is broken. If broken, cut losses immediately to free capital for better trades.` : ''}
+If we are in loss, DO NOT PANIC SELL on tiny drops (less than 1.5%). Only issue SELL if the thesis is completely broken and we are heading for a crash.` : ''}
 
 STRATEGY:
 1. Identify "Liquidity Sweeps" and "Market Structure Shifts" (MSS).
@@ -434,10 +434,11 @@ async function monitorPositionsAI() {
         
         if (analysis && analysis.side === 'SELL') {
           const isProfitable = price > (breakEvenPrice * (1 + MIN_NET_PROFIT));
+          const isSignificantLoss = price < (pos.entryPrice * 0.985); // Only cut loss if down more than 1.5%
           
           // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop (emergency exit)
-          // Be more aggressive: if confidence > 80, cut the loss to free liquidity.
-          if (isProfitable || analysis.confidence >= 80) {
+          // Do not panic sell on tiny noise. Only cut loss if thesis is truly broken (significant loss + high confidence).
+          if (isProfitable || (analysis.confidence >= 90 && isSignificantLoss)) {
             const tradePnl = (price - pos.entryPrice) * pos.quantity;
             const netPnl = tradePnl - (pos.amount * roundTripFee);
             console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
@@ -525,11 +526,16 @@ async function scanWatchlist() {
           const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100));
           
           if (isProfitableEnough) {
-            // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss to max 3% loss
-            const maxSlPrice = price * 0.97;
+            // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss
+            const maxSlPrice = price * 0.97; // Maximum 3% loss
+            const minSlPrice = price * 0.985; // Minimum 1.5% loss (give it room to breathe)
+            
             if (analysis.sl < maxSlPrice) {
               console.log(`[RISK] Clamping SL for ${symbol} from ${analysis.sl} to ${maxSlPrice} (Max 3% loss)`);
               analysis.sl = maxSlPrice;
+            } else if (analysis.sl > minSlPrice) {
+              console.log(`[RISK] Widening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 1.5% loss to avoid noise)`);
+              analysis.sl = minSlPrice;
             }
 
             // Calculate available liquidity for this specific trade
