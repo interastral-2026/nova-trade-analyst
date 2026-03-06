@@ -4636,13 +4636,45 @@
       "pnlPercent": 0.6507592190889309,
       "isPaper": false,
       "timestamp": "2026-03-06T17:34:16.823Z"
+    },
+    {
+      "symbol": "1INCH",
+      "entryPrice": 0,
+      "currentPrice": 0,
+      "amount": 0,
+      "quantity": 37.98,
+      "tp": 0,
+      "sl": 0,
+      "confidence": 100,
+      "potentialRoi": 0,
+      "pnl": 0,
+      "pnlPercent": 0,
+      "isPaper": false,
+      "timestamp": "2026-03-06T19:16:41.230Z"
+    },
+    {
+      "symbol": "ICP",
+      "entryPrice": 0,
+      "currentPrice": 0,
+      "amount": 0,
+      "quantity": 0.9311,
+      "tp": 0,
+      "sl": 0,
+      "confidence": 100,
+      "potentialRoi": 0,
+      "pnl": 0,
+      "pnlPercent": 0,
+      "isPaper": false,
+      "timestamp": "2026-03-06T19:17:01.259Z"
     }
   ],
   "liquidity": {
-    "eur": 6.21322094989395,
+    "eur": 1.11471269414395,
     "usdc": 8.743078e-7
   },
   "actualBalances": {
+    "1INCH": 37.98,
+    "ICP": 0.9311,
     "SHIB": 2152274
   },
   "dailyStats": {
@@ -4653,8 +4685,8 @@
     "lastResetDate": "2026-03-06"
   },
   "totalProfit": -0.4202613503134996,
-  "currentStatus": "SCAN_BATCH_DONE_48654",
-  "scanIndex": 48654,
+  "currentStatus": "IDLE_SCAN_COMPLETE",
+  "scanIndex": 49444,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

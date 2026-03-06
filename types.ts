@@ -79,6 +79,10 @@ export interface ActivePosition {
   pnlPercent: number;
   isPaper: boolean;
   timestamp: string;
+  lastAnalysis?: string;
+  lastDecision?: string;
+  lastConfidence?: number;
+  lastChecked?: string;
 }
 
 export interface ExecutionLog {

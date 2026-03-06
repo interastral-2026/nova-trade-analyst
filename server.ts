@@ -432,6 +432,14 @@ async function monitorPositionsAI() {
 
         const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
         
+        if (analysis) {
+          pos.lastAnalysis = analysis.analysis;
+          pos.lastDecision = analysis.side;
+          pos.lastConfidence = analysis.confidence;
+          pos.lastChecked = new Date().toISOString();
+          saveState();
+        }
+        
         if (analysis && analysis.side === 'SELL') {
           const isProfitable = price > (breakEvenPrice * (1 + MIN_NET_PROFIT));
           const isSignificantLoss = price < (pos.entryPrice * 0.985); // Only cut loss if down more than 1.5%

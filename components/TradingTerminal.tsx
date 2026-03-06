@@ -165,6 +165,39 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                             </div>
                          </div>
 
+                         {pos.lastAnalysis && (
+                           <div className="mb-10 p-6 bg-indigo-900/10 border border-indigo-500/20 rounded-3xl relative">
+                             <div className="absolute -top-3 left-6 bg-[#0a0a14] px-3 py-1 border border-indigo-500/20 rounded-full flex items-center space-x-2">
+                               <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                               <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest">AI Live Analysis</span>
+                             </div>
+                             
+                             <div className="flex justify-between items-center mb-4 mt-2">
+                               <div className="flex items-center space-x-3">
+                                 <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                                   pos.lastDecision === 'BUY' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                                   pos.lastDecision === 'SELL' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                                   'bg-slate-800 text-slate-400 border border-slate-700'
+                                 }`}>
+                                   {pos.lastDecision === 'NEUTRAL' ? 'HOLDING / WAIT' : pos.lastDecision}
+                                 </span>
+                                 {pos.lastConfidence && (
+                                   <span className="text-[10px] font-black text-slate-500">{pos.lastConfidence}% CONFIDENCE</span>
+                                 )}
+                               </div>
+                               {pos.lastChecked && (
+                                 <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                                   {new Date(pos.lastChecked).toLocaleTimeString()}
+                                 </span>
+                               )}
+                             </div>
+                             
+                             <p className="text-[12px] text-indigo-200/70 leading-relaxed font-medium italic whitespace-pre-wrap" dir="auto">
+                               "{pos.lastAnalysis}"
+                             </p>
+                           </div>
+                         )}
+
                          <div className="h-2 bg-white/5 rounded-full overflow-hidden shadow-inner">
                             <div className={`h-full ${isProfit ? 'bg-emerald-500 shadow-[0_0_15px_#10b981]' : 'bg-rose-500 shadow-[0_0_15px_#f43f5e]'}`} style={{ width: '100%' }}></div>
                          </div>
