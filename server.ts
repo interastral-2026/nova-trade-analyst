@@ -113,7 +113,7 @@ async function syncCoinbaseBalance() {
       const currency = acc.currency;
       const amount = parseFloat(acc.available_balance?.value || 0);
       if (currency === 'EUR') ghostState.liquidity.eur = amount;
-      else if (currency === 'USDC' || currency === 'USD') ghostState.liquidity.usdc = amount;
+      else if (currency === 'USDC' || currency === 'USD' || currency === 'EURC') ghostState.liquidity.usdc = amount;
       else if (amount > 0.00000001) newBalances[currency] = amount;
     });
     ghostState.actualBalances = newBalances;
@@ -169,9 +169,14 @@ async function executeTrade(symbol, side, amount, quantity) {
       }
     }
 
+    // Truncate instead of round to avoid INSUFFICIENT_FUND
+    const quoteSizeStr = (Math.floor(Number(amount) * 100) / 100).toFixed(2);
+    // Convert to string and truncate to 8 decimal places max without rounding up
+    const baseSizeStr = finalQty.toString().match(/^-?\d+(?:\.\d{0,8})?/)[0];
+
     const orderConfig = side === 'BUY' 
-      ? { market_market_ioc: { quote_size: Number(amount).toFixed(2).toString() } }
-      : { market_market_ioc: { base_size: finalQty.toFixed(6).toString() } };
+      ? { market_market_ioc: { quote_size: quoteSizeStr } }
+      : { market_market_ioc: { base_size: baseSizeStr } };
     
     const payload = {
       client_order_id: crypto.randomUUID(),
@@ -410,6 +415,10 @@ async function monitorPositionsAI() {
                 details: `AI_EXIT_CONF_${analysis.confidence}%`,
                 timestamp: new Date().toISOString()
               });
+              ghostState.activePositions.splice(i, 1);
+              saveState();
+            } else if (tradeResult.reason && (tradeResult.reason.includes('INSUFFICIENT_FUND') || tradeResult.reason.includes('NO_BALANCE_ON_EXCHANGE'))) {
+              console.log(`[AI-MONITOR] Removing ${pos.symbol} due to missing balance on exchange.`);
               ghostState.activePositions.splice(i, 1);
               saveState();
             }
@@ -678,6 +687,9 @@ async function monitor() {
               timestamp: new Date().toISOString() 
             });
             if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
+            ghostState.activePositions.splice(i, 1);
+          } else if (tradeResult.reason && (tradeResult.reason.includes('INSUFFICIENT_FUND') || tradeResult.reason.includes('NO_BALANCE_ON_EXCHANGE'))) {
+            console.log(`[MONITOR] Removing ${pos.symbol} due to missing balance on exchange.`);
             ghostState.activePositions.splice(i, 1);
           }
         }
