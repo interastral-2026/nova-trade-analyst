@@ -37,8 +37,8 @@ const CB_API_SECRET = process.env.CB_API_SECRET
 
 const WATCHLIST = ['SOL', 'AVAX', 'LINK', 'NEAR', 'MATIC', 'XRP', 'DOGE', 'SHIB', 'PEPE', 'WIF', 'BONK', 'FLOKI', 'RNDR', 'INJ', 'FET', 'TIA'];
 const STATE_FILE = './ghost_state.json';
-const FEE_RATE = 0.005; // 0.5% round-trip fee (0.25% buy + 0.25% sell, assuming advanced trade tier)
-const MIN_NET_PROFIT = 0.003; // 0.3% minimum net profit after fees (Total required move = 0.8%)
+const FEE_RATE = 0.012; // 1.2% round-trip fee (0.6% buy + 0.6% sell, assuming advanced trade tier taker fees)
+const MIN_NET_PROFIT = 0.005; // 0.5% minimum net profit after fees (Total required move = 1.7%)
 
 let availableEurPairs: string[] = [];
 
@@ -252,38 +252,31 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
       model: 'gemini-3-flash-preview', 
       contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, A HIGH-FREQUENCY AI SCALPER.
-Use Smart Money Concepts (SMC), FVG, and MSS. 
-Goal: Capture quick 1.5% - 5% ROI scalps. 
-Speed and liquidity are everything. Do not hold for long-term. DO NOT WASTE TIME.
-Factor in ${FEE_RATE * 100}% round-trip fees. A trade is only valid if potential net profit > 0.5%.
+        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE, AGGRESSIVE BUT HIGHLY CALCULATED AI SCALPER.
+You hunt for A+ setups with high volatility and clear momentum. You DO NOT miss golden opportunities, but you NEVER enter a trade that doesn't guarantee pure profit after fees.
 
-CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION:
-- RULE #1: NEVER LOSE MONEY. If a setup is not A+, DO NOT BUY.
-- RULE #2: DO NOT FOMO. Never buy after a massive green candle. Wait for a pullback to a Discount Zone.
-- RULE #3: DO NOT CATCH FALLING KNIVES. If price is dropping sharply, wait for a clear MSS (Market Structure Shift) and FVG tap before buying.
-- RULE #4: BE EXTREMELY CONSERVATIVE. ACT LIKE A SNIPER.
-- RULE #5: DO NOT OVERTRADE. If the market is choppy, ranging, or unclear, YOU MUST CHOOSE 'NEUTRAL'.
-- RULE #6: DO NOT LET CAPITAL SLEEP. If a position is stagnant or moving against us, cut it (SELL) and free up liquidity for better opportunities.
-- RULE #7: ACTIVE POSITIONS: If we are in profit, be ruthless about taking it before the market reverses. If we are stuck in a slow market, exit to find a faster one.
+Your goal is to maximize pure profit (soode khales) and NEVER lose money unnecessarily.
+Fee Calculation is MANDATORY: You must account for a ${FEE_RATE * 100}% round-trip fee. 
+Break-even = Entry Price * (1 + ${FEE_RATE}). A trade is ONLY valid if the target price is significantly higher than the break-even price.
+
+CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION & AGGRESSIVE GROWTH:
+- RULE #1: PURE PROFIT ONLY. Calculate fees precisely. If the move isn't big enough to cover fees and yield at least 0.5% net profit, DO NOT BUY.
+- RULE #2: NO AMATEUR TRADES. Do not FOMO into massive green candles. Buy the dip (Discount Zones) or the breakout (MSS with volume).
+- RULE #3: AGGRESSIVE ON A+ SETUPS. If you see a perfect Liquidity Sweep followed by a strong Market Structure Shift (MSS) on a famous coin, ATTACK. Do not hesitate.
+- RULE #4: RUTHLESS EXITS. If price stalls, or shows weakness near resistance, SELL immediately. Lock in the profit. Do not let a winning trade turn into a loss.
+- RULE #5: PROTECT THE ENTRY. If we are in a trade and in profit, your stop-loss logic must move to break-even + fees as soon as possible.
 
 INTERNAL REASONING PROTOCOL:
 For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'analysis' field.
 1. Market Context: Trend (Bullish/Bearish/Sideways) and Momentum.
 2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks.
-3. Decision Logic: Why you are choosing BUY, SELL, or WAIT.
-4. Risk Assessment: Is this a FOMO buy? Is this a falling knife?
-5. If WAIT: Explicitly state what is missing (e.g., "Waiting for MSS confirmation", "No clear FVG", "Spread too high").
-
-Only issue BUY if you see a clear institutional "Discount Zone" or "Liquidity Sweep" with strong upward momentum.
-Issue SELL early if you see "Distribution" or "SFP" (Swing Failure Pattern) to lock in profit before reversals.
-BE SMART: Avoid "Bull Traps" and "Bear Traps" set by exchanges.
-NEVER RECOMMEND A TRADE THAT DOES NOT COVER FEES.
+3. Fee Check: Does the expected move cover the ${FEE_RATE * 100}% round-trip fee and leave pure profit?
+4. Decision Logic: Why you are choosing BUY, SELL, or WAIT.
 
 ${entryPrice ? `CURRENT POSITION: You bought ${symbol} at ${entryPrice}. Current price is ${price}. 
 Break-even price (including fees) is ${entryPrice * (1 + FEE_RATE)}.
-If we are above break-even, be very sensitive to any sign of reversal and issue SELL to secure gains. 
-If we are in loss, look for MSS to decide if we should hold or cut loss early (only if trend is clearly broken).` : ''}
+If current price > break-even, you MUST protect this profit. If momentum slows, issue SELL.
+If we are in loss, evaluate if the thesis is broken. If broken, cut losses immediately to free capital for better trades.` : ''}
 
 STRATEGY:
 1. Identify "Liquidity Sweeps" and "Market Structure Shifts" (MSS).
@@ -394,29 +387,72 @@ async function monitorPositionsAI() {
         if (candles.length === 0) continue;
         
         const price = candles[candles.length - 1].close;
+        
+        // --- HARDCODE TRAILING STOP & PROFIT PROTECTION ---
+        const roundTripFee = FEE_RATE;
+        const breakEvenPrice = pos.entryPrice * (1 + roundTripFee);
+        const currentProfitPercent = (price - breakEvenPrice) / breakEvenPrice;
+        
+        // If we are up more than 1.5% pure profit, move SL to guarantee 0.5% pure profit
+        if (currentProfitPercent > 0.015) {
+          const newSl = breakEvenPrice * 1.005;
+          if (pos.sl < newSl) {
+            pos.sl = newSl;
+            console.log(`[AI-MONITOR] Trailing Stop moved up for ${pos.symbol} to ${newSl.toFixed(4)} to lock in pure profit.`);
+          }
+        }
+        
+        // If price drops below our trailing stop, execute emergency sell
+        if (price <= pos.sl && pos.sl > pos.entryPrice) {
+            const tradePnl = (price - pos.entryPrice) * pos.quantity;
+            const netPnl = tradePnl - (pos.amount * roundTripFee);
+            console.log(`[AI-MONITOR] Trailing Stop Hit for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR.`);
+            
+            const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
+            if (tradeResult.success) {
+              ghostState.dailyStats.profit += netPnl;
+              ghostState.totalProfit += netPnl;
+              ghostState.liquidity.eur += (pos.amount + netPnl);
+              ghostState.executionLogs.unshift({
+                id: crypto.randomUUID(),
+                symbol: pos.symbol,
+                action: 'SELL',
+                price,
+                pnl: netPnl,
+                status: 'SUCCESS',
+                details: `TRAILING_STOP_PROFIT`,
+                timestamp: new Date().toISOString()
+              });
+              ghostState.activePositions.splice(i, 1);
+              saveState();
+            }
+            continue; // Skip AI analysis if we just sold
+        }
+        // --------------------------------------------------
+
         const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
         
         if (analysis && analysis.side === 'SELL') {
-          const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
           const isProfitable = price > (breakEvenPrice * (1 + MIN_NET_PROFIT));
           
           // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop (emergency exit)
           // Be more aggressive: if confidence > 80, cut the loss to free liquidity.
           if (isProfitable || analysis.confidence >= 80) {
             const tradePnl = (price - pos.entryPrice) * pos.quantity;
-            const netPnl = tradePnl - (pos.amount * FEE_RATE);
+            const netPnl = tradePnl - (pos.amount * roundTripFee);
             console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
             
             const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
             if (tradeResult.success) {
-              ghostState.dailyStats.profit += tradePnl;
-              ghostState.totalProfit += tradePnl;
+              ghostState.dailyStats.profit += netPnl;
+              ghostState.totalProfit += netPnl;
+              ghostState.liquidity.eur += (pos.amount + netPnl);
               ghostState.executionLogs.unshift({
                 id: crypto.randomUUID(),
                 symbol: pos.symbol,
                 action: 'SELL',
                 price,
-                pnl: tradePnl,
+                pnl: netPnl,
                 status: 'SUCCESS',
                 details: `AI_EXIT_CONF_${analysis.confidence}%`,
                 timestamp: new Date().toISOString()
@@ -620,6 +656,7 @@ async function monitor() {
           if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
           ghostState.dailyStats.profit += pos.pnl; 
           ghostState.totalProfit += pos.pnl;
+          ghostState.liquidity.eur += (pos.amount + pos.pnl);
           ghostState.activePositions.splice(i, 1);
         }
       }
@@ -675,19 +712,23 @@ async function monitor() {
         pos.currentPrice = curPrice;
         const pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
         pos.pnlPercent = pnlPercent;
-        pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
+        
+        // Calculate net PNL (subtracting round-trip fees)
+        const grossPnl = (curPrice - pos.entryPrice) * pos.quantity;
+        const feeAmount = pos.amount * FEE_RATE;
+        pos.pnl = grossPnl - feeAmount;
         
         const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
         const netPnlPercent = pnlPercent - (FEE_RATE * 100);
 
         // Dynamic Trailing Stop & Break Even
-        if (netPnlPercent > 0.2 && pos.sl < breakEvenPrice) {
-          pos.sl = breakEvenPrice * (1 + MIN_NET_PROFIT);
+        if (netPnlPercent > (MIN_NET_PROFIT * 100) && pos.sl < breakEvenPrice) {
+          pos.sl = breakEvenPrice * 1.001; // Lock in 0.1% pure profit
           console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
         }
 
-        if (netPnlPercent > 0.8) {
-          const newSl = curPrice * 0.997; // 0.3% trailing stop once in 0.8% net profit
+        if (netPnlPercent > 1.5) {
+          const newSl = curPrice * 0.995; // 0.5% trailing stop once in 1.5% net profit
           if (newSl > pos.sl) {
             pos.sl = newSl;
             console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
@@ -702,7 +743,8 @@ async function monitor() {
         // TIME-BASED EXIT: If trade is open for > 3 hours and not in significant profit, close it to free liquidity
         const tradeAgeMs = new Date().getTime() - new Date(pos.timestamp).getTime();
         const tradeAgeHours = tradeAgeMs / (1000 * 60 * 60);
-        const isStagnant = tradeAgeHours > 3 && netPnlPercent < 0.5;
+        // Only exit stagnant trades if we are at least at break-even (don't force a loss just for time)
+        const isStagnant = tradeAgeHours > 3 && netPnlPercent < 0.5 && curPrice > breakEvenPrice;
 
         // Trigger SELL if:
         // 1. Reached TP
@@ -718,6 +760,7 @@ async function monitor() {
           if (tradeResult.success) {
             ghostState.dailyStats.profit += pos.pnl;
             ghostState.totalProfit += pos.pnl;
+            ghostState.liquidity.eur += (pos.amount + pos.pnl);
             ghostState.executionLogs.unshift({ 
               id: crypto.randomUUID(), 
               symbol: pos.symbol, 

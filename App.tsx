@@ -8,7 +8,7 @@ import Sidebar from './components/Sidebar.tsx';
 import SignalList from './components/SignalList.tsx';
 import TradingTerminal from './components/TradingTerminal.tsx';
 
-const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR'];
+const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'XRP-EUR', 'DOGE-EUR', 'LINK-EUR', 'ADA-EUR'];
 
 const App: React.FC = () => {
   const [selectedAsset, setSelectedAsset] = useState<string>('BTC-EUR');
