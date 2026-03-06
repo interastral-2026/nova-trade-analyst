@@ -10,10 +10,14 @@ interface SidebarProps {
   onToggleAuto: () => void;
   engineActive: boolean;
   onToggleEngine: () => void;
+  isPaperMode: boolean;
+  onTogglePaper: () => void;
   viewMode: string;
   onViewChange: (mode: any) => void;
   bridgeUrl: string;
   onUpdateBridge: (url: string) => void;
+  settings?: any;
+  onUpdateSettings?: (settings: any) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
@@ -24,14 +28,29 @@ const Sidebar: React.FC<SidebarProps> = ({
   onToggleAuto, 
   engineActive,
   onToggleEngine,
+  isPaperMode,
+  onTogglePaper,
   bridgeUrl,
-  onUpdateBridge
+  onUpdateBridge,
+  settings,
+  onUpdateSettings
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [urlInput, setUrlInput] = useState(bridgeUrl || "");
+  const [localSettings, setLocalSettings] = useState(settings || {});
+
+  // Update local settings when props change
+  React.useEffect(() => {
+    if (settings) {
+      setLocalSettings(settings);
+    }
+  }, [settings]);
 
   const handleReconnect = () => {
     onUpdateBridge(urlInput);
+    if (onUpdateSettings) {
+      onUpdateSettings(localSettings);
+    }
     setShowSettings(false);
   };
 
@@ -78,6 +97,18 @@ const Sidebar: React.FC<SidebarProps> = ({
               PREDATOR_80%_AUTO: {autoPilot ? 'ENGAGED' : 'OFF'}
             </span>
           </button>
+
+          <button 
+            onClick={onTogglePaper}
+            className={`w-full py-3 rounded-xl border transition-all flex items-center justify-center space-x-3 ${
+              isPaperMode ? 'border-amber-500/40 bg-amber-500/5 text-amber-400 shadow-[0_0_10px_#f59e0b33]' : 'border-white/5 bg-white/[0.02] text-slate-500'
+            }`}
+          >
+            <i className={`fas ${isPaperMode ? 'fa-ghost' : 'fa-coins'} text-[10px]`}></i>
+            <span className="text-[9px] font-black uppercase tracking-widest">
+              MODE: {isPaperMode ? 'PAPER (SIMULATION)' : 'REAL MONEY'}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -92,13 +123,31 @@ const Sidebar: React.FC<SidebarProps> = ({
               placeholder="https://..."
               className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
             />
-            <button 
-              onClick={handleReconnect}
-              className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[8px] font-black uppercase rounded-lg transition-all"
-            >
-              Sync Neural Bridge
-            </button>
           </div>
+          <div>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Max Daily Drawdown (EUR)</p>
+            <input 
+              type="number" 
+              value={localSettings.maxDailyDrawdown || -20}
+              onChange={(e) => setLocalSettings({...localSettings, maxDailyDrawdown: parseFloat(e.target.value)})}
+              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
+            />
+          </div>
+          <div>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Default Trade Size (EUR)</p>
+            <input 
+              type="number" 
+              value={localSettings.defaultTradeSize || 50}
+              onChange={(e) => setLocalSettings({...localSettings, defaultTradeSize: parseFloat(e.target.value)})}
+              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
+            />
+          </div>
+          <button 
+            onClick={handleReconnect}
+            className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[8px] font-black uppercase rounded-lg transition-all"
+          >
+            Save Settings
+          </button>
         </div>
       )}
 

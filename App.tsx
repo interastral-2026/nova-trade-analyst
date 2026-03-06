@@ -17,6 +17,8 @@ const App: React.FC = () => {
   const [balances, setBalances] = useState<AccountBalance[]>([]);
   const [isEngineActive, setIsEngineActive] = useState<boolean>(true);
   const [autoTradeEnabled, setAutoTradeEnabled] = useState<boolean>(true);
+  const [isPaperMode, setIsPaperMode] = useState<boolean>(false);
+  const [settings, setSettings] = useState<any>({});
   const [liveActivity, setLiveActivity] = useState<string>("INITIALIZING...");
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [bridgeUrl, setBridgeUrl] = useState<string>(getApiBase());
@@ -35,6 +37,8 @@ const App: React.FC = () => {
       setThoughtHistory(data.thoughts || []);
       setIsEngineActive(!!data.isEngineActive);
       setAutoTradeEnabled(!!data.autoPilot);
+      setIsPaperMode(!!data.isPaperMode);
+      setSettings(data.settings || {});
       setLiveActivity(data.currentStatus || "IDLE");
       
       setBalances([
@@ -80,6 +84,29 @@ const App: React.FC = () => {
     } catch (e) {}
   };
 
+  const togglePaper = async () => {
+    const newState = !isPaperMode;
+    setIsPaperMode(newState);
+    try {
+      await fetch(`${getApiBase()}/api/ghost/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paper: newState })
+      });
+    } catch (e) {}
+  };
+
+  const updateSettings = async (newSettings: any) => {
+    setSettings({ ...settings, ...newSettings });
+    try {
+      await fetch(`${getApiBase()}/api/ghost/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings: newSettings })
+      });
+    } catch (e) {}
+  };
+
   useEffect(() => {
     syncWithServer();
     const interval = setInterval(syncWithServer, 4000);
@@ -115,10 +142,14 @@ const App: React.FC = () => {
           onToggleAuto={toggleAuto} 
           engineActive={isEngineActive} 
           onToggleEngine={toggleEngine} 
+          isPaperMode={isPaperMode}
+          onTogglePaper={togglePaper}
           viewMode={'terminal'} 
           onViewChange={() => {}} 
           bridgeUrl={bridgeUrl} 
-          onUpdateBridge={handleUpdateBridge} 
+          onUpdateBridge={handleUpdateBridge}
+          settings={settings}
+          onUpdateSettings={updateSettings}
         />
         
         <main className="flex-1 flex bg-[#020204]">

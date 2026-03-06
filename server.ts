@@ -343,7 +343,7 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
 function loadState() {
   const defaults = {
     isEngineActive: true, autoPilot: true, isPaperMode: false,
-    settings: { confidenceThreshold: 70, defaultTradeSize: 50.0, minRoi: 1.5 },
+    settings: { confidenceThreshold: 70, defaultTradeSize: 50.0, minRoi: 1.5, maxDailyDrawdown: -20.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, 
     dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
@@ -582,6 +582,15 @@ async function monitor() {
       ghostState.dailyStats.profit = 0; ghostState.dailyStats.trades = 0; ghostState.dailyStats.lastResetDate = today;
     }
     
+    // KILL SWITCH: Daily Drawdown Limit
+    const maxDrawdown = ghostState.settings.maxDailyDrawdown || -20.0;
+    if (ghostState.dailyStats.profit <= maxDrawdown && ghostState.isEngineActive) {
+      console.log(`[KILL SWITCH] Daily drawdown limit reached (${ghostState.dailyStats.profit.toFixed(2)} <= ${maxDrawdown}). Pausing engine.`);
+      ghostState.isEngineActive = false;
+      ghostState.currentStatus = "PAUSED_MAX_DRAWDOWN";
+      saveState();
+    }
+
     // Reconcile active positions with actual Coinbase balances (ONLY IN REAL MODE)
     if (!ghostState.isPaperMode) {
       for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
@@ -682,12 +691,20 @@ async function monitor() {
         const earlyExitPrice = pos.entryPrice + (tpDistance * 0.8);
         const canExitSafely = curPrice > (breakEvenPrice * (1 + MIN_NET_PROFIT));
 
+        // TIME-BASED EXIT: If trade is open for > 3 hours and not in significant profit, close it to free liquidity
+        const tradeAgeMs = new Date().getTime() - new Date(pos.timestamp).getTime();
+        const tradeAgeHours = tradeAgeMs / (1000 * 60 * 60);
+        const isStagnant = tradeAgeHours > 3 && netPnlPercent < 0.5;
+
         // Trigger SELL if:
         // 1. Reached TP
         // 2. Reached SL (Hard stop loss, must execute even if in loss)
         // 3. Reached 80% of TP and is safe to exit
-        if (curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.4 && canExitSafely)) {
-          const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_80%_TP');
+        // 4. Trade is stagnant (time-based exit)
+        if (curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.4 && canExitSafely) || isStagnant) {
+          let reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_80%_TP');
+          if (isStagnant && curPrice < pos.tp && curPrice > pos.sl) reason = 'TIME_STAGNATION_EXIT';
+          
           const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
           
           if (tradeResult.success) {
@@ -738,6 +755,14 @@ async function startServer() {
     if (req.body.paper !== undefined) ghostState.isPaperMode = !!req.body.paper;
     saveState();
     res.json({ success: true });
+  });
+
+  app.post('/api/ghost/settings', (req, res) => {
+    if (req.body.settings) {
+      ghostState.settings = { ...ghostState.settings, ...req.body.settings };
+      saveState();
+    }
+    res.json({ success: true, settings: ghostState.settings });
   });
 
   // Vite middleware for development
