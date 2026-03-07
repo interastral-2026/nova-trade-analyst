@@ -184,6 +184,9 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                                  {pos.lastConfidence && (
                                    <span className="text-[10px] font-black text-slate-500">{pos.lastConfidence}% CONFIDENCE</span>
                                  )}
+                                 {pos.estimatedTime && (
+                                   <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">ETA: {pos.estimatedTime}</span>
+                                 )}
                                </div>
                                {pos.lastChecked && (
                                  <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">

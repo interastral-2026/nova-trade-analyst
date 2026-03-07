@@ -284,10 +284,11 @@ STRATEGY:
 2. If we hold a position, look for "Liquidity Targets" or "Reversal Signs" to issue a SELL signal.
 3. If we don't hold, look for "Discount Zones" or "FVG" for a BUY signal.
 4. ALWAYS prioritize liquidity. If the market looks stagnant, exit and wait for better volatility.
-5. If you issue a BUY signal, your confidence MUST be at least 85%. If you are not 85% sure, issue NEUTRAL. We are currently risking 50% of our capital per trade, so you must be extremely certain.
+5. If you issue a BUY signal, your confidence MUST be at least 85%. If you are not 85% sure, issue NEUTRAL.
+6. Estimate the time it will take to reach the Take Profit (TP) target (e.g., "30m", "2h", "6h", "1d").
 
 IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
-Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, tradePercentage (1-100), analysis.`,
+Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, tradePercentage (1-100), estimatedTime, analysis.`,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -299,9 +300,10 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
             confidence: { type: Type.NUMBER },
             potentialRoi: { type: Type.NUMBER },
             tradePercentage: { type: Type.NUMBER, description: "Percentage of available capital to use (1-100)" },
+            estimatedTime: { type: Type.STRING, description: "Estimated time to reach target (e.g. 2h, 4h)" },
             analysis: { type: Type.STRING }
           },
-          required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'analysis']
+          required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'analysis', 'estimatedTime']
         },
         temperature: 0.1
       }
@@ -444,6 +446,7 @@ async function monitorPositionsAI() {
           pos.lastDecision = analysis.side;
           pos.lastConfidence = analysis.confidence;
           pos.lastChecked = new Date().toISOString();
+          pos.estimatedTime = analysis.estimatedTime;
           saveState();
         }
         
@@ -503,16 +506,16 @@ async function scanWatchlist() {
       : WATCHLIST;
 
     // Check for minimum liquidity before scanning
-    if (ghostState.liquidity.eur < 5) {
+    if (ghostState.liquidity.eur < 10) {
       console.log(`[SCAN] Low liquidity (${ghostState.liquidity.eur.toFixed(2)} EUR). Pausing scan.`);
       return;
     }
 
-    console.log(`[SCAN] Starting full market scan to find the best opportunity...`);
+    console.log(`[SCAN] Starting full market scan to find the absolute BEST opportunity...`);
     const potentialTrades = [];
     
-    // Scan up to 10 symbols per cycle to avoid rate limits but still cover a good chunk
-    const scanLimit = Math.min(10, currentWatchlist.length);
+    // Scan up to 20 symbols per cycle to find the best one among many
+    const scanLimit = Math.min(20, currentWatchlist.length);
     
     for (let i = 0; i < scanLimit; i++) {
       const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
@@ -594,21 +597,20 @@ async function scanWatchlist() {
       // Calculate available liquidity for this specific trade
       const totalEur = ghostState.liquidity.eur;
       
-      // Dynamic sizing: Use 25% of available capital per trade to allow up to ~4-8 concurrent trades
-      // but ensure we don't use more than 1/3 of total starting capital if we have many positions
-      let tradeAmount = totalEur * 0.25;
+      // Dynamic sizing: Use 20% of available capital per trade to allow up to 5 concurrent trades
+      let tradeAmount = totalEur * 0.20;
       
-      // Ensure minimum trade size of 5 EUR for better fee efficiency, but don't exceed available EUR
-      tradeAmount = Math.max(5, tradeAmount);
+      // Ensure minimum trade size of 10 EUR as requested for better selectivity and fee efficiency
+      tradeAmount = Math.max(10, tradeAmount);
       if (tradeAmount > totalEur) tradeAmount = totalEur;
       
-      // If we have less than 5 EUR, don't trade
-      if (tradeAmount < 5) {
-        console.log(`[SCAN] Insufficient liquidity for trade: ${tradeAmount.toFixed(2)} EUR`);
+      // If we have less than 10 EUR, don't trade
+      if (tradeAmount < 10) {
+        console.log(`[SCAN] Insufficient liquidity for trade: ${tradeAmount.toFixed(2)} EUR (Min 10 required)`);
         return;
       }
       
-      if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 2) { 
+      if (totalEur >= (tradeAmount * 1.01) && tradeAmount >= 10) { 
         const qty = tradeAmount / (price || 1);
         const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
         
@@ -617,7 +619,8 @@ async function scanWatchlist() {
           ghostState.activePositions.push({
             symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
             tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
-            pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
+            pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString(),
+            estimatedTime: analysis.estimatedTime
           });
           
           ghostState.liquidity.eur -= tradeAmount;

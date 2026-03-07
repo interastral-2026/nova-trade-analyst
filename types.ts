@@ -55,6 +55,7 @@ export interface TradeSignal {
   tradePercentage?: number;
   analysis: string;
   decision?: string;
+  estimatedTime?: string;
   timestamp: string;
   isPaper?: boolean;
 }
@@ -83,6 +84,7 @@ export interface ActivePosition {
   lastDecision?: string;
   lastConfidence?: number;
   lastChecked?: string;
+  estimatedTime?: string;
 }
 
 export interface ExecutionLog {
