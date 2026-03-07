@@ -208,7 +208,7 @@ async function executeTrade(symbol, side, amount, quantity) {
     return { success: true };
   } catch (e: any) {
     const errorData = e.response?.data;
-    const errorMsg = errorData?.message || errorData?.error || e.message || "UNKNOWN_API_ERROR";
+    let errorMsg = errorData?.message || errorData?.error || e.message || "UNKNOWN_API_ERROR";
     
     console.error("[REAL TRADE API ERROR]", errorData || e.message);
     
@@ -239,24 +239,21 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
     };
   }
 
-  const maxRetries = 2;
-  let lastError = null;
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // Pass the last 60 candles (15 hours of 15m data) to give AI a real trend view
+  const history = (candles || []).slice(-60).map(c => ({ h: c.high, l: c.low, c: c.close }));
+  
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('AI_TIMEOUT')), 45000);
+  });
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
-    const history = (candles || []).slice(-40).map(c => ({ h: c.high, l: c.low, c: c.close }));
-    
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('AI_TIMEOUT')), 90000);
-    });
-
-    try {
-      ghostState.currentStatus = `AI_REQ_${symbol}_ATTEMPT_${attempt + 1}`;
-      const aiPromise = ai.models.generateContent({
-        model: 'gemini-flash-latest', 
-        contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_15M_CANDLES: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
-        config: {
-          systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE, HIGHLY CONSERVATIVE AI SCALPER.
+  try {
+    ghostState.currentStatus = `AI_REQ_${symbol}`;
+    const aiPromise = ai.models.generateContent({
+      model: 'gemini-3-flash-preview', 
+      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_15M_CANDLES: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
+      config: {
+        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE, HIGHLY CONSERVATIVE AI SCALPER.
 You hunt for A+ setups with high volatility and clear momentum. You DO NOT trade in choppy, sideways, or unpredictable markets.
 
 Your goal is to maximize pure profit (soode khales) and NEVER lose money unnecessarily.
@@ -271,11 +268,11 @@ CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION:
 - RULE #5: PROTECT THE ENTRY. If we are in a trade and in profit, your stop-loss logic must move to break-even + fees as soon as possible.
 
 INTERNAL REASONING PROTOCOL:
-For every analysis, you MUST provide:
-1. Liquidity Analysis: Focus on sweeps, FVG gaps, and Order Blocks.
-2. Market Monitoring: Current trend, momentum, and potential reversal signs.
-3. Estimated Time: How long until target is reached.
-4. Overall Analysis: Step-by-step summary of decision logic.
+For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'analysis' field.
+1. Market Context: Trend (Bullish/Bearish/Sideways) and Momentum.
+2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks.
+3. Fee Check: Does the expected move cover the ${FEE_RATE * 100}% round-trip fee and leave pure profit?
+4. Decision Logic: Why you are choosing BUY, SELL, or WAIT.
 
 ${entryPrice ? `CURRENT POSITION: You bought ${symbol} at ${entryPrice}. Current price is ${price}. 
 Break-even price (including fees) is ${entryPrice * (1 + FEE_RATE)}.
@@ -290,69 +287,55 @@ STRATEGY:
 5. If you issue a BUY signal, your confidence MUST be at least 85%. If you are not 85% sure, issue NEUTRAL.
 6. Estimate the time it will take to reach the Take Profit (TP) target (e.g., "30m", "2h", "6h", "1d").
 
-IMPORTANT: You MUST write the "analysis", "liquidityAnalysis", and "marketMonitoring" fields in PERSIAN (Farsi).
-Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, tradePercentage (1-100), estimatedTime, liquidityAnalysis, marketMonitoring, analysis.`,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              side: { type: Type.STRING, enum: ['BUY', 'SELL', 'NEUTRAL'] },
-              tp: { type: Type.NUMBER },
-              sl: { type: Type.NUMBER },
-              entryPrice: { type: Type.NUMBER },
-              confidence: { type: Type.NUMBER },
-              potentialRoi: { type: Type.NUMBER },
-              tradePercentage: { type: Type.NUMBER, description: "Percentage of available capital to use (1-100)" },
-              estimatedTime: { type: Type.STRING, description: "Estimated time to reach target (e.g. 2h, 4h)" },
-              liquidityAnalysis: { type: Type.STRING },
-              marketMonitoring: { type: Type.STRING },
-              analysis: { type: Type.STRING }
-            },
-            required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'analysis', 'estimatedTime', 'liquidityAnalysis', 'marketMonitoring']
+IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
+Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, tradePercentage (1-100), estimatedTime, analysis.`,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            side: { type: Type.STRING, enum: ['BUY', 'SELL', 'NEUTRAL'] },
+            tp: { type: Type.NUMBER },
+            sl: { type: Type.NUMBER },
+            entryPrice: { type: Type.NUMBER },
+            confidence: { type: Type.NUMBER },
+            potentialRoi: { type: Type.NUMBER },
+            tradePercentage: { type: Type.NUMBER, description: "Percentage of available capital to use (1-100)" },
+            estimatedTime: { type: Type.STRING, description: "Estimated time to reach target (e.g. 2h, 4h)" },
+            analysis: { type: Type.STRING }
           },
-          temperature: 0.1
-        }
-      });
+          required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'analysis', 'estimatedTime']
+        },
+        temperature: 0.1
+      }
+    });
 
-      const response: any = await Promise.race([aiPromise, timeoutPromise]);
-      const rawText = response.text?.trim() || '{}';
-      ghostState.currentStatus = `AI_RESP_${symbol}_LEN_${rawText.length}`;
-      const result = JSON.parse(rawText);
-      if (!result.estimatedTime) result.estimatedTime = "--";
-      if (result.confidence !== undefined && result.confidence > 0 && result.confidence <= 1) {
-        result.confidence = Math.round(result.confidence * 100);
-      }
-      return { ...result, id: crypto.randomUUID(), symbol, timestamp: new Date().toISOString() };
-    } catch (e: any) { 
-      lastError = e.message;
-      console.warn(`[AI RETRY] ${symbol} Attempt ${attempt + 1} failed: ${lastError}`);
-      if (attempt < maxRetries) {
-        await new Promise(r => setTimeout(r, 2000)); // Wait 2s before retry
-        continue;
-      }
+    const response: any = await Promise.race([aiPromise, timeoutPromise]);
+    const rawText = response.text?.trim() || '{}';
+    ghostState.currentStatus = `AI_RESP_${symbol}_LEN_${rawText.length}`;
+    const result = JSON.parse(rawText);
+    if (result.confidence !== undefined && result.confidence > 0 && result.confidence <= 1) {
+      result.confidence = Math.round(result.confidence * 100);
     }
+    return { ...result, id: crypto.randomUUID(), symbol, timestamp: new Date().toISOString() };
+  } catch (e: any) { 
+    let errorMsg = e.message;
+    if (errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('API key not valid')) {
+      errorMsg = "کلید API نامعتبر است. لطفاً کلید معتبر وارد کنید.";
+    } else if (errorMsg.includes('AI_TIMEOUT')) {
+      errorMsg = "پاسخ هوش مصنوعی بیش از حد طول کشید (تایم‌اوت).";
+    }
+    
+    console.error(`[AI ERROR] ${symbol}:`, errorMsg);
+    return {
+      side: "NEUTRAL",
+      analysis: `خطا در تحلیل هوش مصنوعی برای ${symbol}: ${errorMsg}`,
+      symbol,
+      timestamp: new Date().toISOString(),
+      confidence: 0,
+      potentialRoi: 0,
+      id: crypto.randomUUID()
+    }; 
   }
-
-  // Final failure after retries
-  let errorMsg = lastError;
-  if (errorMsg.includes('AI_TIMEOUT')) {
-    errorMsg = "پاسخ هوش مصنوعی بیش از حد طول کشید (تایم‌اوت).";
-  } else if (errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('API key not valid')) {
-    errorMsg = "کلید API نامعتبر است.";
-  }
-  
-  return {
-    side: "NEUTRAL",
-    analysis: `خطا در تحلیل هوش مصنوعی برای ${symbol}: ${errorMsg}`,
-    liquidityAnalysis: "خطا در دریافت داده‌های نقدینگی",
-    marketMonitoring: "خطا در نظارت بر بازار",
-    symbol,
-    timestamp: new Date().toISOString(),
-    confidence: 0,
-    potentialRoi: 0,
-    estimatedTime: "--",
-    id: crypto.randomUUID()
-  }; 
 }
 
 function loadState() {
@@ -374,13 +357,11 @@ function loadState() {
         settings: { ...defaults.settings, ...(parsed.settings || {}) }
       };
     }
-  } catch (e) {
-    console.warn("[STATE] Failed to load state, using defaults.");
-  }
+  } catch (e) {}
   return defaults;
 }
 
-const ghostState = loadState();
+let ghostState = loadState();
 
 // --- MIGRATION: CLEAN SYMBOLS (e.g., SOL-EUR -> SOL) ---
 if (ghostState.activePositions && ghostState.activePositions.length > 0) {
@@ -401,30 +382,36 @@ async function monitorPositionsAI() {
   console.log(`[AI-MONITOR] Checking ${ghostState.activePositions.length} active positions...`);
   
   try {
-    // Process all positions in parallel with a small stagger
-    await Promise.all(ghostState.activePositions.map(async (pos, index) => {
+    for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
+      const pos = ghostState.activePositions[i];
       try {
-        await new Promise(r => setTimeout(r, index * 1500)); // Stagger AI requests
         const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=100&aggregate=15`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
-        if (candles.length === 0) return;
+        if (candles.length === 0) continue;
         
         const price = candles[candles.length - 1].close;
+        
+        // --- HARDCODE TRAILING STOP & PROFIT PROTECTION ---
         const roundTripFee = FEE_RATE;
         const breakEvenPrice = pos.entryPrice * (1 + roundTripFee);
-        const currentProfitPercent = (price - breakEvenPrice) / (breakEvenPrice || 1);
+        const currentProfitPercent = (price - breakEvenPrice) / breakEvenPrice;
         
+        // Dynamic Trailing Stop
         if (currentProfitPercent > 0.03) {
+          // If up 3%, lock in 2%
           const newSl = breakEvenPrice * 1.02;
           if (pos.sl < newSl) pos.sl = newSl;
         } else if (currentProfitPercent > 0.02) {
+          // If up 2%, lock in 1%
           const newSl = breakEvenPrice * 1.01;
           if (pos.sl < newSl) pos.sl = newSl;
         } else if (currentProfitPercent > 0.01) {
+          // If up 1%, lock in break-even + tiny profit
           const newSl = breakEvenPrice * 1.002;
           if (pos.sl < newSl) pos.sl = newSl;
         }
         
+        // If price drops below our trailing stop, execute emergency sell
         if (price <= pos.sl && pos.sl > pos.entryPrice) {
             const tradePnl = (price - pos.entryPrice) * pos.quantity;
             const netPnl = tradePnl - (pos.amount * roundTripFee);
@@ -445,19 +432,17 @@ async function monitorPositionsAI() {
                 details: `TRAILING_STOP_PROFIT`,
                 timestamp: new Date().toISOString()
               });
-              const idx = ghostState.activePositions.findIndex(p => p.symbol === pos.symbol);
-              if (idx !== -1) ghostState.activePositions.splice(idx, 1);
+              ghostState.activePositions.splice(i, 1);
               saveState();
             }
-            return;
+            continue; // Skip AI analysis if we just sold
         }
+        // --------------------------------------------------
 
         const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
         
         if (analysis) {
           pos.lastAnalysis = analysis.analysis;
-          pos.liquidityAnalysis = analysis.liquidityAnalysis;
-          pos.marketMonitoring = analysis.marketMonitoring;
           pos.lastDecision = analysis.side;
           pos.lastConfidence = analysis.confidence;
           pos.lastChecked = new Date().toISOString();
@@ -466,9 +451,11 @@ async function monitorPositionsAI() {
         }
         
         if (analysis && analysis.side === 'SELL') {
-          const isProfitable = price > (breakEvenPrice * (1 + 0.01)); 
-          const isSignificantLoss = price < (pos.entryPrice * 0.97); 
+          const isProfitable = price > (breakEvenPrice * (1 + 0.01)); // Require 1% pure profit before allowing AI to sell for profit
+          const isSignificantLoss = price < (pos.entryPrice * 0.97); // Only cut loss if down more than 3%
           
+          // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop (emergency exit)
+          // Do not panic sell on tiny noise. Only cut loss if thesis is truly broken (significant loss + high confidence).
           if (isProfitable || (analysis.confidence >= 90 && isSignificantLoss)) {
             const tradePnl = (price - pos.entryPrice) * pos.quantity;
             const netPnl = tradePnl - (pos.amount * roundTripFee);
@@ -489,21 +476,20 @@ async function monitorPositionsAI() {
                 details: `AI_EXIT_CONF_${analysis.confidence}%`,
                 timestamp: new Date().toISOString()
               });
-              const idx = ghostState.activePositions.findIndex(p => p.symbol === pos.symbol);
-              if (idx !== -1) ghostState.activePositions.splice(idx, 1);
+              ghostState.activePositions.splice(i, 1);
               saveState();
             } else if (tradeResult.reason && (tradeResult.reason.includes('INSUFFICIENT_FUND') || tradeResult.reason.includes('NO_BALANCE_ON_EXCHANGE'))) {
               console.log(`[AI-MONITOR] Removing ${pos.symbol} due to missing balance on exchange.`);
-              const idx = ghostState.activePositions.findIndex(p => p.symbol === pos.symbol);
-              if (idx !== -1) ghostState.activePositions.splice(idx, 1);
+              ghostState.activePositions.splice(i, 1);
               saveState();
             }
           }
         }
-      } catch (_e: any) {
-        console.error(`[AI-MONITOR] Error checking ${pos.symbol}:`, _e.message);
+      } catch (e: any) {
+        console.error(`[AI-MONITOR] Error checking ${pos.symbol}:`, e.message);
       }
-    }));
+      await new Promise(r => setTimeout(r, 1000));
+    }
   } finally {
     isAiMonitoring = false;
   }
@@ -528,9 +514,8 @@ async function scanWatchlist() {
     console.log(`[SCAN] Starting full market scan to find the absolute BEST opportunity...`);
     const potentialTrades = [];
     
-    // Scan up to 10 symbols per cycle to avoid API congestion
-    const scanLimit = Math.min(10, currentWatchlist.length);
-    const scanBatch = [];
+    // Scan up to 20 symbols per cycle to find the best one among many
+    const scanLimit = Math.min(20, currentWatchlist.length);
     
     for (let i = 0; i < scanLimit; i++) {
       const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
@@ -544,48 +529,42 @@ async function scanWatchlist() {
       if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) {
         continue;
       }
-      scanBatch.push(symbol);
-    }
 
-    // Process batch in parallel with a 1s delay between requests
-    const results = await Promise.all(scanBatch.map(async (symbol, index) => {
+      ghostState.currentStatus = `ANALYZING_${symbol}_SMC`;
       try {
-        await new Promise(r => setTimeout(r, index * 1000)); // Stagger requests
-        ghostState.currentStatus = `ANALYZING_${symbol}_SMC`;
         const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=100&aggregate=15`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
-        if (candles.length === 0) return null;
+        if (candles.length === 0) {
+          continue;
+        }
         
         const price = candles[candles.length - 1].close;
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
-        return { symbol, price, analysis };
-      } catch {
-        return null;
-      }
-    }));
-
-    for (const res of results) {
-      if (!res) continue;
-      const { symbol, price, analysis } = res;
-      
-      // Enforce a minimum confidence of 85% for BUY signals
-      const requiredConfidence = Math.max(85, ghostState.settings.confidenceThreshold || 85);
-      
-      if (analysis && analysis.side === 'BUY' && analysis.confidence >= requiredConfidence && ghostState.autoPilot) {
-        // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 1.0% net = 1.5%)
-        const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + 1.0);
         
-        if (isProfitableEnough) {
-          potentialTrades.push({ symbol, price, analysis });
-          console.log(`[SCAN] Found potential BUY for ${symbol} (Confidence: ${analysis.confidence}%, ROI: ${analysis.potentialRoi}%)`);
-        } else {
-          analysis.decision = `SKIPPED: ROI_TOO_LOW (Expected: ${analysis.potentialRoi}%, Min Required: ${((FEE_RATE * 100) + 1.0).toFixed(2)}%)`;
+        // Enforce a minimum confidence of 85% for BUY signals
+        const requiredConfidence = Math.max(85, ghostState.settings.confidenceThreshold || 85);
+        
+        if (analysis && analysis.side === 'BUY' && analysis.confidence >= requiredConfidence && ghostState.autoPilot) {
+          // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 1.0% net = 1.5%)
+          const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + 1.0);
+          
+          if (isProfitableEnough) {
+            potentialTrades.push({ symbol, price, analysis });
+            console.log(`[SCAN] Found potential BUY for ${symbol} (Confidence: ${analysis.confidence}%, ROI: ${analysis.potentialRoi}%)`);
+          } else {
+            analysis.decision = `SKIPPED: ROI_TOO_LOW (Expected: ${analysis.potentialRoi}%, Min Required: ${((FEE_RATE * 100) + 1.0).toFixed(2)}%)`;
+          }
         }
-      }
-      
-      if (analysis) {
-        ghostState.thoughts.unshift(analysis);
-        if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
+        
+        if (analysis) {
+          ghostState.thoughts.unshift(analysis);
+          if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
+        }
+        
+        await new Promise(r => setTimeout(r, 1000)); // Rate limit protection
+      } catch (e: any) {
+        console.error(`[SCAN ERROR] ${symbol}: ${e.message}`);
+        await new Promise(r => setTimeout(r, 1000));
       }
     }
     
@@ -641,10 +620,7 @@ async function scanWatchlist() {
             symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
             tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
             pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString(),
-            estimatedTime: analysis.estimatedTime,
-            lastAnalysis: analysis.analysis,
-            liquidityAnalysis: analysis.liquidityAnalysis,
-            marketMonitoring: analysis.marketMonitoring
+            estimatedTime: analysis.estimatedTime
           });
           
           ghostState.liquidity.eur -= tradeAmount;
@@ -855,22 +831,14 @@ async function monitor() {
           }
         }
       }
-    } catch (e) {
-      console.error("[MONITOR ERROR]", e);
-    }
+    } catch (e) {}
   } finally {
     isMonitoring = false;
     saveState();
   }
 }
 
-function saveState() { 
-  try { 
-    fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); 
-  } catch (e) {
-    console.error("[STATE SAVE ERROR]", e);
-  } 
-}
+function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {} }
 
 // --- SERVER SETUP ---
 
@@ -925,8 +893,8 @@ async function startServer() {
     scanWatchlist();
     
     setInterval(monitor, 3000);           // Hard TP/SL check (3s)
-    setInterval(monitorPositionsAI, 45000); // AI Position Analysis (45s)
-    setInterval(scanWatchlist, 60000);      // New Signal Scanning (60s)
+    setInterval(monitorPositionsAI, 15000); // AI Position Analysis (15s)
+    setInterval(scanWatchlist, 15000);      // New Signal Scanning (15s)
     setInterval(listAvailableProducts, 300000); // Refresh products every 5m
   });
 }

@@ -58,7 +58,7 @@ export const fetchProductStats = async (product_id: string): Promise<AssetInfo> 
       volume: raw.VOLUME24HOURTO.toString(),
       marketCap: raw.MKTCAP ? raw.MKTCAP.toString() : 'N/A'
     };
-  } catch (_error) {
+  } catch (error) {
     return {
       id: product_id,
       name: product_id.split('-')[0],

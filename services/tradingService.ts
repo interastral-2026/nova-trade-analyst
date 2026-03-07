@@ -29,7 +29,7 @@ export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
       { currency: 'EUR', available: Number(data.liquidity?.eur) || 0, total: Number(data.liquidity?.eur) || 0 },
       { currency: 'USDC', available: Number(data.liquidity?.usdc) || 0, total: Number(data.liquidity?.usdc) || 0 }
     ];
-  } catch (_error) {
+  } catch (error) {
     return [];
   }
 };

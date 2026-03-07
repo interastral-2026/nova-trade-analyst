@@ -47,64 +47,64 @@ const SignalList: React.FC<SignalListProps> = ({ signals = [] }) => {
             return (
               <div 
                 key={signal.id} 
-                className={`group border rounded-2xl p-4 transition-all relative overflow-hidden bg-gradient-to-br from-white/[0.04] to-transparent ${
+                className={`group border-2 rounded-[1.8rem] p-5 transition-all relative overflow-hidden bg-gradient-to-br from-white/[0.04] to-transparent ${
                   isBuy ? 'border-emerald-500/20' : 'border-rose-500/20'
-                } hover:border-indigo-500/50 shadow-xl`}
+                } hover:border-indigo-500/50 shadow-2xl`}
               >
-                <div className="absolute top-0 left-0 h-0.5 bg-white/5 w-full">
+                <div className="absolute top-0 left-0 h-1 bg-white/5 w-full">
                   <div 
-                    className={`h-full transition-all duration-1000 ${isBuy ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-rose-500'}`}
+                    className={`h-full transition-all duration-1000 ${isBuy ? 'bg-emerald-500 shadow-[0_0_12px_#10b981]' : 'bg-rose-500'}`}
                     style={{ width: `${confidence}%` }}
                   ></div>
                 </div>
 
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h4 className="text-sm font-black text-white uppercase tracking-tighter">{signal.symbol}</h4>
-                    <div className="flex items-center space-x-2 mt-0.5">
-                       <span className={`text-[7px] font-black px-1 py-0.5 rounded shadow-sm ${isBuy ? 'bg-emerald-500 text-black' : 'bg-rose-500 text-white'}`}>
+                    <h4 className="text-base font-black text-white uppercase tracking-tighter">{signal.symbol}</h4>
+                    <div className="flex items-center space-x-2 mt-1">
+                       <span className={`text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm ${isBuy ? 'bg-emerald-500 text-black' : 'bg-rose-500 text-white'}`}>
                         {signal.side}
                        </span>
-                       <span className="text-[7px] text-slate-500 font-bold uppercase">{confidence}% CONF</span>
+                       <span className="text-[8px] text-slate-500 font-bold uppercase">{confidence}% CONF</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className={`text-xs font-black tracking-tighter ${isBuy ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    <span className={`text-sm font-black tracking-tighter ${isBuy ? 'text-emerald-400' : 'text-rose-400'}`}>
                       {roi > 0 ? `+${roi.toFixed(1)}% ROI` : 'SCALP'}
                     </span>
                     {signal.estimatedTime && (
-                      <div className="text-[7px] font-black text-indigo-400 uppercase tracking-widest mt-0.5">
+                      <div className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mt-1">
                         ETA: {signal.estimatedTime}
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-1.5 mb-3">
-                  <div className="bg-black/60 border border-white/5 p-1.5 rounded-lg text-center shadow-inner">
-                    <p className="text-[6px] text-slate-600 uppercase font-black mb-0.5">Entry</p>
-                    <p className="text-[9px] font-black text-white truncate">€{formatPrice(signal.entryPrice)}</p>
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="bg-black/60 border border-white/5 p-2.5 rounded-xl text-center shadow-inner">
+                    <p className="text-[7px] text-slate-600 uppercase font-black mb-1">Entry</p>
+                    <p className="text-[10px] font-black text-white truncate">€{formatPrice(signal.entryPrice)}</p>
                   </div>
-                  <div className="bg-emerald-500/[0.03] border border-emerald-500/10 p-1.5 rounded-lg text-center shadow-inner">
-                    <p className="text-[6px] text-emerald-500 uppercase font-black mb-0.5">Target</p>
-                    <p className="text-[9px] font-black text-emerald-400 truncate">€{formatPrice(signal.tp)}</p>
+                  <div className="bg-emerald-500/[0.03] border border-emerald-500/10 p-2.5 rounded-xl text-center shadow-inner">
+                    <p className="text-[7px] text-emerald-500 uppercase font-black mb-1">Target</p>
+                    <p className="text-[10px] font-black text-emerald-400 truncate">€{formatPrice(signal.tp)}</p>
                   </div>
-                  <div className="bg-rose-500/[0.03] border border-rose-500/10 p-1.5 rounded-lg text-center shadow-inner">
-                    <p className="text-[6px] text-rose-500 uppercase font-black mb-0.5">Stop</p>
-                    <p className="text-[9px] font-black text-rose-400 truncate">€{formatPrice(signal.sl)}</p>
+                  <div className="bg-rose-500/[0.03] border border-rose-500/10 p-2.5 rounded-xl text-center shadow-inner">
+                    <p className="text-[7px] text-rose-500 uppercase font-black mb-1">Stop</p>
+                    <p className="text-[10px] font-black text-rose-400 truncate">€{formatPrice(signal.sl)}</p>
                   </div>
                 </div>
 
-                <p className="text-[9px] text-slate-400 leading-tight italic font-medium border-t border-white/5 pt-2 whitespace-pre-wrap">
+                <p className="text-[10px] text-slate-400 leading-tight italic font-medium border-t border-white/5 pt-3 whitespace-pre-wrap">
                   "{signal.analysis || "No analysis details provided."}"
                 </p>
                 
-                <div className="mt-3 flex justify-between items-center text-[6px] font-black text-slate-600 uppercase tracking-widest">
+                <div className="mt-4 flex justify-between items-center text-[7px] font-black text-slate-600 uppercase tracking-widest">
                   <span className="flex items-center space-x-1">
                     <i className="fas fa-check-double text-indigo-500"></i>
                     <span>SMC_VALIDATED</span>
                   </span>
-                  <span className="opacity-40">{signal.timestamp ? new Date(signal.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "--:--"}</span>
+                  <span className="opacity-40">{signal.timestamp ? new Date(signal.timestamp).toLocaleTimeString() : "--:--"}</span>
                 </div>
               </div>
             );
