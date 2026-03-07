@@ -37,8 +37,8 @@ const CB_API_SECRET = process.env.CB_API_SECRET
 
 const WATCHLIST = ['SOL', 'AVAX', 'LINK', 'NEAR', 'MATIC', 'XRP', 'DOGE', 'SHIB', 'PEPE', 'WIF', 'BONK', 'FLOKI', 'RNDR', 'INJ', 'FET', 'TIA'];
 const STATE_FILE = './ghost_state.json';
-const FEE_RATE = 0.012; // 1.2% round-trip fee (0.6% buy + 0.6% sell, assuming advanced trade tier taker fees)
-const MIN_NET_PROFIT = 0.005; // 0.5% minimum net profit after fees (Total required move = 1.7%)
+const FEE_RATE = 0.008; // 0.8% round-trip fee (0.4% buy + 0.4% sell)
+const MIN_NET_PROFIT = 0.01; // 1.0% minimum net profit after fees (Total required move = 1.8%)
 
 let availableEurPairs: string[] = [];
 
@@ -321,51 +321,35 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
     const history = (candles || []).slice(-40).map(c => ({ h: c.high, l: c.low, c: c.close }));
     
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('AI_TIMEOUT')), 90000);
+      setTimeout(() => reject(new Error('AI_TIMEOUT')), 120000);
     });
 
     try {
       ghostState.currentStatus = `AI_REQ_${symbol}_ATTEMPT_${attempt + 1}`;
       const aiPromise = ai.models.generateContent({
         model: 'gemini-3-flash-preview', 
-        contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_15M_CANDLES: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
+        contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. ${entryPrice ? `ENTRY: ${entryPrice}.` : ''} HISTORY_15M_CANDLES: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
         config: {
-          systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE, HIGHLY CONSERVATIVE AI SCALPER.
-You hunt for A+ setups with high volatility and clear momentum. You DO NOT trade in choppy, sideways, or unpredictable markets.
+          systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE AI SCALPER.
+Your goal is to maximize NET PROFIT (soode khales) and NEVER lose money unnecessarily.
+Fee Calculation is MANDATORY: Account for a ${FEE_RATE * 100}% round-trip fee. 
+Break-even = Entry Price * (1 + ${FEE_RATE}).
 
-Your goal is to maximize pure profit (soode khales) and NEVER lose money unnecessarily.
-Fee Calculation is MANDATORY: You must account for a ${FEE_RATE * 100}% round-trip fee. 
-Break-even = Entry Price * (1 + ${FEE_RATE}). A trade is ONLY valid if the target price is significantly higher than the break-even price.
-
-CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION:
-- RULE #1: PURE PROFIT ONLY. Calculate fees precisely. If the move isn't big enough to cover fees and yield at least 1.0% net profit, DO NOT BUY.
-- RULE #2: NO AMATEUR TRADES. Do not FOMO into massive green candles. Buy the dip (Discount Zones) or the breakout (MSS with volume).
-- RULE #3: AVOID CHOPPY MARKETS. If the last 15 hours of data show no clear trend, stay NEUTRAL.
-- RULE #4: RUTHLESS EXITS. If price stalls near resistance or shows weakness, SELL. BUT DO NOT PANIC SELL on tiny 0.2% - 1% drops if the trend is still intact.
-- RULE #5: PROTECT THE ENTRY. If we are in a trade and in profit, your stop-loss logic must move to break-even + fees as soon as possible.
-
-INTERNAL REASONING PROTOCOL:
-For every analysis, you MUST provide:
-1. Liquidity Analysis: Focus on sweeps, FVG gaps, and Order Blocks.
-2. Market Monitoring: Current trend, momentum, and potential reversal signs.
-3. Estimated Time: How long until target is reached.
-4. Overall Analysis: Step-by-step summary of decision logic.
-
-${entryPrice ? `CURRENT POSITION: You bought ${symbol} at ${entryPrice}. Current price is ${price}. 
-Break-even price (including fees) is ${entryPrice * (1 + FEE_RATE)}.
-If current price > break-even, you MUST protect this profit. If momentum slows, issue SELL.
-If we are in loss, DO NOT PANIC SELL on tiny drops (less than 1.5%). Only issue SELL if the thesis is completely broken and we are heading for a crash.` : ''}
+CRITICAL DIRECTIVES:
+- RULE #1: PURE PROFIT. If the move isn't big enough to cover fees and yield at least 1.0% net profit, DO NOT BUY.
+- RULE #2: NO FOMO. Buy the dip (Discount Zones) or breakouts with volume.
+- RULE #3: RUTHLESS EXITS. If price stalls or shows weakness, SELL. 
+- RULE #4: PROTECT ENTRY. If in profit, move SL to break-even + fees ASAP.
+- RULE #5: DO NOT PANIC SELL on tiny drops (< 1.5%) if the trend is intact.
 
 STRATEGY:
-1. Identify "Liquidity Sweeps" and "Market Structure Shifts" (MSS).
-2. If we hold a position, look for "Liquidity Targets" or "Reversal Signs" to issue a SELL signal.
-3. If we don't hold, look for "Discount Zones" or "FVG" for a BUY signal.
-4. ALWAYS prioritize liquidity. If the market looks stagnant, exit and wait for better volatility.
-5. If you issue a BUY signal, your confidence MUST be at least 85%. If you are not 85% sure, issue NEUTRAL.
-6. Estimate the time it will take to reach the Take Profit (TP) target (e.g., "30m", "2h", "6h", "1d").
+1. Identify Liquidity Sweeps and MSS.
+2. If holding, look for reversal signs to SELL.
+3. If not holding, look for Discount Zones to BUY.
+4. Confidence MUST be >= 85% for BUY.
 
-IMPORTANT: You MUST write the "analysis", "liquidityAnalysis", and "marketMonitoring" fields in PERSIAN (Farsi).
-Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, tradePercentage (1-100), estimatedTime, liquidityAnalysis, marketMonitoring, analysis.`,
+IMPORTANT: Write "analysis", "liquidityAnalysis", and "marketMonitoring" in PERSIAN (Farsi).
+Return valid JSON: {side: "BUY"|"SELL"|"NEUTRAL", tp, sl, entryPrice, confidence, potentialRoi, tradePercentage, estimatedTime, liquidityAnalysis, marketMonitoring, analysis}`,
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -554,10 +538,10 @@ async function monitorPositionsAI() {
         }
         
         if (analysis && analysis.side === 'SELL') {
-          const isProfitable = price > (breakEvenPrice * (1 + 0.01)); 
-          const isSignificantLoss = price < (pos.entryPrice * 0.97); 
+          const isProfitable = price > (breakEvenPrice * (1 + 0.005)); // 0.5% net profit buffer
+          const isSignificantLoss = price < (pos.entryPrice * 0.96); // 4% loss (thesis broken)
           
-          if (isProfitable || (analysis.confidence >= 90 && isSignificantLoss)) {
+          if (isProfitable || (analysis.confidence >= 95 && isSignificantLoss)) {
             const tradePnl = (price - pos.entryPrice) * pos.quantity;
             const netPnl = tradePnl - (pos.amount * roundTripFee);
             console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
@@ -616,6 +600,11 @@ async function scanWatchlist() {
     }
     saveState();
 
+    if (ghostState.activePositions.length >= 5) {
+      console.log(`[SCAN] Max positions reached (5). Skipping scan.`);
+      return;
+    }
+
     console.log(`[SCAN] Starting full market scan to find the absolute BEST opportunity...`);
     if (ghostState.scanIndex % 10 === 0) {
       addLog('SCAN', 'SYSTEM', "شروع اسکن کامل بازار برای شکار فرصت‌های طلایی...", 'INFO');
@@ -666,8 +655,8 @@ async function scanWatchlist() {
       const requiredConfidence = Math.max(85, ghostState.settings.confidenceThreshold || 85);
       
       if (analysis && analysis.side === 'BUY' && analysis.confidence >= requiredConfidence && ghostState.autoPilot) {
-        // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 1.0% net = 1.5%)
-        const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + 1.0);
+        // Ensure potential ROI covers fees + minimum net profit (0.8% fee + 1.2% net = 2.0%)
+        const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + 1.2);
         
         if (isProfitableEnough) {
           potentialTrades.push({ symbol, price, analysis });
@@ -698,14 +687,14 @@ async function scanWatchlist() {
       const { symbol, price, analysis } = bestTrade;
       
       // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss
-      const maxSlPrice = price * 0.95; // Maximum 5% loss (wider for 15m timeframe)
-      const minSlPrice = price * 0.98; // Minimum 2% loss (give it room to breathe)
+      const maxSlPrice = price * 0.94; // Maximum 6% loss
+      const minSlPrice = price * 0.99; // Minimum 1% loss
       
       if (analysis.sl < maxSlPrice) {
-        console.log(`[RISK] Clamping SL for ${symbol} from ${analysis.sl} to ${maxSlPrice} (Max 5% loss)`);
+        console.log(`[RISK] Clamping SL for ${symbol} from ${analysis.sl} to ${maxSlPrice} (Max 6% loss)`);
         analysis.sl = maxSlPrice;
       } else if (analysis.sl > minSlPrice) {
-        console.log(`[RISK] Widening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 2% loss to avoid noise)`);
+        console.log(`[RISK] Tightening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 1% loss)`);
         analysis.sl = minSlPrice;
       }
 
@@ -946,8 +935,8 @@ async function monitor() {
         const netPnlPercent = pnlPercent - (FEE_RATE * 100);
 
         // Dynamic Trailing Stop & Break Even
-        if (netPnlPercent > (MIN_NET_PROFIT * 100) && pos.sl < breakEvenPrice) {
-          pos.sl = breakEvenPrice * 1.001; // Lock in 0.1% pure profit
+        if (netPnlPercent > 0.5 && pos.sl < breakEvenPrice) {
+          pos.sl = breakEvenPrice * 1.001; // Lock in 0.1% pure profit as soon as we hit 0.5% net
           console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
         }
 

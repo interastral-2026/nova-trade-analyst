@@ -712,6 +712,36 @@
   ],
   "executionLogs": [
     {
+      "id": "a04a9455-d4b7-4b7d-a83f-7bac1988b034",
+      "symbol": "DOT",
+      "action": "SELL",
+      "price": 1.263,
+      "pnl": -0.03509100000000022,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-07T18:42:10.653Z"
+    },
+    {
+      "id": "dc16f59c-affe-47d5-b6fa-722ef70eab3d",
+      "symbol": "DOT",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 5ea60733-586e-4e38-80f8-e4e6ce5406ab",
+      "timestamp": "2026-03-07T18:42:05.558270Z"
+    },
+    {
+      "id": "cb0974cf-0e19-444b-b202-4424bc656765",
+      "symbol": "APE",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: bd8eb4c2-3798-4c80-9777-1cb122bd4d32",
+      "timestamp": "2026-03-07T18:26:01.991985Z"
+    },
+    {
       "id": "3d4615dd-ec65-4314-aab7-f164f46b02e0",
       "symbol": "CHZ",
       "action": "SELL",
@@ -720,6 +750,16 @@
       "status": "SUCCESS",
       "details": "EXTERNAL_EXIT_DETECTED",
       "timestamp": "2026-03-07T18:14:15.450Z"
+    },
+    {
+      "id": "a3928b54-b06e-4441-a1bb-10ce4606d415",
+      "symbol": "CHZ",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: a68b2875-53bf-478f-8c3c-f638f727ed0e",
+      "timestamp": "2026-03-07T18:14:10.084727Z"
     },
     {
       "id": "3655c550-c759-4144-b426-72a97ce496f3",
@@ -732,6 +772,36 @@
       "timestamp": "2026-03-07T18:13:54.436Z"
     },
     {
+      "id": "6d0b2da5-7f20-43fd-b17d-226d16dd06cd",
+      "symbol": "AAVE",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 7143f1f0-f5b5-4f44-98d3-12ba8489151f",
+      "timestamp": "2026-03-07T18:13:45.929104Z"
+    },
+    {
+      "id": "de01b23e-82dc-4b2b-8e6d-10134b694286",
+      "symbol": "CHZ",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 82e7a130-190c-4c09-aaba-95e969134e7a",
+      "timestamp": "2026-03-07T16:42:44.868649Z"
+    },
+    {
+      "id": "42c380f2-7df0-4fa2-a3ed-790d53436ec5",
+      "symbol": "DOT",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: dd1ceda7-907a-414a-92a4-0450d366e2f9",
+      "timestamp": "2026-03-07T05:28:35.915612Z"
+    },
+    {
       "id": "335eac4e-5be9-4564-8e48-481c3eeb90ca",
       "symbol": "CHZ",
       "action": "SELL",
@@ -740,6 +810,26 @@
       "status": "SUCCESS",
       "details": "EXTERNAL_EXIT_DETECTED",
       "timestamp": "2026-03-07T04:04:05.456Z"
+    },
+    {
+      "id": "7adc4bf9-ae4a-4493-ba8f-b040e23e1f8b",
+      "symbol": "CHZ",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 54971524-96be-4f84-9d99-21ae1b506d04",
+      "timestamp": "2026-03-07T04:03:53.387398Z"
+    },
+    {
+      "id": "9efc95d7-96ba-40f2-bbb1-8c06c080bc46",
+      "symbol": "ANKR",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 5430c4ef-df13-49c2-bdc8-8091c7a941f6",
+      "timestamp": "2026-03-07T00:47:13.762123Z"
     },
     {
       "id": "bc179b26-d311-41e9-b477-5edda7a712b7",
@@ -762,6 +852,16 @@
       "timestamp": "2026-03-07T00:11:12.815Z"
     },
     {
+      "id": "45ac4901-a67b-4d48-93ca-4756de83425d",
+      "symbol": "ANKR",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: b2a544af-440b-4c75-ae90-2094fb789fea",
+      "timestamp": "2026-03-07T00:07:03.697286Z"
+    },
+    {
       "id": "4e57bb76-37bd-4429-9e19-f38469b83204",
       "symbol": "ANKR",
       "action": "BUY",
@@ -769,6 +869,16 @@
       "status": "SUCCESS",
       "details": "LIQUIDITY_BUY_CONF_86%",
       "timestamp": "2026-03-07T00:07:03.671Z"
+    },
+    {
+      "id": "011335c6-ec0b-417c-b772-8fbf545bdf9b",
+      "symbol": "CHZ",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 4832a8ab-bbdd-4ae8-ab03-c9b25a6045aa",
+      "timestamp": "2026-03-07T00:05:49.517694Z"
     },
     {
       "id": "e23021e8-26d7-4b25-888d-5db5ab68e094",
@@ -781,6 +891,26 @@
       "timestamp": "2026-03-07T00:00:41.719Z"
     },
     {
+      "id": "84008124-eb53-4cfa-9d30-b52539d04c53",
+      "symbol": "ANKR",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 2403f2c5-135e-4959-9279-57df88f017b1",
+      "timestamp": "2026-03-07T00:00:39.001687Z"
+    },
+    {
+      "id": "2e1860ea-418e-438f-8b37-0f5924be36f9",
+      "symbol": "ANKR",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 12a3e612-d344-4809-8800-5da0119e7fb3",
+      "timestamp": "2026-03-06T23:00:21.466008Z"
+    },
+    {
       "id": "76eeec27-d8a3-49f9-988b-3a6cf45af138",
       "symbol": "ICP",
       "action": "SELL",
@@ -791,6 +921,36 @@
       "timestamp": "2026-03-06T22:58:04.501Z"
     },
     {
+      "id": "5a26ea66-6941-4186-a701-9651a393fef7",
+      "symbol": "ICP",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: d1885c28-c0cf-4818-9192-c88771c2467d",
+      "timestamp": "2026-03-06T22:57:53.057399Z"
+    },
+    {
+      "id": "b85a64ba-9b86-43f5-bc5a-98e0203ae3a3",
+      "symbol": "SOL",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 07cefd2a-7d77-4815-8bd8-a8ed569326d8",
+      "timestamp": "2026-03-06T21:59:01.316419Z"
+    },
+    {
+      "id": "4a1c9d2f-b181-4e00-95b0-94aa6a5821e4",
+      "symbol": "AAVE",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 0da0b288-acd6-44a4-814f-c3ccfa7d263e",
+      "timestamp": "2026-03-06T21:53:42.674953Z"
+    },
+    {
       "id": "bc6be56f-04ae-434b-8f46-51f95e45ab08",
       "symbol": "SHIB",
       "action": "SELL",
@@ -799,6 +959,36 @@
       "status": "SUCCESS",
       "details": "EXTERNAL_EXIT_DETECTED",
       "timestamp": "2026-03-06T21:46:55.182Z"
+    },
+    {
+      "id": "9287e2b0-b24a-4852-9f0f-9ce779867119",
+      "symbol": "SHIB",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: af2640a0-29ab-45b2-b172-e33ae436d795",
+      "timestamp": "2026-03-06T21:46:52.557379Z"
+    },
+    {
+      "id": "d15b2be1-f4b8-402e-922c-c731e74963b4",
+      "symbol": "ICP",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 9e0a2673-39b6-4096-b461-16f50b2d9e1a",
+      "timestamp": "2026-03-06T19:16:52.037080Z"
+    },
+    {
+      "id": "4be7bcb3-2ca3-458c-bc5b-1384a3a72c7f",
+      "symbol": "1INCH",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 8e3666de-f858-4a30-a5b7-72eb2598e6b8",
+      "timestamp": "2026-03-06T19:16:39.562106Z"
     },
     {
       "id": "1903a0b6-f13a-4a45-991b-e1c8502872ea",
@@ -820,6 +1010,16 @@
       "timestamp": "2026-03-06T17:34:06.843Z"
     },
     {
+      "id": "a4e8d597-2261-4ffe-b254-86804bca57d6",
+      "symbol": "SHIB",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 19bead5e-8b09-48b4-b1f8-c1a8b1489730",
+      "timestamp": "2026-03-06T17:34:06.792759Z"
+    },
+    {
       "id": "2a9d285c-e69a-4cb5-b90c-fa1f2bf3f27d",
       "symbol": "SHIB",
       "action": "SELL",
@@ -830,6 +1030,26 @@
       "timestamp": "2026-03-06T17:30:43.713Z"
     },
     {
+      "id": "26fea162-a3b0-4665-b036-b35beebf11e8",
+      "symbol": "SHIB",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 202e24cd-0e24-48e7-a3de-578bb5997331",
+      "timestamp": "2026-03-06T17:30:39.405270Z"
+    },
+    {
+      "id": "a7c8bef9-4b47-45b3-a156-097beccff46b",
+      "symbol": "SHIB",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: f9021d83-dbf8-4417-968a-035ca1e074d4",
+      "timestamp": "2026-03-06T17:15:56.777469Z"
+    },
+    {
       "id": "0291357b-56e3-4296-8b6e-848044a23841",
       "symbol": "MINA",
       "action": "SELL",
@@ -838,6 +1058,16 @@
       "status": "SUCCESS",
       "details": "EXTERNAL_EXIT_DETECTED",
       "timestamp": "2026-03-06T17:12:34.363Z"
+    },
+    {
+      "id": "c6b93bc0-a611-433a-af9b-e66eee06e306",
+      "symbol": "MINA",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 46816774-7e4f-46ff-91ad-3bc951ac5692",
+      "timestamp": "2026-03-06T17:12:29.935569Z"
     },
     {
       "id": "2dc52eb7-aecb-4f4d-809d-e95115a44114",
@@ -860,6 +1090,16 @@
       "timestamp": "2026-03-06T17:11:58.350Z"
     },
     {
+      "id": "5d32ef64-0d8b-4ae1-a7ab-11f09b0f130e",
+      "symbol": "MINA",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: bd0dc910-cb97-4cb1-a06a-5944afaefa76",
+      "timestamp": "2026-03-06T17:11:56.124202Z"
+    },
+    {
       "id": "e3e2051c-ab41-48ff-b287-c9762fece5b1",
       "symbol": "MINA",
       "action": "BUY",
@@ -879,6 +1119,26 @@
       "timestamp": "2026-03-06T17:08:18.145Z"
     },
     {
+      "id": "270dff52-62f3-4d21-835f-dc5979343b9c",
+      "symbol": "ENS",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: b80e14df-da49-45ce-ad99-b61a3a46bac7",
+      "timestamp": "2026-03-06T17:08:09.870762Z"
+    },
+    {
+      "id": "888f3705-929e-49f5-b9dd-2bcf16ac2f40",
+      "symbol": "ENS",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 118d1e17-6ab4-4092-bbdf-08ad5b18df11",
+      "timestamp": "2026-03-06T17:04:00.293425Z"
+    },
+    {
       "id": "b43ab143-445c-431d-b7ac-3889142dd160",
       "symbol": "AAVE",
       "action": "SELL",
@@ -889,6 +1149,26 @@
       "timestamp": "2026-03-06T17:02:15.206Z"
     },
     {
+      "id": "eb32e7b0-ca2b-48b8-b5f1-bd3a7f43bb1a",
+      "symbol": "AAVE",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 8e8f4d3a-256e-447d-887b-dd7d68352273",
+      "timestamp": "2026-03-06T17:02:03.981751Z"
+    },
+    {
+      "id": "7e70c853-dc22-4984-87bc-f4046646fec9",
+      "symbol": "AAVE",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: baf87cd5-6408-42ec-b9b2-a9b2062cb5dc",
+      "timestamp": "2026-03-06T17:01:03.720253Z"
+    },
+    {
       "id": "8dcd5a02-3b09-4143-9379-5217d5930ab2",
       "symbol": "ALGO",
       "action": "SELL",
@@ -897,6 +1177,16 @@
       "status": "SUCCESS",
       "details": "EXTERNAL_EXIT_DETECTED",
       "timestamp": "2026-03-06T16:49:26.640Z"
+    },
+    {
+      "id": "4d9c7f9d-1896-4ae0-9b59-86f1e8708942",
+      "symbol": "ALGO",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 42b65587-dcc2-4eb8-ad88-54480ffe3fd3",
+      "timestamp": "2026-03-06T16:49:23.239855Z"
     },
     {
       "id": "5055a8b3-f622-4b54-824f-fd9bbe860f8c",
@@ -918,6 +1208,16 @@
       "timestamp": "2026-03-06T16:48:47.301Z"
     },
     {
+      "id": "6a79edd6-1b27-4ffb-9386-533eae38cb84",
+      "symbol": "ALGO",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: a74fb94e-63fd-486b-a07d-fb31df125b33",
+      "timestamp": "2026-03-06T16:48:47.210294Z"
+    },
+    {
       "id": "7862c0df-5fa3-45f0-ad5a-0551b4bde6cd",
       "symbol": "FIL",
       "action": "SELL",
@@ -928,6 +1228,16 @@
       "timestamp": "2026-03-06T16:45:47.489Z"
     },
     {
+      "id": "402fe555-48d6-4bd9-9758-ecb34ae3078e",
+      "symbol": "FIL",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 7be87157-5c48-4fd2-b49b-944f01a9cda5",
+      "timestamp": "2026-03-06T16:45:39.998844Z"
+    },
+    {
       "id": "1a56f7e4-e9c9-47b9-a66a-c70253c9f573",
       "symbol": "FIL",
       "action": "SELL",
@@ -936,6 +1246,16 @@
       "status": "SUCCESS",
       "details": "EXTERNAL_EXIT_DETECTED",
       "timestamp": "2026-03-06T16:44:53.473Z"
+    },
+    {
+      "id": "c4222aca-4d02-4a83-b1d6-45b58ba8f453",
+      "symbol": "FIL",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: d3d842df-4227-4d04-80b0-5467d1a551cb",
+      "timestamp": "2026-03-06T16:44:50.990857Z"
     },
     {
       "id": "2ef714c1-4479-438d-81c7-47081c48f010",
@@ -957,6 +1277,16 @@
       "timestamp": "2026-03-06T16:41:30.389Z"
     },
     {
+      "id": "aad0efb5-b1a1-4f54-b1d4-4288cd56b069",
+      "symbol": "AAVE",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: f0d16e81-1b4d-4f03-9205-660634ec6d28",
+      "timestamp": "2026-03-06T16:41:23.411571Z"
+    },
+    {
       "id": "4e07f0b8-c8aa-4509-9b51-85470c95d8d5",
       "symbol": "AAVE",
       "action": "SELL",
@@ -965,6 +1295,16 @@
       "status": "SUCCESS",
       "details": "AI_EXIT_CONF_85%",
       "timestamp": "2026-03-06T16:41:23.353Z"
+    },
+    {
+      "id": "38467d5b-cffc-4055-8e48-87e5be6d53aa",
+      "symbol": "AAVE",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 3d00cabd-6441-4191-9eb5-4ebe309ac1eb",
+      "timestamp": "2026-03-06T16:36:53.296424Z"
     },
     {
       "id": "01d89574-37f1-4ad4-b1ef-22c9be4f6be8",
@@ -977,6 +1317,16 @@
       "timestamp": "2026-03-06T16:33:45.087Z"
     },
     {
+      "id": "62c32667-5fb4-4bba-a103-951e18469af0",
+      "symbol": "AAVE",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 7e09c64f-855c-438e-b2bd-2bedc4290eb2",
+      "timestamp": "2026-03-06T16:33:35.883051Z"
+    },
+    {
       "id": "c0c04cb2-5374-48f4-b650-6160def020fa",
       "symbol": "AAVE",
       "action": "SELL",
@@ -985,6 +1335,16 @@
       "status": "SUCCESS",
       "details": "EXTERNAL_EXIT_DETECTED",
       "timestamp": "2026-03-06T16:33:12.526Z"
+    },
+    {
+      "id": "fb528327-4e7c-498e-9095-5210ce6bb1cd",
+      "symbol": "AAVE",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: ef0ddeb3-ed85-43eb-90e4-f96d9a965a89",
+      "timestamp": "2026-03-06T16:33:11.477406Z"
     },
     {
       "id": "b2b19789-de35-4259-8037-71cdc416a9a0",
@@ -1006,6 +1366,96 @@
       "timestamp": "2026-03-06T16:04:15.086Z"
     },
     {
+      "id": "f9886731-c1ec-4647-981c-50bc4204de34",
+      "symbol": "DOT",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 3f06819a-b784-4306-b92c-610d4f220250",
+      "timestamp": "2026-03-06T13:47:59.915455Z"
+    },
+    {
+      "id": "d24b1583-3688-44c5-bdb7-98c2627e7053",
+      "symbol": "DOT",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 2a88ebed-88b4-46b6-99f9-2581750d9ad3",
+      "timestamp": "2026-03-06T13:41:35.362219Z"
+    },
+    {
+      "id": "135f531b-7aae-4804-aac2-a736be121426",
+      "symbol": "ALGO",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 111f853e-6e94-4559-a8d0-fbd6e03de5d1",
+      "timestamp": "2026-03-06T13:40:36.899685Z"
+    },
+    {
+      "id": "2e94f984-ddcc-4c09-812d-8711d039c18e",
+      "symbol": "ALGO",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: ac661211-a20a-446a-bf30-da6da7d20ab7",
+      "timestamp": "2026-03-06T13:40:24.121698Z"
+    },
+    {
+      "id": "ceef28c8-c325-4c59-89a0-bcc7f7792aaa",
+      "symbol": "ETC",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 643a60ae-a604-492a-8c00-bdd69da39001",
+      "timestamp": "2026-03-06T13:29:33.728059Z"
+    },
+    {
+      "id": "2709cc0c-b619-4301-acfa-5ec268251efa",
+      "symbol": "ETC",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 3697b024-cc8d-4092-a280-1721326b1227",
+      "timestamp": "2026-03-06T13:27:50.541958Z"
+    },
+    {
+      "id": "7c1d91de-366a-4145-8d3e-c7a88afe84ee",
+      "symbol": "ALGO",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 55fab92b-76c1-442b-8cf7-994c9957084d",
+      "timestamp": "2026-03-06T13:26:28.927027Z"
+    },
+    {
+      "id": "cd2b0575-3d0c-4230-b792-80ebae0ed04a",
+      "symbol": "ALGO",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 77220918-e60e-4a7a-b3c6-9c9a546b6169",
+      "timestamp": "2026-03-06T13:24:49.013907Z"
+    },
+    {
+      "id": "9a866998-0f1b-430d-8ca2-c7acd234197f",
+      "symbol": "GRT",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 24fd602b-ac20-451e-8251-c28a3b5d8f1e",
+      "timestamp": "2026-03-06T13:22:13.718396Z"
+    },
+    {
       "id": "9f3bf1cc-3382-45d9-8ebc-a449a7bd3ef0",
       "symbol": "ENS",
       "action": "SELL",
@@ -1014,6 +1464,56 @@
       "status": "SUCCESS",
       "details": "EXTERNAL_EXIT_DETECTED",
       "timestamp": "2026-03-06T13:16:52.953Z"
+    },
+    {
+      "id": "fe6e224d-0cf5-44f3-ae5b-712e2ae5e0aa",
+      "symbol": "GRT",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: deb9b278-2b31-4256-a178-bd1b1475e283",
+      "timestamp": "2026-03-06T13:13:48.326837Z"
+    },
+    {
+      "id": "991380ac-4faf-492f-982e-a621df0f799d",
+      "symbol": "ENS",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 6de02d27-1ddc-447b-bcf4-2bbd53f00b31",
+      "timestamp": "2026-03-06T13:08:44.194243Z"
+    },
+    {
+      "id": "16ee7d60-2e09-40e8-accf-7e86f6322245",
+      "symbol": "ENS",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 8de70150-dea8-4023-be90-ccaba8f0ff83",
+      "timestamp": "2026-03-06T12:51:58.051908Z"
+    },
+    {
+      "id": "5ba1458c-261c-4e16-8d6f-eb6976f96834",
+      "symbol": "LINK",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: f9edba51-c0d7-4511-9f77-82258399d172",
+      "timestamp": "2026-03-06T12:33:30.543479Z"
+    },
+    {
+      "id": "85440955-bd79-4f4e-bcad-8ec0244750fd",
+      "symbol": "LINK",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: f158a4d3-3333-4797-ace1-8d60fa8bc310",
+      "timestamp": "2026-03-06T12:32:10.497776Z"
     },
     {
       "id": "c07f0e71-531a-4e21-80dc-fa366bf2328a",
@@ -4227,456 +4727,6 @@
       "status": "FAILED",
       "details": "API_EXECUTION_FAILED",
       "timestamp": "2026-02-21T01:06:05.043Z"
-    },
-    {
-      "id": "b9cf50b6-1c98-479d-86d0-79dde0422b52",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.748,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_82%",
-      "timestamp": "2026-02-21T01:05:41.787Z"
-    },
-    {
-      "id": "a5452794-519f-43fc-8e9e-1e97791c8bd1",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1667.12,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_82%",
-      "timestamp": "2026-02-21T01:05:18.135Z"
-    },
-    {
-      "id": "2c3a0666-e926-46c8-a364-933136b7c7bb",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1415,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T01:04:58.976Z"
-    },
-    {
-      "id": "93f8947f-57c0-4a87-81c5-b6a423509650",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.754,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_82%",
-      "timestamp": "2026-02-21T01:04:30.814Z"
-    },
-    {
-      "id": "46d75b07-21dd-4178-8988-13c013747f42",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1667.39,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_82%",
-      "timestamp": "2026-02-21T01:04:06.240Z"
-    },
-    {
-      "id": "e34fe39e-98bf-4d97-90e2-d7f5a1c54d1f",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1414,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T01:03:48.663Z"
-    },
-    {
-      "id": "95cdfa9f-9c0b-4261-90d0-0a52528c8f47",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.753,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_82%",
-      "timestamp": "2026-02-21T01:03:20.027Z"
-    },
-    {
-      "id": "8ab19484-b44a-451e-9d27-76cdba953dbc",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1414,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T01:03:06.960Z"
-    },
-    {
-      "id": "5fcdfeca-8b26-43d7-8237-4f2261874ee6",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1666.4,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_82%",
-      "timestamp": "2026-02-21T01:02:57.145Z"
-    },
-    {
-      "id": "cf173d64-3765-4b87-90d1-a0d9430e702c",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.752,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_78%",
-      "timestamp": "2026-02-21T01:02:05.778Z"
-    },
-    {
-      "id": "ac3dfa9e-148d-4244-b3f6-4cae9135a03b",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1666.34,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_82%",
-      "timestamp": "2026-02-21T01:01:46.578Z"
-    },
-    {
-      "id": "f0e0f554-952d-4230-afb3-1479e5f26f24",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1415,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T01:01:25.298Z"
-    },
-    {
-      "id": "4eaaa14a-0392-4e01-9505-eae5d4b5c53d",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.752,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_82%",
-      "timestamp": "2026-02-21T01:00:56.730Z"
-    },
-    {
-      "id": "a6254e85-d093-4763-8df9-934c3105c0ff",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1665.66,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_78%",
-      "timestamp": "2026-02-21T01:00:31.506Z"
-    },
-    {
-      "id": "f90f9821-da34-41a6-99f3-17711e7e4f98",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8858,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T01:00:01.881Z"
-    },
-    {
-      "id": "55cfa9c7-ff8d-4d36-b739-03b8d3a10847",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.747,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_78%",
-      "timestamp": "2026-02-21T00:59:41.096Z"
-    },
-    {
-      "id": "5bde5b44-cc92-42bc-8c8a-34b51c0d17bd",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1413,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:58:54.160Z"
-    },
-    {
-      "id": "2929bbe7-f7dc-4ca2-948f-f30ccc399afe",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1413,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:56:31.833Z"
-    },
-    {
-      "id": "c698fc44-a5c4-4f88-922a-65584a949795",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8862,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:56:17.689Z"
-    },
-    {
-      "id": "9796e7b7-27a2-4bf5-bb60-c1b78d440794",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1415,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:54:06.189Z"
-    },
-    {
-      "id": "52bd1959-72b3-42f0-af03-f1ff82c4141f",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8896,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:51:33.265Z"
-    },
-    {
-      "id": "9aa44655-716d-44ab-b7ce-2b54c9b3cdb9",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1665.92,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_82%",
-      "timestamp": "2026-02-21T00:49:42.870Z"
-    },
-    {
-      "id": "2ac2b3bf-8aec-4e03-bf03-879057f4af47",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1416,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:49:19.289Z"
-    },
-    {
-      "id": "176feb2a-ee35-470c-988a-c2fdc8ded594",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1415,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:48:05.843Z"
-    },
-    {
-      "id": "2f8988b4-5237-4605-be84-d6fcdad615b1",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1418,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:45:42.472Z"
-    },
-    {
-      "id": "901e70b3-0309-4d0d-a88a-3f673b2a7681",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1418,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:44:50.697Z"
-    },
-    {
-      "id": "069df72f-2cd8-42ba-872f-ab183fb9f7f6",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.142,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:43:18.315Z"
-    },
-    {
-      "id": "9ae584db-55c5-47b7-84fe-fb5057a91773",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1416,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:42:07.025Z"
-    },
-    {
-      "id": "6f0e647d-7f14-4e91-bba0-f38bb51259fd",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1415,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:40:57.376Z"
-    },
-    {
-      "id": "0429c05d-cf50-4bd6-9391-5d6476a4fff5",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1413,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:34:04.163Z"
-    },
-    {
-      "id": "6ef23027-6fa2-44c8-8389-4ac5b00b5ad0",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8941,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:33:34.600Z"
-    },
-    {
-      "id": "2adde4b6-07cf-4ec9-9ae3-08500185f159",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1668.13,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_76%",
-      "timestamp": "2026-02-21T00:31:58.882Z"
-    },
-    {
-      "id": "16bb1fa8-11d1-4332-b2c6-9e7c1d7d8bfe",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8954,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:29:56.939Z"
-    },
-    {
-      "id": "9683cf54-2bfe-4d61-bda2-d11ff5626e63",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8948,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:27:30.771Z"
-    },
-    {
-      "id": "02256b72-10a2-44c7-b6ff-a9803723b6cc",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.895,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:25:06.504Z"
-    },
-    {
-      "id": "aa2bdd38-65ef-47cf-8615-380b1baa6614",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1421,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:24:06.444Z"
-    },
-    {
-      "id": "b79dcb84-5928-45c4-9008-aa3b23271816",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8954,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:23:53.957Z"
-    },
-    {
-      "id": "662424d3-6c52-434c-9ff8-b22b0576a312",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1421,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:22:55.302Z"
-    },
-    {
-      "id": "ebaa52cf-6b2e-4636-8535-078f6a68dc71",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8946,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:22:42.392Z"
-    },
-    {
-      "id": "2f246852-06d4-402e-9807-63c5996aae34",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.777,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_78%",
-      "timestamp": "2026-02-21T00:22:31.375Z"
-    },
-    {
-      "id": "47a432f8-37e0-411b-9899-644078a6c564",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1669.06,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_85%",
-      "timestamp": "2026-02-21T00:22:18.459Z"
-    },
-    {
-      "id": "c91ab93a-b1d6-4c59-8a7e-b401cf43ec98",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8956,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:21:34.438Z"
-    },
-    {
-      "id": "18c60e6d-c37c-4de3-87ac-a23133e24097",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.772,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_78%",
-      "timestamp": "2026-02-21T00:21:28.524Z"
-    },
-    {
-      "id": "7f024940-7a33-4c75-b6a9-36b647f136c1",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8949,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:20:19.717Z"
-    },
-    {
-      "id": "411a648f-43a5-4246-96d6-bb753b421f67",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.778,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_78%",
-      "timestamp": "2026-02-21T00:20:06.213Z"
-    },
-    {
-      "id": "1b9a19ba-cd74-4d78-aa91-5d16833ca447",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1421,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:19:17.322Z"
-    },
-    {
-      "id": "a0b8d6e8-acac-4551-83a1-1631544a8369",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8945,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:19:06.742Z"
-    },
-    {
-      "id": "abedcc3a-dd1c-40e3-8b7b-21ec71900396",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.779,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_78%",
-      "timestamp": "2026-02-21T00:18:55.245Z"
-    },
-    {
-      "id": "b7f0b475-7e0d-4e67-b0d8-f9c1fa9e231a",
-      "symbol": "NEAR",
-      "action": "BUY",
-      "price": 0.8953,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:17:56.603Z"
-    },
-    {
-      "id": "30226308-57c8-4955-8a13-154ca462daec",
-      "symbol": "AVAX",
-      "action": "BUY",
-      "price": 7.779,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_82%",
-      "timestamp": "2026-02-21T00:17:41.515Z"
     }
   ],
   "activePositions": [
@@ -4721,25 +4771,6 @@
       "estimatedTime": "4h"
     },
     {
-      "symbol": "DOT",
-      "entryPrice": 1.284,
-      "currentPrice": 1.263,
-      "amount": 0,
-      "quantity": 1.671,
-      "tp": 1.3225200000000001,
-      "sl": 1.25832,
-      "confidence": 100,
-      "potentialRoi": 0,
-      "pnl": -0.03509100000000022,
-      "pnlPercent": -1.6355140186915986,
-      "isPaper": false,
-      "timestamp": "2026-03-07T13:53:37.895Z",
-      "lastAnalysis": "خطا در تحلیل هوش مصنوعی برای DOT: پاسخ هوش مصنوعی بیش از حد طول کشید (تایم‌اوت).",
-      "lastDecision": "NEUTRAL",
-      "lastConfidence": 0,
-      "lastChecked": "2026-03-07T15:41:28.261Z"
-    },
-    {
       "symbol": "APE",
       "entryPrice": 0,
       "currentPrice": 0,
@@ -4756,25 +4787,24 @@
     }
   ],
   "liquidity": {
-    "eur": 9.27590032859395,
-    "usdc": 9.243078e-7
+    "eur": 11.34898470359395,
+    "usdc": 6.1099808843078
   },
   "actualBalances": {
     "1INCH": 37.98,
     "APE": 119.58,
-    "DOT": 1.671,
     "SOL": 0.038
   },
   "dailyStats": {
     "trades": 1,
-    "profit": -0.2137189400307537,
+    "profit": -0.2488099400307539,
     "fees": 0,
     "dailyGoal": 50,
     "lastResetDate": "2026-03-07"
   },
-  "totalProfit": -0.5263665903442525,
-  "currentStatus": "ANALYZING_HUNT_APE",
-  "scanIndex": 57758,
+  "totalProfit": -0.5614575903442527,
+  "currentStatus": "IDLE_SCAN_COMPLETE",
+  "scanIndex": 57898,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
