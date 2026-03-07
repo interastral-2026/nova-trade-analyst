@@ -4792,7 +4792,7 @@
     "lastResetDate": "2026-03-07"
   },
   "totalProfit": -0.4546865903442524,
-  "currentStatus": "SCAN_BATCH_DONE_57458",
+  "currentStatus": "IDLE_SCAN_COMPLETE",
   "scanIndex": 57458,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],

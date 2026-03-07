@@ -397,6 +397,8 @@ if (ghostState.activePositions && ghostState.activePositions.length > 0) {
 async function monitorPositionsAI() {
   if (isAiMonitoring || !ghostState.isEngineActive || ghostState.activePositions.length === 0) return;
   isAiMonitoring = true;
+  ghostState.currentStatus = "MONITORING_HUNTS";
+  saveState();
   
   console.log(`[AI-MONITOR] Checking ${ghostState.activePositions.length} active positions...`);
   
@@ -405,6 +407,8 @@ async function monitorPositionsAI() {
     await Promise.all(ghostState.activePositions.map(async (pos, index) => {
       try {
         await new Promise(r => setTimeout(r, index * 1500)); // Stagger AI requests
+        ghostState.currentStatus = `ANALYZING_HUNT_${pos.symbol}`;
+        saveState();
         const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=100&aggregate=15`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) return;
@@ -521,9 +525,12 @@ async function scanWatchlist() {
 
     // Check for minimum liquidity before scanning
     if (ghostState.liquidity.eur < 10) {
-      console.log(`[SCAN] Low liquidity (${ghostState.liquidity.eur.toFixed(2)} EUR). Pausing scan.`);
-      return;
+      console.log(`[SCAN] Low liquidity (${ghostState.liquidity.eur.toFixed(2)} EUR). Scanning for signals only (No execution).`);
+      ghostState.currentStatus = "SCANNING_LOW_LIQUIDITY";
+    } else {
+      ghostState.currentStatus = "SCANNING_MARKET";
     }
+    saveState();
 
     console.log(`[SCAN] Starting full market scan to find the absolute BEST opportunity...`);
     const potentialTrades = [];
