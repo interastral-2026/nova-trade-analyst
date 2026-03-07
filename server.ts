@@ -502,9 +502,9 @@ async function scanWatchlist() {
       ? availableEurPairs.map(p => p.split('-')[0]) 
       : WATCHLIST;
 
-    // MAX 4 CONCURRENT TRADES TO PRESERVE LIQUIDITY
-    if (ghostState.activePositions.length >= 4) {
-      console.log(`[SCAN] Max concurrent trades (4) reached. Pausing scan.`);
+    // Check for minimum liquidity before scanning
+    if (ghostState.liquidity.eur < 5) {
+      console.log(`[SCAN] Low liquidity (${ghostState.liquidity.eur.toFixed(2)} EUR). Pausing scan.`);
       return;
     }
 
@@ -594,12 +594,19 @@ async function scanWatchlist() {
       // Calculate available liquidity for this specific trade
       const totalEur = ghostState.liquidity.eur;
       
-      // User requested to use 50% of available capital per trade
-      let tradeAmount = totalEur * 0.50;
+      // Dynamic sizing: Use 25% of available capital per trade to allow up to ~4-8 concurrent trades
+      // but ensure we don't use more than 1/3 of total starting capital if we have many positions
+      let tradeAmount = totalEur * 0.25;
       
-      // Ensure minimum trade size of 2 EUR (Coinbase minimum is usually around 1-2 EUR), but don't exceed available EUR
-      tradeAmount = Math.max(2, tradeAmount);
+      // Ensure minimum trade size of 5 EUR for better fee efficiency, but don't exceed available EUR
+      tradeAmount = Math.max(5, tradeAmount);
       if (tradeAmount > totalEur) tradeAmount = totalEur;
+      
+      // If we have less than 5 EUR, don't trade
+      if (tradeAmount < 5) {
+        console.log(`[SCAN] Insufficient liquidity for trade: ${tradeAmount.toFixed(2)} EUR`);
+        return;
+      }
       
       if (totalEur >= (tradeAmount * 1.015) && tradeAmount >= 2) { 
         const qty = tradeAmount / (price || 1);
