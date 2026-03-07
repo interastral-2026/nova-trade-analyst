@@ -244,7 +244,7 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
   const history = (candles || []).slice(-60).map(c => ({ h: c.high, l: c.low, c: c.close }));
   
   const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('AI_TIMEOUT')), 45000);
+    setTimeout(() => reject(new Error('AI_TIMEOUT')), 60000);
   });
 
   try {
@@ -313,6 +313,7 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
     const rawText = response.text?.trim() || '{}';
     ghostState.currentStatus = `AI_RESP_${symbol}_LEN_${rawText.length}`;
     const result = JSON.parse(rawText);
+    if (!result.estimatedTime) result.estimatedTime = "--";
     if (result.confidence !== undefined && result.confidence > 0 && result.confidence <= 1) {
       result.confidence = Math.round(result.confidence * 100);
     }
@@ -333,6 +334,7 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
       timestamp: new Date().toISOString(),
       confidence: 0,
       potentialRoi: 0,
+      estimatedTime: "--",
       id: crypto.randomUUID()
     }; 
   }
@@ -516,6 +518,7 @@ async function scanWatchlist() {
     
     // Scan up to 20 symbols per cycle to find the best one among many
     const scanLimit = Math.min(20, currentWatchlist.length);
+    const scanBatch = [];
     
     for (let i = 0; i < scanLimit; i++) {
       const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
@@ -529,42 +532,48 @@ async function scanWatchlist() {
       if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) {
         continue;
       }
+      scanBatch.push(symbol);
+    }
 
-      ghostState.currentStatus = `ANALYZING_${symbol}_SMC`;
+    // Process batch in parallel with a small delay between requests to avoid rate limits
+    const results = await Promise.all(scanBatch.map(async (symbol, index) => {
       try {
+        await new Promise(r => setTimeout(r, index * 500)); // Stagger requests
+        ghostState.currentStatus = `ANALYZING_${symbol}_SMC`;
         const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=100&aggregate=15`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
-        if (candles.length === 0) {
-          continue;
-        }
+        if (candles.length === 0) return null;
         
         const price = candles[candles.length - 1].close;
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
+        return { symbol, price, analysis };
+      } catch (e) {
+        return null;
+      }
+    }));
+
+    for (const res of results) {
+      if (!res) continue;
+      const { symbol, price, analysis } = res;
+      
+      // Enforce a minimum confidence of 85% for BUY signals
+      const requiredConfidence = Math.max(85, ghostState.settings.confidenceThreshold || 85);
+      
+      if (analysis && analysis.side === 'BUY' && analysis.confidence >= requiredConfidence && ghostState.autoPilot) {
+        // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 1.0% net = 1.5%)
+        const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + 1.0);
         
-        // Enforce a minimum confidence of 85% for BUY signals
-        const requiredConfidence = Math.max(85, ghostState.settings.confidenceThreshold || 85);
-        
-        if (analysis && analysis.side === 'BUY' && analysis.confidence >= requiredConfidence && ghostState.autoPilot) {
-          // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 1.0% net = 1.5%)
-          const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + 1.0);
-          
-          if (isProfitableEnough) {
-            potentialTrades.push({ symbol, price, analysis });
-            console.log(`[SCAN] Found potential BUY for ${symbol} (Confidence: ${analysis.confidence}%, ROI: ${analysis.potentialRoi}%)`);
-          } else {
-            analysis.decision = `SKIPPED: ROI_TOO_LOW (Expected: ${analysis.potentialRoi}%, Min Required: ${((FEE_RATE * 100) + 1.0).toFixed(2)}%)`;
-          }
+        if (isProfitableEnough) {
+          potentialTrades.push({ symbol, price, analysis });
+          console.log(`[SCAN] Found potential BUY for ${symbol} (Confidence: ${analysis.confidence}%, ROI: ${analysis.potentialRoi}%)`);
+        } else {
+          analysis.decision = `SKIPPED: ROI_TOO_LOW (Expected: ${analysis.potentialRoi}%, Min Required: ${((FEE_RATE * 100) + 1.0).toFixed(2)}%)`;
         }
-        
-        if (analysis) {
-          ghostState.thoughts.unshift(analysis);
-          if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
-        }
-        
-        await new Promise(r => setTimeout(r, 1000)); // Rate limit protection
-      } catch (e: any) {
-        console.error(`[SCAN ERROR] ${symbol}: ${e.message}`);
-        await new Promise(r => setTimeout(r, 1000));
+      }
+      
+      if (analysis) {
+        ghostState.thoughts.unshift(analysis);
+        if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
       }
     }
     

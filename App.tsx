@@ -133,37 +133,39 @@ const App: React.FC = () => {
         engineActive={isEngineActive} 
       />
       
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar 
-          assets={assets} 
-          selected={selectedAsset} 
-          onSelect={setSelectedAsset} 
-          autoPilot={autoTradeEnabled} 
-          onToggleAuto={toggleAuto} 
-          engineActive={isEngineActive} 
-          onToggleEngine={toggleEngine} 
-          isPaperMode={isPaperMode}
-          onTogglePaper={togglePaper}
-          viewMode={'terminal'} 
-          onViewChange={() => {}} 
-          bridgeUrl={bridgeUrl} 
-          onUpdateBridge={handleUpdateBridge}
-          settings={settings}
-          onUpdateSettings={updateSettings}
-        />
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        <div className="hidden lg:block">
+          <Sidebar 
+            assets={assets} 
+            selected={selectedAsset} 
+            onSelect={setSelectedAsset} 
+            autoPilot={autoTradeEnabled} 
+            onToggleAuto={toggleAuto} 
+            engineActive={isEngineActive} 
+            onToggleEngine={toggleEngine} 
+            isPaperMode={isPaperMode}
+            onTogglePaper={togglePaper}
+            viewMode={'terminal'} 
+            onViewChange={() => {}} 
+            bridgeUrl={bridgeUrl} 
+            onUpdateBridge={handleUpdateBridge}
+            settings={settings}
+            onUpdateSettings={updateSettings}
+          />
+        </div>
         
-        <main className="flex-1 flex bg-[#020204]">
-          <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">
+        <main className="flex-1 flex flex-col md:flex-row bg-[#020204] overflow-hidden">
+          <div className="flex-1 p-3 md:p-6 overflow-y-auto custom-scrollbar">
               <TradingTerminal 
                 thoughtHistory={thoughtHistory} 
                 liveActivity={liveActivity} 
               />
           </div>
           
-          <div className="w-80 border-l border-white/5 bg-black/40 flex flex-col">
-            <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-               <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Signal Feed</span>
-               <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse shadow-[0_0_8px_#6366f1]"></div>
+          <div className="w-full md:w-64 lg:w-80 border-t md:border-t-0 md:border-l border-white/5 bg-black/40 flex flex-col h-64 md:h-auto">
+            <div className="p-3 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+               <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Signal Feed</span>
+               <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse shadow-[0_0_8px_#6366f1]"></div>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               <SignalList signals={thoughtHistory} />
