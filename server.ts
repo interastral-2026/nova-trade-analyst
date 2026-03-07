@@ -240,7 +240,8 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
   }
 
   const ai = new GoogleGenAI({ apiKey: API_KEY });
-  const history = (candles || []).slice(-30).map(c => ({ h: c.high, l: c.low, c: c.close }));
+  // Pass the last 60 candles (15 hours of 15m data) to give AI a real trend view
+  const history = (candles || []).slice(-60).map(c => ({ h: c.high, l: c.low, c: c.close }));
   
   const timeoutPromise = new Promise((_, reject) => {
     setTimeout(() => reject(new Error('AI_TIMEOUT')), 45000);
@@ -250,20 +251,20 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
     ghostState.currentStatus = `AI_REQ_${symbol}`;
     const aiPromise = ai.models.generateContent({
       model: 'gemini-3-flash-preview', 
-      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
+      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_15M_CANDLES: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE, AGGRESSIVE BUT HIGHLY CALCULATED AI SCALPER.
-You hunt for A+ setups with high volatility and clear momentum. You DO NOT miss golden opportunities, but you NEVER enter a trade that doesn't guarantee pure profit after fees.
+        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE, HIGHLY CONSERVATIVE AI SCALPER.
+You hunt for A+ setups with high volatility and clear momentum. You DO NOT trade in choppy, sideways, or unpredictable markets.
 
 Your goal is to maximize pure profit (soode khales) and NEVER lose money unnecessarily.
 Fee Calculation is MANDATORY: You must account for a ${FEE_RATE * 100}% round-trip fee. 
 Break-even = Entry Price * (1 + ${FEE_RATE}). A trade is ONLY valid if the target price is significantly higher than the break-even price.
 
-CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION & AGGRESSIVE GROWTH:
-- RULE #1: PURE PROFIT ONLY. Calculate fees precisely. If the move isn't big enough to cover fees and yield at least 0.5% net profit, DO NOT BUY.
+CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION:
+- RULE #1: PURE PROFIT ONLY. Calculate fees precisely. If the move isn't big enough to cover fees and yield at least 1.0% net profit, DO NOT BUY.
 - RULE #2: NO AMATEUR TRADES. Do not FOMO into massive green candles. Buy the dip (Discount Zones) or the breakout (MSS with volume).
-- RULE #3: AGGRESSIVE ON A+ SETUPS. If you see a perfect Liquidity Sweep followed by a strong Market Structure Shift (MSS) on a famous coin, ATTACK. Do not hesitate.
-- RULE #4: RUTHLESS BUT PATIENT EXITS. If price stalls near resistance, SELL. BUT DO NOT PANIC SELL on tiny 0.2% - 1% drops. Give the trade room to breathe.
+- RULE #3: AVOID CHOPPY MARKETS. If the last 15 hours of data show no clear trend, stay NEUTRAL.
+- RULE #4: RUTHLESS EXITS. If price stalls near resistance or shows weakness, SELL. BUT DO NOT PANIC SELL on tiny 0.2% - 1% drops if the trend is still intact.
 - RULE #5: PROTECT THE ENTRY. If we are in a trade and in profit, your stop-loss logic must move to break-even + fees as soon as possible.
 
 INTERNAL REASONING PROTOCOL:
@@ -382,7 +383,7 @@ async function monitorPositionsAI() {
     for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
       const pos = ghostState.activePositions[i];
       try {
-        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=30`, { timeout: 8000 });
+        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=100&aggregate=15`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) continue;
         
@@ -393,13 +394,19 @@ async function monitorPositionsAI() {
         const breakEvenPrice = pos.entryPrice * (1 + roundTripFee);
         const currentProfitPercent = (price - breakEvenPrice) / breakEvenPrice;
         
-        // If we are up more than 1.5% pure profit, move SL to guarantee 0.5% pure profit
-        if (currentProfitPercent > 0.015) {
-          const newSl = breakEvenPrice * 1.005;
-          if (pos.sl < newSl) {
-            pos.sl = newSl;
-            console.log(`[AI-MONITOR] Trailing Stop moved up for ${pos.symbol} to ${newSl.toFixed(4)} to lock in pure profit.`);
-          }
+        // Dynamic Trailing Stop
+        if (currentProfitPercent > 0.03) {
+          // If up 3%, lock in 2%
+          const newSl = breakEvenPrice * 1.02;
+          if (pos.sl < newSl) pos.sl = newSl;
+        } else if (currentProfitPercent > 0.02) {
+          // If up 2%, lock in 1%
+          const newSl = breakEvenPrice * 1.01;
+          if (pos.sl < newSl) pos.sl = newSl;
+        } else if (currentProfitPercent > 0.01) {
+          // If up 1%, lock in break-even + tiny profit
+          const newSl = breakEvenPrice * 1.002;
+          if (pos.sl < newSl) pos.sl = newSl;
         }
         
         // If price drops below our trailing stop, execute emergency sell
@@ -441,8 +448,8 @@ async function monitorPositionsAI() {
         }
         
         if (analysis && analysis.side === 'SELL') {
-          const isProfitable = price > (breakEvenPrice * (1 + MIN_NET_PROFIT));
-          const isSignificantLoss = price < (pos.entryPrice * 0.985); // Only cut loss if down more than 1.5%
+          const isProfitable = price > (breakEvenPrice * (1 + 0.01)); // Require 1% pure profit before allowing AI to sell for profit
+          const isSignificantLoss = price < (pos.entryPrice * 0.97); // Only cut loss if down more than 3%
           
           // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop (emergency exit)
           // Do not panic sell on tiny noise. Only cut loss if thesis is truly broken (significant loss + high confidence).
@@ -522,7 +529,7 @@ async function scanWatchlist() {
 
       ghostState.currentStatus = `ANALYZING_${symbol}_SMC`;
       try {
-        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`, { timeout: 8000 });
+        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=100&aggregate=15`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) {
           continue;
@@ -535,14 +542,14 @@ async function scanWatchlist() {
         const requiredConfidence = Math.max(85, ghostState.settings.confidenceThreshold || 85);
         
         if (analysis && analysis.side === 'BUY' && analysis.confidence >= requiredConfidence && ghostState.autoPilot) {
-          // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 0.3% net = 0.8%)
-          const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100));
+          // Ensure potential ROI covers fees + minimum net profit (0.5% fee + 1.0% net = 1.5%)
+          const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + 1.0);
           
           if (isProfitableEnough) {
             potentialTrades.push({ symbol, price, analysis });
             console.log(`[SCAN] Found potential BUY for ${symbol} (Confidence: ${analysis.confidence}%, ROI: ${analysis.potentialRoi}%)`);
           } else {
-            analysis.decision = `SKIPPED: ROI_TOO_LOW (Expected: ${analysis.potentialRoi}%, Min Required: ${((FEE_RATE * 100) + (MIN_NET_PROFIT * 100)).toFixed(2)}%)`;
+            analysis.decision = `SKIPPED: ROI_TOO_LOW (Expected: ${analysis.potentialRoi}%, Min Required: ${((FEE_RATE * 100) + 1.0).toFixed(2)}%)`;
           }
         }
         
@@ -573,14 +580,14 @@ async function scanWatchlist() {
       const { symbol, price, analysis } = bestTrade;
       
       // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss
-      const maxSlPrice = price * 0.97; // Maximum 3% loss
-      const minSlPrice = price * 0.985; // Minimum 1.5% loss (give it room to breathe)
+      const maxSlPrice = price * 0.95; // Maximum 5% loss (wider for 15m timeframe)
+      const minSlPrice = price * 0.98; // Minimum 2% loss (give it room to breathe)
       
       if (analysis.sl < maxSlPrice) {
-        console.log(`[RISK] Clamping SL for ${symbol} from ${analysis.sl} to ${maxSlPrice} (Max 3% loss)`);
+        console.log(`[RISK] Clamping SL for ${symbol} from ${analysis.sl} to ${maxSlPrice} (Max 5% loss)`);
         analysis.sl = maxSlPrice;
       } else if (analysis.sl > minSlPrice) {
-        console.log(`[RISK] Widening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 1.5% loss to avoid noise)`);
+        console.log(`[RISK] Widening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 2% loss to avoid noise)`);
         analysis.sl = minSlPrice;
       }
 
