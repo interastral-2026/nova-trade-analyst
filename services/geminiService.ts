@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { MarketData, TradeSignal } from "../types.ts";
+import { MarketData, TradeSignal } from "../types";
 
 export const analyzeMarketData = async (
   symbol: string,
@@ -18,6 +18,9 @@ CONCEPTS:
 - Look for Market Structure Shifts (MSS) after a Liquidity Sweep.
 - Only trigger if the candle shows strong displacement.
 - Target internal liquidity gaps (FVG).
+- Analyze Liquidity: Identify where the "Smart Money" is likely to sweep next.
+- Monitor Market: Assess current volatility and potential traps.
+- Estimate Time: Provide a realistic ETA for the target (e.g., "15m", "1h", "4h").
 THRESHOLD: 80% Confidence required for BUY.
 BE CONCISE.`;
 
@@ -35,9 +38,12 @@ BE CONCISE.`;
             tp: { type: Type.NUMBER },
             sl: { type: Type.NUMBER },
             confidence: { type: Type.NUMBER },
-            analysis: { type: Type.STRING }
+            analysis: { type: Type.STRING },
+            liquidityAnalysis: { type: Type.STRING, description: "Detailed SMC liquidity sweep analysis" },
+            marketMonitoring: { type: Type.STRING, description: "Current market volatility and trap assessment" },
+            estimatedTime: { type: Type.STRING, description: "Estimated time to reach target (e.g. 15m, 1h)" }
           },
-          required: ['side', 'entryPrice', 'tp', 'sl', 'confidence', 'analysis']
+          required: ['side', 'entryPrice', 'tp', 'sl', 'confidence', 'analysis', 'liquidityAnalysis', 'marketMonitoring', 'estimatedTime']
         },
         systemInstruction: systemInstruction,
         temperature: 0.1,
@@ -45,7 +51,7 @@ BE CONCISE.`;
       }
     });
 
-    const result = JSON.parse(response.text.trim());
+    const result = JSON.parse(response.text?.trim() || '{}');
     if (result.confidence < 80) return null;
 
     return {

@@ -176,6 +176,15 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </div>
       </div>
+      <div className="p-4 border-t border-white/5 bg-black/20">
+        <div className="flex items-center space-x-2 mb-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+          <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest">SMC Strategy</span>
+        </div>
+        <p className="text-[8px] text-slate-500 leading-relaxed font-medium" dir="auto">
+          ربات از استراتژی Smart Money Concepts (SMC) استفاده می‌کند. تمرکز بر شناسایی نقدینگی (Liquidity Sweeps)، تغییر ساختار بازار (MSS) و شکاف‌های ارزش منصفانه (FVG) برای ورود در نقاط بهینه است.
+        </p>
+      </div>
     </aside>
   );
 };

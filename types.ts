@@ -54,6 +54,8 @@ export interface TradeSignal {
   potentialRoi: number;
   tradePercentage?: number;
   analysis: string;
+  liquidityAnalysis?: string;
+  marketMonitoring?: string;
   decision?: string;
   estimatedTime?: string;
   timestamp: string;
@@ -84,6 +86,8 @@ export interface ActivePosition {
   lastDecision?: string;
   lastConfidence?: number;
   lastChecked?: string;
+  liquidityAnalysis?: string;
+  marketMonitoring?: string;
   estimatedTime?: string;
 }
 

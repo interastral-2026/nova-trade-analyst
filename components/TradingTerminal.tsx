@@ -33,10 +33,13 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
       });
       setLogs(Array.isArray(data.executionLogs) ? data.executionLogs : []);
       setHoldings(Array.isArray(data.activePositions) ? data.activePositions : []);
-    } catch (e) {}
+    } catch (e) {
+      console.error("Failed to fetch state", e);
+    }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchState();
     const i = setInterval(fetchState, 3000);
     return () => clearInterval(i);
@@ -57,152 +60,190 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
   return (
     <div className="flex flex-col space-y-6 h-full font-mono bg-black/50">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="col-span-1 md:col-span-2 bg-[#080812] border-2 border-indigo-500/20 rounded-[2.2rem] p-7 shadow-2xl relative overflow-hidden group">
-           <div className="flex justify-between items-end mb-4 relative z-10">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="col-span-2 bg-[#080812] border border-indigo-500/20 rounded-3xl p-5 shadow-2xl relative overflow-hidden group">
+           <div className="flex justify-between items-end mb-3 relative z-10">
               <div>
-                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] mb-1">DAILY_PROFIT</p>
-                <h3 className="text-3xl font-black text-white">€{getSafeNum(stats.profit).toFixed(2)} <span className="text-slate-600 text-lg">/ €{stats.dailyGoal}</span></h3>
+                <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-1">DAILY_PROFIT</p>
+                <h3 className="text-2xl font-black text-white">€{getSafeNum(stats.profit).toFixed(2)} <span className="text-slate-600 text-sm">/ €{stats.dailyGoal}</span></h3>
               </div>
               <div className="text-right">
-                <span className={`text-[12px] font-black ${goalProgress >= 100 ? 'text-emerald-400' : 'text-indigo-500'}`}>
-                  {goalProgress.toFixed(1)}% GOAL
+                <span className={`text-[10px] font-black ${goalProgress >= 100 ? 'text-emerald-400' : 'text-indigo-500'}`}>
+                   {goalProgress.toFixed(0)}%
                 </span>
               </div>
            </div>
-           <div className="h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 relative z-10">
+           <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5 relative z-10">
               <div 
-                className={`h-full transition-all duration-1000 ${goalProgress >= 100 ? 'bg-emerald-500 shadow-[0_0_20px_#10b981]' : 'bg-gradient-to-r from-indigo-600 to-cyan-400'}`}
+                className={`h-full transition-all duration-1000 ${goalProgress >= 100 ? 'bg-emerald-500 shadow-[0_0_15px_#10b981]' : 'bg-gradient-to-r from-indigo-600 to-cyan-400'}`}
                 style={{ width: `${goalProgress}%` }}
               ></div>
            </div>
         </div>
         
-        <div className="bg-[#080812] border border-white/10 p-7 rounded-[2.2rem] flex flex-col justify-center shadow-lg">
-           <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">TOTAL_PROFIT</p>
-           <h2 className="text-2xl font-black text-white tracking-tighter">€{formatPrice(stats.totalProfit)}</h2>
+        <div className="bg-[#080812] border border-white/10 p-5 rounded-3xl flex flex-col justify-center shadow-lg">
+           <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-1">TOTAL</p>
+           <h2 className="text-xl font-black text-white tracking-tighter">€{formatPrice(stats.totalProfit)}</h2>
         </div>
 
-        <div className="bg-[#080812] border border-white/10 p-7 rounded-[2.2rem] flex flex-col justify-center shadow-lg">
-           <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">LIQUIDITY_EUR</p>
-           <h2 className="text-2xl font-black text-white tracking-tighter">€{formatPrice(stats.eur)}</h2>
+        <div className="bg-[#080812] border border-white/10 p-5 rounded-3xl flex flex-col justify-center shadow-lg">
+           <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1">CASH</p>
+           <h2 className="text-xl font-black text-white tracking-tighter">€{formatPrice(stats.eur)}</h2>
         </div>
 
-        <div className="bg-[#080812] border border-white/10 p-7 rounded-[2.2rem] flex flex-col justify-center relative overflow-hidden shadow-lg">
-           <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">RADAR_ACTIVITY</p>
-           <div className="flex items-center space-x-3">
-              <span className={`w-2.5 h-2.5 rounded-full ${liveActivity.includes('ANALYZING') ? 'bg-cyan-500 animate-ping' : 'bg-rose-600 animate-pulse'} shadow-[0_0_10px_#e11d48]`}></span>
-              <h2 className={`text-[11px] font-black uppercase truncate tracking-tight ${liveActivity.includes('ANALYZING') ? 'text-cyan-400' : 'text-white'}`}>
+        <div className="bg-[#080812] border border-white/10 p-5 rounded-3xl flex flex-col justify-center relative overflow-hidden shadow-lg col-span-2 lg:col-span-1">
+           <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-1">RADAR</p>
+           <div className="flex items-center space-x-2">
+              <span className={`w-2 h-2 rounded-full ${liveActivity.includes('ANALYZING') ? 'bg-cyan-500 animate-ping' : 'bg-rose-600 animate-pulse'} shadow-[0_0_8px_#e11d48]`}></span>
+              <h2 className={`text-[10px] font-black uppercase truncate tracking-tight ${liveActivity.includes('ANALYZING') ? 'text-cyan-400' : 'text-white'}`}>
                 {liveActivity || "READY"}
               </h2>
            </div>
-           {liveActivity.includes('ANALYZING') && (
-             <div className="absolute bottom-0 left-0 h-0.5 bg-cyan-500 animate-[shimmer_2s_infinite]" style={{ width: '100%' }}></div>
-           )}
         </div>
       </div>
 
       <div className="flex-1 bg-[#010103] border border-white/10 rounded-[3rem] overflow-hidden flex flex-col shadow-2xl relative">
-        <div className="px-10 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01] backdrop-blur-md">
-           <div className="flex space-x-12">
+        <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.01] backdrop-blur-md">
+           <div className="flex space-x-8">
               {[
-                { id: 'holdings', label: 'Active Hunts', count: holdings.length },
-                { id: 'stream', label: 'Intelligence Stream' },
-                { id: 'activity', label: 'Activity Logs' }
+                { id: 'holdings', label: 'Hunts', count: holdings.length },
+                { id: 'stream', label: 'Intelligence' },
+                { id: 'activity', label: 'Logs' }
               ].map((tab) => (
                 <button 
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)} 
-                  className={`text-[12px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all flex items-center space-x-3 ${activeTab === tab.id ? 'text-indigo-400 border-indigo-500' : 'text-slate-600 border-transparent hover:text-slate-400'}`}
+                  className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all flex items-center space-x-2 ${activeTab === tab.id ? 'text-indigo-400 border-indigo-500' : 'text-slate-600 border-transparent hover:text-slate-400'}`}
                 >
                   <span>{tab.label}</span>
                   {tab.count !== undefined && tab.count > 0 && (
-                    <span className="bg-indigo-500 text-white text-[9px] px-2 py-0.5 rounded-full font-black animate-pulse">{tab.count}</span>
+                    <span className="bg-indigo-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-black animate-pulse">{tab.count}</span>
                   )}
                 </button>
               ))}
            </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
            {activeTab === 'holdings' && (
-             <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
                 {holdings.length === 0 ? (
-                   <div className="col-span-full h-80 flex flex-col items-center justify-center opacity-20 text-center grayscale border border-dashed border-white/5 rounded-[3rem]">
-                      <div className="w-20 h-20 border-8 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin mb-8"></div>
-                      <p className="uppercase text-[14px] font-black tracking-[0.5em]">Establishing Target Nodes...</p>
+                   <div className="col-span-full h-64 flex flex-col items-center justify-center opacity-20 text-center grayscale border border-dashed border-white/10 rounded-[2rem] bg-white/[0.01]">
+                      <div className="w-12 h-12 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+                      <p className="uppercase text-[10px] font-black tracking-[0.3em] text-indigo-400">Establishing Target Nodes...</p>
                    </div>
                 ) : (
                    holdings.map((pos) => {
                     const isProfit = getSafeNum(pos.pnlPercent) >= 0;
+                    const roi = getSafeNum(pos.pnlPercent);
+                    const pnl = getSafeNum(pos.pnl);
+                    
                     return (
-                      <div key={pos.symbol} className={`group bg-[#0a0a14] border-2 p-10 rounded-[3rem] relative overflow-hidden transition-all hover:scale-[1.01] ${isProfit ? 'border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.05)]' : 'border-rose-500/20 shadow-[0_0_50px_rgba(244,63,94,0.05)]'}`}>
-                         <div className="flex justify-between items-start mb-10">
-                            <div>
-                               <h4 className="text-2xl font-black text-white tracking-tighter uppercase mb-1">{pos.symbol}</h4>
-                               <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest">{getSafeNum(pos.confidence)}% Conf. | {getSafeNum(pos.potentialRoi).toFixed(1)}% ROI</span>
+                      <div key={pos.symbol} className={`group bg-[#080812] border p-5 lg:p-6 rounded-[2rem] relative overflow-hidden transition-all hover:border-indigo-500/40 ${isProfit ? 'border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.03)]' : 'border-rose-500/20 shadow-[0_0_40px_rgba(244,63,94,0.03)]'}`}>
+                         {/* Header Section */}
+                         <div className="flex justify-between items-start mb-5">
+                            <div className="flex items-center space-x-3">
+                               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-lg ${isProfit ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                                 {pos.symbol[0]}
+                               </div>
+                               <div>
+                                  <h4 className="text-xl font-black text-white tracking-tighter uppercase leading-none">{pos.symbol}</h4>
+                                  <div className="flex items-center space-x-2 mt-1">
+                                     <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{getSafeNum(pos.confidence)}% CONF</span>
+                                     <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
+                                     <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest">SMC_HUNT</span>
+                                  </div>
+                               </div>
                             </div>
                             <div className="text-right">
-                               <h2 className={`text-4xl font-black tracking-tighter ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                 {isProfit ? '+' : ''}{getSafeNum(pos.pnlPercent).toFixed(2)}%
-                               </h2>
-                               <p className="text-[12px] font-black text-slate-500 mt-1 uppercase">€{getSafeNum(pos.pnl).toFixed(2)} ROI</p>
-                            </div>
-                         </div>
-
-                         <div className="grid grid-cols-3 gap-6 p-8 bg-black/60 border border-white/5 rounded-3xl mb-10 shadow-inner">
-                            <div className="text-center">
-                              <span className="text-[9px] text-slate-600 block uppercase mb-1 font-black">Entry</span>
-                              <span className="text-[14px] text-white font-black tracking-tighter">€{formatPrice(pos.entryPrice)}</span>
-                            </div>
-                            <div className="text-center border-x border-white/5">
-                              <span className="text-[9px] text-emerald-500 block uppercase mb-1 font-black">Target</span>
-                              <span className="text-[14px] text-emerald-400 font-black tracking-tighter">€{formatPrice(pos.tp)}</span>
-                            </div>
-                            <div className="text-center">
-                              <span className="text-[9px] text-rose-500 block uppercase mb-1 font-black">Stop</span>
-                              <span className="text-[14px] text-rose-400 font-black tracking-tighter">€{formatPrice(pos.sl)}</span>
-                            </div>
-                         </div>
-
-                         {pos.lastAnalysis && (
-                           <div className="mb-10 p-6 bg-indigo-900/10 border border-indigo-500/20 rounded-3xl relative">
-                             <div className="absolute -top-3 left-6 bg-[#0a0a14] px-3 py-1 border border-indigo-500/20 rounded-full flex items-center space-x-2">
-                               <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-                               <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest">AI Live Analysis</span>
-                             </div>
-                             
-                             <div className="flex justify-between items-center mb-4 mt-2">
-                               <div className="flex items-center space-x-3">
-                                 <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                                   pos.lastDecision === 'BUY' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                                   pos.lastDecision === 'SELL' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
-                                   'bg-slate-800 text-slate-400 border border-slate-700'
-                                 }`}>
-                                   {pos.lastDecision === 'NEUTRAL' ? 'HOLDING / WAIT' : pos.lastDecision}
-                                 </span>
-                                 {pos.lastConfidence && (
-                                   <span className="text-[10px] font-black text-slate-500">{pos.lastConfidence}% CONFIDENCE</span>
-                                 )}
-                                 {pos.estimatedTime && (
-                                   <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">ETA: {pos.estimatedTime}</span>
-                                 )}
+                               <div className={`text-2xl font-black tracking-tighter leading-none ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                 {isProfit ? '+' : ''}{roi.toFixed(2)}%
                                </div>
-                               {pos.lastChecked && (
-                                 <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
-                                   {new Date(pos.lastChecked).toLocaleTimeString()}
-                                 </span>
-                               )}
-                             </div>
-                             
-                             <p className="text-[12px] text-indigo-200/70 leading-relaxed font-medium italic whitespace-pre-wrap" dir="auto">
-                               "{pos.lastAnalysis}"
-                             </p>
-                           </div>
-                         )}
+                               <p className="text-[10px] font-black text-slate-500 mt-1 uppercase">€{pnl.toFixed(2)} ROI</p>
+                            </div>
+                         </div>
 
-                         <div className="h-2 bg-white/5 rounded-full overflow-hidden shadow-inner">
-                            <div className={`h-full ${isProfit ? 'bg-emerald-500 shadow-[0_0_15px_#10b981]' : 'bg-rose-500 shadow-[0_0_15px_#f43f5e]'}`} style={{ width: '100%' }}></div>
+                         {/* Price Grid */}
+                         <div className="grid grid-cols-3 gap-2 mb-5">
+                            <div className="bg-black/40 border border-white/5 p-3 rounded-2xl text-center">
+                              <span className="text-[7px] text-slate-600 block uppercase mb-1 font-black tracking-widest">Entry</span>
+                              <span className="text-[10px] text-white font-black tracking-tighter">€{formatPrice(pos.entryPrice)}</span>
+                            </div>
+                            <div className="bg-emerald-500/[0.02] border border-emerald-500/10 p-3 rounded-2xl text-center">
+                              <span className="text-[7px] text-emerald-500 block uppercase mb-1 font-black tracking-widest">Target</span>
+                              <span className="text-[10px] text-emerald-400 font-black tracking-tighter">€{formatPrice(pos.tp)}</span>
+                            </div>
+                            <div className="bg-rose-500/[0.02] border border-rose-500/10 p-3 rounded-2xl text-center">
+                              <span className="text-[7px] text-rose-500 block uppercase mb-1 font-black tracking-widest">Stop</span>
+                              <span className="text-[10px] text-rose-400 font-black tracking-tighter">€{formatPrice(pos.sl)}</span>
+                            </div>
+                         </div>
+
+                         {/* AI Analysis Section - Stable Layout */}
+                         <div className="mb-5 p-4 bg-indigo-900/10 border border-indigo-500/20 rounded-2xl relative min-h-[160px] flex flex-col">
+                           <div className="absolute -top-2.5 left-4 bg-[#080812] px-2 py-0.5 border border-indigo-500/20 rounded-full flex items-center space-x-1.5">
+                             <div className="w-1 h-1 rounded-full bg-indigo-500 animate-pulse"></div>
+                             <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Neural Analysis</span>
+                           </div>
+                           
+                           <div className="flex justify-between items-center mb-3 mt-1">
+                             <div className="flex items-center space-x-2">
+                               <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                                 pos.lastDecision === 'BUY' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                                 pos.lastDecision === 'SELL' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                                 'bg-slate-800 text-slate-400 border border-slate-700'
+                               }`}>
+                                 {pos.lastDecision === 'NEUTRAL' ? 'HOLDING' : (pos.lastDecision || 'SCANNING')}
+                               </span>
+                               <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">
+                                 ETA: {pos.estimatedTime || "--"}
+                               </span>
+                             </div>
+                             {pos.lastChecked && (
+                               <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">
+                                 {new Date(pos.lastChecked).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                               </span>
+                             )}
+                           </div>
+                           
+                           <div className="flex-1 overflow-y-auto custom-scrollbar max-h-32">
+                             <p className="text-[10px] text-indigo-100/80 leading-relaxed font-medium italic mb-4" dir="auto">
+                                {pos.lastAnalysis ? `"${pos.lastAnalysis}"` : "در حال دریافت تحلیل اولیه هوش مصنوعی..."}
+                             </p>
+
+                             <div className="space-y-3 pt-3 border-t border-white/5">
+                               <div className="flex items-start space-x-2">
+                                 <div className="w-4 flex justify-center mt-0.5">
+                                   <i className="fas fa-droplet text-cyan-500 text-[8px]"></i>
+                                 </div>
+                                 <div className="flex-1">
+                                   <span className="text-[7px] text-slate-500 uppercase font-black block mb-0.5">نقدینگی (Liquidity)</span>
+                                   <p className="text-[9px] text-slate-300 leading-tight font-medium" dir="auto">
+                                     {pos.liquidityAnalysis || "در حال بررسی سطوح نقدینگی..."}
+                                   </p>
+                                 </div>
+                               </div>
+                               <div className="flex items-start space-x-2">
+                                 <div className="w-4 flex justify-center mt-0.5">
+                                   <i className="fas fa-eye text-amber-500 text-[8px]"></i>
+                                 </div>
+                                 <div className="flex-1">
+                                   <span className="text-[7px] text-slate-500 uppercase font-black block mb-0.5">نظارت بازار (Monitoring)</span>
+                                   <p className="text-[9px] text-slate-300 leading-tight font-medium" dir="auto">
+                                     {pos.marketMonitoring || "در حال پایش نوسانات بازار..."}
+                                   </p>
+                                 </div>
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+
+                         {/* Progress Bar */}
+                         <div className="relative h-1.5 bg-white/5 rounded-full overflow-hidden shadow-inner">
+                            <div 
+                              className={`absolute top-0 left-0 h-full transition-all duration-1000 ${isProfit ? 'bg-emerald-500 shadow-[0_0_15px_#10b981]' : 'bg-rose-500 shadow-[0_0_15px_#f43f5e]'}`} 
+                              style={{ width: `${Math.max(5, Math.min(100, (roi + 5) * 10))}%` }}
+                            ></div>
                          </div>
                       </div>
                     )
