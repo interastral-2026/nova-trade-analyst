@@ -204,8 +204,9 @@ async function executeTrade(symbol, side, amount, quantity) {
       return { success: false, reason: `CB_REJECT: ${errorMsg}` };
     }
 
-    console.log(`[REAL TRADE SUCCESS] ${side} ${productId}`);
-    return { success: true };
+    const orderId = response.data?.order_id || response.data?.success_response?.order_id;
+    console.log(`[REAL TRADE SUCCESS] ${side} ${productId} | OrderID: ${orderId}`);
+    return { success: true, orderId };
   } catch (e: any) {
     const errorData = e.response?.data;
     const errorMsg = errorData?.message || errorData?.error || e.message || "UNKNOWN_API_ERROR";
@@ -223,6 +224,56 @@ async function executeTrade(symbol, side, amount, quantity) {
     }
     
     return { success: false, reason: `API_ERR: ${errorMsg}` };
+  }
+}
+
+async function getActualFillPrice(orderId) {
+  if (!orderId || ghostState.isPaperMode) return null;
+  const token = generateCoinbaseJWT('GET', `/api/v3/brokerage/orders/historical/${orderId}`);
+  if (!token) return null;
+  
+  try {
+    // Wait a bit for the order to fill
+    await new Promise(r => setTimeout(r, 2000));
+    const response = await axios.get(`https://api.coinbase.com/api/v3/brokerage/orders/historical/${orderId}`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      timeout: 10000
+    });
+    
+    const order = response.data?.order;
+    if (order && order.status === 'FILLED') {
+      return Number(order.avg_fill_price);
+    }
+    return null;
+  } catch (e: any) {
+    console.warn(`[FILL_PRICE_ERROR] Could not fetch fill price for ${orderId}:`, e.message);
+    return null;
+  }
+}
+
+async function getLastFillPrice(symbol) {
+  if (ghostState.isPaperMode) return null;
+  const productId = `${symbol}-EUR`;
+  const token = generateCoinbaseJWT('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${productId}`);
+  if (!token) return null;
+  
+  try {
+    const response = await axios.get(`https://api.coinbase.com/api/v3/brokerage/orders/historical/fills?product_id=${productId}&limit=1`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      timeout: 10000
+    });
+    
+    const fills = response.data?.fills || [];
+    if (fills.length > 0) {
+      const lastFill = fills[0];
+      if (lastFill.side === 'BUY') {
+        return Number(lastFill.price);
+      }
+    }
+    return null;
+  } catch (e: any) {
+    console.warn(`[LAST_FILL_ERROR] Could not fetch last fill for ${symbol}:`, e.message);
+    return null;
   }
 }
 
@@ -459,6 +510,7 @@ async function monitorPositionsAI() {
         const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
         
         if (analysis) {
+          console.log(`[AI-MONITOR] Analysis for ${pos.symbol}: ${analysis.side} (Conf: ${analysis.confidence}%)`);
           pos.lastAnalysis = analysis.analysis;
           pos.liquidityAnalysis = analysis.liquidityAnalysis;
           pos.marketMonitoring = analysis.marketMonitoring;
@@ -466,6 +518,21 @@ async function monitorPositionsAI() {
           pos.lastConfidence = analysis.confidence;
           pos.lastChecked = new Date().toISOString();
           pos.estimatedTime = analysis.estimatedTime;
+          
+          // Update targets if AI suggests new ones and they are logically better
+          if (analysis.tp > 0 && (pos.tp === 0 || analysis.tp > pos.tp)) {
+            console.log(`[AI-MONITOR] Updating TP for ${pos.symbol}: ${pos.tp} -> ${analysis.tp}`);
+            pos.tp = analysis.tp;
+          }
+          if (analysis.sl > 0 && (pos.sl === 0 || (analysis.sl > pos.sl && analysis.sl < price))) {
+            console.log(`[AI-MONITOR] Updating SL for ${pos.symbol}: ${pos.sl} -> ${analysis.sl}`);
+            pos.sl = analysis.sl;
+          }
+          
+          saveState();
+        } else {
+          console.warn(`[AI-MONITOR] Failed to get analysis for ${pos.symbol}`);
+          pos.lastChecked = new Date().toISOString(); // Still mark as checked
           saveState();
         }
         
@@ -643,9 +710,18 @@ async function scanWatchlist() {
         const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
         
         if (tradeResult.success) {
-          analysis.decision = `EXECUTED: BUY_${symbol}_AT_${price}`;
+          let finalEntryPrice = price;
+          if (tradeResult.orderId) {
+            const actualPrice = await getActualFillPrice(tradeResult.orderId);
+            if (actualPrice) {
+              console.log(`[REAL_FILL] Actual entry price for ${symbol}: ${actualPrice} EUR`);
+              finalEntryPrice = actualPrice;
+            }
+          }
+
+          analysis.decision = `EXECUTED: BUY_${symbol}_AT_${finalEntryPrice}`;
           ghostState.activePositions.push({
-            symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
+            symbol, entryPrice: finalEntryPrice, currentPrice: finalEntryPrice, amount: tradeAmount, quantity: qty,
             tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
             pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString(),
             estimatedTime: analysis.estimatedTime,
@@ -755,11 +831,13 @@ async function monitor() {
           
           if (qty > 0.00001 && canTrade) {
             console.log(`[RECONCILE] Adopting position: ${symbol} (${qty})`);
+            const lastFillPrice = await getLastFillPrice(symbol);
+            
             ghostState.activePositions.push({
               symbol,
-              entryPrice: 0, 
+              entryPrice: lastFillPrice || 0, 
               currentPrice: 0,
-              amount: 0,
+              amount: (lastFillPrice || 0) * qty,
               quantity: qty,
               tp: 0,
               sl: 0,
@@ -770,6 +848,7 @@ async function monitor() {
               isPaper: false,
               timestamp: new Date().toISOString()
             });
+            saveState();
           }
         }
       }
@@ -788,6 +867,7 @@ async function monitor() {
         // If it's a newly adopted position, set initial prices and default targets
         if (pos.entryPrice === 0) {
           pos.entryPrice = curPrice;
+          pos.amount = curPrice * pos.quantity;
           pos.tp = curPrice * 1.03; // Default 3% TP
           pos.sl = curPrice * 0.98; // Default 2% SL
         }

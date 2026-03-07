@@ -198,12 +198,12 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                                <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">
                                  ETA: {pos.estimatedTime || "--"}
                                </span>
+                               {pos.lastChecked && (
+                                 <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">
+                                   CHECKED: {new Date(pos.lastChecked).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                 </span>
+                               )}
                              </div>
-                             {pos.lastChecked && (
-                               <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">
-                                 {new Date(pos.lastChecked).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                               </span>
-                             )}
                            </div>
                            
                            <div className="flex-1 overflow-y-auto custom-scrollbar max-h-32">
