@@ -4738,14 +4738,30 @@
       "lastDecision": "NEUTRAL",
       "lastConfidence": 0,
       "lastChecked": "2026-03-07T15:41:28.261Z"
+    },
+    {
+      "symbol": "APE",
+      "entryPrice": 0,
+      "currentPrice": 0,
+      "amount": 0,
+      "quantity": 119.58,
+      "tp": 0,
+      "sl": 0,
+      "confidence": 100,
+      "potentialRoi": 0,
+      "pnl": 0,
+      "pnlPercent": 0,
+      "isPaper": false,
+      "timestamp": "2026-03-07T18:27:42.492Z"
     }
   ],
   "liquidity": {
-    "eur": 19.27547887859395,
+    "eur": 9.27590032859395,
     "usdc": 9.243078e-7
   },
   "actualBalances": {
     "1INCH": 37.98,
+    "APE": 119.58,
     "DOT": 1.671,
     "SOL": 0.038
   },
@@ -4757,8 +4773,8 @@
     "lastResetDate": "2026-03-07"
   },
   "totalProfit": -0.5263665903442525,
-  "currentStatus": "ANALYZING_HUNT_1INCH",
-  "scanIndex": 57638,
+  "currentStatus": "ANALYZING_HUNT_APE",
+  "scanIndex": 57668,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

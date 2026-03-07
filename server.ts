@@ -73,10 +73,13 @@ function generateCoinbaseJWT(request_method, request_path) {
   if (!CB_API_KEY || !CB_API_SECRET) return null;
   try {
     const request_host = 'api.coinbase.com';
-    const uri = request_method + ' ' + request_host + request_path;
+    // Strip query parameters for the JWT uri claim as per Coinbase CDP best practices
+    const pathWithoutQuery = request_path.split('?')[0];
+    const uri = request_method + ' ' + request_host + pathWithoutQuery;
+    
     const payload = {
       iss: "cdp",
-      nbf: Math.floor(Date.now() / 1000),
+      nbf: Math.floor(Date.now() / 1000) - 10, // 10 seconds in the past to avoid clock skew
       exp: Math.floor(Date.now() / 1000) + 120,
       sub: CB_API_KEY,
       uri: uri,
@@ -87,7 +90,7 @@ function generateCoinbaseJWT(request_method, request_path) {
       nonce: crypto.randomBytes(16).toString("hex"),
     };
     return jwt.sign(payload, CB_API_SECRET, { algorithm: 'ES256', header });
-  } catch (e) {
+  } catch (e: any) {
     console.error("JWT Error:", e.message);
     return null;
   }
