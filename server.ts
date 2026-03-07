@@ -271,11 +271,11 @@ CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION:
 - RULE #5: PROTECT THE ENTRY. If we are in a trade and in profit, your stop-loss logic must move to break-even + fees as soon as possible.
 
 INTERNAL REASONING PROTOCOL:
-For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'analysis' field.
-1. Market Context: Trend (Bullish/Bearish/Sideways) and Momentum.
-2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks.
-3. Fee Check: Does the expected move cover the ${FEE_RATE * 100}% round-trip fee and leave pure profit?
-4. Decision Logic: Why you are choosing BUY, SELL, or WAIT.
+For every analysis, you MUST provide:
+1. Liquidity Analysis: Focus on sweeps, FVG gaps, and Order Blocks.
+2. Market Monitoring: Current trend, momentum, and potential reversal signs.
+3. Estimated Time: How long until target is reached.
+4. Overall Analysis: Step-by-step summary of decision logic.
 
 ${entryPrice ? `CURRENT POSITION: You bought ${symbol} at ${entryPrice}. Current price is ${price}. 
 Break-even price (including fees) is ${entryPrice * (1 + FEE_RATE)}.
@@ -290,8 +290,8 @@ STRATEGY:
 5. If you issue a BUY signal, your confidence MUST be at least 85%. If you are not 85% sure, issue NEUTRAL.
 6. Estimate the time it will take to reach the Take Profit (TP) target (e.g., "30m", "2h", "6h", "1d").
 
-IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
-Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, tradePercentage (1-100), estimatedTime, analysis.`,
+IMPORTANT: You MUST write the "analysis", "liquidityAnalysis", and "marketMonitoring" fields in PERSIAN (Farsi).
+Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, tradePercentage (1-100), estimatedTime, liquidityAnalysis, marketMonitoring, analysis.`,
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -304,9 +304,11 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
               potentialRoi: { type: Type.NUMBER },
               tradePercentage: { type: Type.NUMBER, description: "Percentage of available capital to use (1-100)" },
               estimatedTime: { type: Type.STRING, description: "Estimated time to reach target (e.g. 2h, 4h)" },
+              liquidityAnalysis: { type: Type.STRING },
+              marketMonitoring: { type: Type.STRING },
               analysis: { type: Type.STRING }
             },
-            required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'analysis', 'estimatedTime']
+            required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'analysis', 'estimatedTime', 'liquidityAnalysis', 'marketMonitoring']
           },
           temperature: 0.1
         }
@@ -342,6 +344,8 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
   return {
     side: "NEUTRAL",
     analysis: `خطا در تحلیل هوش مصنوعی برای ${symbol}: ${errorMsg}`,
+    liquidityAnalysis: "خطا در دریافت داده‌های نقدینگی",
+    marketMonitoring: "خطا در نظارت بر بازار",
     symbol,
     timestamp: new Date().toISOString(),
     confidence: 0,
@@ -452,6 +456,8 @@ async function monitorPositionsAI() {
         
         if (analysis) {
           pos.lastAnalysis = analysis.analysis;
+          pos.liquidityAnalysis = analysis.liquidityAnalysis;
+          pos.marketMonitoring = analysis.marketMonitoring;
           pos.lastDecision = analysis.side;
           pos.lastConfidence = analysis.confidence;
           pos.lastChecked = new Date().toISOString();
@@ -553,7 +559,7 @@ async function scanWatchlist() {
         const price = candles[candles.length - 1].close;
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
         return { symbol, price, analysis };
-      } catch (_e) {
+      } catch {
         return null;
       }
     }));
@@ -635,7 +641,10 @@ async function scanWatchlist() {
             symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
             tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
             pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString(),
-            estimatedTime: analysis.estimatedTime
+            estimatedTime: analysis.estimatedTime,
+            lastAnalysis: analysis.analysis,
+            liquidityAnalysis: analysis.liquidityAnalysis,
+            marketMonitoring: analysis.marketMonitoring
           });
           
           ghostState.liquidity.eur -= tradeAmount;
