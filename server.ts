@@ -287,7 +287,7 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
                        API_KEY.length < 20;
 
   if (isInvalidKey) {
-    return {
+    const errorResult = {
       side: "NEUTRAL",
       analysis: "خطا: کلید API هوش مصنوعی (Gemini) یافت نشد یا نامعتبر است. لطفاً یک کلید معتبر در فایل .env تنظیم کنید.",
       symbol,
@@ -299,6 +299,18 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
       marketMonitoring: "سیستم پایش غیرفعال است",
       id: crypto.randomUUID()
     };
+    
+    // Log error to thoughts so it shows up in Intelligence tab
+    ghostState.thoughts.unshift(errorResult);
+    if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
+    
+    // Also add to execution logs if it's a critical failure
+    if (ghostState.executionLogs.length === 0 || ghostState.executionLogs[0].action !== 'AI_ERROR') {
+      addLog('AI_ERROR', symbol, "کلید API هوش مصنوعی نامعتبر است.", 'FAILED');
+    }
+    
+    saveState();
+    return errorResult;
   }
 
   const maxRetries = 2;
@@ -315,7 +327,7 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
     try {
       ghostState.currentStatus = `AI_REQ_${symbol}_ATTEMPT_${attempt + 1}`;
       const aiPromise = ai.models.generateContent({
-        model: 'gemini-flash-latest', 
+        model: 'gemini-3-flash-preview', 
         contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_15M_CANDLES: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
         config: {
           systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE, HIGHLY CONSERVATIVE AI SCALPER.
@@ -463,6 +475,9 @@ async function monitorPositionsAI() {
   saveState();
   
   console.log(`[AI-MONITOR] Checking ${ghostState.activePositions.length} active positions...`);
+  if (ghostState.scanIndex % 5 === 0) {
+    addLog('MONITOR', 'SYSTEM', `در حال پایش ${ghostState.activePositions.length} شکار فعال...`, 'INFO');
+  }
   
   try {
     // Process all positions in parallel with a small stagger
@@ -501,16 +516,7 @@ async function monitorPositionsAI() {
               ghostState.dailyStats.profit += netPnl;
               ghostState.totalProfit += netPnl;
               ghostState.liquidity.eur += (pos.amount + netPnl);
-              ghostState.executionLogs.unshift({
-                id: crypto.randomUUID(),
-                symbol: pos.symbol,
-                action: 'SELL',
-                price,
-                pnl: netPnl,
-                status: 'SUCCESS',
-                details: `TRAILING_STOP_PROFIT`,
-                timestamp: new Date().toISOString()
-              });
+              addLog('SELL', pos.symbol, `TRAILING_STOP_PROFIT`, 'SUCCESS', price, netPnl);
               const idx = ghostState.activePositions.findIndex(p => p.symbol === pos.symbol);
               if (idx !== -1) ghostState.activePositions.splice(idx, 1);
               saveState();
@@ -611,6 +617,9 @@ async function scanWatchlist() {
     saveState();
 
     console.log(`[SCAN] Starting full market scan to find the absolute BEST opportunity...`);
+    if (ghostState.scanIndex % 10 === 0) {
+      addLog('SCAN', 'SYSTEM', "شروع اسکن کامل بازار برای شکار فرصت‌های طلایی...", 'INFO');
+    }
     const potentialTrades = [];
     
     // Scan up to 10 symbols per cycle to avoid API congestion
@@ -743,18 +752,11 @@ async function scanWatchlist() {
           
           ghostState.liquidity.eur -= tradeAmount;
 
-          ghostState.executionLogs.unshift({ 
-            id: crypto.randomUUID(), 
-            symbol, 
-            action: 'BUY', 
-            price, 
-            status: 'SUCCESS', 
-            details: `LIQUIDITY_BUY_CONF_${analysis.confidence}%`,
-            timestamp: new Date().toISOString() 
-          });
+          addLog('BUY', symbol, `LIQUIDITY_BUY_CONF_${analysis.confidence}%`, 'SUCCESS', finalEntryPrice);
           ghostState.dailyStats.trades++;
         } else {
           analysis.decision = `FAILED: ${tradeResult.reason}`;
+          addLog('BUY', symbol, `FAILED_BUY_SIGNAL: ${tradeResult.reason}`, 'FAILED', price);
         }
       } else {
         analysis.decision = `SKIPPED: INSUFFICIENT_LIQUIDITY (Need: ${tradeAmount.toFixed(2)}, Have: ${totalEur.toFixed(2)})`;
@@ -785,12 +787,70 @@ async function scanWatchlist() {
   }
 }
 
+function addLog(action: string, symbol: string, details: string, status: 'SUCCESS' | 'FAILED' | 'INFO' = 'INFO', price: number = 0, pnl: number = 0, timestamp?: string) {
+  ghostState.executionLogs.unshift({
+    id: crypto.randomUUID(),
+    symbol,
+    action,
+    price,
+    pnl,
+    status,
+    details,
+    timestamp: timestamp || new Date().toISOString()
+  });
+  if (ghostState.executionLogs.length > 100) ghostState.executionLogs.pop();
+  saveState();
+}
+
+async function syncCoinbaseOrders() {
+  if (ghostState.isPaperMode) return;
+  
+  const token = generateCoinbaseJWT('GET', '/api/v3/brokerage/orders/historical/batch');
+  if (!token) return;
+
+  try {
+    const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/orders/historical/batch?limit=50', {
+      headers: { 'Authorization': `Bearer ${token}` },
+      timeout: 10000
+    });
+    
+    const orders = response.data?.orders || [];
+    let addedCount = 0;
+
+    for (const order of orders) {
+      if (order.status !== 'FILLED') continue;
+      
+      const orderId = order.order_id;
+      const exists = ghostState.executionLogs.some(log => log.details && log.details.includes(orderId));
+      
+      if (!exists) {
+        const symbol = order.product_id.split('-')[0];
+        const action = order.side;
+        const price = Number(order.avg_price) || Number(order.price) || 0;
+        const timestamp = order.created_time || new Date().toISOString();
+        
+        addLog(action, symbol, `COINBASE_SYNC | ID: ${orderId}`, 'SUCCESS', price, 0, timestamp);
+        addedCount++;
+      }
+    }
+
+    if (addedCount > 0) {
+      console.log(`[SYNC] Added ${addedCount} historical orders from Coinbase to logs.`);
+      ghostState.executionLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      saveState();
+    }
+  } catch (e: any) {
+    console.warn("[SYNC ERROR] Failed to sync historical orders:", e.message);
+  }
+}
+
 async function monitor() {
   if (isMonitoring) return;
   isMonitoring = true;
 
   try {
     await syncCoinbaseBalance();
+    await syncCoinbaseOrders(); // Sync history on every monitor cycle
     const today = new Date().toISOString().split('T')[0];
     if (ghostState.dailyStats.lastResetDate !== today) {
       ghostState.dailyStats.profit = 0; ghostState.dailyStats.trades = 0; ghostState.dailyStats.lastResetDate = today;
@@ -813,17 +873,7 @@ async function monitor() {
         
         if (actualQty < (pos.quantity * 0.1)) {
           console.log(`[RECONCILE] Removing ${pos.symbol} - Position no longer exists on Coinbase.`);
-          ghostState.executionLogs.unshift({
-            id: crypto.randomUUID(),
-            symbol: pos.symbol,
-            action: 'SELL',
-            price: pos.currentPrice,
-            pnl: pos.pnl,
-            status: 'SUCCESS',
-            details: `EXTERNAL_EXIT_DETECTED`,
-            timestamp: new Date().toISOString()
-          });
-          if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
+          addLog('SELL', pos.symbol, `EXTERNAL_EXIT_DETECTED`, 'SUCCESS', pos.currentPrice, pos.pnl);
           ghostState.dailyStats.profit += pos.pnl; 
           ghostState.totalProfit += pos.pnl;
           ghostState.liquidity.eur += (pos.amount + pos.pnl);
@@ -983,9 +1033,18 @@ async function startServer() {
   app.get('/api/ping', (req, res) => res.json({ status: 'pong', timestamp: new Date().toISOString() }));
   app.get('/api/ghost/state', (req, res) => res.json(ghostState));
   app.post('/api/ghost/toggle', (req, res) => {
-    if (req.body.engine !== undefined) ghostState.isEngineActive = !!req.body.engine;
-    if (req.body.auto !== undefined) ghostState.autoPilot = !!req.body.auto;
-    if (req.body.paper !== undefined) ghostState.isPaperMode = !!req.body.paper;
+    if (req.body.engine !== undefined) {
+      ghostState.isEngineActive = !!req.body.engine;
+      addLog('ENGINE', 'SYSTEM', ghostState.isEngineActive ? "ربات فعال شد." : "ربات متوقف شد.", 'INFO');
+    }
+    if (req.body.auto !== undefined) {
+      ghostState.autoPilot = !!req.body.auto;
+      addLog('AUTOPILOT', 'SYSTEM', ghostState.autoPilot ? "حالت خودکار فعال شد." : "حالت خودکار غیرفعال شد.", 'INFO');
+    }
+    if (req.body.paper !== undefined) {
+      ghostState.isPaperMode = !!req.body.paper;
+      addLog('PAPER_MODE', 'SYSTEM', ghostState.isPaperMode ? "حالت دمو فعال شد." : "حالت واقعی فعال شد.", 'INFO');
+    }
     saveState();
     res.json({ success: true });
   });
