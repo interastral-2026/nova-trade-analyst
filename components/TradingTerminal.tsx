@@ -33,10 +33,13 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
       });
       setLogs(Array.isArray(data.executionLogs) ? data.executionLogs : []);
       setHoldings(Array.isArray(data.activePositions) ? data.activePositions : []);
-    } catch (e) {}
+    } catch (e) {
+      console.error("Failed to fetch state", e);
+    }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchState();
     const i = setInterval(fetchState, 3000);
     return () => clearInterval(i);

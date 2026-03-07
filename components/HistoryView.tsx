@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { TradeSignal } from '../types';
 
 interface HistoryViewProps {
   signals: any[];

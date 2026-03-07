@@ -1,5 +1,5 @@
 
-import { MarketData, AssetInfo } from "../types.ts";
+import { MarketData, AssetInfo } from "../types";
 
 /**
  * GHOST_STABILITY_V3: SWITCHED TO CRYPTOCOMPARE
@@ -58,7 +58,7 @@ export const fetchProductStats = async (product_id: string): Promise<AssetInfo> 
       volume: raw.VOLUME24HOURTO.toString(),
       marketCap: raw.MKTCAP ? raw.MKTCAP.toString() : 'N/A'
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       id: product_id,
       name: product_id.split('-')[0],

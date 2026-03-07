@@ -16,6 +16,18 @@ interface MarketDashboardProps {
   candles: MarketData[];
 }
 
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-slate-900 border border-slate-700 p-2 rounded shadow-xl">
+        <p className="text-[10px] text-slate-400 uppercase mb-1">{payload[0].payload.time}</p>
+        <p className="text-sm font-mono font-bold text-white">${payload[0].value.toFixed(2)}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 const MarketDashboard: React.FC<MarketDashboardProps> = ({ asset, candles }) => {
   if (!asset || !candles || candles.length === 0) {
     return (
@@ -29,18 +41,6 @@ const MarketDashboard: React.FC<MarketDashboardProps> = ({ asset, candles }) => 
     time: new Date(c.time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     price: c.close
   }));
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-slate-900 border border-slate-700 p-2 rounded shadow-xl">
-          <p className="text-[10px] text-slate-400 uppercase mb-1">{payload[0].payload.time}</p>
-          <p className="text-sm font-mono font-bold text-white">${payload[0].value.toFixed(2)}</p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div className="space-y-4">

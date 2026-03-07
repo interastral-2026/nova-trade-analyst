@@ -46,7 +46,7 @@ const App: React.FC = () => {
         { currency: 'USDC', available: Number(data.liquidity?.usdc) || 0, total: Number(data.liquidity?.usdc) || 0 }
       ]);
       setStatus(AnalysisStatus.IDLE);
-    } catch (e) {
+    } catch (_e) {
       setLiveActivity("BRIDGE_OFFLINE");
       setStatus(AnalysisStatus.ERROR);
     }
@@ -55,7 +55,9 @@ const App: React.FC = () => {
   const handleUpdateBridge = (url: string) => {
     try {
       localStorage.setItem('NOVA_BRIDGE_URL', url.trim());
-    } catch (e) {}
+    } catch (e) {
+      console.error("Failed to update settings", e);
+    }
     setBridgeUrl(url.trim());
     syncWithServer();
   };
@@ -69,7 +71,9 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ engine: newState })
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error("Failed to update settings", e);
+    }
   };
 
   const toggleAuto = async () => {
@@ -81,7 +85,9 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ auto: newState })
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error("Failed to toggle auto trade", e);
+    }
   };
 
   const togglePaper = async () => {
@@ -93,7 +99,9 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ paper: newState })
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error("Failed to toggle paper mode", e);
+    }
   };
 
   const updateSettings = async (newSettings: any) => {
@@ -104,10 +112,13 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ settings: newSettings })
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error("Failed to update settings", e);
+    }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     syncWithServer();
     const interval = setInterval(syncWithServer, 4000);
     const statsInterval = setInterval(() => {
@@ -117,7 +128,9 @@ const App: React.FC = () => {
             const filtered = prev.filter(a => a.id !== id);
             return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
           });
-        }).catch(() => {});
+        }).catch((err) => {
+          console.error(`Failed to fetch stats for ${id}`, err);
+        });
       });
     }, 8000);
     return () => { clearInterval(interval); clearInterval(statsInterval); };

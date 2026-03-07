@@ -4756,14 +4756,30 @@
       "lastDecision": "NEUTRAL",
       "lastConfidence": 0,
       "lastChecked": "2026-03-07T15:41:28.261Z"
+    },
+    {
+      "symbol": "CHZ",
+      "entryPrice": 0,
+      "currentPrice": 0,
+      "amount": 0,
+      "quantity": 338.6,
+      "tp": 0,
+      "sl": 0,
+      "confidence": 100,
+      "potentialRoi": 0,
+      "pnl": 0,
+      "pnlPercent": 0,
+      "isPaper": false,
+      "timestamp": "2026-03-07T16:42:45.323Z"
     }
   ],
   "liquidity": {
-    "eur": 19.42086622859395,
+    "eur": 9.42547887859395,
     "usdc": 8.743078e-7
   },
   "actualBalances": {
     "1INCH": 37.98,
+    "CHZ": 338.6,
     "AAVE": 0.056,
     "DOT": 1.671,
     "SOL": 0.038
@@ -4777,7 +4793,7 @@
   },
   "totalProfit": -0.4546865903442524,
   "currentStatus": "IDLE_SCAN_COMPLETE",
-  "scanIndex": 56402,
+  "scanIndex": 57458,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
