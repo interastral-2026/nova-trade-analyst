@@ -39,7 +39,14 @@ const App: React.FC = () => {
       setIsPaperMode(!!data.isPaperMode);
       setSettings(data.settings || {});
       setLiveActivity(data.currentStatus || "IDLE");
-      setStatus(AnalysisStatus.IDLE);
+      
+      // Detect AI Key Error in thoughts
+      const hasKeyError = (data.thoughts || []).some((t: any) => t.analysis && (t.analysis.includes('کلید') || t.analysis.includes('API key')));
+      if (hasKeyError) {
+        setStatus(AnalysisStatus.KEY_REQUIRED);
+      } else {
+        setStatus(AnalysisStatus.IDLE);
+      }
     } catch {
       setLiveActivity("BRIDGE_OFFLINE");
       setStatus(AnalysisStatus.ERROR);

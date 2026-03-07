@@ -712,6 +712,26 @@
   ],
   "executionLogs": [
     {
+      "id": "3d4615dd-ec65-4314-aab7-f164f46b02e0",
+      "symbol": "CHZ",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-07T18:14:15.450Z"
+    },
+    {
+      "id": "3655c550-c759-4144-b426-72a97ce496f3",
+      "symbol": "AAVE",
+      "action": "SELL",
+      "price": 94.32,
+      "pnl": -0.07168000000000006,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-07T18:13:54.436Z"
+    },
+    {
       "id": "335eac4e-5be9-4564-8e48-481c3eeb90ca",
       "symbol": "CHZ",
       "action": "SELL",
@@ -4657,24 +4677,6 @@
       "status": "SUCCESS",
       "details": "AUTO_SMC_HIT_82%",
       "timestamp": "2026-02-21T00:17:41.515Z"
-    },
-    {
-      "id": "4eba0c0c-3cc2-4617-8a09-193c5470f65d",
-      "symbol": "ETH",
-      "action": "BUY",
-      "price": 1669.38,
-      "status": "SUCCESS",
-      "details": "AUTO_SMC_HIT_78%",
-      "timestamp": "2026-02-21T00:17:25.958Z"
-    },
-    {
-      "id": "de4f44dd-f1e9-4086-9969-48fb024779f2",
-      "symbol": "FET",
-      "action": "BUY",
-      "price": 0.1422,
-      "status": "FAILED",
-      "details": "API_EXECUTION_FAILED",
-      "timestamp": "2026-02-21T00:16:55.199Z"
     }
   ],
   "activePositions": [
@@ -4697,26 +4699,6 @@
       "lastConfidence": 85,
       "lastChecked": "2026-03-07T15:40:39.023Z",
       "estimatedTime": "4h"
-    },
-    {
-      "symbol": "AAVE",
-      "entryPrice": 95.6,
-      "currentPrice": 94.32,
-      "amount": 0,
-      "quantity": 0.056,
-      "tp": 98.468,
-      "sl": 93.68799999999999,
-      "confidence": 100,
-      "potentialRoi": 0,
-      "pnl": -0.07168000000000006,
-      "pnlPercent": -1.3389121338912147,
-      "isPaper": false,
-      "timestamp": "2026-03-06T21:53:49.366Z",
-      "lastAnalysis": "تحلیل گام‌به‌گام: ۱. وضعیت بازار: روند در تایم‌فریم ۱۵ دقیقه نزولی است و قیمت با شتاب به سمت پایین حرکت کرده است. ۲. شواهد SMC: قیمت در حال حاضر نقدینگی سطح ۹۴.۳۳ را جمع‌آوری کرده (Liquidity Sweep) که می‌تواند منجر به یک بازگشت موقت شود. ۳. بررسی کارمزد: نقطه سر به سر ما ۹۶.۷۴ است. قیمت فعلی ۱.۳۳٪ پایین‌تر از نقطه ورود است. ۴. منطق تصمیم: طبق قوانین حفاظتی، چون ضرر کمتر از ۱.۵٪ است و قیمت در یک ناحیه احتمالی برگشت قرار دارد، فعلاً پوزیشن را حفظ می‌کنیم. فروش در این نقطه ریسک فروش در کف را دارد. منتظر تایید صعودی برای خروج در قیمت بهتر یا سر به سر می‌مانیم.",
-      "lastDecision": "NEUTRAL",
-      "lastConfidence": 65,
-      "lastChecked": "2026-03-07T15:41:55.617Z",
-      "estimatedTime": "6h"
     },
     {
       "symbol": "SOL",
@@ -4756,44 +4738,27 @@
       "lastDecision": "NEUTRAL",
       "lastConfidence": 0,
       "lastChecked": "2026-03-07T15:41:28.261Z"
-    },
-    {
-      "symbol": "CHZ",
-      "entryPrice": 0,
-      "currentPrice": 0,
-      "amount": 0,
-      "quantity": 338.6,
-      "tp": 0,
-      "sl": 0,
-      "confidence": 100,
-      "potentialRoi": 0,
-      "pnl": 0,
-      "pnlPercent": 0,
-      "isPaper": false,
-      "timestamp": "2026-03-07T16:42:45.323Z"
     }
   ],
   "liquidity": {
-    "eur": 9.42547887859395,
-    "usdc": 8.743078e-7
+    "eur": 19.27547887859395,
+    "usdc": 9.243078e-7
   },
   "actualBalances": {
     "1INCH": 37.98,
-    "CHZ": 338.6,
-    "AAVE": 0.056,
     "DOT": 1.671,
     "SOL": 0.038
   },
   "dailyStats": {
     "trades": 1,
-    "profit": -0.14203894003075362,
+    "profit": -0.2137189400307537,
     "fees": 0,
     "dailyGoal": 50,
     "lastResetDate": "2026-03-07"
   },
-  "totalProfit": -0.4546865903442524,
-  "currentStatus": "IDLE_SCAN_COMPLETE",
-  "scanIndex": 57588,
+  "totalProfit": -0.5263665903442525,
+  "currentStatus": "ANALYZING_HUNT_1INCH",
+  "scanIndex": 57638,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

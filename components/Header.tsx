@@ -26,14 +26,15 @@ const Header: React.FC<HeaderProps> = ({ status, autoPilot, scanningSymbol, engi
   };
 
   const getStatusLabel = () => {
-    if (!engineActive) return 'Core Engine Off';
+    if (!engineActive) return 'موتور خاموش است';
     switch (status) {
-      case AnalysisStatus.RATE_LIMITED: return 'Rate Limited';
-      case AnalysisStatus.OVERLOADED: return 'Model Overloaded';
-      case AnalysisStatus.KEY_REQUIRED: return 'Key Required';
-      case AnalysisStatus.ANALYZING: return 'Neural 2.5 Lite Probing';
-      case AnalysisStatus.IDLE: return 'Ghost Scan Active';
-      default: return `System: ${status}`;
+      case AnalysisStatus.RATE_LIMITED: return 'محدودیت درخواست';
+      case AnalysisStatus.OVERLOADED: return 'ترافیک بالای مدل';
+      case AnalysisStatus.KEY_REQUIRED: return 'خطای کلید API هوش مصنوعی';
+      case AnalysisStatus.ANALYZING: return 'در حال تحلیل عصبی بازار';
+      case AnalysisStatus.IDLE: return 'رادار فعال - در حال شکار';
+      case AnalysisStatus.ERROR: return 'خطای سیستمی';
+      default: return `وضعیت: ${status}`;
     }
   };
 
