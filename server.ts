@@ -679,14 +679,6 @@ async function startServer() {
   app.use(cors());
   app.use(express.json());
 
-  // Request Logging
-  app.use((req, _res, next) => {
-    if (req.url.startsWith('/api')) {
-      console.log(`[API_REQ] ${req.method} ${req.url}`);
-    }
-    next();
-  });
-
   // API Routes (MOVED TO TOP)
   app.get('/api/ping', (req, res) => res.json({ status: 'pong', timestamp: new Date().toISOString() }));
   app.get('/api/ghost/state', (req, res) => res.json(ghostState));

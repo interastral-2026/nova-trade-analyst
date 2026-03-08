@@ -5180,8 +5180,8 @@
     "lastResetDate": "2026-03-08"
   },
   "totalProfit": -8.086584894221222,
-  "currentStatus": "IDLE_SCAN_COMPLETE",
-  "scanIndex": 61745,
+  "currentStatus": "MONITORING_HUNTS",
+  "scanIndex": 61761,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
