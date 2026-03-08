@@ -7,6 +7,7 @@ import axios from 'axios';
 import cors from 'cors';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
+import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -27,6 +28,8 @@ envPaths.forEach(envPath => {
   }
 });
 
+const API_KEY = (process.env.GEMINI_API_KEY || process.env.API_KEY || "").trim();
+fs.appendFileSync('debug.log', `[INIT] API_KEY starts with: ${API_KEY.substring(0, 5)}... (Length: ${API_KEY.length})\n`);
 const CB_API_KEY = (process.env.CB_API_KEY || "").trim();
 const CB_API_SECRET = process.env.CB_API_SECRET 
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
@@ -34,13 +37,10 @@ const CB_API_SECRET = process.env.CB_API_SECRET
 
 const WATCHLIST = ['SOL', 'AVAX', 'LINK', 'NEAR', 'MATIC', 'XRP', 'DOGE', 'SHIB', 'PEPE', 'WIF', 'BONK', 'FLOKI', 'RNDR', 'INJ', 'FET', 'TIA'];
 const STATE_FILE = './ghost_state.json';
-const FEE_RATE = 0.008; // 0.8% round-trip fee (0.4% buy + 0.4% sell)
-const MIN_HOLD_TIME_MS = 10 * 60 * 1000; // 10 minutes minimum hold time
-const TRADE_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes cooldown between trades for same symbol
+const FEE_RATE = 0.005; // 0.5% round-trip fee (0.25% buy + 0.25% sell, assuming advanced trade tier)
+const MIN_NET_PROFIT = 0.003; // 0.3% minimum net profit after fees (Total required move = 0.8%)
 
 let availableEurPairs: string[] = [];
-const lastTradeTime: Record<string, number> = {};
-const pendingAnalysis: any[] = [];
 
 // --- TRADING ENGINE LOGIC ---
 
@@ -73,13 +73,10 @@ function generateCoinbaseJWT(request_method, request_path) {
   if (!CB_API_KEY || !CB_API_SECRET) return null;
   try {
     const request_host = 'api.coinbase.com';
-    // Strip query parameters for the JWT uri claim as per Coinbase CDP best practices
-    const pathWithoutQuery = request_path.split('?')[0];
-    const uri = request_method + ' ' + request_host + pathWithoutQuery;
-    
+    const uri = request_method + ' ' + request_host + request_path;
     const payload = {
       iss: "cdp",
-      nbf: Math.floor(Date.now() / 1000) - 10, // 10 seconds in the past to avoid clock skew
+      nbf: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 120,
       sub: CB_API_KEY,
       uri: uri,
@@ -90,7 +87,7 @@ function generateCoinbaseJWT(request_method, request_path) {
       nonce: crypto.randomBytes(16).toString("hex"),
     };
     return jwt.sign(payload, CB_API_SECRET, { algorithm: 'ES256', header });
-  } catch (e: any) {
+  } catch (e) {
     console.error("JWT Error:", e.message);
     return null;
   }
@@ -106,8 +103,7 @@ async function syncCoinbaseBalance() {
   const token = generateCoinbaseJWT('GET', '/api/v3/brokerage/accounts');
   if (!token) return false;
   try {
-    // Increase limit to 250 to ensure we get all accounts
-    const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/accounts?limit=250', {
+    const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/accounts', {
       headers: { 'Authorization': `Bearer ${token}` },
       timeout: 10000
     });
@@ -123,7 +119,7 @@ async function syncCoinbaseBalance() {
     ghostState.actualBalances = newBalances;
     console.log(`[SYNC] Coinbase Balance Updated. EUR: ${ghostState.liquidity.eur}, Assets: ${Object.keys(newBalances).join(', ')}`);
     return true;
-  } catch (e: any) {
+  } catch (e) {
     console.error("[SYNC ERROR] Failed to fetch Coinbase balances:", e.message);
     return false;
   }
@@ -175,8 +171,15 @@ async function executeTrade(symbol, side, amount, quantity) {
 
     // Truncate instead of round to avoid INSUFFICIENT_FUND
     const quoteSizeStr = (Math.floor(Number(amount) * 100) / 100).toFixed(2);
-    // Convert to string and truncate to 8 decimal places max without rounding up
-    const baseSizeStr = finalQty.toString().match(/^-?\d+(?:\.\d{0,8})?/)[0];
+    
+    // Improved truncation: handle integers and ensure we don't round up
+    let baseSizeStr = finalQty.toFixed(8);
+    const parts = baseSizeStr.split('.');
+    if (parts.length > 1) {
+      baseSizeStr = parts[0] + '.' + parts[1].substring(0, 8);
+    }
+    // Remove trailing zeros for cleaner API call
+    baseSizeStr = parseFloat(baseSizeStr).toString();
 
     const orderConfig = side === 'BUY' 
       ? { market_market_ioc: { quote_size: quoteSizeStr } }
@@ -208,12 +211,11 @@ async function executeTrade(symbol, side, amount, quantity) {
       return { success: false, reason: `CB_REJECT: ${errorMsg}` };
     }
 
-    const orderId = response.data?.order_id || response.data?.success_response?.order_id;
-    console.log(`[REAL TRADE SUCCESS] ${side} ${productId} | OrderID: ${orderId}`);
-    return { success: true, orderId };
+    console.log(`[REAL TRADE SUCCESS] ${side} ${productId}`);
+    return { success: true };
   } catch (e: any) {
     const errorData = e.response?.data;
-    const errorMsg = errorData?.message || errorData?.error || e.message || "UNKNOWN_API_ERROR";
+    let errorMsg = errorData?.message || errorData?.error || e.message || "UNKNOWN_API_ERROR";
     
     console.error("[REAL TRADE API ERROR]", errorData || e.message);
     
@@ -231,36 +233,127 @@ async function executeTrade(symbol, side, amount, quantity) {
   }
 }
 
-async function getLastFillPrice(symbol) {
-  if (ghostState.isPaperMode) return null;
-  const productId = `${symbol}-EUR`;
-  const token = generateCoinbaseJWT('GET', `/api/v3/brokerage/orders/historical/fills?product_id=${productId}`);
-  if (!token) return null;
+async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
+  if (!API_KEY || API_KEY.startsWith('MY_GE') || API_KEY === 'YOUR_API_KEY') {
+    return {
+      side: "NEUTRAL",
+      analysis: "خطا: کلید API هوش مصنوعی نامعتبر است. لطفاً کلید معتبر خود را در تنظیمات وارد کنید.",
+      symbol,
+      timestamp: new Date().toISOString(),
+      confidence: 0,
+      potentialRoi: 0,
+      id: crypto.randomUUID()
+    };
+  }
+
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  const history = (candles || []).slice(-30).map(c => ({ h: c.high, l: c.low, c: c.close }));
   
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('AI_TIMEOUT')), 45000);
+  });
+
   try {
-    const response = await axios.get(`https://api.coinbase.com/api/v3/brokerage/orders/historical/fills?product_id=${productId}&limit=1`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-      timeout: 10000
-    });
-    
-    const fills = response.data?.fills || [];
-    if (fills.length > 0) {
-      const lastFill = fills[0];
-      if (lastFill.side === 'BUY') {
-        return Number(lastFill.price);
+    ghostState.currentStatus = `AI_REQ_${symbol}`;
+    const aiPromise = ai.models.generateContent({
+      model: 'gemini-3-flash-preview', 
+      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
+      config: {
+        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, A HIGH-FREQUENCY AI SCALPER.
+Use Smart Money Concepts (SMC), FVG, and MSS. 
+Goal: Capture quick 1.5% - 5% ROI scalps. 
+Speed and liquidity are everything. Do not hold for long-term. DO NOT WASTE TIME.
+Factor in ${FEE_RATE * 100}% round-trip fees. A trade is only valid if potential net profit > 0.5%.
+
+CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION:
+- RULE #1: NEVER LOSE MONEY. If a setup is not A+, DO NOT BUY.
+- RULE #2: DO NOT FOMO. Never buy after a massive green candle. Wait for a pullback to a Discount Zone.
+- RULE #3: DO NOT CATCH FALLING KNIVES. If price is dropping sharply, wait for a clear MSS (Market Structure Shift) and FVG tap before buying.
+- RULE #4: BE EXTREMELY CONSERVATIVE. ACT LIKE A SNIPER.
+- RULE #5: DO NOT OVERTRADE. If the market is choppy, ranging, or unclear, YOU MUST CHOOSE 'NEUTRAL'.
+- RULE #6: DO NOT LET CAPITAL SLEEP. If a position is stagnant or moving against us, cut it (SELL) and free up liquidity for better opportunities.
+- RULE #7: ACTIVE POSITIONS: If we are in profit, be ruthless about taking it before the market reverses. If we are stuck in a slow market, exit to find a faster one.
+- RULE #8: NOISE REDUCTION: Ignore small, random price fluctuations. Only act on significant structural shifts or clear institutional footprints.
+
+INTERNAL REASONING PROTOCOL:
+For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'analysis' field.
+1. Market Context: Trend (Bullish/Bearish/Sideways) and Momentum.
+2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks.
+3. Decision Logic: Why you are choosing BUY, SELL, or WAIT.
+4. Risk Assessment: Is this a FOMO buy? Is this a falling knife?
+5. Time Estimation: How many minutes do you expect it will take to reach the Take Profit (TP) target?
+6. If WAIT: Explicitly state what is missing (e.g., "Waiting for MSS confirmation", "No clear FVG", "Spread too high").
+
+Only issue BUY if you see a clear institutional "Discount Zone" or "Liquidity Sweep" with strong upward momentum.
+Issue SELL early if you see "Distribution" or "SFP" (Swing Failure Pattern) to lock in profit before reversals.
+BE SMART: Avoid "Bull Traps" and "Bear Traps" set by exchanges.
+NEVER RECOMMEND A TRADE THAT DOES NOT COVER FEES.
+
+${entryPrice ? `CURRENT POSITION: You bought ${symbol} at ${entryPrice}. Current price is ${price}. 
+Break-even price (including fees) is ${entryPrice * (1 + FEE_RATE)}.
+If we are above break-even, be very sensitive to any sign of reversal and issue SELL to secure gains. 
+If we are in loss, look for MSS to decide if we should hold or cut loss early (only if trend is clearly broken).` : ''}
+
+STRATEGY:
+1. Identify "Liquidity Sweeps" and "Market Structure Shifts" (MSS).
+2. If we hold a position, look for "Liquidity Targets" or "Reversal Signs" to issue a SELL signal.
+3. If we don't hold, look for "Discount Zones" or "FVG" for a BUY signal.
+4. ALWAYS prioritize liquidity. If the market looks stagnant, exit and wait for better volatility.
+
+IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
+Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, estimatedTimeMinutes, analysis.`,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            side: { type: Type.STRING, enum: ['BUY', 'SELL', 'NEUTRAL'] },
+            tp: { type: Type.NUMBER },
+            sl: { type: Type.NUMBER },
+            entryPrice: { type: Type.NUMBER },
+            confidence: { type: Type.NUMBER },
+            potentialRoi: { type: Type.NUMBER },
+            estimatedTimeMinutes: { type: Type.NUMBER, description: "Estimated time to reach TP in minutes" },
+            analysis: { type: Type.STRING }
+          },
+          required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'estimatedTimeMinutes', 'analysis']
+        },
+        temperature: 0.1
       }
+    });
+
+    const response: any = await Promise.race([aiPromise, timeoutPromise]);
+    const rawText = response.text?.trim() || '{}';
+    ghostState.currentStatus = `AI_RESP_${symbol}_LEN_${rawText.length}`;
+    const result = JSON.parse(rawText);
+    if (result.confidence !== undefined && result.confidence > 0 && result.confidence <= 1) {
+      result.confidence = Math.round(result.confidence * 100);
     }
-    return null;
-  } catch (e: any) {
-    console.warn(`[LAST_FILL_ERROR] Could not fetch last fill for ${symbol}:`, e.message);
-    return null;
+    return { ...result, id: crypto.randomUUID(), symbol, timestamp: new Date().toISOString() };
+  } catch (e: any) { 
+    let errorMsg = e.message;
+    if (errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('API key not valid')) {
+      errorMsg = "کلید API نامعتبر است. لطفاً کلید معتبر وارد کنید.";
+    } else if (errorMsg.includes('AI_TIMEOUT')) {
+      errorMsg = "پاسخ هوش مصنوعی بیش از حد طول کشید (تایم‌اوت).";
+    }
+    
+    console.error(`[AI ERROR] ${symbol}:`, errorMsg);
+    return {
+      side: "NEUTRAL",
+      analysis: `خطا در تحلیل هوش مصنوعی برای ${symbol}: ${errorMsg}`,
+      symbol,
+      timestamp: new Date().toISOString(),
+      confidence: 0,
+      potentialRoi: 0,
+      id: crypto.randomUUID()
+    }; 
   }
 }
 
 function loadState() {
   const defaults = {
     isEngineActive: true, autoPilot: true, isPaperMode: false,
-    settings: { confidenceThreshold: 70, minRoi: 1.5, maxDailyDrawdown: -20.0 },
+    settings: { confidenceThreshold: 70, defaultTradeSize: 50.0, minRoi: 1.5, maxDailyDrawdown: -20.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, 
     dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
@@ -276,13 +369,11 @@ function loadState() {
         settings: { ...defaults.settings, ...(parsed.settings || {}) }
       };
     }
-  } catch {
-    console.warn("[STATE] Failed to load state, using defaults.");
-  }
+  } catch (e) {}
   return defaults;
 }
 
-const ghostState = loadState();
+let ghostState = loadState();
 
 // --- MIGRATION: CLEAN SYMBOLS (e.g., SOL-EUR -> SOL) ---
 if (ghostState.activePositions && ghostState.activePositions.length > 0) {
@@ -299,48 +390,58 @@ if (ghostState.activePositions && ghostState.activePositions.length > 0) {
 async function monitorPositionsAI() {
   if (isAiMonitoring || !ghostState.isEngineActive || ghostState.activePositions.length === 0) return;
   isAiMonitoring = true;
-  ghostState.currentStatus = "MONITORING_HUNTS";
-  saveState();
   
-  console.log(`[MONITOR] Queueing ${ghostState.activePositions.length} active positions for AI analysis...`);
+  console.log(`[AI-MONITOR] Checking ${ghostState.activePositions.length} active positions...`);
   
   try {
-    for (const pos of ghostState.activePositions) {
+    for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
+      const pos = ghostState.activePositions[i];
       try {
-        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=100&aggregate=15`, { timeout: 8000 });
+        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=30`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) continue;
         
         const price = candles[candles.length - 1].close;
-        const roundTripFee = FEE_RATE;
-        const breakEvenPrice = pos.entryPrice * (1 + roundTripFee);
-        const currentProfitPercent = (price - breakEvenPrice) / (breakEvenPrice || 1);
+        const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
         
-        // Basic trailing stop logic (non-AI)
-        if (currentProfitPercent > 0.03) {
-          const newSl = breakEvenPrice * 1.02;
-          if (pos.sl < newSl) pos.sl = newSl;
-        } else if (currentProfitPercent > 0.02) {
-          const newSl = breakEvenPrice * 1.01;
-          if (pos.sl < newSl) pos.sl = newSl;
-        }
-        
-        // Queue for AI analysis
-        const existingIdx = pendingAnalysis.findIndex(p => p.symbol === pos.symbol && p.type === 'MONITOR');
-        if (existingIdx === -1) {
-          pendingAnalysis.push({
-            id: crypto.randomUUID(),
-            type: 'MONITOR',
-            symbol: pos.symbol,
-            price,
-            candles,
-            entryPrice: pos.entryPrice,
-            timestamp: new Date().toISOString()
-          });
+        if (analysis && analysis.side === 'SELL') {
+          const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
+          const isProfitable = price > (breakEvenPrice * (1 + MIN_NET_PROFIT));
+          
+          // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop (emergency exit)
+          // Be more aggressive: if confidence > 80, cut the loss to free liquidity.
+          if (isProfitable || analysis.confidence >= 80) {
+            const tradePnl = (price - pos.entryPrice) * pos.quantity;
+            const netPnl = tradePnl - (pos.amount * FEE_RATE);
+            console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
+            
+            const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
+            if (tradeResult.success) {
+              ghostState.dailyStats.profit += tradePnl;
+              ghostState.totalProfit += tradePnl;
+              ghostState.executionLogs.unshift({
+                id: crypto.randomUUID(),
+                symbol: pos.symbol,
+                action: 'SELL',
+                price,
+                pnl: tradePnl,
+                status: 'SUCCESS',
+                details: `AI_EXIT_CONF_${analysis.confidence}%`,
+                timestamp: new Date().toISOString()
+              });
+              ghostState.activePositions.splice(i, 1);
+              saveState();
+            } else if (tradeResult.reason && (tradeResult.reason.includes('INSUFFICIENT_FUND') || tradeResult.reason.includes('NO_BALANCE_ON_EXCHANGE'))) {
+              console.log(`[AI-MONITOR] Removing ${pos.symbol} due to missing balance on exchange.`);
+              ghostState.activePositions.splice(i, 1);
+              saveState();
+            }
+          }
         }
       } catch (e: any) {
-        console.error(`[MONITOR] Error queueing ${pos.symbol}:`, e.message);
+        console.error(`[AI-MONITOR] Error checking ${pos.symbol}:`, e.message);
       }
+      await new Promise(r => setTimeout(r, 1000));
     }
   } finally {
     isAiMonitoring = false;
@@ -352,105 +453,100 @@ async function scanWatchlist() {
   isScanning = true;
   
   try {
-    const rawWatchlist = availableEurPairs.length > 0 
+    const currentWatchlist = availableEurPairs.length > 0 
       ? availableEurPairs.map(p => p.split('-')[0]) 
       : WATCHLIST;
-    const currentWatchlist = [...new Set(rawWatchlist)];
 
-    if (ghostState.activePositions.length >= 5) return;
+    const batchSize = 6;
+    const candidates: any[] = [];
 
-    console.log(`[SCAN] Queueing market scan for AI analysis...`);
-    
-    // Scan up to 8 symbols per cycle
-    const scanLimit = Math.min(8, currentWatchlist.length);
-    for (let i = 0; i < scanLimit; i++) {
+    for (let i = 0; i < batchSize; i++) {
       const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
       ghostState.scanIndex++;
       
       if (ghostState.activePositions.some(p => p.symbol === symbol)) continue;
-      if (Date.now() - (lastTradeTime[symbol] || 0) < TRADE_COOLDOWN_MS) continue;
+
+      const productId = `${symbol}-EUR`;
+      if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) continue;
 
       try {
-        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=100&aggregate=15`, { timeout: 8000 });
+        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) continue;
         
         const price = candles[candles.length - 1].close;
+        const analysis = await getAdvancedAnalysis(symbol, price, candles);
         
-        const existingIdx = pendingAnalysis.findIndex(p => p.symbol === symbol && p.type === 'SCAN');
-        if (existingIdx === -1) {
-          pendingAnalysis.push({
-            id: crypto.randomUUID(),
-            type: 'SCAN',
-            symbol,
-            price,
-            candles,
-            timestamp: new Date().toISOString()
-          });
+        if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold) {
+          const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100));
+          if (isProfitableEnough) {
+            candidates.push({ symbol, price, analysis });
+          }
         }
-      } catch {
-        // Silent fail for scan
+
+        if (analysis) {
+          ghostState.thoughts.unshift(analysis);
+          if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
+        }
+      } catch (e) {
+        console.error(`[SCAN ERROR] ${symbol}:`, e.message);
+      }
+    }
+
+    // Pick the BEST candidate if any
+    if (candidates.length > 0 && ghostState.activePositions.length < 4 && ghostState.autoPilot) {
+      // Sort by confidence * potentialRoi to find the "best" setup
+      candidates.sort((a, b) => (b.analysis.confidence * b.analysis.potentialRoi) - (a.analysis.confidence * a.analysis.potentialRoi));
+      
+      const best = candidates[0];
+      const { symbol, price, analysis } = best;
+
+      // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss to max 3% loss
+      const maxSlPrice = price * 0.97;
+      if (analysis.sl < maxSlPrice) {
+        analysis.sl = maxSlPrice;
+      }
+
+      const totalEur = ghostState.liquidity.eur;
+      const maxPerTrade = totalEur * 0.15; // Reduced from 20% to 15% for more safety buffer
+      let tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
+      
+      // Ensure we have enough for trade + fees + small slippage buffer
+      const requiredEur = tradeAmount * (1 + FEE_RATE + 0.005); // 0.5% extra buffer
+      
+      if (totalEur >= requiredEur && tradeAmount >= 5) { 
+        const qty = tradeAmount / (price || 1);
+        const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
+        
+        if (tradeResult.success) {
+          ghostState.activePositions.push({
+            symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
+            tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
+            estimatedTimeMinutes: analysis.estimatedTimeMinutes,
+            analysis: analysis.analysis,
+            pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
+          });
+          
+          ghostState.liquidity.eur -= tradeAmount;
+
+          ghostState.executionLogs.unshift({ 
+            id: crypto.randomUUID(), 
+            symbol, 
+            action: 'BUY', 
+            price, 
+            status: 'SUCCESS', 
+            details: `BEST_CANDIDATE_CONF_${analysis.confidence}%`,
+            timestamp: new Date().toISOString() 
+          });
+          ghostState.dailyStats.trades++;
+          saveState();
+        }
       }
     }
   } finally {
     isScanning = false;
-  }
-}
-
-function addLog(action: string, symbol: string, details: string, status: 'SUCCESS' | 'FAILED' | 'INFO' = 'INFO', price: number = 0, pnl: number = 0, timestamp?: string) {
-  ghostState.executionLogs.unshift({
-    id: crypto.randomUUID(),
-    symbol,
-    action,
-    price,
-    pnl,
-    status,
-    details,
-    timestamp: timestamp || new Date().toISOString()
-  });
-  if (ghostState.executionLogs.length > 100) ghostState.executionLogs.pop();
-  saveState();
-}
-
-async function syncCoinbaseOrders() {
-  if (ghostState.isPaperMode) return;
-  
-  const token = generateCoinbaseJWT('GET', '/api/v3/brokerage/orders/historical/batch');
-  if (!token) return;
-
-  try {
-    const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/orders/historical/batch?limit=50', {
-      headers: { 'Authorization': `Bearer ${token}` },
-      timeout: 10000
-    });
-    
-    const orders = response.data?.orders || [];
-    let addedCount = 0;
-
-    for (const order of orders) {
-      if (order.status !== 'FILLED') continue;
-      
-      const orderId = order.order_id;
-      const exists = ghostState.executionLogs.some(log => log.details && log.details.includes(orderId));
-      
-      if (!exists) {
-        const symbol = order.product_id.split('-')[0];
-        const action = order.side;
-        const price = Number(order.avg_price) || Number(order.price) || 0;
-        const timestamp = order.created_time || new Date().toISOString();
-        
-        addLog(action, symbol, `COINBASE_SYNC | ID: ${orderId}`, 'SUCCESS', price, 0, timestamp);
-        addedCount++;
-      }
-    }
-
-    if (addedCount > 0) {
-      console.log(`[SYNC] Added ${addedCount} historical orders from Coinbase to logs.`);
-      ghostState.executionLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-      saveState();
-    }
-  } catch (e: any) {
-    console.warn("[SYNC ERROR] Failed to sync historical orders:", e.message);
+    ghostState.currentStatus = `SCAN_BATCH_DONE_${ghostState.scanIndex}`;
+    saveState();
   }
 }
 
@@ -459,6 +555,7 @@ async function monitor() {
   isMonitoring = true;
 
   try {
+    await syncCoinbaseBalance();
     const today = new Date().toISOString().split('T')[0];
     if (ghostState.dailyStats.lastResetDate !== today) {
       ghostState.dailyStats.profit = 0; ghostState.dailyStats.trades = 0; ghostState.dailyStats.lastResetDate = today;
@@ -479,16 +576,21 @@ async function monitor() {
         const pos = ghostState.activePositions[i];
         const actualQty = ghostState.actualBalances[pos.symbol] || 0;
         
-        // Add a 5-minute grace period for newly opened positions to avoid immediate reconciliation
-        const tradeAgeMs = Date.now() - new Date(pos.timestamp).getTime();
-        const isNewTrade = tradeAgeMs < (5 * 60 * 1000); 
-
-        if (actualQty < (pos.quantity * 0.1) && !isNewTrade) {
+        if (actualQty < (pos.quantity * 0.1)) {
           console.log(`[RECONCILE] Removing ${pos.symbol} - Position no longer exists on Coinbase.`);
-          addLog('SELL', pos.symbol, `EXTERNAL_EXIT_DETECTED`, 'SUCCESS', pos.currentPrice, pos.pnl);
+          ghostState.executionLogs.unshift({
+            id: crypto.randomUUID(),
+            symbol: pos.symbol,
+            action: 'SELL',
+            price: pos.currentPrice,
+            pnl: pos.pnl,
+            status: 'SUCCESS',
+            details: `EXTERNAL_EXIT_DETECTED`,
+            timestamp: new Date().toISOString()
+          });
+          if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
           ghostState.dailyStats.profit += pos.pnl; 
           ghostState.totalProfit += pos.pnl;
-          ghostState.liquidity.eur += (pos.amount + pos.pnl);
           ghostState.activePositions.splice(i, 1);
         }
       }
@@ -504,14 +606,11 @@ async function monitor() {
           
           if (qty > 0.00001 && canTrade) {
             console.log(`[RECONCILE] Adopting position: ${symbol} (${qty})`);
-            const lastFillPrice = await getLastFillPrice(symbol);
-            
             ghostState.activePositions.push({
-              id: crypto.randomUUID(),
               symbol,
-              entryPrice: lastFillPrice || 0, 
+              entryPrice: 0, 
               currentPrice: 0,
-              amount: (lastFillPrice || 0) * qty,
+              amount: 0,
               quantity: qty,
               tp: 0,
               sl: 0,
@@ -522,7 +621,6 @@ async function monitor() {
               isPaper: false,
               timestamp: new Date().toISOString()
             });
-            saveState();
           }
         }
       }
@@ -541,7 +639,6 @@ async function monitor() {
         // If it's a newly adopted position, set initial prices and default targets
         if (pos.entryPrice === 0) {
           pos.entryPrice = curPrice;
-          pos.amount = curPrice * pos.quantity;
           pos.tp = curPrice * 1.03; // Default 3% TP
           pos.sl = curPrice * 0.98; // Default 2% SL
         }
@@ -549,73 +646,49 @@ async function monitor() {
         pos.currentPrice = curPrice;
         const pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
         pos.pnlPercent = pnlPercent;
-        
-        // Calculate net PNL (subtracting round-trip fees)
-        const grossPnl = (curPrice - pos.entryPrice) * pos.quantity;
-        const feeAmount = pos.amount * FEE_RATE;
-        pos.pnl = grossPnl - feeAmount;
+        pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
         
         const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
         const netPnlPercent = pnlPercent - (FEE_RATE * 100);
 
         // Dynamic Trailing Stop & Break Even
-        if (netPnlPercent > 1.8 && pos.sl < breakEvenPrice) {
-          pos.sl = breakEvenPrice * 1.005; // Lock in 0.5% pure profit as soon as we hit 1.8% net
+        if (netPnlPercent > 0.2 && pos.sl < breakEvenPrice) {
+          pos.sl = breakEvenPrice * (1 + MIN_NET_PROFIT);
+          console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
         }
 
-        if (netPnlPercent > 3.0) {
-          const newSl = curPrice * 0.985; // 1.5% trailing stop once in 3.0% net profit
+        if (netPnlPercent > 0.8) {
+          const newSl = curPrice * 0.997; // 0.3% trailing stop once in 0.8% net profit
           if (newSl > pos.sl) {
             pos.sl = newSl;
+            console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
           }
         }
 
-        // TIME-BASED EXIT: If trade is open for > 6 hours and not in significant profit
-        const tradeAgeMs = Date.now() - new Date(pos.timestamp).getTime();
+        // EARLY EXIT: If price reaches 80% of TP
+        const tpDistance = pos.tp - pos.entryPrice;
+        const earlyExitPrice = pos.entryPrice + (tpDistance * 0.8);
+        const canExitSafely = curPrice > (breakEvenPrice * (1 + MIN_NET_PROFIT));
+
+        // TIME-BASED EXIT: If trade is open for > 3 hours and not in significant profit, close it to free liquidity
+        const tradeAgeMs = new Date().getTime() - new Date(pos.timestamp).getTime();
         const tradeAgeHours = tradeAgeMs / (1000 * 60 * 60);
-        const isStagnant = tradeAgeHours > 6 && netPnlPercent < 0.5 && curPrice > breakEvenPrice;
+        const isStagnant = tradeAgeHours > 3 && netPnlPercent < 0.5;
 
         // Trigger SELL if:
         // 1. Reached TP
-        // 2. Reached SL (Hard stop loss)
-        // 3. Trade is stagnant (time-based exit)
-        
-        const isGracePeriod = tradeAgeMs < (5 * 60 * 1000); // 5-minute grace period
-        const isHardStop = curPrice <= (pos.entryPrice * 0.94); // 6% hard stop bypasses grace
-        const isMinHoldTimeMet = tradeAgeMs > (60 * 1000); // 1-minute minimum hold time for ANY exit (except hard stop)
-        
-        let shouldSell = false;
-        let sellReason = "";
-
-        // Ensure TP/SL are initialized for adopted positions if they are still 0
-        if (pos.tp === 0) pos.tp = pos.entryPrice * 1.05;
-        if (pos.sl === 0) pos.sl = pos.entryPrice * 0.95;
-
-        if (curPrice >= pos.tp) {
-          if (isMinHoldTimeMet) {
-            shouldSell = true;
-            sellReason = "TAKE_PROFIT";
-          }
-        } else if (curPrice <= pos.sl) {
-          if (isHardStop || (!isGracePeriod && isMinHoldTimeMet)) {
-            shouldSell = true;
-            sellReason = "STOP_LOSS";
-          }
-        } else if (isStagnant && isMinHoldTimeMet) {
-          shouldSell = true;
-          sellReason = "TIME_STAGNATION_EXIT";
-        }
-
-        if (shouldSell) {
-          console.log(`[MONITOR] Triggering SELL for ${pos.symbol}. Reason: ${sellReason} | Price: ${curPrice} | SL: ${pos.sl} | TP: ${pos.tp} | Age: ${Math.round(tradeAgeMs/1000)}s`);
+        // 2. Reached SL (Hard stop loss, must execute even if in loss)
+        // 3. Reached 80% of TP and is safe to exit
+        // 4. Trade is stagnant (time-based exit)
+        if (curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.4 && canExitSafely) || isStagnant) {
+          let reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_80%_TP');
+          if (isStagnant && curPrice < pos.tp && curPrice > pos.sl) reason = 'TIME_STAGNATION_EXIT';
           
           const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
           
           if (tradeResult.success) {
             ghostState.dailyStats.profit += pos.pnl;
             ghostState.totalProfit += pos.pnl;
-            ghostState.liquidity.eur += (pos.amount + pos.pnl);
-            lastTradeTime[pos.symbol] = Date.now();
             ghostState.executionLogs.unshift({ 
               id: crypto.randomUUID(), 
               symbol: pos.symbol, 
@@ -623,7 +696,7 @@ async function monitor() {
               price: curPrice, 
               pnl: pos.pnl, 
               status: 'SUCCESS', 
-              details: `EXIT_${sellReason}_PNL_${pos.pnl.toFixed(2)}`,
+              details: `EXIT_${reason}_PNL_${pos.pnl.toFixed(2)}`,
               timestamp: new Date().toISOString() 
             });
             if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();
@@ -634,41 +707,14 @@ async function monitor() {
           }
         }
       }
-    } catch (e) {
-      console.error("[MONITOR ERROR]", e);
-    }
+    } catch (e) {}
   } finally {
     isMonitoring = false;
     saveState();
   }
 }
 
-function saveState() { 
-  try { 
-    // Final deduplication before saving
-    if (ghostState.thoughts) {
-      const seen = new Set();
-      ghostState.thoughts = ghostState.thoughts.filter(t => {
-        if (!t.id) return true;
-        if (seen.has(t.id)) return false;
-        seen.add(t.id);
-        return true;
-      });
-    }
-    if (ghostState.executionLogs) {
-      const seen = new Set();
-      ghostState.executionLogs = ghostState.executionLogs.filter(l => {
-        if (!l.id) return true;
-        if (seen.has(l.id)) return false;
-        seen.add(l.id);
-        return true;
-      });
-    }
-    fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); 
-  } catch (e) {
-    console.error("[STATE SAVE ERROR]", e);
-  } 
-}
+function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {} }
 
 // --- SERVER SETUP ---
 
@@ -679,121 +725,14 @@ async function startServer() {
   app.use(cors());
   app.use(express.json());
 
-  // API Routes (MOVED TO TOP)
+  // API Routes
   app.get('/api/ping', (req, res) => res.json({ status: 'pong', timestamp: new Date().toISOString() }));
   app.get('/api/ghost/state', (req, res) => res.json(ghostState));
-  
-  app.get('/api/ghost/pending-analysis', (req, res) => {
-    if (pendingAnalysis.length === 0) return res.json(null);
-    const request = pendingAnalysis.shift();
-    res.json(request);
-  });
-
-  app.post('/api/ghost/submit-analysis', async (req, res) => {
-    const { type, symbol, analysis } = req.body;
-    if (!analysis || !symbol) return res.status(400).json({ error: 'Invalid analysis' });
-
-    console.log(`[AI-SUBMIT] Received ${type} analysis for ${symbol}: ${analysis.side}`);
-
-    if (type === 'MONITOR') {
-      const pos = ghostState.activePositions.find(p => p.symbol === symbol);
-      if (pos) {
-        pos.lastAnalysis = analysis.analysis;
-        pos.liquidityAnalysis = analysis.liquidityAnalysis || "تحلیل نقدینگی در دسترس نیست";
-        pos.marketMonitoring = analysis.marketMonitoring || "نظارت بازار در دسترس نیست";
-        pos.lastDecision = analysis.side;
-        pos.lastConfidence = analysis.confidence;
-        pos.lastChecked = new Date().toISOString();
-        pos.estimatedTime = analysis.estimatedTime;
-
-        // Update targets if AI suggests new ones
-        const curPrice = pos.currentPrice || pos.entryPrice;
-        const minAiSlBuffer = curPrice * 0.985;
-        if (analysis.sl > 0 && analysis.sl < minAiSlBuffer && (pos.sl === 0 || (analysis.sl > pos.sl))) {
-          pos.sl = analysis.sl;
-        }
-        if (analysis.tp > 0 && (pos.tp === 0 || analysis.tp > pos.tp)) {
-          pos.tp = analysis.tp;
-        }
-
-        // Check for AI SELL signal
-        if (analysis.side === 'SELL') {
-          const tradeAgeMs = Date.now() - new Date(pos.timestamp).getTime();
-          const isMinHoldTimeMet = tradeAgeMs > MIN_HOLD_TIME_MS;
-          const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
-          const isProfitable = curPrice > (breakEvenPrice * (1 + 0.012));
-          const isSignificantLoss = curPrice < (pos.entryPrice * 0.95);
-
-          if ((isProfitable && isMinHoldTimeMet) || (analysis.confidence >= 98 && isSignificantLoss)) {
-            const tradePnl = (curPrice - pos.entryPrice) * pos.quantity;
-            const netPnl = tradePnl - (pos.amount * FEE_RATE);
-            console.log(`[AI-MONITOR] AI SELL for ${symbol}. Net PNL: ${netPnl.toFixed(2)} EUR.`);
-            
-            const tradeResult = await executeTrade(symbol, 'SELL', 0, pos.quantity);
-            if (tradeResult.success) {
-              ghostState.dailyStats.profit += netPnl;
-              ghostState.totalProfit += netPnl;
-              ghostState.liquidity.eur += (pos.amount + netPnl);
-              addLog('SELL', symbol, `AI_EXIT_CONF_${analysis.confidence}%`, 'SUCCESS', curPrice, netPnl);
-              const idx = ghostState.activePositions.findIndex(p => p.symbol === symbol);
-              if (idx !== -1) ghostState.activePositions.splice(idx, 1);
-              lastTradeTime[symbol] = Date.now();
-            }
-          }
-        }
-      }
-    } else if (type === 'SCAN') {
-      // Process SCAN results
-      ghostState.thoughts.unshift(analysis);
-      if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
-
-      const requiredConfidence = Math.max(85, ghostState.settings.confidenceThreshold || 85);
-      if (analysis.side === 'BUY' && analysis.confidence >= requiredConfidence && ghostState.autoPilot) {
-        const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + 1.2);
-        const totalEur = ghostState.liquidity.eur;
-        const tradeAmount = Math.max(10, Math.min(totalEur, totalEur * 0.20));
-
-        if (isProfitableEnough && totalEur >= (tradeAmount * 1.01) && tradeAmount >= 10 && ghostState.activePositions.length < 5) {
-          const qty = tradeAmount / (analysis.entryPrice || 1);
-          const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
-          
-          if (tradeResult.success) {
-            analysis.decision = `EXECUTED: BUY_${symbol}_AT_${analysis.entryPrice}`;
-            ghostState.activePositions.push({
-              id: crypto.randomUUID(),
-              symbol, entryPrice: analysis.entryPrice, currentPrice: analysis.entryPrice, amount: tradeAmount, quantity: qty,
-              tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
-              pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString(),
-              estimatedTime: analysis.estimatedTime,
-              lastAnalysis: analysis.analysis,
-              liquidityAnalysis: analysis.liquidityAnalysis,
-              marketMonitoring: analysis.marketMonitoring
-            });
-            ghostState.liquidity.eur -= tradeAmount;
-            addLog('BUY', symbol, `AI_BUY_CONF_${analysis.confidence}%`, 'SUCCESS', analysis.entryPrice);
-            ghostState.dailyStats.trades++;
-          }
-        }
-      }
-    }
-
-    saveState();
-    res.json({ success: true });
-  });
-
+  app.get('/api/ghost/pending-analysis', (req, res) => res.json([]));
   app.post('/api/ghost/toggle', (req, res) => {
-    if (req.body.engine !== undefined) {
-      ghostState.isEngineActive = !!req.body.engine;
-      addLog('ENGINE', 'SYSTEM', ghostState.isEngineActive ? "ربات فعال شد." : "ربات متوقف شد.", 'INFO');
-    }
-    if (req.body.auto !== undefined) {
-      ghostState.autoPilot = !!req.body.auto;
-      addLog('AUTOPILOT', 'SYSTEM', ghostState.autoPilot ? "حالت خودکار فعال شد." : "حالت خودکار غیرفعال شد.", 'INFO');
-    }
-    if (req.body.paper !== undefined) {
-      ghostState.isPaperMode = !!req.body.paper;
-      addLog('PAPER_MODE', 'SYSTEM', ghostState.isPaperMode ? "حالت دمو فعال شد." : "حالت واقعی فعال شد.", 'INFO');
-    }
+    if (req.body.engine !== undefined) ghostState.isEngineActive = !!req.body.engine;
+    if (req.body.auto !== undefined) ghostState.autoPilot = !!req.body.auto;
+    if (req.body.paper !== undefined) ghostState.isPaperMode = !!req.body.paper;
     saveState();
     res.json({ success: true });
   });
@@ -806,15 +745,21 @@ async function startServer() {
     res.json({ success: true, settings: ghostState.settings });
   });
 
+  app.post('/api/ghost/refill', (req, res) => {
+    if (ghostState.isPaperMode) {
+      ghostState.liquidity.eur = 1000;
+      ghostState.liquidity.usdc = 1000;
+      saveState();
+      return res.json({ success: true, liquidity: ghostState.liquidity });
+    }
+    res.status(400).json({ success: false, error: "Only available in Paper Mode" });
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { 
-        middlewareMode: true,
-        hmr: false,
-        proxy: {} 
-      },
+      server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
@@ -830,18 +775,14 @@ async function startServer() {
     
     // Start trading engine
     listAvailableProducts();
-    syncCoinbaseBalance();
-    syncCoinbaseOrders();
     monitor();
     monitorPositionsAI();
     scanWatchlist();
     
-    setInterval(monitor, 8000);           // Hard TP/SL check (8s)
-    setInterval(syncCoinbaseBalance, 60000); // Sync balances (60s)
-    setInterval(syncCoinbaseOrders, 120000); // Sync orders (120s)
-    setInterval(monitorPositionsAI, 90000); // AI Position Analysis (90s)
-    setInterval(scanWatchlist, 120000);      // New Signal Scanning (120s)
-    setInterval(listAvailableProducts, 600000); // Refresh products every 10m
+    setInterval(monitor, 3000);           // Hard TP/SL check (3s)
+    setInterval(monitorPositionsAI, 15000); // AI Position Analysis (15s)
+    setInterval(scanWatchlist, 15000);      // New Signal Scanning (15s)
+    setInterval(listAvailableProducts, 300000); // Refresh products every 5m
   });
 }
 

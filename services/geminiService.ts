@@ -18,9 +18,6 @@ CONCEPTS:
 - Look for Market Structure Shifts (MSS) after a Liquidity Sweep.
 - Only trigger if the candle shows strong displacement.
 - Target internal liquidity gaps (FVG).
-- Analyze Liquidity: Identify where the "Smart Money" is likely to sweep next.
-- Monitor Market: Assess current volatility and potential traps.
-- Estimate Time: Provide a realistic ETA for the target (e.g., "15m", "1h", "4h").
 THRESHOLD: 80% Confidence required for BUY.
 BE CONCISE.`;
 
@@ -38,12 +35,9 @@ BE CONCISE.`;
             tp: { type: Type.NUMBER },
             sl: { type: Type.NUMBER },
             confidence: { type: Type.NUMBER },
-            analysis: { type: Type.STRING },
-            liquidityAnalysis: { type: Type.STRING, description: "Detailed SMC liquidity sweep analysis" },
-            marketMonitoring: { type: Type.STRING, description: "Current market volatility and trap assessment" },
-            estimatedTime: { type: Type.STRING, description: "Estimated time to reach target (e.g. 15m, 1h)" }
+            analysis: { type: Type.STRING }
           },
-          required: ['side', 'entryPrice', 'tp', 'sl', 'confidence', 'analysis', 'liquidityAnalysis', 'marketMonitoring', 'estimatedTime']
+          required: ['side', 'entryPrice', 'tp', 'sl', 'confidence', 'analysis']
         },
         systemInstruction: systemInstruction,
         temperature: 0.1,

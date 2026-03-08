@@ -9,8 +9,8 @@ export const getApiBase = () => {
   if (savedUrl) return savedUrl.endsWith('/') ? savedUrl.slice(0, -1) : savedUrl;
 
   // 2. Localhost fallback: If on port 5173 (Vite), point to 3000 (Express)
-  if (window.location.hostname === 'localhost' && window.location.port === '5173') {
-    return "http://localhost:3000";
+  if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port === '5173') {
+    return "http://127.0.0.1:3000";
   }
 
   // 3. Default to relative path (works for unified server)
@@ -29,7 +29,7 @@ export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
       { currency: 'EUR', available: Number(data.liquidity?.eur) || 0, total: Number(data.liquidity?.eur) || 0 },
       { currency: 'USDC', available: Number(data.liquidity?.usdc) || 0, total: Number(data.liquidity?.usdc) || 0 }
     ];
-  } catch {
+  } catch (_error) {
     return [];
   }
 };

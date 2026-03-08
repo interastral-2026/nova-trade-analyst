@@ -5,7 +5,7 @@ export interface GhostState {
   isPaperMode: boolean;
   settings: {
     confidenceThreshold: number;
-    maxDailyDrawdown?: number;
+    defaultTradeSize: number;
   };
   thoughts: TradeSignal[];
   executionLogs: ExecutionLog[];
@@ -52,13 +52,10 @@ export interface TradeSignal {
   sl: number;
   confidence: number;
   potentialRoi: number;
-  tradePercentage?: number;
   analysis: string;
-  liquidityAnalysis?: string;
-  marketMonitoring?: string;
   decision?: string;
-  estimatedTime?: string;
   timestamp: string;
+  estimatedTimeMinutes?: number;
   isPaper?: boolean;
 }
 
@@ -69,7 +66,6 @@ export interface AccountBalance {
 }
 
 export interface ActivePosition {
-  id: string;
   symbol: string;
   entryPrice: number;
   currentPrice: number;
@@ -83,13 +79,8 @@ export interface ActivePosition {
   pnlPercent: number;
   isPaper: boolean;
   timestamp: string;
-  lastAnalysis?: string;
-  lastDecision?: string;
-  lastConfidence?: number;
-  lastChecked?: string;
-  liquidityAnalysis?: string;
-  marketMonitoring?: string;
-  estimatedTime?: string;
+  estimatedTimeMinutes?: number;
+  analysis?: string;
 }
 
 export interface ExecutionLog {

@@ -4,9 +4,9 @@
   "isPaperMode": false,
   "settings": {
     "confidenceThreshold": 75,
+    "defaultTradeSize": 10,
     "minRoi": 1.5,
-    "maxDailyDrawdown": -20,
-    "defaultTradeSize": 10
+    "maxDailyDrawdown": -20
   },
   "thoughts": [
     {
@@ -819,6 +819,46 @@
     }
   ],
   "executionLogs": [
+    {
+      "id": "655e2860-1d7a-4fb7-984b-a194d5e62e5d",
+      "symbol": "SYSTEM",
+      "action": "ENGINE",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "ربات متوقف شد.",
+      "timestamp": "2026-03-08T22:24:01.243Z"
+    },
+    {
+      "id": "ded9b27d-0e5b-4488-9b96-9d37b7bd76e5",
+      "symbol": "BAT",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-08T21:51:52.924Z"
+    },
+    {
+      "id": "dbfd180f-f382-4c15-a761-803a4a440399",
+      "symbol": "BAT",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 6996f4d4-a4c8-4d37-8a40-bf9efec55f10",
+      "timestamp": "2026-03-08T21:50:58.470562Z"
+    },
+    {
+      "id": "d6ff0812-641c-4cac-b4a7-89992dfa69bc",
+      "symbol": "BAT",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 2a1034f1-d9c9-4f88-b720-2acded70e2ff",
+      "timestamp": "2026-03-08T21:44:05.267324Z"
+    },
     {
       "id": "8b1389b2-b721-49fe-b4cb-815f59fa3b55",
       "symbol": "ANKR",
@@ -5098,51 +5138,11 @@
       "status": "SUCCESS",
       "details": "COINBASE_SYNC | ID: 91eb5977-9fa3-429a-a3b4-daec74e572bb",
       "timestamp": "2026-03-07T20:00:02.131642Z"
-    },
-    {
-      "id": "b81ed1ef-7358-4585-83bc-606a1e56c650",
-      "symbol": "ADA",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 484b506b-32cb-4e00-b3d4-0789cfd12a9f",
-      "timestamp": "2026-03-07T19:59:55.212228Z"
-    },
-    {
-      "id": "b2342606-77b0-46c6-8b41-e1e888d9d644",
-      "symbol": "CHZ",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 2e4f9a38-1517-4feb-ada0-811e8831c408",
-      "timestamp": "2026-03-07T19:56:22.444238Z"
-    },
-    {
-      "id": "ba506079-a10f-4c9a-ad7a-003185cf6a55",
-      "symbol": "CHZ",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 0e20e129-8ac4-40fa-b59a-0d4d0e2a1680",
-      "timestamp": "2026-03-07T19:56:18.002200Z"
-    },
-    {
-      "id": "38630fd6-6c41-4c04-896f-1f005382c34c",
-      "symbol": "XTZ",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 1b1239af-dea8-4f71-abf7-7637a8dd6147",
-      "timestamp": "2026-03-07T19:55:01.605564Z"
     }
   ],
   "activePositions": [],
   "liquidity": {
-    "eur": 11.3407440922957,
+    "eur": 11.1659745822957,
     "usdc": 8.843078e-7
   },
   "actualBalances": {},
@@ -5154,8 +5154,8 @@
     "lastResetDate": "2026-03-08"
   },
   "totalProfit": -8.187341214221222,
-  "currentStatus": "MONITORING_HUNTS",
-  "scanIndex": 61833,
+  "currentStatus": "SCAN_BATCH_DONE_62243",
+  "scanIndex": 62246,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,

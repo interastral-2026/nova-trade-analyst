@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { AssetInfo } from '../types';
+import { getApiBase } from '../services/tradingService.ts';
 
 interface SidebarProps {
   assets: AssetInfo[];
@@ -55,135 +56,150 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <aside className="w-64 lg:w-72 border-r border-cyan-500/10 bg-[#05070a] flex flex-col h-full">
-      <div className="p-4 border-b border-white/5 bg-gradient-to-b from-cyan-900/10 to-transparent">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Neural Link v18.5</span>
+    <aside className="w-full lg:w-80 border-r border-cyan-500/10 bg-[#05070a] flex flex-col h-full">
+      <div className="p-6 border-b border-white/5 bg-gradient-to-b from-cyan-900/10 to-transparent">
+        <div className="flex justify-between items-center mb-6">
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Neural Link v18.5</span>
           <button 
             onClick={() => setShowSettings(!showSettings)}
-            className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${showSettings ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/20' : 'bg-white/5 text-slate-500 hover:text-white'}`}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${showSettings ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/20' : 'bg-white/5 text-slate-500 hover:text-white'}`}
           >
-            <i className="fas fa-network-wired text-xs"></i>
+            <i className="fas fa-network-wired"></i>
           </button>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <button 
             onClick={onToggleEngine}
-            className={`w-full p-4 rounded-2xl border transition-all flex flex-col items-center justify-center space-y-2 relative overflow-hidden group ${
+            className={`w-full p-5 rounded-2xl border transition-all flex flex-col items-center justify-center space-y-3 relative overflow-hidden group ${
               engineActive ? 'border-cyan-500/40 bg-cyan-500/5' : 'border-rose-500/20 bg-rose-500/5 opacity-60'
             }`}
           >
-            {engineActive && <div className="absolute top-0 left-0 w-full h-0.5 bg-cyan-500/50 animate-pulse"></div>}
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${engineActive ? 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-rose-500/20 text-rose-400 shadow-[0_0_15px_#f43f5e33]'}`}>
-              <i className={`fas ${engineActive ? 'fa-satellite-dish animate-bounce' : 'fa-power-off'} text-lg`}></i>
+            {engineActive && <div className="absolute top-0 left-0 w-full h-1 bg-cyan-500/50 animate-pulse"></div>}
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${engineActive ? 'bg-cyan-500/20 text-cyan-400 shadow-[0_0_20px_#22d3ee]' : 'bg-rose-500/20 text-rose-400 shadow-[0_0_20px_#f43f5e33]'}`}>
+              <i className={`fas ${engineActive ? 'fa-satellite-dish animate-bounce' : 'fa-power-off'} text-xl`}></i>
             </div>
             <div className="text-center">
-              <span className={`text-[9px] font-black uppercase tracking-[0.2em] block ${engineActive ? 'text-cyan-400' : 'text-rose-400'}`}>
+              <span className={`text-[10px] font-black uppercase tracking-[0.3em] block ${engineActive ? 'text-cyan-400' : 'text-rose-400'}`}>
                 {engineActive ? 'RADAR_ARMED' : 'SYSTEM_OFF'}
               </span>
-              <p className="text-[7px] text-slate-500 mt-0.5 font-bold">{engineActive ? 'MONITORING_LIVE' : 'IDLE'}</p>
+              <p className="text-[8px] text-slate-500 mt-1 font-bold">{engineActive ? 'MONITORING_LIVE' : 'IDLE'}</p>
             </div>
           </button>
 
           <button 
             onClick={onToggleAuto}
-            className={`w-full py-2.5 rounded-xl border transition-all flex items-center justify-center space-x-2 ${
+            className={`w-full py-3 rounded-xl border transition-all flex items-center justify-center space-x-3 ${
               autoPilot && engineActive ? 'border-emerald-500/40 bg-emerald-500/5 text-emerald-400 shadow-[0_0_10px_#10b98133]' : 'border-white/5 bg-white/[0.02] text-slate-500'
             }`}
           >
-            <i className={`fas ${autoPilot ? 'fa-crosshairs' : 'fa-circle'} text-[8px]`}></i>
-            <span className="text-[8px] font-black uppercase tracking-widest">
-              AUTO: {autoPilot ? 'ENGAGED' : 'OFF'}
+            <i className={`fas ${autoPilot ? 'fa-crosshairs' : 'fa-circle'} text-[10px]`}></i>
+            <span className="text-[9px] font-black uppercase tracking-widest">
+              PREDATOR_80%_AUTO: {autoPilot ? 'ENGAGED' : 'OFF'}
             </span>
           </button>
 
           <button 
             onClick={onTogglePaper}
-            className={`w-full py-2.5 rounded-xl border transition-all flex items-center justify-center space-x-2 ${
+            className={`w-full py-3 rounded-xl border transition-all flex items-center justify-center space-x-3 ${
               isPaperMode ? 'border-amber-500/40 bg-amber-500/5 text-amber-400 shadow-[0_0_10px_#f59e0b33]' : 'border-white/5 bg-white/[0.02] text-slate-500'
             }`}
           >
-            <i className={`fas ${isPaperMode ? 'fa-ghost' : 'fa-coins'} text-[8px]`}></i>
-            <span className="text-[8px] font-black uppercase tracking-widest">
-              {isPaperMode ? 'PAPER MODE' : 'REAL MONEY'}
+            <i className={`fas ${isPaperMode ? 'fa-ghost' : 'fa-coins'} text-[10px]`}></i>
+            <span className="text-[9px] font-black uppercase tracking-widest">
+              MODE: {isPaperMode ? 'PAPER (SIMULATION)' : 'REAL MONEY'}
             </span>
           </button>
+
+          {isPaperMode && (
+            <button 
+              onClick={async () => {
+                try {
+                  await fetch(`${getApiBase()}/api/ghost/refill`, { method: 'POST' });
+                  window.location.reload();
+                } catch (e) {}
+              }}
+              className="w-full py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase rounded-lg border border-amber-500/20 transition-all"
+            >
+              <i className="fas fa-gas-pump mr-2"></i>
+              Refill Paper Funds (1000 EUR)
+            </button>
+          )}
         </div>
       </div>
 
       {showSettings && (
-        <div className="m-3 p-4 bg-[#0a0f18] border border-cyan-500/20 rounded-2xl shadow-2xl space-y-3">
+        <div className="m-4 p-5 bg-[#0a0f18] border border-cyan-500/20 rounded-2xl shadow-2xl space-y-4">
           <div>
-            <p className="text-[8px] font-black text-cyan-500 uppercase tracking-widest mb-1">Bridge API Gateway</p>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Bridge API Gateway</p>
             <input 
               type="text" 
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               placeholder="https://..."
-              className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-[9px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-1"
+              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
             />
           </div>
           <div>
-            <p className="text-[8px] font-black text-cyan-500 uppercase tracking-widest mb-1">Max Daily Drawdown (EUR)</p>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Max Daily Drawdown (EUR)</p>
             <input 
               type="number" 
               value={localSettings.maxDailyDrawdown || -20}
               onChange={(e) => setLocalSettings({...localSettings, maxDailyDrawdown: parseFloat(e.target.value)})}
-              className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-[9px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-1"
+              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
+            />
+          </div>
+          <div>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Default Trade Size (EUR)</p>
+            <input 
+              type="number" 
+              value={localSettings.defaultTradeSize || 50}
+              onChange={(e) => setLocalSettings({...localSettings, defaultTradeSize: parseFloat(e.target.value)})}
+              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
             />
           </div>
           <button 
             onClick={handleReconnect}
-            className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[7px] font-black uppercase rounded-lg transition-all"
+            className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[8px] font-black uppercase rounded-lg transition-all"
           >
             Save Settings
           </button>
         </div>
       )}
 
-      <div className="px-4 py-4 flex-1 overflow-hidden flex flex-col">
-        <div className="flex justify-between items-center mb-4">
-           <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Radar Watchlist</span>
-           <span className={`text-[7px] font-black px-1.5 py-0.5 rounded bg-white/5 tracking-widest ${engineActive ? 'text-emerald-500' : 'text-slate-600'}`}>
+      <div className="px-6 py-4 flex-1 overflow-hidden flex flex-col">
+        <div className="flex justify-between items-center mb-6">
+           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Radar Watchlist</span>
+           <span className={`text-[8px] font-black px-2 py-0.5 rounded bg-white/5 tracking-widest ${engineActive ? 'text-emerald-500' : 'text-slate-600'}`}>
             {engineActive ? 'SCANNING' : 'IDLE'}
            </span>
         </div>
-        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
+        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
           {assets.map((asset) => (
             <button
               key={asset.id}
               onClick={() => onSelect(asset.id)}
-              className={`w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all border group ${
+              className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all border group ${
                 selected === asset.id ? 'bg-cyan-500/10 border-cyan-500/40 shadow-lg' : 'bg-white/[0.02] border-white/5 hover:border-white/10'
               }`}
             >
-              <div className="flex items-center space-x-2.5">
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[9px] transition-all ${selected === asset.id ? 'bg-cyan-500 text-black' : 'bg-slate-800 text-slate-500'}`}>
+              <div className="flex items-center space-x-3">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[10px] transition-all ${selected === asset.id ? 'bg-cyan-500 text-black' : 'bg-slate-800 text-slate-500'}`}>
                   {asset.name[0]}
                 </div>
                 <div className="text-left">
-                  <h4 className="text-[10px] font-black text-white uppercase tracking-tight">{asset.id.split('-')[0]}</h4>
+                  <h4 className="text-[11px] font-black text-white uppercase tracking-tight">{asset.id.split('-')[0]}</h4>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] font-black text-white">€{parseFloat(asset.price).toLocaleString()}</div>
-                <div className={`text-[7px] font-black ${asset.change24h >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                <div className="text-[11px] font-black text-white">€{parseFloat(asset.price).toLocaleString()}</div>
+                <div className={`text-[8px] font-black ${asset.change24h >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                   {asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%
                 </div>
               </div>
             </button>
           ))}
         </div>
-      </div>
-      <div className="p-4 border-t border-white/5 bg-black/20">
-        <div className="flex items-center space-x-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
-          <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest">SMC Strategy</span>
-        </div>
-        <p className="text-[8px] text-slate-500 leading-relaxed font-medium" dir="auto">
-          ربات از استراتژی Smart Money Concepts (SMC) استفاده می‌کند. تمرکز بر شناسایی نقدینگی (Liquidity Sweeps)، تغییر ساختار بازار (MSS) و شکاف‌های ارزش منصفانه (FVG) برای ورود در نقاط بهینه است.
-        </p>
       </div>
     </aside>
   );
