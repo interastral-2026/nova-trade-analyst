@@ -13,451 +13,451 @@
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای ENS: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "ENS",
-      "timestamp": "2026-03-08T23:40:02.042Z",
+      "timestamp": "2026-03-08T23:48:50.037Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "98438ce6-297c-420e-84d6-056f35251f3b"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای MANA: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "MANA",
-      "timestamp": "2026-03-08T23:40:01.396Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "ebfb4f3b-327c-4a1d-b83f-62cf7c5f3c9f"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای FIL: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "FIL",
-      "timestamp": "2026-03-08T23:40:01.088Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "f213f195-7a71-4bc0-b281-e9d04746320b"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای XTZ: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "XTZ",
-      "timestamp": "2026-03-08T23:40:00.756Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "c7eb6887-09a7-4afe-99e3-48d2ae0f8a4d"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای CRO: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "CRO",
-      "timestamp": "2026-03-08T23:39:47.316Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "076296ae-784f-4231-8027-927ec66e98b1"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای ATOM: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "ATOM",
-      "timestamp": "2026-03-08T23:39:46.435Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "6a4b7131-c8f4-4be3-92b2-a921eb1a18cf"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای ICP: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "ICP",
-      "timestamp": "2026-03-08T23:39:46.118Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "a3de798c-2ffb-4405-ae25-4bcfef5c82ca"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای ETC: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "ETC",
-      "timestamp": "2026-03-08T23:39:45.818Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "989d5555-e7c9-4707-9541-a19d61bbb3e2"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای BAT: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "BAT",
-      "timestamp": "2026-03-08T23:39:31.224Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "6aa2cbce-cd19-4316-a056-e98a1fc2504f"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای CHZ: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "CHZ",
-      "timestamp": "2026-03-08T23:39:30.904Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "23a923e9-b63a-4e47-91d3-642e0acc9760"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای AVAX: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "AVAX",
-      "timestamp": "2026-03-08T23:39:30.589Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "64323ab3-030a-4bed-bdd6-888b623fd158"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای UNI: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "UNI",
-      "timestamp": "2026-03-08T23:39:17.403Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "a43e078e-7076-421a-9d5e-91757fc714c2"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای AAVE: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "AAVE",
-      "timestamp": "2026-03-08T23:39:17.085Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "2c940478-9b00-432a-b490-4455bfcb7852"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای ALGO: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "ALGO",
-      "timestamp": "2026-03-08T23:39:16.595Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "8f55fff7-0228-41eb-b15a-89cea75fa955"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای DOGE: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "DOGE",
-      "timestamp": "2026-03-08T23:39:16.264Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "76c4f851-f481-4483-86b3-caa54cf83a9b"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای ADA: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "ADA",
-      "timestamp": "2026-03-08T23:39:15.953Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "e94aa54c-f40b-4b76-91af-82d81ab4c6b2"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای LTC: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "LTC",
-      "timestamp": "2026-03-08T23:39:02.200Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "82736273-0c15-4b3b-ae7b-c54792d00fcf"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای USDT: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "USDT",
-      "timestamp": "2026-03-08T23:39:01.545Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "997681d3-243d-428d-b487-3f068f009d10"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای ETH: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "ETH",
-      "timestamp": "2026-03-08T23:39:01.247Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "88b26d14-a3dd-4361-83e4-1a0a8fd15863"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای USDC: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "USDC",
-      "timestamp": "2026-03-08T23:39:00.925Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "64c5e0bd-fb7a-46a7-b0f8-ad3afc9ad564"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای BTC: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "BTC",
-      "timestamp": "2026-03-08T23:38:51.807Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "3c63b8eb-ab59-43ca-8846-357139f22a46"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای MINA: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "MINA",
-      "timestamp": "2026-03-08T23:38:50.607Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "a33c26ba-fa7b-4338-931f-5a765d277ed1"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای APE: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "APE",
-      "timestamp": "2026-03-08T23:38:49.409Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "86667de0-8179-430c-8d10-6b1af259ec22"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای SNX: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "SNX",
-      "timestamp": "2026-03-08T23:38:48.294Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "914feef0-0851-433b-b151-1eb9223ef8f0"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای 1INCH: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "1INCH",
-      "timestamp": "2026-03-08T23:38:47.050Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "62f37eb9-3e45-4d60-adcd-cfb0fd37bcfd"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای ENS: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "ENS",
-      "timestamp": "2026-03-08T23:38:46.038Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "6fcd69a7-8dd1-4b55-b77c-65bfb598541c"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای GRT: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "GRT",
-      "timestamp": "2026-03-08T23:38:32.600Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "0a6d4b8a-dc17-47e5-968f-8cebf98c908a"
+      "id": "574f64a1-294e-4036-a2a8-7e5dd192f251"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای ANKR: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "ANKR",
-      "timestamp": "2026-03-08T23:38:32.305Z",
+      "timestamp": "2026-03-08T23:48:49.553Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "0a84acc7-c86b-4dcb-aa4b-7f8ef9aaa230"
+      "id": "58d3c3ed-f0c8-48d0-ad66-eec44c3d970d"
     },
     {
       "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای FIL: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "FIL",
-      "timestamp": "2026-03-08T23:38:31.645Z",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای MANA: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "MANA",
+      "timestamp": "2026-03-08T23:48:49.231Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "e2d80af9-0113-45e5-9ee7-9e553569d802"
+      "id": "17c0c466-303f-430f-bdb1-0b5fb67ac06a"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای XTZ: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "XTZ",
-      "timestamp": "2026-03-08T23:38:31.321Z",
+      "timestamp": "2026-03-08T23:48:48.924Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "68484992-718f-4e9f-81a5-e544d9e8f1b7"
+      "id": "66680fc4-1e97-46d8-bd8b-898d7e5254ca"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای CRO: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "CRO",
-      "timestamp": "2026-03-08T23:38:31.009Z",
+      "timestamp": "2026-03-08T23:48:48.589Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "ca91ebf0-471e-47ba-9928-be98fa41c2a7"
+      "id": "a33d34c1-3b5c-485c-9a12-652da453db26"
     },
     {
       "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای SHIB: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "SHIB",
-      "timestamp": "2026-03-08T23:38:17.553Z",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای FIL: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "FIL",
+      "timestamp": "2026-03-08T23:48:34.989Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "00355bfc-4f9a-4e60-a3e7-79d99e11f305"
+      "id": "d31580dc-94db-4182-9219-92d129bc42b0"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای DOT: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "DOT",
-      "timestamp": "2026-03-08T23:38:17.243Z",
+      "timestamp": "2026-03-08T23:48:34.510Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "034f670f-d8e8-4042-b5e6-c3282a5f10c7"
+      "id": "a8c0adf9-4532-4635-ad50-9dd8a94db219"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای ATOM: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "ATOM",
+      "timestamp": "2026-03-08T23:48:34.164Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "dac56cf4-9ade-4c70-968a-f121aca6c52f"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای ICP: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "ICP",
-      "timestamp": "2026-03-08T23:38:16.772Z",
+      "timestamp": "2026-03-08T23:48:33.864Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "4f9979ee-6e3a-4b85-a50d-000aecd8e7c5"
+      "id": "062199e6-63ca-40f9-8019-dd01bd685577"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای ETC: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "ETC",
-      "timestamp": "2026-03-08T23:38:16.437Z",
+      "timestamp": "2026-03-08T23:48:33.539Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "2cb7aed2-1734-4095-9d9d-ae829623b4be"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای XLM: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "XLM",
-      "timestamp": "2026-03-08T23:38:16.119Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "27e0e910-d89d-4c57-a247-6cc0e4a8d5cf"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای BCH: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "BCH",
-      "timestamp": "2026-03-08T23:38:02.537Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "18ef950b-7333-4a09-9e8a-7b72e27bddd3"
+      "id": "c4d330d8-2c3e-4fdc-881a-e705a25c54b4"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای CRV: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "CRV",
-      "timestamp": "2026-03-08T23:38:02.200Z",
+      "timestamp": "2026-03-08T23:48:19.275Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "d32e3637-da5e-4c78-adee-0c9a5c148474"
+      "id": "4ef0cd54-d473-4583-9093-de48c68b4762"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای BAT: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "BAT",
+      "timestamp": "2026-03-08T23:48:18.980Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "c06ff705-0773-4375-8ee7-62aef2446906"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای CHZ: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "CHZ",
-      "timestamp": "2026-03-08T23:38:01.581Z",
+      "timestamp": "2026-03-08T23:48:18.675Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "2bc71058-0daf-4d7e-b115-ab48b1927065"
+      "id": "ed2866b0-fb1c-466b-ba9c-e817dff84e09"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای AVAX: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "AVAX",
-      "timestamp": "2026-03-08T23:38:01.254Z",
+      "timestamp": "2026-03-08T23:48:18.340Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "2e1b5647-96a0-4701-95ab-a0a1ef67de93"
+      "id": "56a95183-eb68-42c9-9199-4c18a9037d8c"
     },
     {
       "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای UNI: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
-      "symbol": "UNI",
-      "timestamp": "2026-03-08T23:38:00.930Z",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای AAVE: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "AAVE",
+      "timestamp": "2026-03-08T23:48:05.529Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "4b19d4a0-6078-4b8c-b84e-9f2486dfedc2"
+      "id": "5d83bf3c-c6c3-4519-9c10-5546864c3bb9"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای LINK: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "LINK",
-      "timestamp": "2026-03-08T23:37:47.652Z",
+      "timestamp": "2026-03-08T23:48:05.222Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "f026c25d-1106-4527-b345-9c2dc3823079"
+      "id": "71c34301-9ef6-417a-b5c4-06b4340034fa"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای ALGO: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "ALGO",
-      "timestamp": "2026-03-08T23:37:47.164Z",
+      "timestamp": "2026-03-08T23:48:04.909Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "d120adfa-2ee6-4568-946a-e62aa51bc57c"
+      "id": "e1d61811-92b6-4662-9ccd-be6cc4b950ab"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای DOGE: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "DOGE",
-      "timestamp": "2026-03-08T23:37:46.845Z",
+      "timestamp": "2026-03-08T23:48:04.574Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "bb07bde9-cd67-457e-b4c8-22f9ba8d6bc8"
+      "id": "a8ea9118-20fe-4686-9e46-1dba03d7d8c8"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای ADA: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "ADA",
-      "timestamp": "2026-03-08T23:37:46.373Z",
+      "timestamp": "2026-03-08T23:48:04.177Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "bdca6bad-6e52-46bb-81f3-5ff4824ea8b2"
+      "id": "97f9f8d4-9bbc-4571-855f-36e79282e859"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای LTC: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "LTC",
-      "timestamp": "2026-03-08T23:37:46.036Z",
+      "timestamp": "2026-03-08T23:47:50.061Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "789657eb-1c5c-4a2b-a1af-0141d8bff103"
+      "id": "3f567b37-d372-4084-bd49-f363a156d58b"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای SOL: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "SOL",
-      "timestamp": "2026-03-08T23:37:32.595Z",
+      "timestamp": "2026-03-08T23:47:49.393Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "992cc833-e1de-4446-9446-c04f581015f3"
+      "id": "da968c85-77c0-4f3d-b879-db1b25fee133"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای USDT: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "USDT",
-      "timestamp": "2026-03-08T23:37:32.154Z",
+      "timestamp": "2026-03-08T23:47:49.074Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "1f6cc39a-ed87-4b30-8ae5-8cc68111fc40"
+      "id": "edcd9777-8c51-4888-861f-a0b2ed27ebd4"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای ETH: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "ETH",
-      "timestamp": "2026-03-08T23:37:31.848Z",
+      "timestamp": "2026-03-08T23:47:48.749Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "f355ee41-71ad-4385-8991-3979014d3b73"
+      "id": "f0598a57-ebb4-4258-8dd7-a80012344c3f"
     },
     {
       "side": "NEUTRAL",
       "analysis": "خطا در تحلیل هوش مصنوعی برای USDC: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
       "symbol": "USDC",
-      "timestamp": "2026-03-08T23:37:31.339Z",
+      "timestamp": "2026-03-08T23:47:48.438Z",
       "confidence": 0,
       "potentialRoi": 0,
-      "id": "48fb4c76-6ab4-4a05-a974-fe9662c1a8f0"
+      "id": "b4e1867d-4fbd-4a1e-92f6-f803bd7eccbb"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای 1INCH: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "1INCH",
+      "timestamp": "2026-03-08T23:47:33.953Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "403259d8-2257-4ce7-bc19-07f87d6eef2a"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای ENS: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "ENS",
+      "timestamp": "2026-03-08T23:47:33.620Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "83115869-c31b-4d45-82b9-7c4d066094d6"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای GRT: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "GRT",
+      "timestamp": "2026-03-08T23:47:20.111Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "52f71744-581a-4d17-bada-1ff1660c17b9"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای MANA: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "MANA",
+      "timestamp": "2026-03-08T23:47:19.321Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "9060be99-4f64-4652-91ec-33833c7cebed"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای XTZ: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "XTZ",
+      "timestamp": "2026-03-08T23:47:19.028Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "fb21b162-3dfb-4741-8392-f730f6f46eb2"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای FIL: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "FIL",
+      "timestamp": "2026-03-08T23:47:18.559Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "bd897afd-d984-4fb2-a95a-514cb8a337b5"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای SHIB: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "SHIB",
+      "timestamp": "2026-03-08T23:47:05.389Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "abe67613-5bf4-4858-b63d-357bbc96ba40"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای DOT: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "DOT",
+      "timestamp": "2026-03-08T23:47:05.068Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "fbaa5bb4-1792-464c-88c4-94cd91e28ad1"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای ATOM: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "ATOM",
+      "timestamp": "2026-03-08T23:47:04.752Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "a49acc6d-e3ac-4e8f-a576-558a9d8bc26b"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای ICP: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "ICP",
+      "timestamp": "2026-03-08T23:47:04.436Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "657ac966-e374-4bb5-816d-88681f1a2aba"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای ETC: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "ETC",
+      "timestamp": "2026-03-08T23:47:03.961Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "54c7f757-aa68-4ed8-88fc-e123a0c461c3"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای XLM: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "XLM",
+      "timestamp": "2026-03-08T23:47:03.503Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "49c9ae32-ffa1-4c88-a0cb-077654a4e44c"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای BCH: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "BCH",
+      "timestamp": "2026-03-08T23:46:50.023Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "ba4dddb4-1e86-4d1f-998d-71128ec559af"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای BAT: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "BAT",
+      "timestamp": "2026-03-08T23:46:49.563Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "45dc5584-60c8-4276-816d-313ebf238896"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای CHZ: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "CHZ",
+      "timestamp": "2026-03-08T23:46:49.238Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "19ef9ce1-6155-4bff-91dd-9ce422f9f3ad"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای AVAX: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "AVAX",
+      "timestamp": "2026-03-08T23:46:48.916Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "c0f71b2b-f33a-4da8-9b15-b4a6987dd10e"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای UNI: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "UNI",
+      "timestamp": "2026-03-08T23:46:48.600Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "f7fc6ab5-f2d3-49ac-a885-bf242ee07d45"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای AAVE: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "AAVE",
+      "timestamp": "2026-03-08T23:46:34.991Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "89b7c5e0-b6a4-48f1-90ad-8ee0823cab9c"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای ALGO: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "ALGO",
+      "timestamp": "2026-03-08T23:46:34.511Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "e397fa67-90a3-430c-94e5-62f7ae435776"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای DOGE: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "DOGE",
+      "timestamp": "2026-03-08T23:46:34.183Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "8c492b1f-c1e0-488b-b76c-06aaa0a55e2e"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای ADA: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "ADA",
+      "timestamp": "2026-03-08T23:46:33.869Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "3e315585-18c7-4d87-92be-24c91baa9f30"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای LTC: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "LTC",
+      "timestamp": "2026-03-08T23:46:33.557Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "62513654-863f-407c-84ae-d3b968e56572"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای XRP: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "XRP",
+      "timestamp": "2026-03-08T23:46:25.325Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "2ade7a41-62ad-441e-8532-c93bb5fe3c77"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای SOL: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "SOL",
+      "timestamp": "2026-03-08T23:46:23.999Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "19230336-3879-445e-a2e5-9a32e3314caa"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای USDT: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "USDT",
+      "timestamp": "2026-03-08T23:46:22.270Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "e60eb949-bd4d-4901-8e8f-ddf765f40aaf"
+    },
+    {
+      "side": "NEUTRAL",
+      "analysis": "خطا در تحلیل هوش مصنوعی برای ETH: {\"error\":{\"code\":429,\"message\":\"Resource has been exhausted (e.g. check quota).\",\"status\":\"RESOURCE_EXHAUSTED\"}}",
+      "symbol": "ETH",
+      "timestamp": "2026-03-08T23:46:20.768Z",
+      "confidence": 0,
+      "potentialRoi": 0,
+      "id": "2972f89e-3958-45f2-b4ea-0dc14b98a7ce"
     }
   ],
   "executionLogs": [
@@ -4796,8 +4796,8 @@
     "lastResetDate": "2026-03-08"
   },
   "totalProfit": -8.187341214221222,
-  "currentStatus": "SCAN_BATCH_DONE_62786",
-  "scanIndex": 62786,
+  "currentStatus": "SCAN_BATCH_DONE_62996",
+  "scanIndex": 62996,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
