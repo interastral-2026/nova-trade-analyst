@@ -339,7 +339,7 @@ Fee Calculation is MANDATORY: Account for a ${FEE_RATE * 100}% round-trip fee.
 Break-even = Entry Price * (1 + ${FEE_RATE}).
 
 CRITICAL DIRECTIVES:
-- RULE #1: PURE PROFIT. If the move isn't big enough to cover fees and yield at least 1.0% net profit, DO NOT BUY.
+- RULE #1: PURE PROFIT. If the move isn't big enough to cover fees and yield at least 1.2% net profit, DO NOT BUY.
 - RULE #2: NO FOMO. Buy the dip (Discount Zones) or breakouts with volume.
 - RULE #3: RUTHLESS EXITS. If price stalls or shows weakness, SELL. 
 - RULE #4: PROTECT ENTRY. If in profit, move SL to break-even + fees ASAP.
@@ -544,7 +544,7 @@ async function monitorPositionsAI() {
           const tradeAgeMs = Date.now() - new Date(pos.timestamp).getTime();
           const isMinHoldTimeMet = tradeAgeMs > MIN_HOLD_TIME_MS;
           
-          const isProfitable = price > (breakEvenPrice * (1 + 0.01)); // 1.0% net profit buffer
+          const isProfitable = price > (breakEvenPrice * (1 + 0.012)); // 1.2% net profit buffer as requested
           const isSignificantLoss = price < (pos.entryPrice * 0.95); // 5% loss (thesis broken)
           
           if ((isProfitable && isMinHoldTimeMet) || (analysis.confidence >= 98 && isSignificantLoss)) {
@@ -702,13 +702,13 @@ async function scanWatchlist() {
       
       // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss
       const maxSlPrice = price * 0.94; // Maximum 6% loss
-      const minSlPrice = price * 0.99; // Minimum 1% loss
+      const minSlPrice = price * 0.98; // Minimum 2% loss (increased from 1% for more breathing room)
       
       if (analysis.sl < maxSlPrice) {
         console.log(`[RISK] Clamping SL for ${symbol} from ${analysis.sl} to ${maxSlPrice} (Max 6% loss)`);
         analysis.sl = maxSlPrice;
       } else if (analysis.sl > minSlPrice) {
-        console.log(`[RISK] Tightening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 1% loss)`);
+        console.log(`[RISK] Tightening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 2% loss)`);
         analysis.sl = minSlPrice;
       }
 
@@ -955,13 +955,13 @@ async function monitor() {
         const netPnlPercent = pnlPercent - (FEE_RATE * 100);
 
         // Dynamic Trailing Stop & Break Even
-        if (netPnlPercent > 1.5 && pos.sl < breakEvenPrice) {
-          pos.sl = breakEvenPrice * 1.002; // Lock in 0.2% pure profit as soon as we hit 1.5% net
+        if (netPnlPercent > 1.8 && pos.sl < breakEvenPrice) {
+          pos.sl = breakEvenPrice * 1.005; // Lock in 0.5% pure profit as soon as we hit 1.8% net
           console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
         }
 
-        if (netPnlPercent > 2.5) {
-          const newSl = curPrice * 0.99; // 1.0% trailing stop once in 2.5% net profit
+        if (netPnlPercent > 3.0) {
+          const newSl = curPrice * 0.985; // 1.5% trailing stop once in 3.0% net profit
           if (newSl > pos.sl) {
             pos.sl = newSl;
             console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
