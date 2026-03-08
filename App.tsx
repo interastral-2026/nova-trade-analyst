@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { AssetInfo, TradeSignal, AnalysisStatus } from './types.ts';
+import { AssetInfo, TradeSignal, AnalysisStatus, ActivePosition, ExecutionLog } from './types.ts';
 import { fetchProductStats } from './services/coinbaseService.ts';
 import { getApiBase } from './services/tradingService.ts';
 import Header from './components/Header.tsx';
@@ -14,6 +14,9 @@ const App: React.FC = () => {
   const [selectedAsset, setSelectedAsset] = useState<string>('BTC-EUR');
   const [assets, setAssets] = useState<AssetInfo[]>([]);
   const [thoughtHistory, setThoughtHistory] = useState<TradeSignal[]>([]);
+  const [activePositions, setActivePositions] = useState<ActivePosition[]>([]);
+  const [executionLogs, setExecutionLogs] = useState<ExecutionLog[]>([]);
+  const [stats, setStats] = useState({ eur: 0, usdc: 0, trades: 0, profit: 0, totalProfit: 0, isPaper: true, dailyGoal: 50 });
   const [isEngineActive, setIsEngineActive] = useState<boolean>(true);
   const [autoTradeEnabled, setAutoTradeEnabled] = useState<boolean>(true);
   const [isPaperMode, setIsPaperMode] = useState<boolean>(false);
@@ -33,7 +36,32 @@ const App: React.FC = () => {
       }
       
       const data = await response.json();
-      setThoughtHistory(data.thoughts || []);
+      
+      // Deduplicate by ID to prevent React key warnings
+      const deduplicate = (arr: any[]) => {
+        if (!Array.isArray(arr)) return [];
+        const seen = new Set();
+        return arr.filter(item => {
+          if (!item.id) return true;
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
+      };
+
+      setThoughtHistory(deduplicate(data.thoughts));
+      setActivePositions(data.activePositions || []);
+      setExecutionLogs(deduplicate(data.executionLogs));
+      setStats({
+        eur: Number(data.liquidity?.eur) || 0,
+        usdc: Number(data.liquidity?.usdc) || 0,
+        trades: Number(data.dailyStats?.trades) || 0,
+        profit: Number(data.dailyStats?.profit) || 0,
+        totalProfit: Number(data.totalProfit) || 0,
+        isPaper: data.isPaperMode !== false,
+        dailyGoal: Number(data.dailyStats?.dailyGoal) || 50
+      });
+      
       setIsEngineActive(!!data.isEngineActive);
       setAutoTradeEnabled(!!data.autoPilot);
       setIsPaperMode(!!data.isPaperMode);
@@ -173,6 +201,9 @@ const App: React.FC = () => {
               <TradingTerminal 
                 thoughtHistory={thoughtHistory} 
                 liveActivity={liveActivity} 
+                activePositions={activePositions}
+                executionLogs={executionLogs}
+                stats={stats}
               />
           </div>
           

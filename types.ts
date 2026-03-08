@@ -69,6 +69,7 @@ export interface AccountBalance {
 }
 
 export interface ActivePosition {
+  id: string;
   symbol: string;
   entryPrice: number;
   currentPrice: number;

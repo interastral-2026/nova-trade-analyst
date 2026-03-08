@@ -38,9 +38,11 @@ const CB_API_SECRET = process.env.CB_API_SECRET
 const WATCHLIST = ['SOL', 'AVAX', 'LINK', 'NEAR', 'MATIC', 'XRP', 'DOGE', 'SHIB', 'PEPE', 'WIF', 'BONK', 'FLOKI', 'RNDR', 'INJ', 'FET', 'TIA'];
 const STATE_FILE = './ghost_state.json';
 const FEE_RATE = 0.008; // 0.8% round-trip fee (0.4% buy + 0.4% sell)
-const MIN_NET_PROFIT = 0.01; // 1.0% minimum net profit after fees (Total required move = 1.8%)
+const MIN_HOLD_TIME_MS = 10 * 60 * 1000; // 10 minutes minimum hold time
+const TRADE_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes cooldown between trades for same symbol
 
 let availableEurPairs: string[] = [];
+const lastTradeTime: Record<string, number> = {};
 
 // --- TRADING ENGINE LOGIC ---
 
@@ -538,10 +540,13 @@ async function monitorPositionsAI() {
         }
         
         if (analysis && analysis.side === 'SELL') {
-          const isProfitable = price > (breakEvenPrice * (1 + 0.005)); // 0.5% net profit buffer
-          const isSignificantLoss = price < (pos.entryPrice * 0.96); // 4% loss (thesis broken)
+          const tradeAgeMs = Date.now() - new Date(pos.timestamp).getTime();
+          const isMinHoldTimeMet = tradeAgeMs > MIN_HOLD_TIME_MS;
           
-          if (isProfitable || (analysis.confidence >= 95 && isSignificantLoss)) {
+          const isProfitable = price > (breakEvenPrice * (1 + 0.01)); // 1.0% net profit buffer
+          const isSignificantLoss = price < (pos.entryPrice * 0.95); // 5% loss (thesis broken)
+          
+          if ((isProfitable && isMinHoldTimeMet) || (analysis.confidence >= 98 && isSignificantLoss)) {
             const tradePnl = (price - pos.entryPrice) * pos.quantity;
             const netPnl = tradePnl - (pos.amount * roundTripFee);
             console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
@@ -563,6 +568,7 @@ async function monitorPositionsAI() {
               });
               const idx = ghostState.activePositions.findIndex(p => p.symbol === pos.symbol);
               if (idx !== -1) ghostState.activePositions.splice(idx, 1);
+              lastTradeTime[pos.symbol] = Date.now();
               saveState();
             } else if (tradeResult.reason && (tradeResult.reason.includes('INSUFFICIENT_FUND') || tradeResult.reason.includes('NO_BALANCE_ON_EXCHANGE'))) {
               console.log(`[AI-MONITOR] Removing ${pos.symbol} due to missing balance on exchange.`);
@@ -587,9 +593,10 @@ async function scanWatchlist() {
   
   try {
     // Use availableEurPairs if we have them, otherwise fallback to WATCHLIST
-    const currentWatchlist = availableEurPairs.length > 0 
+    const rawWatchlist = availableEurPairs.length > 0 
       ? availableEurPairs.map(p => p.split('-')[0]) 
       : WATCHLIST;
+    const currentWatchlist = [...new Set(rawWatchlist)];
 
     // Check for minimum liquidity before scanning
     if (ghostState.liquidity.eur < 10) {
@@ -620,6 +627,12 @@ async function scanWatchlist() {
       ghostState.scanIndex++;
       
       if (ghostState.activePositions.some(p => p.symbol === symbol)) {
+        continue;
+      }
+
+      // Cooldown check
+      const lastTrade = lastTradeTime[symbol] || 0;
+      if (Date.now() - lastTrade < TRADE_COOLDOWN_MS) {
         continue;
       }
 
@@ -730,6 +743,7 @@ async function scanWatchlist() {
 
           analysis.decision = `EXECUTED: BUY_${symbol}_AT_${finalEntryPrice}`;
           ghostState.activePositions.push({
+            id: crypto.randomUUID(),
             symbol, entryPrice: finalEntryPrice, currentPrice: finalEntryPrice, amount: tradeAmount, quantity: qty,
             tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
             pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString(),
@@ -884,6 +898,7 @@ async function monitor() {
             const lastFillPrice = await getLastFillPrice(symbol);
             
             ghostState.activePositions.push({
+              id: crypto.randomUUID(),
               symbol,
               entryPrice: lastFillPrice || 0, 
               currentPrice: 0,
@@ -935,38 +950,30 @@ async function monitor() {
         const netPnlPercent = pnlPercent - (FEE_RATE * 100);
 
         // Dynamic Trailing Stop & Break Even
-        if (netPnlPercent > 0.5 && pos.sl < breakEvenPrice) {
-          pos.sl = breakEvenPrice * 1.001; // Lock in 0.1% pure profit as soon as we hit 0.5% net
+        if (netPnlPercent > 1.5 && pos.sl < breakEvenPrice) {
+          pos.sl = breakEvenPrice * 1.002; // Lock in 0.2% pure profit as soon as we hit 1.5% net
           console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
         }
 
-        if (netPnlPercent > 1.5) {
-          const newSl = curPrice * 0.995; // 0.5% trailing stop once in 1.5% net profit
+        if (netPnlPercent > 2.5) {
+          const newSl = curPrice * 0.99; // 1.0% trailing stop once in 2.5% net profit
           if (newSl > pos.sl) {
             pos.sl = newSl;
             console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
           }
         }
 
-        // EARLY EXIT: If price reaches 80% of TP
-        const tpDistance = pos.tp - pos.entryPrice;
-        const earlyExitPrice = pos.entryPrice + (tpDistance * 0.8);
-        const canExitSafely = curPrice > (breakEvenPrice * (1 + MIN_NET_PROFIT));
-
-        // TIME-BASED EXIT: If trade is open for > 3 hours and not in significant profit, close it to free liquidity
-        const tradeAgeMs = new Date().getTime() - new Date(pos.timestamp).getTime();
+        // TIME-BASED EXIT: If trade is open for > 6 hours and not in significant profit
+        const tradeAgeMs = Date.now() - new Date(pos.timestamp).getTime();
         const tradeAgeHours = tradeAgeMs / (1000 * 60 * 60);
-        // Only exit stagnant trades if we are at least at break-even (don't force a loss just for time)
-        const isStagnant = tradeAgeHours > 3 && netPnlPercent < 0.5 && curPrice > breakEvenPrice;
+        const isStagnant = tradeAgeHours > 6 && netPnlPercent < 0.5 && curPrice > breakEvenPrice;
 
         // Trigger SELL if:
         // 1. Reached TP
-        // 2. Reached SL (Hard stop loss, must execute even if in loss)
-        // 3. Reached 80% of TP and is safe to exit
-        // 4. Trade is stagnant (time-based exit)
-        if (curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.4 && canExitSafely) || isStagnant) {
-          let reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_80%_TP');
-          if (isStagnant && curPrice < pos.tp && curPrice > pos.sl) reason = 'TIME_STAGNATION_EXIT';
+        // 2. Reached SL (Hard stop loss)
+        // 3. Trade is stagnant (time-based exit)
+        if (curPrice >= pos.tp || curPrice <= pos.sl || isStagnant) {
+          const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'TIME_STAGNATION_EXIT');
           
           const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
           
@@ -974,6 +981,7 @@ async function monitor() {
             ghostState.dailyStats.profit += pos.pnl;
             ghostState.totalProfit += pos.pnl;
             ghostState.liquidity.eur += (pos.amount + pos.pnl);
+            lastTradeTime[pos.symbol] = Date.now();
             ghostState.executionLogs.unshift({ 
               id: crypto.randomUUID(), 
               symbol: pos.symbol, 
@@ -1003,6 +1011,25 @@ async function monitor() {
 
 function saveState() { 
   try { 
+    // Final deduplication before saving
+    if (ghostState.thoughts) {
+      const seen = new Set();
+      ghostState.thoughts = ghostState.thoughts.filter(t => {
+        if (!t.id) return true;
+        if (seen.has(t.id)) return false;
+        seen.add(t.id);
+        return true;
+      });
+    }
+    if (ghostState.executionLogs) {
+      const seen = new Set();
+      ghostState.executionLogs = ghostState.executionLogs.filter(l => {
+        if (!l.id) return true;
+        if (seen.has(l.id)) return false;
+        seen.add(l.id);
+        return true;
+      });
+    }
     fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); 
   } catch (e) {
     console.error("[STATE SAVE ERROR]", e);

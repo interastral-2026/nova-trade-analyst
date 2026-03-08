@@ -1,49 +1,31 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ExecutionLog, ActivePosition, TradeSignal } from '../types.ts';
-import { getApiBase } from '../services/tradingService.ts';
 
 interface TradingTerminalProps {
   thoughtHistory: TradeSignal[];
   liveActivity: string;
+  activePositions: ActivePosition[];
+  executionLogs: ExecutionLog[];
+  stats: {
+    eur: number;
+    usdc: number;
+    trades: number;
+    profit: number;
+    totalProfit: number;
+    isPaper: boolean;
+    dailyGoal: number;
+  };
 }
 
 const TradingTerminal: React.FC<TradingTerminalProps> = ({ 
   thoughtHistory = [],
-  liveActivity = "IDLE"
+  liveActivity = "IDLE",
+  activePositions = [],
+  executionLogs = [],
+  stats
 }) => {
-  const [stats, setStats] = useState({ eur: 0, usdc: 0, trades: 0, profit: 0, totalProfit: 0, isPaper: true, dailyGoal: 50 });
-  const [logs, setLogs] = useState<ExecutionLog[]>([]);
-  const [holdings, setHoldings] = useState<ActivePosition[]>([]);
   const [activeTab, setActiveTab] = useState<'holdings' | 'stream' | 'activity'>('holdings');
-
-  const fetchState = async () => {
-    try {
-      const res = await fetch(`${getApiBase()}/api/ghost/state`);
-      if (!res.ok) return;
-      const data = await res.json();
-      setStats({ 
-        eur: Number(data.liquidity?.eur) || 0, 
-        usdc: Number(data.liquidity?.usdc) || 0,
-        trades: Number(data.dailyStats?.trades) || 0, 
-        profit: Number(data.dailyStats?.profit) || 0,
-        totalProfit: Number(data.totalProfit) || 0,
-        isPaper: data.isPaperMode !== false,
-        dailyGoal: Number(data.dailyStats?.dailyGoal) || 50
-      });
-      setLogs(Array.isArray(data.executionLogs) ? data.executionLogs : []);
-      setHoldings(Array.isArray(data.activePositions) ? data.activePositions : []);
-    } catch (e) {
-      console.error("Failed to fetch state", e);
-    }
-  };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchState();
-    const i = setInterval(fetchState, 3000);
-    return () => clearInterval(i);
-  }, []);
 
   const goalProgress = stats.dailyGoal > 0 ? Math.max(0, Math.min(100, (stats.profit / stats.dailyGoal) * 100)) : 0;
 
@@ -106,7 +88,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
         <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.01] backdrop-blur-md">
            <div className="flex space-x-8">
               {[
-                { id: 'holdings', label: 'Hunts', count: holdings.length },
+                { id: 'holdings', label: 'Hunts', count: activePositions.length },
                 { id: 'stream', label: 'Intelligence' },
                 { id: 'activity', label: 'Logs' }
               ].map((tab) => (
@@ -127,19 +109,19 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
            {activeTab === 'holdings' && (
              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
-                {holdings.length === 0 ? (
+                {activePositions.length === 0 ? (
                    <div className="col-span-full h-64 flex flex-col items-center justify-center opacity-20 text-center grayscale border border-dashed border-white/10 rounded-[2rem] bg-white/[0.01]">
                       <div className="w-12 h-12 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
                       <p className="uppercase text-[10px] font-black tracking-[0.3em] text-indigo-400">Establishing Target Nodes...</p>
                    </div>
                 ) : (
-                   holdings.map((pos) => {
+                   activePositions.map((pos) => {
                     const isProfit = getSafeNum(pos.pnlPercent) >= 0;
                     const roi = getSafeNum(pos.pnlPercent);
                     const pnl = getSafeNum(pos.pnl);
                     
                     return (
-                      <div key={pos.symbol} className={`group bg-[#080812] border p-5 lg:p-6 rounded-[2rem] relative overflow-hidden transition-all hover:border-indigo-500/40 ${isProfit ? 'border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.03)]' : 'border-rose-500/20 shadow-[0_0_40px_rgba(244,63,94,0.03)]'}`}>
+                      <div key={pos.id || pos.symbol} className={`group bg-[#080812] border p-5 lg:p-6 rounded-[2rem] relative overflow-hidden transition-all hover:border-indigo-500/40 ${isProfit ? 'border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.03)]' : 'border-rose-500/20 shadow-[0_0_40px_rgba(244,63,94,0.03)]'}`}>
                          {/* Header Section */}
                          <div className="flex justify-between items-start mb-5">
                             <div className="flex items-center space-x-3">
@@ -305,10 +287,10 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
 
            {activeTab === 'activity' && (
               <div className="space-y-4 max-w-5xl mx-auto">
-                 {logs.length === 0 ? (
+                 {executionLogs.length === 0 ? (
                    <p className="text-slate-600 text-[10px] uppercase font-black text-center py-20">No execution logs found.</p>
                  ) : (
-                   logs.map(log => (
+                   executionLogs.map(log => (
                      <div key={log.id} className="bg-[#0a0a14] border border-white/5 p-6 rounded-2xl flex justify-between items-center group hover:border-indigo-500/30 transition-all">
                         <div className="flex items-center space-x-6">
                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${log.action === 'BUY' ? 'bg-emerald-500/10 text-emerald-400' : log.action === 'SELL' ? 'bg-rose-500/10 text-rose-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
