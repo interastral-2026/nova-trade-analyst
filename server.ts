@@ -285,20 +285,19 @@ async function getLastFillPrice(symbol) {
 
 async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
   const isInvalidKey = !API_KEY || 
-                       API_KEY.startsWith('MY_GE') || 
-                       API_KEY === 'YOUR_API_KEY' || 
-                       API_KEY.length < 20;
+                       API_KEY.includes('your_gemini') || 
+                       API_KEY.length < 5;
 
   if (isInvalidKey) {
     const errorResult = {
       side: "NEUTRAL",
-      analysis: "خطا: کلید API هوش مصنوعی (Gemini) یافت نشد یا نامعتبر است. لطفاً یک کلید معتبر در فایل .env تنظیم کنید.",
+      analysis: "خطا: کلید API هوش مصنوعی (Gemini) یافت نشد. لطفاً در بخش تنظیمات پلتفرم (Environment Variables)، متغیر GEMINI_API_KEY را با یک کلید معتبر تنظیم کنید.",
       symbol,
       timestamp: new Date().toISOString(),
       confidence: 0,
       potentialRoi: 0,
       estimatedTime: "--",
-      liquidityAnalysis: "عدم دسترسی به هوش مصنوعی",
+      liquidityAnalysis: "کلید API یافت نشد",
       marketMonitoring: "سیستم پایش غیرفعال است",
       id: crypto.randomUUID()
     };

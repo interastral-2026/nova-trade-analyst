@@ -820,6 +820,266 @@
   ],
   "executionLogs": [
     {
+      "id": "e08ce89b-f906-4412-a20c-7f2a5f5d1803",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:33:15.007Z"
+    },
+    {
+      "id": "e059efdc-452b-49ae-a4c6-e8563ce8d1e4",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:32:30.009Z"
+    },
+    {
+      "id": "4d14f673-9a7c-49fb-bef1-d2f2cf3c62f4",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:31:45.011Z"
+    },
+    {
+      "id": "543a82c8-c4f8-44ad-b313-5a830647ce0f",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:31:00.011Z"
+    },
+    {
+      "id": "f98e9348-015b-4883-a288-1d1aa0cdfc4d",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:30:15.014Z"
+    },
+    {
+      "id": "8b3d23f3-cd62-4469-91fd-8f8ac23ed051",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:29:30.014Z"
+    },
+    {
+      "id": "c16352a9-66f3-4591-a699-ae4f8454c9a5",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:28:45.017Z"
+    },
+    {
+      "id": "8db995dd-55d0-4878-9de7-ab2e2fb796e9",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:28:00.018Z"
+    },
+    {
+      "id": "4a34f6be-0717-4fd3-9ae3-7ab084d04f82",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:27:15.019Z"
+    },
+    {
+      "id": "6a7b89fb-d517-4d43-a0c9-7fa04ab583aa",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:26:30.021Z"
+    },
+    {
+      "id": "b8e7cacf-5e84-43f5-ae60-77c1d346350e",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:25:45.023Z"
+    },
+    {
+      "id": "6b55e112-122a-417e-a121-40ea3582e5be",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:25:00.022Z"
+    },
+    {
+      "id": "16166fae-903a-4ade-9383-d7ccf68e8a73",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:24:15.027Z"
+    },
+    {
+      "id": "29ca27af-dfe7-48c5-8b27-91bdb33e89a2",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:23:30.027Z"
+    },
+    {
+      "id": "a9f7c7dc-e8e3-4642-8767-6186f1459317",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:22:45.029Z"
+    },
+    {
+      "id": "7d393560-5ca7-436f-9a53-b7c58431befd",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:22:00.032Z"
+    },
+    {
+      "id": "941aa186-50e8-48ec-8167-787ec5f1d9c1",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:21:15.033Z"
+    },
+    {
+      "id": "cc022635-2ef5-4942-ab86-8a495ea35194",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:20:30.036Z"
+    },
+    {
+      "id": "de626c08-47b6-4a0e-a64d-2541004aa641",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:19:45.039Z"
+    },
+    {
+      "id": "2662a332-2b6c-46f8-9c21-9c5934b7c39a",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:18:57.938Z"
+    },
+    {
+      "id": "c107b538-3921-4e9e-95dc-926f9d71db82",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:18:12.942Z"
+    },
+    {
+      "id": "c293db7e-1c32-416d-bb25-37c15127a231",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:17:27.942Z"
+    },
+    {
+      "id": "c0f7d0a9-8b00-4053-b2b5-483d0053f9b1",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:16:42.940Z"
+    },
+    {
+      "id": "da906a80-c080-4043-8937-e140d938cc84",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:15:57.946Z"
+    },
+    {
+      "id": "e2ac39e4-ca35-4972-ad12-1b7187574126",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:15:12.945Z"
+    },
+    {
+      "id": "43b62deb-b074-48fc-958b-5c776d4957cd",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T18:14:27.940Z"
+    },
+    {
       "id": "a7031706-74d8-40b9-8ec8-0b4cfb5d2982",
       "symbol": "SYSTEM",
       "action": "MONITOR",
@@ -4878,265 +5138,6 @@
       "status": "SUCCESS",
       "details": "COINBASE_SYNC | ID: 3ce95657-8f7e-4c55-8fe1-5cbde79c5206",
       "timestamp": "2026-03-07T18:57:58.475483Z"
-    },
-    {
-      "id": "d7f52738-1381-4a5a-a48a-b64645fb0bd9",
-      "symbol": "ATOM",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-07T18:57:13.782Z"
-    },
-    {
-      "id": "16359337-54e2-47d8-842b-0d406fc7f935",
-      "symbol": "ATOM",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 69de8192-70c3-4d8f-989f-af64b6657b03",
-      "timestamp": "2026-03-07T18:57:00.819416Z"
-    },
-    {
-      "id": "1005bf68-9b18-4c9f-b365-4e800b2b6ad0",
-      "symbol": "ATOM",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 68315038-5bbf-4efd-bcef-6cd8a457f8c2",
-      "timestamp": "2026-03-07T18:56:54.325178Z"
-    },
-    {
-      "id": "a04a9455-d4b7-4b7d-a83f-7bac1988b034",
-      "symbol": "DOT",
-      "action": "SELL",
-      "price": 1.263,
-      "pnl": -0.03509100000000022,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-07T18:42:10.653Z"
-    },
-    {
-      "id": "dc16f59c-affe-47d5-b6fa-722ef70eab3d",
-      "symbol": "DOT",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 5ea60733-586e-4e38-80f8-e4e6ce5406ab",
-      "timestamp": "2026-03-07T18:42:05.558270Z"
-    },
-    {
-      "id": "cb0974cf-0e19-444b-b202-4424bc656765",
-      "symbol": "APE",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: bd8eb4c2-3798-4c80-9777-1cb122bd4d32",
-      "timestamp": "2026-03-07T18:26:01.991985Z"
-    },
-    {
-      "id": "3d4615dd-ec65-4314-aab7-f164f46b02e0",
-      "symbol": "CHZ",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-07T18:14:15.450Z"
-    },
-    {
-      "id": "a3928b54-b06e-4441-a1bb-10ce4606d415",
-      "symbol": "CHZ",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: a68b2875-53bf-478f-8c3c-f638f727ed0e",
-      "timestamp": "2026-03-07T18:14:10.084727Z"
-    },
-    {
-      "id": "3655c550-c759-4144-b426-72a97ce496f3",
-      "symbol": "AAVE",
-      "action": "SELL",
-      "price": 94.32,
-      "pnl": -0.07168000000000006,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-07T18:13:54.436Z"
-    },
-    {
-      "id": "6d0b2da5-7f20-43fd-b17d-226d16dd06cd",
-      "symbol": "AAVE",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 7143f1f0-f5b5-4f44-98d3-12ba8489151f",
-      "timestamp": "2026-03-07T18:13:45.929104Z"
-    },
-    {
-      "id": "de01b23e-82dc-4b2b-8e6d-10134b694286",
-      "symbol": "CHZ",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 82e7a130-190c-4c09-aaba-95e969134e7a",
-      "timestamp": "2026-03-07T16:42:44.868649Z"
-    },
-    {
-      "id": "42c380f2-7df0-4fa2-a3ed-790d53436ec5",
-      "symbol": "DOT",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: dd1ceda7-907a-414a-92a4-0450d366e2f9",
-      "timestamp": "2026-03-07T05:28:35.915612Z"
-    },
-    {
-      "id": "335eac4e-5be9-4564-8e48-481c3eeb90ca",
-      "symbol": "CHZ",
-      "action": "SELL",
-      "price": 0.03103,
-      "pnl": -0.020115000000000216,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-07T04:04:05.456Z"
-    },
-    {
-      "id": "7adc4bf9-ae4a-4493-ba8f-b040e23e1f8b",
-      "symbol": "CHZ",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 54971524-96be-4f84-9d99-21ae1b506d04",
-      "timestamp": "2026-03-07T04:03:53.387398Z"
-    },
-    {
-      "id": "9efc95d7-96ba-40f2-bbb1-8c06c080bc46",
-      "symbol": "ANKR",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 5430c4ef-df13-49c2-bdc8-8091c7a941f6",
-      "timestamp": "2026-03-07T00:47:13.762123Z"
-    },
-    {
-      "id": "bc179b26-d311-41e9-b477-5edda7a712b7",
-      "symbol": "ANKR",
-      "action": "SELL",
-      "price": 0.003748,
-      "pnl": -0.03742199999999991,
-      "status": "SUCCESS",
-      "details": "EXIT_STOP_LOSS_PNL_-0.04",
-      "timestamp": "2026-03-07T00:47:13.714Z"
-    },
-    {
-      "id": "57805f6e-f8a2-4fa0-ad10-8d5706870892",
-      "symbol": "ANKR",
-      "action": "SELL",
-      "price": 0.003825,
-      "pnl": -0.06346694003075358,
-      "status": "SUCCESS",
-      "details": "EXIT_STOP_LOSS_PNL_-0.06",
-      "timestamp": "2026-03-07T00:11:12.815Z"
-    },
-    {
-      "id": "45ac4901-a67b-4d48-93ca-4756de83425d",
-      "symbol": "ANKR",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: b2a544af-440b-4c75-ae90-2094fb789fea",
-      "timestamp": "2026-03-07T00:07:03.697286Z"
-    },
-    {
-      "id": "4e57bb76-37bd-4429-9e19-f38469b83204",
-      "symbol": "ANKR",
-      "action": "BUY",
-      "price": 0.003902,
-      "status": "SUCCESS",
-      "details": "LIQUIDITY_BUY_CONF_86%",
-      "timestamp": "2026-03-07T00:07:03.671Z"
-    },
-    {
-      "id": "011335c6-ec0b-417c-b772-8fbf545bdf9b",
-      "symbol": "CHZ",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 4832a8ab-bbdd-4ae8-ab03-c9b25a6045aa",
-      "timestamp": "2026-03-07T00:05:49.517694Z"
-    },
-    {
-      "id": "e23021e8-26d7-4b25-888d-5db5ab68e094",
-      "symbol": "ANKR",
-      "action": "SELL",
-      "price": 0.00387,
-      "pnl": -0.021034999999999925,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-07T00:00:41.719Z"
-    },
-    {
-      "id": "84008124-eb53-4cfa-9d30-b52539d04c53",
-      "symbol": "ANKR",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 2403f2c5-135e-4959-9279-57df88f017b1",
-      "timestamp": "2026-03-07T00:00:39.001687Z"
-    },
-    {
-      "id": "2e1860ea-418e-438f-8b37-0f5924be36f9",
-      "symbol": "ANKR",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 12a3e612-d344-4809-8800-5da0119e7fb3",
-      "timestamp": "2026-03-06T23:00:21.466008Z"
-    },
-    {
-      "id": "76eeec27-d8a3-49f9-988b-3a6cf45af138",
-      "symbol": "ICP",
-      "action": "SELL",
-      "price": 2.126,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-06T22:58:04.501Z"
-    },
-    {
-      "id": "5a26ea66-6941-4186-a701-9651a393fef7",
-      "symbol": "ICP",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: d1885c28-c0cf-4818-9192-c88771c2467d",
-      "timestamp": "2026-03-06T22:57:53.057399Z"
-    },
-    {
-      "id": "b85a64ba-9b86-43f5-bc5a-98e0203ae3a3",
-      "symbol": "SOL",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 07cefd2a-7d77-4815-8bd8-a8ed569326d8",
-      "timestamp": "2026-03-06T21:59:01.316419Z"
     }
   ],
   "activePositions": [
@@ -5179,8 +5180,8 @@
     "lastResetDate": "2026-03-08"
   },
   "totalProfit": -8.086584894221222,
-  "currentStatus": "ANALYZING_HUNT_ANKR",
-  "scanIndex": 61355,
+  "currentStatus": "SCAN_BATCH_DONE_61555",
+  "scanIndex": 61555,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
