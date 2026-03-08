@@ -986,12 +986,34 @@ async function monitor() {
         // 2. Reached SL (Hard stop loss)
         // 3. Trade is stagnant (time-based exit)
         
-       
-        const isGracePeriod = tradeAgeMs < (3 * 60 * 1000); // 3-minute grace period
-        const isHardStop = curPrice <= (pos.entryPrice * 0.95); // 5% hard stop bypasses grace
+        const isGracePeriod = tradeAgeMs < (5 * 60 * 1000); // 5-minute grace period
+        const isHardStop = curPrice <= (pos.entryPrice * 0.94); // 6% hard stop bypasses grace
+        const isMinHoldTimeMet = tradeAgeMs > (60 * 1000); // 1-minute minimum hold time for ANY exit (except hard stop)
         
-        if (curPrice >= pos.tp || (curPrice <= pos.sl && (!isGracePeriod || isHardStop)) || isStagnant) {
-          const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'TIME_STAGNATION_EXIT');
+        let shouldSell = false;
+        let sellReason = "";
+
+        // Ensure TP/SL are initialized for adopted positions if they are still 0
+        if (pos.tp === 0) pos.tp = pos.entryPrice * 1.05;
+        if (pos.sl === 0) pos.sl = pos.entryPrice * 0.95;
+
+        if (curPrice >= pos.tp) {
+          if (isMinHoldTimeMet) {
+            shouldSell = true;
+            sellReason = "TAKE_PROFIT";
+          }
+        } else if (curPrice <= pos.sl) {
+          if (isHardStop || (!isGracePeriod && isMinHoldTimeMet)) {
+            shouldSell = true;
+            sellReason = "STOP_LOSS";
+          }
+        } else if (isStagnant && isMinHoldTimeMet) {
+          shouldSell = true;
+          sellReason = "TIME_STAGNATION_EXIT";
+        }
+
+        if (shouldSell) {
+          console.log(`[MONITOR] Triggering SELL for ${pos.symbol}. Reason: ${sellReason} | Price: ${curPrice} | SL: ${pos.sl} | TP: ${pos.tp} | Age: ${Math.round(tradeAgeMs/1000)}s`);
           
           const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
           
@@ -1007,7 +1029,7 @@ async function monitor() {
               price: curPrice, 
               pnl: pos.pnl, 
               status: 'SUCCESS', 
-              details: `EXIT_${reason}_PNL_${pos.pnl.toFixed(2)}`,
+              details: `EXIT_${sellReason}_PNL_${pos.pnl.toFixed(2)}`,
               timestamp: new Date().toISOString() 
             });
             if (ghostState.executionLogs.length > 50) ghostState.executionLogs.pop();

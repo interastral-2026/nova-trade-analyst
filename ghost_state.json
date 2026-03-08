@@ -1,5 +1,5 @@
 {
-  "isEngineActive": true,
+  "isEngineActive": false,
   "autoPilot": true,
   "isPaperMode": false,
   "settings": {
@@ -824,6 +824,156 @@
     }
   ],
   "executionLogs": [
+    {
+      "id": "2074bf55-d8f0-4fcd-aab8-f7f6f957ed45",
+      "symbol": "CHZ",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-08T17:55:18.840Z"
+    },
+    {
+      "id": "6be1e01d-79fa-4a14-85a8-8fd9219e828d",
+      "symbol": "ANKR",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: c84bcab8-9102-44d5-a187-df22ef0fb79b",
+      "timestamp": "2026-03-08T17:53:12.642161Z"
+    },
+    {
+      "id": "7ca77113-d596-43a4-bb32-ba5fc088aa07",
+      "symbol": "SYSTEM",
+      "action": "ENGINE",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "ربات متوقف شد.",
+      "timestamp": "2026-03-08T17:52:41.507Z"
+    },
+    {
+      "id": "80213df4-3f68-4a33-938a-292614c7bd92",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T17:52:14.791Z"
+    },
+    {
+      "id": "e6cb3321-ad62-4a56-a619-55667d8486bc",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T17:51:29.793Z"
+    },
+    {
+      "id": "8c406b32-8fe7-4243-81f4-dd5d361f230c",
+      "symbol": "SYSTEM",
+      "action": "SCAN",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "شروع اسکن کامل بازار برای شکار فرصت‌های طلایی...",
+      "timestamp": "2026-03-08T17:50:59.784Z"
+    },
+    {
+      "id": "25b05bd4-6a7e-420f-bf40-ed74425bcab8",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T17:50:44.795Z"
+    },
+    {
+      "id": "1e47e4c9-9856-409d-b9af-8ccafea9d7b2",
+      "symbol": "CHZ",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 723385e8-5c80-428e-9da1-8e74d73ba670",
+      "timestamp": "2026-03-08T17:50:18.793085Z"
+    },
+    {
+      "id": "de8353a0-618f-4108-b896-4ad676064616",
+      "symbol": "CHZ",
+      "action": "BUY",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: ab981f21-7e40-4d5f-b10b-20dbcd556adc",
+      "timestamp": "2026-03-08T17:50:16.527230Z"
+    },
+    {
+      "id": "ccedf2bc-c4a1-4ef3-b512-d7e955fb6174",
+      "symbol": "SYSTEM",
+      "action": "SCAN",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "شروع اسکن کامل بازار برای شکار فرصت‌های طلایی...",
+      "timestamp": "2026-03-08T17:48:59.789Z"
+    },
+    {
+      "id": "2b71126c-196d-4218-8395-abc3acc05913",
+      "symbol": "SYSTEM",
+      "action": "SCAN",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "شروع اسکن کامل بازار برای شکار فرصت‌های طلایی...",
+      "timestamp": "2026-03-08T17:46:59.796Z"
+    },
+    {
+      "id": "84d8f0b6-71c1-42e1-88a3-a8c288d4311a",
+      "symbol": "BCH",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-08T17:45:18.465Z"
+    },
+    {
+      "id": "dbc4b511-903b-4010-a299-1ebca37c8132",
+      "symbol": "SYSTEM",
+      "action": "SCAN",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "شروع اسکن کامل بازار برای شکار فرصت‌های طلایی...",
+      "timestamp": "2026-03-08T17:44:59.801Z"
+    },
+    {
+      "id": "1c8c68f2-aeea-485a-a926-deb386d78b97",
+      "symbol": "SYSTEM",
+      "action": "MONITOR",
+      "price": 0,
+      "pnl": 0,
+      "status": "INFO",
+      "details": "در حال پایش 1 شکار فعال...",
+      "timestamp": "2026-03-08T17:44:44.801Z"
+    },
+    {
+      "id": "16aa4504-9a0b-43b9-9e58-77c2ca45543c",
+      "symbol": "BCH",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: cb22f29e-5e47-47eb-b5eb-819eb604c72e",
+      "timestamp": "2026-03-08T17:44:30.532268Z"
+    },
     {
       "id": "5c7bfe53-7294-4ce2-84e7-dfbb07c37542",
       "symbol": "ALGO",
@@ -4990,164 +5140,16 @@
       "status": "SUCCESS",
       "details": "EXTERNAL_EXIT_DETECTED",
       "timestamp": "2026-03-06T17:08:18.145Z"
-    },
-    {
-      "id": "270dff52-62f3-4d21-835f-dc5979343b9c",
-      "symbol": "ENS",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: b80e14df-da49-45ce-ad99-b61a3a46bac7",
-      "timestamp": "2026-03-06T17:08:09.870762Z"
-    },
-    {
-      "id": "888f3705-929e-49f5-b9dd-2bcf16ac2f40",
-      "symbol": "ENS",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 118d1e17-6ab4-4092-bbdf-08ad5b18df11",
-      "timestamp": "2026-03-06T17:04:00.293425Z"
-    },
-    {
-      "id": "b43ab143-445c-431d-b7ac-3889142dd160",
-      "symbol": "AAVE",
-      "action": "SELL",
-      "price": 95.35,
-      "pnl": 0.0010299999999990631,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-06T17:02:15.206Z"
-    },
-    {
-      "id": "eb32e7b0-ca2b-48b8-b5f1-bd3a7f43bb1a",
-      "symbol": "AAVE",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 8e8f4d3a-256e-447d-887b-dd7d68352273",
-      "timestamp": "2026-03-06T17:02:03.981751Z"
-    },
-    {
-      "id": "7e70c853-dc22-4984-87bc-f4046646fec9",
-      "symbol": "AAVE",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: baf87cd5-6408-42ec-b9b2-a9b2062cb5dc",
-      "timestamp": "2026-03-06T17:01:03.720253Z"
-    },
-    {
-      "id": "8dcd5a02-3b09-4143-9379-5217d5930ab2",
-      "symbol": "ALGO",
-      "action": "SELL",
-      "price": 0.07293,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-06T16:49:26.640Z"
-    },
-    {
-      "id": "4d9c7f9d-1896-4ae0-9b59-86f1e8708942",
-      "symbol": "ALGO",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 42b65587-dcc2-4eb8-ad88-54480ffe3fd3",
-      "timestamp": "2026-03-06T16:49:23.239855Z"
-    },
-    {
-      "id": "5055a8b3-f622-4b54-824f-fd9bbe860f8c",
-      "symbol": "ALGO",
-      "action": "SELL",
-      "price": 0.07295,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-06T16:48:47.860Z"
-    },
-    {
-      "id": "5dedf4a3-f9d2-4f7e-bac7-fdedb6cb38e6",
-      "symbol": "ALGO",
-      "action": "BUY",
-      "price": 0.07295,
-      "status": "SUCCESS",
-      "details": "LIQUIDITY_BUY_CONF_75%",
-      "timestamp": "2026-03-06T16:48:47.301Z"
-    },
-    {
-      "id": "6a79edd6-1b27-4ffb-9386-533eae38cb84",
-      "symbol": "ALGO",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: a74fb94e-63fd-486b-a07d-fb31df125b33",
-      "timestamp": "2026-03-06T16:48:47.210294Z"
-    },
-    {
-      "id": "7862c0df-5fa3-45f0-ad5a-0551b4bde6cd",
-      "symbol": "FIL",
-      "action": "SELL",
-      "price": 0.8448,
-      "pnl": 0.002333199999999743,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-06T16:45:47.489Z"
-    },
-    {
-      "id": "402fe555-48d6-4bd9-9758-ecb34ae3078e",
-      "symbol": "FIL",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 7be87157-5c48-4fd2-b49b-944f01a9cda5",
-      "timestamp": "2026-03-06T16:45:39.998844Z"
-    },
-    {
-      "id": "1a56f7e4-e9c9-47b9-a66a-c70253c9f573",
-      "symbol": "FIL",
-      "action": "SELL",
-      "price": 0.8447,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "EXTERNAL_EXIT_DETECTED",
-      "timestamp": "2026-03-06T16:44:53.473Z"
-    },
-    {
-      "id": "c4222aca-4d02-4a83-b1d6-45b58ba8f453",
-      "symbol": "FIL",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: d3d842df-4227-4d04-80b0-5467d1a551cb",
-      "timestamp": "2026-03-06T16:44:50.990857Z"
-    },
-    {
-      "id": "2ef714c1-4479-438d-81c7-47081c48f010",
-      "symbol": "FIL",
-      "action": "BUY",
-      "price": 0.8447,
-      "status": "SUCCESS",
-      "details": "LIQUIDITY_BUY_CONF_75%",
-      "timestamp": "2026-03-06T16:44:50.947Z"
     }
   ],
   "activePositions": [
     {
-      "id": "43638da9-ab50-4bd6-9dd6-a7de2e81db0a",
-      "symbol": "BCH",
-      "entryPrice": 384.14,
+      "id": "541ce7a8-008e-440d-8cef-9733a06c8614",
+      "symbol": "ANKR",
+      "entryPrice": 0.00371,
       "currentPrice": 0,
-      "amount": 9.9164281268,
-      "quantity": 0.02581462,
+      "amount": 9.92054,
+      "quantity": 2674,
       "tp": 0,
       "sl": 0,
       "confidence": 100,
@@ -5155,15 +5157,15 @@
       "pnl": 0,
       "pnlPercent": 0,
       "isPaper": false,
-      "timestamp": "2026-03-08T17:40:17.030Z"
+      "timestamp": "2026-03-08T17:53:15.980Z"
     }
   ],
   "liquidity": {
-    "eur": 1.7811239141377,
+    "eur": 1.4415292422957,
     "usdc": 8.843078e-7
   },
   "actualBalances": {
-    "BCH": 0.02581462
+    "ANKR": 2674
   },
   "dailyStats": {
     "trades": 40,
@@ -5173,8 +5175,8 @@
     "lastResetDate": "2026-03-08"
   },
   "totalProfit": -8.086584894221222,
-  "currentStatus": "ANALYZING_MINA_SMC",
-  "scanIndex": 60914,
+  "currentStatus": "IDLE_SCAN_COMPLETE",
+  "scanIndex": 61130,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
