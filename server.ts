@@ -324,7 +324,7 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
     const history = (candles || []).slice(-40).map(c => ({ h: c.high, l: c.low, c: c.close }));
     
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('AI_TIMEOUT')), 120000);
+      setTimeout(() => reject(new Error('AI_TIMEOUT')), 60000); // Reduced to 60s
     });
 
     try {
@@ -513,34 +513,31 @@ async function monitorPositionsAI() {
 
         const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
         
+        pos.lastChecked = new Date().toISOString();
+        
         if (analysis) {
           console.log(`[AI-MONITOR] Analysis for ${pos.symbol}: ${analysis.side} (Conf: ${analysis.confidence}%)`);
           pos.lastAnalysis = analysis.analysis;
-          pos.liquidityAnalysis = analysis.liquidityAnalysis;
-          pos.marketMonitoring = analysis.marketMonitoring;
+          pos.liquidityAnalysis = analysis.liquidityAnalysis || "تحلیل نقدینگی در دسترس نیست";
+          pos.marketMonitoring = analysis.marketMonitoring || "نظارت بازار در دسترس نیست";
           pos.lastDecision = analysis.side;
           pos.lastConfidence = analysis.confidence;
-          pos.lastChecked = new Date().toISOString();
           pos.estimatedTime = analysis.estimatedTime;
           
           // Update targets if AI suggests new ones and they are logically better
-          // Ensure AI doesn't move SL too close (minimum 1.5% buffer from current price)
           const minAiSlBuffer = price * 0.985;
           if (analysis.sl > 0 && analysis.sl < minAiSlBuffer && (pos.sl === 0 || (analysis.sl > pos.sl))) {
-            console.log(`[AI-MONITOR] Updating SL for ${pos.symbol}: ${pos.sl} -> ${analysis.sl}`);
             pos.sl = analysis.sl;
           }
           if (analysis.tp > 0 && (pos.tp === 0 || analysis.tp > pos.tp)) {
-            console.log(`[AI-MONITOR] Updating TP for ${pos.symbol}: ${pos.tp} -> ${analysis.tp}`);
             pos.tp = analysis.tp;
           }
-          
-          saveState();
         } else {
-          console.warn(`[AI-MONITOR] Failed to get analysis for ${pos.symbol}`);
-          pos.lastChecked = new Date().toISOString(); // Still mark as checked
-          saveState();
+          pos.lastAnalysis = "خطا در دریافت تحلیل جدید. در حال تلاش مجدد...";
+          pos.lastDecision = "NEUTRAL";
         }
+        
+        saveState();
         
         if (analysis && analysis.side === 'SELL') {
           const tradeAgeMs = Date.now() - new Date(pos.timestamp).getTime();
@@ -621,8 +618,8 @@ async function scanWatchlist() {
     }
     const potentialTrades = [];
     
-    // Scan up to 25 symbols per cycle to find better signals
-    const scanLimit = Math.min(25, currentWatchlist.length);
+    // Scan up to 10 symbols per cycle to find better signals (reduced from 25 for speed)
+    const scanLimit = Math.min(10, currentWatchlist.length);
     const scanBatch = [];
     
     for (let i = 0; i < scanLimit; i++) {
@@ -965,14 +962,12 @@ async function monitor() {
         // Dynamic Trailing Stop & Break Even
         if (netPnlPercent > 1.8 && pos.sl < breakEvenPrice) {
           pos.sl = breakEvenPrice * 1.005; // Lock in 0.5% pure profit as soon as we hit 1.8% net
-          console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
         }
 
         if (netPnlPercent > 3.0) {
           const newSl = curPrice * 0.985; // 1.5% trailing stop once in 3.0% net profit
           if (newSl > pos.sl) {
             pos.sl = newSl;
-            console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
           }
         }
 
