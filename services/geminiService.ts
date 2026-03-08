@@ -23,7 +23,7 @@ BE CONCISE.`;
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-lite-preview',
       contents: [{ parts: [{ text: `SCAN_ASSET: ${symbol} | PRICE: ${currentPrice} | DATA: ${JSON.stringify(data.slice(-20))}` }] }],
       config: {
         responseMimeType: "application/json",

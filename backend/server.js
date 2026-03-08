@@ -195,7 +195,7 @@ async function getAdvancedAnalysis(symbol, price, candles) {
   
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.1-flash-lite-preview',
       contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR. DAILY_GOAL: ${ghostState.dailyStats.dailyGoal} EUR.` }] }],
       config: {
         systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN AGGRESSIVE YET CALCULATED AI TRADER.
