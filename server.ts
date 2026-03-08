@@ -28,8 +28,27 @@ envPaths.forEach(envPath => {
   }
 });
 
-const API_KEY = (process.env.GEMINI_API_KEY || process.env.API_KEY || "").trim();
-fs.appendFileSync('debug.log', `[INIT] API_KEY starts with: ${API_KEY.substring(0, 5)}... (Length: ${API_KEY.length})\n`);
+const getBestApiKey = () => {
+  const keys = [
+    { name: "GEMINI_API_KEY", val: (process.env.GEMINI_API_KEY || "").trim() },
+    { name: "API_KEY", val: (process.env.API_KEY || "").trim() }
+  ];
+
+  // Look for a key that starts with AIza (typical for Google APIs)
+  const validKey = keys.find(k => k.val.startsWith('AIza'));
+  if (validKey) return { val: validKey.val, source: validKey.name };
+
+  // Fallback to any non-empty key that isn't a known placeholder
+  const fallbackKey = keys.find(k => k.val && !k.val.startsWith('MY_GE') && k.val !== 'your_gemini_api_key_here');
+  if (fallbackKey) return { val: fallbackKey.val, source: fallbackKey.name };
+
+  // Absolute fallback
+  return { val: keys[0].val || keys[1].val || "", source: keys[0].val ? keys[0].name : (keys[1].val ? keys[1].name : "NONE") };
+};
+
+const { val: API_KEY, source: API_KEY_SOURCE } = getBestApiKey();
+
+fs.appendFileSync('debug.log', `[INIT] API_KEY Source: ${API_KEY_SOURCE}, Starts with: ${API_KEY.substring(0, 5)}... (Length: ${API_KEY.length})\n`);
 const CB_API_KEY = (process.env.CB_API_KEY || "").trim();
 const CB_API_SECRET = process.env.CB_API_SECRET 
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
