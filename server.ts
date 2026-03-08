@@ -524,13 +524,15 @@ async function monitorPositionsAI() {
           pos.estimatedTime = analysis.estimatedTime;
           
           // Update targets if AI suggests new ones and they are logically better
+          // Ensure AI doesn't move SL too close (minimum 1.5% buffer from current price)
+          const minAiSlBuffer = price * 0.985;
+          if (analysis.sl > 0 && analysis.sl < minAiSlBuffer && (pos.sl === 0 || (analysis.sl > pos.sl))) {
+            console.log(`[AI-MONITOR] Updating SL for ${pos.symbol}: ${pos.sl} -> ${analysis.sl}`);
+            pos.sl = analysis.sl;
+          }
           if (analysis.tp > 0 && (pos.tp === 0 || analysis.tp > pos.tp)) {
             console.log(`[AI-MONITOR] Updating TP for ${pos.symbol}: ${pos.tp} -> ${analysis.tp}`);
             pos.tp = analysis.tp;
-          }
-          if (analysis.sl > 0 && (pos.sl === 0 || (analysis.sl > pos.sl && analysis.sl < price))) {
-            console.log(`[AI-MONITOR] Updating SL for ${pos.symbol}: ${pos.sl} -> ${analysis.sl}`);
-            pos.sl = analysis.sl;
           }
           
           saveState();
@@ -700,16 +702,22 @@ async function scanWatchlist() {
       
       const { symbol, price, analysis } = bestTrade;
       
-      // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss
+      // SYSTEM LEVEL RISK MANAGEMENT: Clamp Stop Loss & Take Profit
       const maxSlPrice = price * 0.94; // Maximum 6% loss
-      const minSlPrice = price * 0.98; // Minimum 2% loss (increased from 1% for more breathing room)
+      const minSlPrice = price * 0.975; // Minimum 2.5% loss for breathing room
+      const minTpPrice = price * 1.025; // Minimum 2.5% TP to cover fees + profit
       
       if (analysis.sl < maxSlPrice) {
         console.log(`[RISK] Clamping SL for ${symbol} from ${analysis.sl} to ${maxSlPrice} (Max 6% loss)`);
         analysis.sl = maxSlPrice;
       } else if (analysis.sl > minSlPrice) {
-        console.log(`[RISK] Tightening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 2% loss)`);
+        console.log(`[RISK] Loosening SL for ${symbol} from ${analysis.sl} to ${minSlPrice} (Min 2.5% buffer)`);
         analysis.sl = minSlPrice;
+      }
+
+      if (analysis.tp < minTpPrice) {
+        console.log(`[RISK] Increasing TP for ${symbol} from ${analysis.tp} to ${minTpPrice} (Min 2.5% target)`);
+        analysis.tp = minTpPrice;
       }
 
       // Calculate available liquidity for this specific trade
@@ -977,7 +985,12 @@ async function monitor() {
         // 1. Reached TP
         // 2. Reached SL (Hard stop loss)
         // 3. Trade is stagnant (time-based exit)
-        if (curPrice >= pos.tp || curPrice <= pos.sl || isStagnant) {
+        
+       
+        const isGracePeriod = tradeAgeMs < (3 * 60 * 1000); // 3-minute grace period
+        const isHardStop = curPrice <= (pos.entryPrice * 0.95); // 5% hard stop bypasses grace
+        
+        if (curPrice >= pos.tp || (curPrice <= pos.sl && (!isGracePeriod || isHardStop)) || isStagnant) {
           const reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'TIME_STAGNATION_EXIT');
           
           const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
