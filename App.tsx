@@ -186,21 +186,51 @@ const App: React.FC = () => {
             const apiKey = (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) || "";
             const ai = new GoogleGenAI({ apiKey });
             const history = (req.candles || []).slice(-40).map((c: any) => ({ h: c.high, l: c.low, c: c.close }));
-            
-            const response = await ai.models.generateContent({
+                     const response = await ai.models.generateContent({
               model: 'gemini-3-flash-preview',
-              contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${req.symbol} @ ${req.price} EUR. ${req.entryPrice ? `ENTRY: ${req.entryPrice}.` : ''} HISTORY_15M_CANDLES: ${JSON.stringify(history)}.` }] }],
+              contents: [{ parts: [{ text: `SMC_ANALYSIS_REQUEST: ${req.symbol}
+CURRENT_PRICE: ${req.price} EUR
+TYPE: ${req.type}
+${req.entryPrice ? `EXISTING_ENTRY: ${req.entryPrice} EUR` : ''}
+
+MARKET_DATA_15M_CANDLES:
+${JSON.stringify(history)}
+
+TASK:
+Perform a professional Smart Money Concepts (SMC) analysis.
+1. Identify Market Structure (BOS/CHoCH), Order Blocks (OB), and Fair Value Gaps (FVG).
+2. Calculate:
+   - entryPrice: The optimal entry point (usually near an OB or FVG). If req.type is SCAN, this should be close to CURRENT_PRICE if the setup is immediate.
+   - tp: Take Profit target based on the next liquidity zone or supply/demand area.
+   - sl: Stop Loss placed below/above the structural invalidation point.
+3. ACCOUNT FOR FEES: 0.8% round-trip. Break-even = entryPrice * 1.008.
+4. Only suggest BUY if: ((tp - entryPrice) / entryPrice) - 0.008 > 0.012 (1.2% net profit) AND confidence > 85%.
+5. potentialRoi must be the NET profit percentage after subtracting the 0.8% fee.
+6. If the setup is not high-probability, return side: "NEUTRAL".
+
+OUTPUT_REQUIREMENTS:
+- "analysis", "liquidityAnalysis", and "marketMonitoring" MUST be in PERSIAN (Farsi).
+- All prices (tp, sl, entryPrice) must be numbers.
+- Return valid JSON only.` }] }],
               config: {
-                systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE AI SCALPER.
-Your goal is to maximize NET PROFIT. Fee Calculation is MANDATORY: Account for a 0.8% round-trip fee.
-Break-even = Entry Price * 1.008.
+                systemInstruction: `YOU ARE GHOST_SMC_PRO, THE WORLD'S MOST ACCURATE CRYPTO TRADING AI.
+You use Smart Money Concepts and Liquidity analysis to find high-probability scalps.
+You are conservative and only trade when the risk/reward ratio is excellent.
+Always calculate Entry, TP, and SL relative to the current market price provided.
 
-CRITICAL DIRECTIVES:
-- RULE #1: PURE PROFIT. If the move isn't big enough to cover fees and yield at least 1.2% net profit, DO NOT BUY.
-- RULE #2: Confidence MUST be >= 85% for BUY.
-- RULE #3: Write "analysis", "liquidityAnalysis", and "marketMonitoring" in PERSIAN (Farsi).
-
-Return valid JSON: {side: "BUY"|"SELL"|"NEUTRAL", tp, sl, entryPrice, confidence, potentialRoi, tradePercentage, estimatedTime, liquidityAnalysis, marketMonitoring, analysis}`,
+JSON_SCHEMA:
+{
+  "side": "BUY" | "SELL" | "NEUTRAL",
+  "tp": number,
+  "sl": number,
+  "entryPrice": number,
+  "confidence": number (0-100),
+  "potentialRoi": number (NET % profit after 0.8% fees),
+  "estimatedTime": string,
+  "liquidityAnalysis": string (Persian),
+  "marketMonitoring": string (Persian),
+  "analysis": string (Persian)
+}`,
                 responseMimeType: "application/json",
                 responseSchema: {
                   type: Type.OBJECT,
@@ -211,7 +241,6 @@ Return valid JSON: {side: "BUY"|"SELL"|"NEUTRAL", tp, sl, entryPrice, confidence
                     entryPrice: { type: Type.NUMBER },
                     confidence: { type: Type.NUMBER },
                     potentialRoi: { type: Type.NUMBER },
-                    tradePercentage: { type: Type.NUMBER },
                     estimatedTime: { type: Type.STRING },
                     liquidityAnalysis: { type: Type.STRING },
                     marketMonitoring: { type: Type.STRING },
@@ -219,11 +248,12 @@ Return valid JSON: {side: "BUY"|"SELL"|"NEUTRAL", tp, sl, entryPrice, confidence
                   },
                   required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'analysis', 'estimatedTime', 'liquidityAnalysis', 'marketMonitoring']
                 },
-                temperature: 0.1
+                temperature: 0.2
               }
             });
 
             const rawText = response.text?.trim() || '{}';
+            console.log(`[FRONTEND-AI] AI Raw Response for ${req.symbol}:`, rawText);
             const result = JSON.parse(rawText);
             
             // Normalize confidence
@@ -233,9 +263,12 @@ Return valid JSON: {side: "BUY"|"SELL"|"NEUTRAL", tp, sl, entryPrice, confidence
 
             const analysisResult = {
               ...result,
+              id: crypto.randomUUID ? crypto.randomUUID() : `ghost-${Date.now()}-${Math.random().toString(36).substring(7)}`,
               symbol: req.symbol,
               timestamp: new Date().toISOString()
             };
+
+            console.log(`[FRONTEND-AI] Parsed Analysis for ${req.symbol}:`, analysisResult);
 
             await fetch(`${base}/api/ghost/submit-analysis`, {
               method: 'POST',

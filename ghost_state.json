@@ -820,6 +820,26 @@
   ],
   "executionLogs": [
     {
+      "id": "8b1389b2-b721-49fe-b4cb-815f59fa3b55",
+      "symbol": "ANKR",
+      "action": "SELL",
+      "price": 0.003702,
+      "pnl": -0.10075632000000052,
+      "status": "SUCCESS",
+      "details": "EXTERNAL_EXIT_DETECTED",
+      "timestamp": "2026-03-08T19:05:30.018Z"
+    },
+    {
+      "id": "09bd561c-6433-4b59-947a-ff8aa42ea009",
+      "symbol": "ANKR",
+      "action": "SELL",
+      "price": 0,
+      "pnl": 0,
+      "status": "SUCCESS",
+      "details": "COINBASE_SYNC | ID: 45b7884e-11c7-4153-8c34-3dee33de0992",
+      "timestamp": "2026-03-08T19:04:29.780454Z"
+    },
+    {
       "id": "f9003c01-82ab-4cd8-9903-0cf9104a81c2",
       "symbol": "SYSTEM",
       "action": "MONITOR",
@@ -5118,70 +5138,24 @@
       "status": "SUCCESS",
       "details": "COINBASE_SYNC | ID: 1b1239af-dea8-4f71-abf7-7637a8dd6147",
       "timestamp": "2026-03-07T19:55:01.605564Z"
-    },
-    {
-      "id": "0376cc8c-61b4-48ea-a9e2-260a9899e756",
-      "symbol": "XTZ",
-      "action": "BUY",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 17633b80-af5f-43bc-8ef6-541542e1ef2d",
-      "timestamp": "2026-03-07T19:54:51.869841Z"
-    },
-    {
-      "id": "9f193e80-3f6e-4afc-a89c-55c0a4515da6",
-      "symbol": "MINA",
-      "action": "SELL",
-      "price": 0,
-      "pnl": 0,
-      "status": "SUCCESS",
-      "details": "COINBASE_SYNC | ID: 1da1326c-6a5b-4ef6-a07d-c08f6bb440e1",
-      "timestamp": "2026-03-07T19:52:07.363793Z"
     }
   ],
-  "activePositions": [
-    {
-      "id": "541ce7a8-008e-440d-8cef-9733a06c8614",
-      "symbol": "ANKR",
-      "entryPrice": 0.00371,
-      "currentPrice": 0.003702,
-      "amount": 9.92054,
-      "quantity": 2674,
-      "tp": 0.0038955000000000005,
-      "sl": 0.00365,
-      "confidence": 100,
-      "potentialRoi": 0,
-      "pnl": -0.10075632000000052,
-      "pnlPercent": -0.21563342318059822,
-      "isPaper": false,
-      "timestamp": "2026-03-08T17:53:15.980Z",
-      "lastAnalysis": "قیمت پس از چندین مرحله جمع‌آوری نقدینگی در سطوح پایین (سایه‌های بلند تا محدوده ۰.۰۰۳۴۷) اکنون در حال تثبیت بالای سطح حمایتی ۰.۰۰۳۶۸ است. با توجه به ساختار بازار در تایم‌فریم ۱۵ دقیقه، نشانه‌هایی از تغییر ساختار (MSS) به سمت صعود دیده می‌شود. هدف اول سقف قبلی در ۰.۰۰۳۷۸ و هدف اصلی نقدینگی‌های بالای ۰.۰۰۳۸ است که سود خالص پس از کسر کارمزد را تضمین می‌کند.",
-      "liquidityAnalysis": "نقدینگی سمت فروش (Sell-side Liquidity) در چندین مرحله زیر سطح ۰.۰۰۳۶۵ پاکسازی شده است. در حال حاضر نقدینگی جذب نشده در محدوده ۰.۰۰۳۷۸ تا ۰.۰۰۳۸۱ وجود دارد که به عنوان آهنربای قیمتی عمل می‌کند. عدم شکست کف‌های جدید نشان‌دهنده تمایل خریداران برای بازگشت قیمت است.",
-      "marketMonitoring": "روند کلی در حال گذار از حالت نزولی به خنثی است. حجم معاملات در کف‌ها افزایش یافته که نشانه ورود پول هوشمند در مناطق تخفیف (Discount Zone) است. برای حفظ امنیت معامله، به محض رسیدن قیمت به ۰.۰۰۳۷۵، حد ضرر باید به نقطه ورود به علاوه کارمزد منتقل شود.",
-      "lastDecision": "BUY",
-      "lastConfidence": 86,
-      "lastChecked": "2026-03-08T18:10:24.155Z",
-      "estimatedTime": "6h"
-    }
-  ],
+  "activePositions": [],
   "liquidity": {
-    "eur": 1.4415292422957,
+    "eur": 11.3407440922957,
     "usdc": 8.843078e-7
   },
-  "actualBalances": {
-    "ANKR": 2674
-  },
+  "actualBalances": {},
   "dailyStats": {
     "trades": 40,
-    "profit": -7.525127303876965,
+    "profit": -7.625883623876965,
     "fees": 0,
     "dailyGoal": 50,
     "lastResetDate": "2026-03-08"
   },
-  "totalProfit": -8.086584894221222,
+  "totalProfit": -8.187341214221222,
   "currentStatus": "MONITORING_HUNTS",
-  "scanIndex": 61761,
+  "scanIndex": 61833,
   "diag": "PREDATOR_X_ONLINE",
   "lastScans": [],
   "lastSync": null,
