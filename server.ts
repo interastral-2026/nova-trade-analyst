@@ -108,7 +108,8 @@ async function syncCoinbaseBalance() {
   const token = generateCoinbaseJWT('GET', '/api/v3/brokerage/accounts');
   if (!token) return false;
   try {
-    const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/accounts', {
+    // Increase limit to 250 to ensure we get all accounts
+    const response = await axios.get('https://api.coinbase.com/api/v3/brokerage/accounts?limit=250', {
       headers: { 'Authorization': `Bearer ${token}` },
       timeout: 10000
     });
@@ -124,7 +125,7 @@ async function syncCoinbaseBalance() {
     ghostState.actualBalances = newBalances;
     console.log(`[SYNC] Coinbase Balance Updated. EUR: ${ghostState.liquidity.eur}, Assets: ${Object.keys(newBalances).join(', ')}`);
     return true;
-  } catch (e) {
+  } catch (e: any) {
     console.error("[SYNC ERROR] Failed to fetch Coinbase balances:", e.message);
     return false;
   }
@@ -618,8 +619,8 @@ async function scanWatchlist() {
     }
     const potentialTrades = [];
     
-    // Scan up to 10 symbols per cycle to avoid API congestion
-    const scanLimit = Math.min(10, currentWatchlist.length);
+    // Scan up to 25 symbols per cycle to find better signals
+    const scanLimit = Math.min(25, currentWatchlist.length);
     const scanBatch = [];
     
     for (let i = 0; i < scanLimit; i++) {
@@ -874,7 +875,11 @@ async function monitor() {
         const pos = ghostState.activePositions[i];
         const actualQty = ghostState.actualBalances[pos.symbol] || 0;
         
-        if (actualQty < (pos.quantity * 0.1)) {
+        // Add a 5-minute grace period for newly opened positions to avoid immediate reconciliation
+        const tradeAgeMs = Date.now() - new Date(pos.timestamp).getTime();
+        const isNewTrade = tradeAgeMs < (5 * 60 * 1000); 
+
+        if (actualQty < (pos.quantity * 0.1) && !isNewTrade) {
           console.log(`[RECONCILE] Removing ${pos.symbol} - Position no longer exists on Coinbase.`);
           addLog('SELL', pos.symbol, `EXTERNAL_EXIT_DETECTED`, 'SUCCESS', pos.currentPrice, pos.pnl);
           ghostState.dailyStats.profit += pos.pnl; 
