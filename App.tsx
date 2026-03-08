@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AssetInfo, TradeSignal, AnalysisStatus, ActivePosition, ExecutionLog } from './types.ts';
 import { fetchProductStats } from './services/coinbaseService.ts';
 import { getApiBase } from './services/tradingService.ts';
@@ -7,6 +7,7 @@ import Header from './components/Header.tsx';
 import Sidebar from './components/Sidebar.tsx';
 import SignalList from './components/SignalList.tsx';
 import TradingTerminal from './components/TradingTerminal.tsx';
+import { GoogleGenAI, Type } from "@google/genai";
 
 const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR', 'XRP-EUR', 'DOGE-EUR', 'LINK-EUR', 'ADA-EUR'];
 
@@ -24,6 +25,8 @@ const App: React.FC = () => {
   const [liveActivity, setLiveActivity] = useState<string>("INITIALIZING...");
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [bridgeUrl, setBridgeUrl] = useState<string>(getApiBase());
+  
+  const aiProcessingRef = useRef(false);
 
   const syncWithServer = useCallback(async () => {
     const base = getApiBase();
@@ -147,7 +150,6 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     syncWithServer();
     const interval = setInterval(syncWithServer, 4000);
     const statsInterval = setInterval(() => {
@@ -162,7 +164,127 @@ const App: React.FC = () => {
         });
       });
     }, 8000);
-    return () => { clearInterval(interval); clearInterval(statsInterval); };
+
+    // AI Analysis Loop (Frontend-side to use platform key)
+    const aiInterval = setInterval(async () => {
+      if (aiProcessingRef.current) return;
+      aiProcessingRef.current = true;
+
+      try {
+        const base = getApiBase();
+        const reqRes = await fetch(`${base}/api/ghost/pending-analysis`);
+        if (!reqRes.ok) {
+          throw new Error(`HTTP error! status: ${reqRes.status}`);
+        }
+        const req = await reqRes.json();
+
+        if (req) {
+          console.log(`[FRONTEND-AI] Processing ${req.type} for ${req.symbol}...`);
+          setLiveActivity(`ANALYZING_${req.symbol}`);
+          
+          try {
+            const apiKey = (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) || "";
+            const ai = new GoogleGenAI({ apiKey });
+            const history = (req.candles || []).slice(-40).map((c: any) => ({ h: c.high, l: c.low, c: c.close }));
+            
+            const response = await ai.models.generateContent({
+              model: 'gemini-3-flash-preview',
+              contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${req.symbol} @ ${req.price} EUR. ${req.entryPrice ? `ENTRY: ${req.entryPrice}.` : ''} HISTORY_15M_CANDLES: ${JSON.stringify(history)}.` }] }],
+              config: {
+                systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE AI SCALPER.
+Your goal is to maximize NET PROFIT. Fee Calculation is MANDATORY: Account for a 0.8% round-trip fee.
+Break-even = Entry Price * 1.008.
+
+CRITICAL DIRECTIVES:
+- RULE #1: PURE PROFIT. If the move isn't big enough to cover fees and yield at least 1.2% net profit, DO NOT BUY.
+- RULE #2: Confidence MUST be >= 85% for BUY.
+- RULE #3: Write "analysis", "liquidityAnalysis", and "marketMonitoring" in PERSIAN (Farsi).
+
+Return valid JSON: {side: "BUY"|"SELL"|"NEUTRAL", tp, sl, entryPrice, confidence, potentialRoi, tradePercentage, estimatedTime, liquidityAnalysis, marketMonitoring, analysis}`,
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: Type.OBJECT,
+                  properties: {
+                    side: { type: Type.STRING, enum: ['BUY', 'SELL', 'NEUTRAL'] },
+                    tp: { type: Type.NUMBER },
+                    sl: { type: Type.NUMBER },
+                    entryPrice: { type: Type.NUMBER },
+                    confidence: { type: Type.NUMBER },
+                    potentialRoi: { type: Type.NUMBER },
+                    tradePercentage: { type: Type.NUMBER },
+                    estimatedTime: { type: Type.STRING },
+                    liquidityAnalysis: { type: Type.STRING },
+                    marketMonitoring: { type: Type.STRING },
+                    analysis: { type: Type.STRING }
+                  },
+                  required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'analysis', 'estimatedTime', 'liquidityAnalysis', 'marketMonitoring']
+                },
+                temperature: 0.1
+              }
+            });
+
+            const rawText = response.text?.trim() || '{}';
+            const result = JSON.parse(rawText);
+            
+            // Normalize confidence
+            if (result.confidence !== undefined && result.confidence > 0 && result.confidence <= 1) {
+              result.confidence = Math.round(result.confidence * 100);
+            }
+
+            const analysisResult = {
+              ...result,
+              symbol: req.symbol,
+              timestamp: new Date().toISOString()
+            };
+
+            await fetch(`${base}/api/ghost/submit-analysis`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: req.type,
+                symbol: req.symbol,
+                analysis: analysisResult
+              })
+            });
+            
+            console.log(`[FRONTEND-AI] Submitted ${req.type} for ${req.symbol}`);
+          } catch (aiError: any) {
+            console.error("[FRONTEND-AI] AI Error:", aiError);
+            // Submit failure result to backend so it doesn't wait forever
+            await fetch(`${base}/api/ghost/submit-analysis`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: req.type,
+                symbol: req.symbol,
+                analysis: {
+                  side: "NEUTRAL",
+                  analysis: `خطای هوش مصنوعی: ${aiError.message || "Unknown error"}`,
+                  symbol: req.symbol,
+                  timestamp: new Date().toISOString(),
+                  confidence: 0,
+                  potentialRoi: 0,
+                  estimatedTime: "--",
+                  liquidityAnalysis: "خطا در تحلیل",
+                  marketMonitoring: "خطا در نظارت",
+                  id: Math.random().toString(36).substring(7)
+                }
+              })
+            });
+          }
+        }
+      } catch (e) {
+        console.error("[FRONTEND-AI] Loop Error:", e);
+      } finally {
+        aiProcessingRef.current = false;
+      }
+    }, 5000);
+
+    return () => { 
+      clearInterval(interval); 
+      clearInterval(statsInterval); 
+      clearInterval(aiInterval);
+    };
   }, [syncWithServer]);
 
   return (
