@@ -54,10 +54,10 @@ const CB_API_SECRET = process.env.CB_API_SECRET
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
   : "";
 
-const WATCHLIST = ['SOL', 'AVAX', 'LINK', 'NEAR', 'MATIC', 'XRP', 'DOGE', 'SHIB', 'PEPE', 'WIF', 'BONK', 'FLOKI', 'RNDR', 'INJ', 'FET', 'TIA'];
+const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'NEAR', 'XRP', 'ADA', 'DOT', 'MATIC', 'RNDR', 'FET'];
 const STATE_FILE = './ghost_state.json';
-const FEE_RATE = 0.005; // 0.5% round-trip fee (0.25% buy + 0.25% sell, assuming advanced trade tier)
-const MIN_NET_PROFIT = 0.003; // 0.3% minimum net profit after fees (Total required move = 0.8%)
+const FEE_RATE = 0.005; // 0.5% round-trip fee
+const MIN_NET_PROFIT = 0.005; // Increased to 0.5% minimum net profit (Total move = 1.0%)
 
 let availableEurPairs: string[] = [];
 
@@ -252,7 +252,24 @@ async function executeTrade(symbol, side, amount, quantity) {
   }
 }
 
+let lastQuotaExhaustedTime = 0;
+const QUOTA_COOLDOWN_MS = 60000; // 1 minute cooldown on 429
+
 async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
+  // Add a small random delay (0-3s) to prevent simultaneous bursts
+  await new Promise(r => setTimeout(r, Math.random() * 3000));
+
+  if (Date.now() - lastQuotaExhaustedTime < QUOTA_COOLDOWN_MS) {
+    return {
+      side: "NEUTRAL",
+      analysis: "وضعیت: در حال انتظار برای بازنشانی سهمیه API (Rate Limit Cooldown)",
+      symbol,
+      timestamp: new Date().toISOString(),
+      confidence: 0,
+      potentialRoi: 0,
+      id: crypto.randomUUID()
+    };
+  }
   if (!API_KEY || API_KEY.startsWith('MY_GE') || API_KEY === 'YOUR_API_KEY') {
     return {
       side: "NEUTRAL",
@@ -266,7 +283,7 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
   }
 
   const ai = new GoogleGenAI({ apiKey: API_KEY });
-  const history = (candles || []).slice(-30).map(c => ({ h: c.high, l: c.low, c: c.close }));
+  const history = (candles || []).slice(-60).map(c => ({ h: c.high, l: c.low, c: c.close }));
   
   const timeoutPromise = new Promise((_, reject) => {
     setTimeout(() => reject(new Error('AI_TIMEOUT')), 45000);
@@ -276,23 +293,20 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
     ghostState.currentStatus = `AI_REQ_${symbol}`;
     const aiPromise = ai.models.generateContent({
       model: 'gemini-3.1-flash-lite-preview', 
-      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_30M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
+      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_60M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, A HIGH-FREQUENCY AI SCALPER.
+        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE INSTITUTIONAL-GRADE SCALPER.
 Use Smart Money Concepts (SMC), FVG, and MSS. 
-Goal: Capture quick 1.5% - 5% ROI scalps. 
-Speed and liquidity are everything. Do not hold for long-term. DO NOT WASTE TIME.
-Factor in ${FEE_RATE * 100}% round-trip fees. A trade is only valid if potential net profit > 0.5%.
+Goal: Capture high-probability "A+" setups with 1.5% - 5% ROI. 
 
-CRITICAL DIRECTIVES FOR CAPITAL PRESERVATION:
-- RULE #1: NEVER LOSE MONEY. If a setup is not A+, DO NOT BUY.
-- RULE #2: DO NOT FOMO. Never buy after a massive green candle. Wait for a pullback to a Discount Zone.
-- RULE #3: DO NOT CATCH FALLING KNIVES. If price is dropping sharply, wait for a clear MSS (Market Structure Shift) and FVG tap before buying.
-- RULE #4: BE EXTREMELY CONSERVATIVE. ACT LIKE A SNIPER.
-- RULE #5: DO NOT OVERTRADE. If the market is choppy, ranging, or unclear, YOU MUST CHOOSE 'NEUTRAL'.
-- RULE #6: DO NOT LET CAPITAL SLEEP. If a position is stagnant or moving against us, cut it (SELL) and free up liquidity for better opportunities.
-- RULE #7: ACTIVE POSITIONS: If we are in profit, be ruthless about taking it before the market reverses. If we are stuck in a slow market, exit to find a faster one.
-- RULE #8: NOISE REDUCTION: Ignore small, random price fluctuations. Only act on significant structural shifts or clear institutional footprints.
+CRITICAL DIRECTIVES FOR NOISE REDUCTION & PRECISION:
+- RULE #1: IGNORE MARKET NOISE. Do not act on small, random fluctuations. Only act on clear structural shifts (MSS) and institutional footprints (FVG).
+- RULE #2: QUALITY OVER QUANTITY. It is better to have 0 trades than 1 bad trade.
+- RULE #3: CONSERVATIVE CONFIDENCE. Only assign 85+ confidence if the setup is near-perfect.
+- RULE #4: FACTOR IN VOLUME. If the displacement is weak, IT IS NOISE. Ignore it.
+- RULE #5: DISCOUNT ZONES. Never buy at a premium. Only buy after a pullback into a Discount Zone (Ote/Fib levels).
+- RULE #6: LIQUIDITY HUNTER. Look for "Stop Hunts" before the real move. Do not get trapped.
+- RULE #7: CAPITAL PRESERVATION. If the market is choppy, ranging, or unclear, YOU MUST CHOOSE 'NEUTRAL'.
 
 INTERNAL REASONING PROTOCOL:
 For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'analysis' field.
@@ -350,7 +364,11 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
     return { ...result, id: crypto.randomUUID(), symbol, timestamp: new Date().toISOString() };
   } catch (e: any) { 
     let errorMsg = e.message;
-    if (errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('API key not valid')) {
+    
+    if (errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED')) {
+      lastQuotaExhaustedTime = Date.now();
+      errorMsg = "سهمیه API تمام شده است. ۱ دقیقه صبر کنید...";
+    } else if (errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('API key not valid')) {
       errorMsg = "کلید API نامعتبر است. لطفاً کلید معتبر وارد کنید.";
     } else if (errorMsg.includes('AI_TIMEOUT')) {
       errorMsg = "پاسخ هوش مصنوعی بیش از حد طول کشید (تایم‌اوت).";
@@ -372,7 +390,7 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
 function loadState() {
   const defaults = {
     isEngineActive: true, autoPilot: true, isPaperMode: false,
-    settings: { confidenceThreshold: 70, defaultTradeSize: 50.0, minRoi: 1.5, maxDailyDrawdown: -20.0 },
+    settings: { confidenceThreshold: 85, defaultTradeSize: 50.0, minRoi: 1.5, maxDailyDrawdown: -20.0 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, 
     dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
@@ -476,10 +494,12 @@ async function scanWatchlist() {
       ? availableEurPairs.map(p => p.split('-')[0]) 
       : WATCHLIST;
 
-    const batchSize = 6;
+    const batchSize = 2; // Increased for Lite model
     const candidates: any[] = [];
 
     for (let i = 0; i < batchSize; i++) {
+      if (i > 0) await new Promise(r => setTimeout(r, 1500));
+      
       const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
       ghostState.scanIndex++;
       
@@ -489,7 +509,7 @@ async function scanWatchlist() {
       if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) continue;
 
       try {
-        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=30`, { timeout: 8000 });
+        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=60`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) continue;
         
@@ -799,8 +819,8 @@ async function startServer() {
     scanWatchlist();
     
     setInterval(monitor, 3000);           // Hard TP/SL check (3s)
-    setInterval(monitorPositionsAI, 15000); // AI Position Analysis (15s)
-    setInterval(scanWatchlist, 15000);      // New Signal Scanning (15s)
+    setInterval(monitorPositionsAI, 45000); // AI Position Analysis (45s)
+    setInterval(scanWatchlist, 45000);      // New Signal Scanning (45s)
     setInterval(listAvailableProducts, 300000); // Refresh products every 5m
   });
 }

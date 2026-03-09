@@ -53,7 +53,7 @@ const StrategyInfo: React.FC = () => {
             <i className="fas fa-microchip"></i>
           </div>
           <h5 className="text-[10px] font-black text-white uppercase mb-1">هسته پردازشی</h5>
-          <p className="text-[9px] text-slate-500 uppercase font-bold">Gemini 2.5 Flash</p>
+          <p className="text-[9px] text-slate-500 uppercase font-bold">gemini-3.1-flash-lite-preview</p>
         </div>
         
         <div className="bg-[#080812] border border-white/5 p-5 rounded-3xl text-center">
