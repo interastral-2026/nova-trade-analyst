@@ -117,7 +117,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                 try {
                   await fetch(`${getApiBase()}/api/ghost/refill`, { method: 'POST' });
                   window.location.reload();
-                } catch (e) {}
+                } catch (_e) {
+                  console.error("Failed to refill funds");
+                }
               }}
               className="w-full py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase rounded-lg border border-amber-500/20 transition-all"
             >

@@ -41,6 +41,8 @@ const SignalList: React.FC<SignalListProps> = ({ signals = [] }) => {
         ) : (
           activeSignals.map((signal) => {
             const isBuy = signal.side === 'BUY';
+            const isSell = signal.side === 'SELL';
+            const isNeutral = signal.side === 'NEUTRAL';
             const roi = signal.potentialRoi || 0;
             const confidence = signal.confidence || 0;
 
@@ -48,12 +50,12 @@ const SignalList: React.FC<SignalListProps> = ({ signals = [] }) => {
               <div 
                 key={signal.id} 
                 className={`group border-2 rounded-[1.8rem] p-5 transition-all relative overflow-hidden bg-gradient-to-br from-white/[0.04] to-transparent ${
-                  isBuy ? 'border-emerald-500/20' : 'border-rose-500/20'
+                  isBuy ? 'border-emerald-500/20' : isSell ? 'border-rose-500/20' : 'border-slate-500/10'
                 } hover:border-indigo-500/50 shadow-2xl`}
               >
                 <div className="absolute top-0 left-0 h-1 bg-white/5 w-full">
                   <div 
-                    className={`h-full transition-all duration-1000 ${isBuy ? 'bg-emerald-500 shadow-[0_0_12px_#10b981]' : 'bg-rose-500'}`}
+                    className={`h-full transition-all duration-1000 ${isBuy ? 'bg-emerald-500 shadow-[0_0_12px_#10b981]' : isSell ? 'bg-rose-500' : 'bg-slate-700'}`}
                     style={{ width: `${confidence}%` }}
                   ></div>
                 </div>
@@ -62,15 +64,15 @@ const SignalList: React.FC<SignalListProps> = ({ signals = [] }) => {
                   <div>
                     <h4 className="text-base font-black text-white uppercase tracking-tighter">{signal.symbol}</h4>
                     <div className="flex items-center space-x-2 mt-1">
-                       <span className={`text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm ${isBuy ? 'bg-emerald-500 text-black' : 'bg-rose-500 text-white'}`}>
-                        {signal.side}
+                       <span className={`text-[8px] font-black px-1.5 py-0.5 rounded shadow-sm ${isBuy ? 'bg-emerald-500 text-black' : isSell ? 'bg-rose-500 text-white' : 'bg-slate-700 text-slate-300'}`}>
+                        {isNeutral ? 'WAIT' : signal.side}
                        </span>
                        <span className="text-[8px] text-slate-500 font-bold uppercase">{confidence}% CONF</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className={`text-sm font-black tracking-tighter ${isBuy ? 'text-emerald-400' : 'text-rose-400'}`}>
-                      {roi > 0 ? `+${roi.toFixed(1)}% ROI` : 'SCALP'}
+                    <span className={`text-sm font-black tracking-tighter ${isBuy ? 'text-emerald-400' : isSell ? 'text-rose-400' : 'text-slate-500'}`}>
+                      {isNeutral ? 'OBSERVING' : (roi > 0 ? `+${roi.toFixed(1)}% ROI` : 'SCALP')}
                     </span>
                   </div>
                 </div>

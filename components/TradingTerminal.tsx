@@ -33,13 +33,20 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
       });
       setLogs(Array.isArray(data.executionLogs) ? data.executionLogs : []);
       setHoldings(Array.isArray(data.activePositions) ? data.activePositions : []);
-    } catch (e) {}
+    } catch (_e) {
+      console.error("Failed to fetch state");
+    }
   };
 
   useEffect(() => {
-    fetchState();
+    const timer = setTimeout(() => {
+      fetchState();
+    }, 0);
     const i = setInterval(fetchState, 3000);
-    return () => clearInterval(i);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(i);
+    };
   }, []);
 
   const goalProgress = stats.dailyGoal > 0 ? Math.max(0, Math.min(100, (stats.profit / stats.dailyGoal) * 100)) : 0;

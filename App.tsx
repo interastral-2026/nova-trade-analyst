@@ -106,11 +106,15 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ settings: newSettings })
       });
-    } catch (e) {}
+    } catch (_e) {
+      console.error("Failed to update settings");
+    }
   };
 
   useEffect(() => {
-    syncWithServer();
+    const timer = setTimeout(() => {
+      syncWithServer();
+    }, 0);
     const interval = setInterval(syncWithServer, 4000);
     const statsInterval = setInterval(() => {
       WATCHLIST.forEach(id => {
@@ -119,10 +123,14 @@ const App: React.FC = () => {
             const filtered = prev.filter(a => a.id !== id);
             return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
           });
-        }).catch(() => {});
+        }).catch(_e => {});
       });
     }, 8000);
-    return () => { clearInterval(interval); clearInterval(statsInterval); };
+    return () => { 
+      clearTimeout(timer);
+      clearInterval(interval); 
+      clearInterval(statsInterval); 
+    };
   }, [syncWithServer]);
 
   return (

@@ -112,6 +112,17 @@ function generateCoinbaseJWT(request_method, request_path) {
   }
 }
 
+async function get24hStats(symbol) {
+  try {
+    const response = await axios.get(`https://api.exchange.coinbase.com/products/${symbol}-EUR/stats`, {
+      timeout: 5000,
+      headers: { 'User-Agent': 'GhostSMCBot/1.0' }
+    });
+    return response.data;
+  } catch (e) {
+    return null;
+  }
+}
 async function syncCoinbaseBalance() {
   if (ghostState.isPaperMode) {
     if (ghostState.liquidity.eur < 10) ghostState.liquidity.eur = 1000; // Auto-refill paper money
@@ -234,7 +245,7 @@ async function executeTrade(symbol, side, amount, quantity) {
     return { success: true };
   } catch (e: any) {
     const errorData = e.response?.data;
-    let errorMsg = errorData?.message || errorData?.error || e.message || "UNKNOWN_API_ERROR";
+    const errorMsg = errorData?.message || errorData?.error || e.message || "UNKNOWN_API_ERROR";
     
     console.error("[REAL TRADE API ERROR]", errorData || e.message);
     
@@ -284,7 +295,7 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
 
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   const history = (candles || []).slice(-60).map(c => ({ h: c.high, l: c.low, c: c.close }));
-  
+  const stats24h = await get24hStats(symbol);
   const timeoutPromise = new Promise((_, reject) => {
     setTimeout(() => reject(new Error('AI_TIMEOUT')), 45000);
   });
@@ -293,7 +304,10 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
     ghostState.currentStatus = `AI_REQ_${symbol}`;
     const aiPromise = ai.models.generateContent({
       model: 'gemini-3.1-flash-lite-preview', 
-      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. HISTORY_60M: ${JSON.stringify(history)}. CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
+      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. 
+        HISTORY_60M: ${JSON.stringify(history)}. 
+        STATS_24H: ${JSON.stringify(stats24h)}.
+        CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
         systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE INSTITUTIONAL-GRADE SCALPER.
 Use Smart Money Concepts (SMC), FVG, and MSS. 
@@ -310,7 +324,7 @@ CRITICAL DIRECTIVES FOR NOISE REDUCTION & PRECISION:
 
 INTERNAL REASONING PROTOCOL:
 For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'analysis' field.
-1. Market Context: Trend (Bullish/Bearish/Sideways) and Momentum.
+1. Market Context: Trend (Bullish/Bearish/Sideways) and Momentum based on 24h stats and 60m history.
 2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks.
 3. Decision Logic: Why you are choosing BUY, SELL, or WAIT.
 4. Risk Assessment: Is this a FOMO buy? Is this a falling knife?
