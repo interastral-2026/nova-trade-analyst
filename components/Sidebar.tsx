@@ -88,6 +88,22 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
 
           <button 
+            onClick={() => {
+              const newSettings = {...localSettings, highPrecision: !localSettings.highPrecision};
+              setLocalSettings(newSettings);
+              if (onUpdateSettings) onUpdateSettings(newSettings);
+            }}
+            className={`w-full py-3 rounded-xl border transition-all flex items-center justify-center space-x-3 ${
+              localSettings.highPrecision ? 'border-amber-500/40 bg-amber-500/5 text-amber-400 shadow-[0_0_10px_#f59e0b33]' : 'border-white/5 bg-white/[0.02] text-slate-500'
+            }`}
+          >
+            <i className={`fas ${localSettings.highPrecision ? 'fa-gem' : 'fa-circle'} text-[10px]`}></i>
+            <span className="text-[9px] font-black uppercase tracking-widest">
+              HIGH_PRECISION: {localSettings.highPrecision ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
+          <button 
             onClick={onToggleAuto}
             className={`w-full py-3 rounded-xl border transition-all flex items-center justify-center space-x-3 ${
               autoPilot && engineActive ? 'border-emerald-500/40 bg-emerald-500/5 text-emerald-400 shadow-[0_0_10px_#10b98133]' : 'border-white/5 bg-white/[0.02] text-slate-500'
@@ -117,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 try {
                   await fetch(`${getApiBase()}/api/ghost/refill`, { method: 'POST' });
                   window.location.reload();
-                } catch (_e) {
+                } catch {
                   console.error("Failed to refill funds");
                 }
               }}
@@ -157,6 +173,24 @@ const Sidebar: React.FC<SidebarProps> = ({
               type="number" 
               value={localSettings.defaultTradeSize || 50}
               onChange={(e) => setLocalSettings({...localSettings, defaultTradeSize: parseFloat(e.target.value)})}
+              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
+            />
+          </div>
+          <div>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Risk Per Trade (%)</p>
+            <input 
+              type="number" 
+              value={localSettings.riskPerTradePercent || 15}
+              onChange={(e) => setLocalSettings({...localSettings, riskPerTradePercent: parseFloat(e.target.value)})}
+              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
+            />
+          </div>
+          <div>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Confidence Threshold (%)</p>
+            <input 
+              type="number" 
+              value={localSettings.confidenceThreshold || 85}
+              onChange={(e) => setLocalSettings({...localSettings, confidenceThreshold: parseFloat(e.target.value)})}
               className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
             />
           </div>

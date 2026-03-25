@@ -325,11 +325,11 @@ Use Smart Money Concepts (SMC), FVG, and MSS on the 15-MINUTE TIMEFRAME.
 Goal: Capture high-probability "A+" setups with 0.5% - 2% ROI (Scalping). 
 
 CRITICAL DIRECTIVES FOR PRECISION SCALPING:
-- RULE #1: CANDLE PRECISION. Analyze the provided 15-minute candles for institutional footprints.
-- RULE #2: GOLD & OIL DYNAMICS. Understand that Gold and Oil have high volatility and specific liquidity patterns.
-- RULE #3: QUALITY OVER QUANTITY. Only act on clear structural shifts (MSS) and institutional footprints (FVG).
-- RULE #4: CONSERVATIVE CONFIDENCE. Only assign 85+ confidence if the setup is near-perfect on the 15M chart.
-- RULE #5: DISCOUNT ZONES. Only buy after a pullback into a Discount Zone.
+- RULE #1: CANDLE PRECISION. Look for "Predictable Candles" (e.g., strong displacement after liquidity sweep). Ignore choppy or indecisive price action.
+- RULE #2: GOLD & OIL DYNAMICS. Gold and Oil are highly sensitive to liquidity. Look for "Stop Hunts" (SFP) before the real move.
+- RULE #3: QUALITY OVER QUANTITY. It is better to have 0 trades than 1 bad trade. Only act on clear structural shifts (MSS) and institutional footprints (FVG).
+- RULE #4: CONSERVATIVE CONFIDENCE. Only assign 90+ confidence if the setup is near-perfect on the 15M chart.
+- RULE #5: RISK/REWARD. Ensure the distance to TP is at least 2.5x the distance to SL.
 - RULE #6: If NEUTRAL/WAIT: Explicitly state what is missing in Persian (e.g., "در انتظار تایید MSS در تایم ۱۵ دقیقه", "عدم وجود FVG در طلا").
 
 INTERNAL REASONING PROTOCOL (IN PERSIAN):
@@ -502,11 +502,17 @@ async function scanWatchlist() {
   isScanning = true;
   
   try {
+    const now = new Date();
+    const hourUtc = now.getUTCHours();
+    
+    // London/NY Session Filter: 07:00 to 20:00 UTC is generally best for Gold/Oil volatility
+    const isHighVolatilitySession = hourUtc >= 7 && hourUtc <= 20;
+    
     const currentWatchlist = availableEurPairs.length > 0 
       ? availableEurPairs.map(p => p.split('-')[0]) 
       : WATCHLIST;
 
-    const batchSize = 3; // Increased for Lite model
+    const batchSize = 3; 
     const candidates: any[] = [];
 
     for (let i = 0; i < batchSize; i++) {
@@ -516,6 +522,12 @@ async function scanWatchlist() {
       ghostState.scanIndex++;
       
       if (ghostState.activePositions.some(p => p.symbol === symbol)) continue;
+
+      // Skip scanning if outside high volatility hours (only if highPrecision is ON)
+      if (ghostState.settings.highPrecision && !isHighVolatilitySession && !ghostState.isPaperMode) {
+        console.log(`[SCAN] Low volatility session (${hourUtc} UTC). Skipping ${symbol} for High Precision.`);
+        continue;
+      }
 
       const productId = `${symbol}-EUR`;
       if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) continue;
@@ -528,8 +540,11 @@ async function scanWatchlist() {
         const price = candles[candles.length - 1].close;
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
         
-        if (analysis && analysis.side === 'BUY' && analysis.confidence >= ghostState.settings.confidenceThreshold) {
-          const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (MIN_NET_PROFIT * 100));
+        const minConfidence = ghostState.settings.highPrecision ? 90 : (ghostState.settings.confidenceThreshold || 85);
+        const minNetProfit = ghostState.settings.highPrecision ? 0.008 : MIN_NET_PROFIT;
+
+        if (analysis && analysis.side === 'BUY' && analysis.confidence >= minConfidence) {
+          const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (minNetProfit * 100));
           if (isProfitableEnough) {
             candidates.push({ symbol, price, analysis });
           }
@@ -559,8 +574,9 @@ async function scanWatchlist() {
       }
 
       const totalEur = ghostState.liquidity.eur;
-      const maxPerTrade = totalEur * 0.15; // Reduced from 20% to 15% for more safety buffer
-      const tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
+      const riskPercent = (ghostState.settings.riskPerTradePercent || 15) / 100;
+      const maxPerTrade = totalEur * riskPercent;
+      const tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize || 50, maxPerTrade));
       
       // Ensure we have enough for trade + fees + small slippage buffer
       const requiredEur = tradeAmount * (1 + FEE_RATE + 0.005); // 0.5% extra buffer
@@ -702,17 +718,24 @@ async function monitor() {
         const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
         const netPnlPercent = pnlPercent - (FEE_RATE * 100);
 
-        // Dynamic Trailing Stop & Break Even
-        if (netPnlPercent > 0.2 && pos.sl < breakEvenPrice) {
-          pos.sl = breakEvenPrice * (1 + MIN_NET_PROFIT);
-          console.log(`[MONITOR] Break-Even + Profit Buffer activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
+        // Dynamic Trailing Stop & Break Even (Aggressive for Scalping)
+        if (netPnlPercent > 0.15 && pos.sl < breakEvenPrice) {
+          pos.sl = breakEvenPrice * (1 + 0.001); // BE + 0.1% profit buffer
+          console.log(`[MONITOR] Break-Even activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
         }
 
-        if (netPnlPercent > 0.8) {
-          const newSl = curPrice * 0.997; // 0.3% trailing stop once in 0.8% net profit
+        if (netPnlPercent > 0.4) {
+          const newSl = curPrice * 0.9985; // 0.15% trailing stop once in 0.4% net profit
           if (newSl > pos.sl) {
             pos.sl = newSl;
-            console.log(`[MONITOR] Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
+            console.log(`[MONITOR] Aggressive Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
+          }
+        }
+
+        if (netPnlPercent > 1.0) {
+          const newSl = curPrice * 0.995; // 0.5% trailing stop once in 1% net profit
+          if (newSl > pos.sl) {
+            pos.sl = newSl;
           }
         }
 
