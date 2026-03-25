@@ -8,13 +8,13 @@ import Sidebar from './components/Sidebar.tsx';
 import SignalList from './components/SignalList.tsx';
 import TradingTerminal from './components/TradingTerminal.tsx';
 
-const WATCHLIST = ['BTC-EUR', 'ETH-EUR', 'SOL-EUR', 'AVAX-EUR'];
+const WATCHLIST = ['XAU-EUR', 'WTI-EUR', 'BRENT-EUR', 'EUR-USD'];
 
 const App: React.FC = () => {
-  const [selectedAsset, setSelectedAsset] = useState<string>('BTC-EUR');
+  const [selectedAsset, setSelectedAsset] = useState<string>('XAU-EUR');
   const [assets, setAssets] = useState<AssetInfo[]>([]);
   const [thoughtHistory, setThoughtHistory] = useState<TradeSignal[]>([]);
-  const [balances, setBalances] = useState<AccountBalance[]>([]);
+  const [_balances, setBalances] = useState<AccountBalance[]>([]);
   const [isEngineActive, setIsEngineActive] = useState<boolean>(true);
   const [autoTradeEnabled, setAutoTradeEnabled] = useState<boolean>(true);
   const [isPaperMode, setIsPaperMode] = useState<boolean>(false);
@@ -48,7 +48,7 @@ const App: React.FC = () => {
         { currency: 'USDC', available: Number(data.liquidity?.usdc) || 0, total: Number(data.liquidity?.usdc) || 0 }
       ]);
       setStatus(AnalysisStatus.IDLE);
-    } catch (e) {
+    } catch {
       setLiveActivity("BRIDGE_OFFLINE");
       setStatus(AnalysisStatus.ERROR);
     }
@@ -57,7 +57,9 @@ const App: React.FC = () => {
   const handleUpdateBridge = (url: string) => {
     try {
       localStorage.setItem('NOVA_BRIDGE_URL', url.trim());
-    } catch (e) {}
+    } catch {
+      console.error("Failed to save bridge URL");
+    }
     setBridgeUrl(url.trim());
     syncWithServer();
   };
@@ -71,7 +73,9 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ engine: newState })
       });
-    } catch (e) {}
+    } catch {
+      console.error("Failed to toggle engine");
+    }
   };
 
   const toggleAuto = async () => {
@@ -83,7 +87,9 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ auto: newState })
       });
-    } catch (e) {}
+    } catch {
+      console.error("Failed to toggle auto trade");
+    }
   };
 
   const togglePaper = async () => {
@@ -95,7 +101,9 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ paper: newState })
       });
-    } catch (e) {}
+    } catch {
+      console.error("Failed to toggle paper mode");
+    }
   };
 
   const updateSettings = async (newSettings: any) => {
@@ -106,7 +114,7 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ settings: newSettings })
       });
-    } catch (_e) {
+    } catch {
       console.error("Failed to update settings");
     }
   };
@@ -123,7 +131,7 @@ const App: React.FC = () => {
             const filtered = prev.filter(a => a.id !== id);
             return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
           });
-        }).catch(_e => {});
+        }).catch(() => {});
       });
     }, 8000);
     return () => { 

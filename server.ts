@@ -114,15 +114,25 @@ function generateCoinbaseJWT(request_method, request_path) {
 
 async function get24hStats(symbol) {
   try {
-    const response = await axios.get(`https://api.exchange.coinbase.com/products/${symbol}-EUR/stats`, {
+    const response = await axios.get(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${symbol}&tsyms=EUR`, {
       timeout: 5000,
       headers: { 'User-Agent': 'GhostSMCBot/1.0' }
     });
-    return response.data;
-  } catch (e) {
+    const data = response.data?.RAW?.[symbol]?.['EUR'];
+    if (!data) return null;
+    return {
+      open: data.OPEN24HOUR,
+      high: data.HIGH24HOUR,
+      low: data.LOW24HOUR,
+      volume: data.VOLUME24HOUR,
+      last: data.PRICE,
+      volume_30day: data.VOLUME24HOUR * 30 // Mock 30d volume
+    };
+  } catch {
     return null;
   }
 }
+
 async function syncCoinbaseBalance() {
   if (ghostState.isPaperMode) {
     if (ghostState.liquidity.eur < 10) ghostState.liquidity.eur = 1000; // Auto-refill paper money
@@ -266,7 +276,7 @@ async function executeTrade(symbol, side, amount, quantity) {
 let lastQuotaExhaustedTime = 0;
 const QUOTA_COOLDOWN_MS = 60000; // 1 minute cooldown on 429
 
-async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
+async function getAdvancedAnalysis(symbol, price, candles, _entryPrice = null) {
   // Add a small random delay (0-3s) to prevent simultaneous bursts
   await new Promise(r => setTimeout(r, Math.random() * 3000));
 
@@ -296,6 +306,7 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   const history = (candles || []).slice(-60).map(c => ({ h: c.high, l: c.low, c: c.close }));
   const stats24h = await get24hStats(symbol);
+  
   const timeoutPromise = new Promise((_, reject) => {
     setTimeout(() => reject(new Error('AI_TIMEOUT')), 45000);
   });
@@ -304,48 +315,33 @@ async function getAdvancedAnalysis(symbol, price, candles, entryPrice = null) {
     ghostState.currentStatus = `AI_REQ_${symbol}`;
     const aiPromise = ai.models.generateContent({
       model: 'gemini-3.1-flash-lite-preview', 
-      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR. 
-        HISTORY_60M: ${JSON.stringify(history)}. 
-        STATS_24H: ${JSON.stringify(stats24h)}.
-        CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
+      contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR (15M TIMEFRAME). 
+HISTORY_15M_CANDLES: ${JSON.stringify(history)}. 
+STATS_24H: ${JSON.stringify(stats24h)}.
+CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE INSTITUTIONAL-GRADE SCALPER.
-Use Smart Money Concepts (SMC), FVG, and MSS. 
-Goal: Capture high-probability "A+" setups with 1.5% - 5% ROI. 
+        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE INSTITUTIONAL-GRADE SCALPER SPECIALIZING IN GOLD (XAU), OIL (WTI/BRENT), AND FOREX.
+Use Smart Money Concepts (SMC), FVG, and MSS on the 15-MINUTE TIMEFRAME. 
+Goal: Capture high-probability "A+" setups with 0.5% - 2% ROI (Scalping). 
 
-CRITICAL DIRECTIVES FOR NOISE REDUCTION & PRECISION:
-- RULE #1: IGNORE MARKET NOISE. Do not act on small, random fluctuations. Only act on clear structural shifts (MSS) and institutional footprints (FVG).
-- RULE #2: QUALITY OVER QUANTITY. It is better to have 0 trades than 1 bad trade.
-- RULE #3: CONSERVATIVE CONFIDENCE. Only assign 85+ confidence if the setup is near-perfect.
-- RULE #4: FACTOR IN VOLUME. If the displacement is weak, IT IS NOISE. Ignore it.
-- RULE #5: DISCOUNT ZONES. Never buy at a premium. Only buy after a pullback into a Discount Zone (Ote/Fib levels).
-- RULE #6: LIQUIDITY HUNTER. Look for "Stop Hunts" before the real move. Do not get trapped.
-- RULE #7: CAPITAL PRESERVATION. If the market is choppy, ranging, or unclear, YOU MUST CHOOSE 'NEUTRAL'.
+CRITICAL DIRECTIVES FOR PRECISION SCALPING:
+- RULE #1: CANDLE PRECISION. Analyze the provided 15-minute candles for institutional footprints.
+- RULE #2: GOLD & OIL DYNAMICS. Understand that Gold and Oil have high volatility and specific liquidity patterns.
+- RULE #3: QUALITY OVER QUANTITY. Only act on clear structural shifts (MSS) and institutional footprints (FVG).
+- RULE #4: CONSERVATIVE CONFIDENCE. Only assign 85+ confidence if the setup is near-perfect on the 15M chart.
+- RULE #5: DISCOUNT ZONES. Only buy after a pullback into a Discount Zone.
+- RULE #6: If NEUTRAL/WAIT: Explicitly state what is missing in Persian (e.g., "در انتظار تایید MSS در تایم ۱۵ دقیقه", "عدم وجود FVG در طلا").
 
-INTERNAL REASONING PROTOCOL:
-For every analysis, you MUST provide a "Step-by-step Thought Process" in the 'analysis' field.
-1. Market Context: Trend (Bullish/Bearish/Sideways) and Momentum based on 24h stats and 60m history.
-2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks.
-3. Decision Logic: Why you are choosing BUY, SELL, or WAIT.
-4. Risk Assessment: Is this a FOMO buy? Is this a falling knife?
-5. Time Estimation: How many minutes do you expect it will take to reach the Take Profit (TP) target?
-6. If WAIT: Explicitly state what is missing (e.g., "Waiting for MSS confirmation", "No clear FVG", "Spread too high").
+INTERNAL REASONING PROTOCOL (IN PERSIAN):
+1. Market Context: Trend on 15M timeframe.
+2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks on 15M.
+3. Decision Logic: Why BUY/SELL/WAIT for this specific Forex/Commodity asset.
+4. Risk Assessment: Volatility check for Gold/Oil.
+5. Time Estimation: Scalping usually takes 15-60 minutes.
 
 Only issue BUY if you see a clear institutional "Discount Zone" or "Liquidity Sweep" with strong upward momentum.
-Issue SELL early if you see "Distribution" or "SFP" (Swing Failure Pattern) to lock in profit before reversals.
-BE SMART: Avoid "Bull Traps" and "Bear Traps" set by exchanges.
+Issue SELL early if you see "Distribution" or "SFP" (Swing Failure Pattern) to lock in profit.
 NEVER RECOMMEND A TRADE THAT DOES NOT COVER FEES.
-
-${entryPrice ? `CURRENT POSITION: You bought ${symbol} at ${entryPrice}. Current price is ${price}. 
-Break-even price (including fees) is ${entryPrice * (1 + FEE_RATE)}.
-If we are above break-even, be very sensitive to any sign of reversal and issue SELL to secure gains. 
-If we are in loss, look for MSS to decide if we should hold or cut loss early (only if trend is clearly broken).` : ''}
-
-STRATEGY:
-1. Identify "Liquidity Sweeps" and "Market Structure Shifts" (MSS).
-2. If we hold a position, look for "Liquidity Targets" or "Reversal Signs" to issue a SELL signal.
-3. If we don't hold, look for "Discount Zones" or "FVG" for a BUY signal.
-4. ALWAYS prioritize liquidity. If the market looks stagnant, exit and wait for better volatility.
 
 IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
 Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, estimatedTimeMinutes, analysis.`,
@@ -420,11 +416,13 @@ function loadState() {
         settings: { ...defaults.settings, ...(parsed.settings || {}) }
       };
     }
-  } catch (e) {}
+  } catch {
+    console.error("Failed to load state");
+  }
   return defaults;
 }
 
-let ghostState = loadState();
+const ghostState = loadState();
 
 // --- MIGRATION: CLEAN SYMBOLS (e.g., SOL-EUR -> SOL) ---
 if (ghostState.activePositions && ghostState.activePositions.length > 0) {
@@ -448,7 +446,7 @@ async function monitorPositionsAI() {
     for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
       const pos = ghostState.activePositions[i];
       try {
-        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=30`, { timeout: 8000 });
+        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=60`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) continue;
         
@@ -508,11 +506,11 @@ async function scanWatchlist() {
       ? availableEurPairs.map(p => p.split('-')[0]) 
       : WATCHLIST;
 
-    const batchSize = 2; // Increased for Lite model
+    const batchSize = 3; // Increased for Lite model
     const candidates: any[] = [];
 
     for (let i = 0; i < batchSize; i++) {
-      if (i > 0) await new Promise(r => setTimeout(r, 1500));
+      if (i > 0) await new Promise(r => setTimeout(r, 2000));
       
       const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
       ghostState.scanIndex++;
@@ -523,7 +521,7 @@ async function scanWatchlist() {
       if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) continue;
 
       try {
-        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=60`, { timeout: 8000 });
+        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=60&aggregate=15`, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) continue;
         
@@ -562,7 +560,7 @@ async function scanWatchlist() {
 
       const totalEur = ghostState.liquidity.eur;
       const maxPerTrade = totalEur * 0.15; // Reduced from 20% to 15% for more safety buffer
-      let tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
+      const tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize, maxPerTrade));
       
       // Ensure we have enough for trade + fees + small slippage buffer
       const requiredEur = tradeAmount * (1 + FEE_RATE + 0.005); // 0.5% extra buffer
@@ -760,14 +758,18 @@ async function monitor() {
           }
         }
       }
-    } catch (e) {}
+    } catch {
+      console.error("[MONITOR ERROR] Failed to monitor positions");
+    }
+  } catch {
+    console.error("[MONITOR FATAL ERROR]");
   } finally {
     isMonitoring = false;
     saveState();
   }
 }
 
-function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch (e) {} }
+function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostState, null, 2)); } catch { console.error("Failed to save state"); } }
 
 // --- SERVER SETUP ---
 

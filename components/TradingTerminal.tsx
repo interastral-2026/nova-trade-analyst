@@ -33,7 +33,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
       });
       setLogs(Array.isArray(data.executionLogs) ? data.executionLogs : []);
       setHoldings(Array.isArray(data.activePositions) ? data.activePositions : []);
-    } catch (_e) {
+    } catch {
       console.error("Failed to fetch state");
     }
   };
@@ -96,7 +96,7 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
         </div>
 
         <div className="bg-[#080812] border border-white/10 p-7 rounded-[2.2rem] flex flex-col justify-center relative overflow-hidden shadow-lg">
-           <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">RADAR_ACTIVITY</p>
+           <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">RADAR_ACTIVITY (15M)</p>
            <div className="flex items-center space-x-3">
               <span className={`w-2.5 h-2.5 rounded-full ${liveActivity.includes('ANALYZING') ? 'bg-cyan-500 animate-ping' : 'bg-rose-600 animate-pulse'} shadow-[0_0_10px_#e11d48]`}></span>
               <h2 className={`text-[11px] font-black uppercase truncate tracking-tight ${liveActivity.includes('ANALYZING') ? 'text-cyan-400' : 'text-white'}`}>
