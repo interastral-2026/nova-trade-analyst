@@ -192,11 +192,19 @@ async function executeTrade(symbol, side, amount, quantity) {
     return { success: true };
   }
 
-  const productId = symbol.includes('-') ? symbol : `${symbol}-EUR`;
+  const baseSymbol = symbol.includes('-') ? symbol.split('-')[0] : symbol;
+  let productId = `${baseSymbol}-EUR`;
   
-  if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) {
-    console.error(`[REAL TRADE ERROR] Invalid product ID: ${productId}`);
-    return { success: false, reason: `INVALID_PRODUCT: ${productId}` };
+  // Special handling for PAXG: if PAXG-EUR is not in available pairs, try PAXG-USD or PAXG-USDC
+  if (baseSymbol === 'PAXG' && !ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) {
+    if (availableEurPairs.includes('PAXG-USD')) productId = 'PAXG-USD';
+    else if (availableEurPairs.includes('PAXG-USDC')) productId = 'PAXG-USDC';
+    else {
+      // If no PAXG pair found in our list, let's try to find ANY PAXG pair
+      const anyPaxgPair = availableEurPairs.find(p => p.startsWith('PAXG-'));
+      if (anyPaxgPair) productId = anyPaxgPair;
+    }
+    console.log(`[TRADE] PAXG-EUR not found, using fallback: ${productId}`);
   }
   
   if (!CB_API_KEY || !CB_API_SECRET) {
