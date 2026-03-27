@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ExecutionLog, ActivePosition, TradeSignal } from '../types.ts';
 import { getApiBase } from '../services/tradingService.ts';
+import StrategyInfo from './StrategyInfo.tsx';
 
 interface TradingTerminalProps {
   thoughtHistory: TradeSignal[];
@@ -319,57 +320,14 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                    ))
                  )}
               </div>
-            )}
+           )}
 
-            {activeTab === 'strategy' && (
-              <div className="max-w-4xl mx-auto space-y-8">
-                <div className="bg-[#0a0a14] border border-white/5 p-8 rounded-[2.5rem] shadow-xl">
-                  <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-6 flex items-center space-x-3">
-                    <i className="fas fa-chess-knight text-indigo-500"></i>
-                    <span>Ghost SMC Strategy Overview</span>
-                  </h3>
-                  
-                  <div className="space-y-6">
-                    <section>
-                      <h4 className="text-sm font-black text-indigo-400 uppercase tracking-widest mb-2">1. Smart Money Concepts (SMC)</h4>
-                      <p className="text-slate-400 text-sm leading-relaxed">
-                        The robot identifies where institutional "Smart Money" is likely entering or exiting. It looks for 
-                        <strong>Liquidity Sweeps</strong> (taking out retail stop losses) followed by a 
-                        <strong>Market Structure Shift (MSS)</strong> to confirm the new trend.
-                      </p>
-                    </section>
-
-                    <section>
-                      <h4 className="text-sm font-black text-emerald-400 uppercase tracking-widest mb-2">2. Fair Value Gaps (FVG)</h4>
-                      <p className="text-slate-400 text-sm leading-relaxed">
-                        When price moves rapidly, it leaves "gaps" or imbalances. The robot treats these as magnets. 
-                        It waits for a "retrace" into an FVG (Discount Zone) before entering a trade, ensuring a high 
-                        Risk-to-Reward ratio.
-                      </p>
-                    </section>
-
-                    <section>
-                      <h4 className="text-sm font-black text-amber-400 uppercase tracking-widest mb-2">3. Noise Reduction & Precision</h4>
-                      <p className="text-slate-400 text-sm leading-relaxed">
-                        The AI filters out random volatility. It only acts when multiple factors align: 
-                        Institutional footprint + FVG tap + MSS confirmation + High Confidence score. 
-                        This "Sniper" approach minimizes false signals.
-                      </p>
-                    </section>
-
-                    <div className="p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl">
-                      <p className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.2em] mb-2">Current Decision Logic</p>
-                      <p className="text-xs text-slate-500 italic">
-                        "I am currently scanning for high-probability SMC setups. I prioritize capital preservation over 
-                        frequent trading. If the market is choppy, I stay NEUTRAL. When I find an A+ setup, I execute 
-                        with tight stop losses and dynamic trailing targets."
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-         </div>
+           {activeTab === 'strategy' && (
+             <div className="max-w-4xl mx-auto">
+                <StrategyInfo />
+             </div>
+           )}
+        </div>
       </div>
     </div>
   );
