@@ -1,12 +1,8 @@
 
 import React, { useState } from 'react';
-import { AssetInfo } from '../types';
 import { getApiBase } from '../services/tradingService.ts';
 
 interface SidebarProps {
-  assets: AssetInfo[];
-  selected: string;
-  onSelect: (id: string) => void;
   autoPilot: boolean;
   onToggleAuto: () => void;
   engineActive: boolean;
@@ -22,9 +18,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
-  assets, 
-  selected, 
-  onSelect, 
   autoPilot, 
   onToggleAuto, 
   engineActive,

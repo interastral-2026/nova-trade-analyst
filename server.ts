@@ -598,10 +598,20 @@ async function scanWatchlist() {
       if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) continue;
 
       try {
-        const tsym = (symbol === 'XAU' || symbol === 'WTI') ? 'USD' : 'EUR';
-        const apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=${tsym}&limit=60&aggregate=15&e=CCCAGG`;
+        let tsym = 'EUR';
+        if (symbol === 'XAU' || symbol === 'WTI') tsym = 'USD';
+        
+        let apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=${tsym}&limit=60&aggregate=15`;
         console.log(`[SCAN] Fetching data for ${symbol}: ${apiUrl}`);
-        const res = await axios.get(apiUrl, { timeout: 8000 });
+        let res = await axios.get(apiUrl, { timeout: 8000 });
+        
+        if (res.data?.Response === 'Error' && tsym === 'EUR') {
+          console.log(`[SCAN] EUR pair failed for ${symbol}, trying USD fallback...`);
+          tsym = 'USD';
+          apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=${tsym}&limit=60&aggregate=15`;
+          res = await axios.get(apiUrl, { timeout: 8000 });
+        }
+
         const candles = res.data?.Data?.Data || [];
         
         if (candles.length === 0) {

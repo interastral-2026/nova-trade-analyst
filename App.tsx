@@ -1,18 +1,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { AssetInfo, TradeSignal, AnalysisStatus, AccountBalance } from './types.ts';
-import { fetchProductStats } from './services/coinbaseService.ts';
+import { TradeSignal, AnalysisStatus, AccountBalance } from './types.ts';
 import { getApiBase } from './services/tradingService.ts';
 import Header from './components/Header.tsx';
 import Sidebar from './components/Sidebar.tsx';
 import SignalList from './components/SignalList.tsx';
 import TradingTerminal from './components/TradingTerminal.tsx';
 
-const WATCHLIST = ['XAU-EUR', 'WTI-EUR', 'GBP-EUR'];
 
 const App: React.FC = () => {
-  const [selectedAsset, setSelectedAsset] = useState<string>('XAU-EUR');
-  const [assets, setAssets] = useState<AssetInfo[]>([]);
   const [thoughtHistory, setThoughtHistory] = useState<TradeSignal[]>([]);
   const [_balances, setBalances] = useState<AccountBalance[]>([]);
   const [isEngineActive, setIsEngineActive] = useState<boolean>(true);
@@ -124,20 +120,9 @@ const App: React.FC = () => {
       syncWithServer();
     }, 0);
     const interval = setInterval(syncWithServer, 4000);
-    const statsInterval = setInterval(() => {
-      WATCHLIST.forEach(id => {
-        fetchProductStats(id).then(info => {
-          setAssets(prev => {
-            const filtered = prev.filter(a => a.id !== id);
-            return [...filtered, info].sort((a,b) => a.id.localeCompare(b.id));
-          });
-        }).catch(() => {});
-      });
-    }, 8000);
     return () => { 
       clearTimeout(timer);
       clearInterval(interval); 
-      clearInterval(statsInterval); 
     };
   }, [syncWithServer]);
 
@@ -177,9 +162,6 @@ const App: React.FC = () => {
           w-full sm:w-80 flex-shrink-0
         `}>
           <Sidebar 
-            assets={assets} 
-            selected={selectedAsset} 
-            onSelect={(id) => { setSelectedAsset(id); setMobileMenuOpen(false); }} 
             autoPilot={autoTradeEnabled} 
             onToggleAuto={toggleAuto} 
             engineActive={isEngineActive} 
