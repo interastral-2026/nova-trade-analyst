@@ -54,7 +54,7 @@ const CB_API_SECRET = process.env.CB_API_SECRET
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
   : "";
 
-const WATCHLIST = ['XAU', 'WTI', 'GBP'];
+const WATCHLIST = ['BTC', 'ETH', 'PAXG'];
 const STATE_FILE = './ghost_state.json';
 const FEE_RATE = 0.012; // 1.2% round-trip fee (0.6% per side)
 const MIN_NET_PROFIT = 0.005; // 0.5% minimum net profit after fees
@@ -114,18 +114,39 @@ function generateCoinbaseJWT(request_method, request_path) {
 
 async function get24hStats(symbol) {
   try {
-    const response = await axios.get(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${symbol}&tsyms=EUR`, {
+    let tsym = 'EUR';
+    let fsym = symbol.toUpperCase().trim();
+    
+    // Commodity Mapping
+    if (fsym === 'XAU') fsym = 'PAXG';
+    if (fsym === 'WTI') fsym = 'OIL';
+    
+    if (fsym === 'PAXG' || fsym === 'OIL') tsym = 'USD';
+
+    const response = await axios.get(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${fsym}&tsyms=${tsym}`, {
       timeout: 5000,
       headers: { 'User-Agent': 'GhostSMCBot/1.0' }
     });
-    const data = response.data?.RAW?.[symbol]?.['EUR'];
+    
+    let data = response.data?.RAW?.[fsym]?.[tsym];
+    
+    // Fallback if EUR failed
+    if (!data && tsym === 'EUR') {
+      tsym = 'USD';
+      const fallbackRes = await axios.get(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${symbol}&tsyms=USD`, { timeout: 5000 });
+      data = fallbackRes.data?.RAW?.[symbol]?.['USD'];
+    }
+
     if (!data) return null;
+
+    const conversionRate = tsym === 'USD' ? 1 / 1.08 : 1;
+
     return {
-      open: data.OPEN24HOUR,
-      high: data.HIGH24HOUR,
-      low: data.LOW24HOUR,
+      open: data.OPEN24HOUR * conversionRate,
+      high: data.HIGH24HOUR * conversionRate,
+      low: data.LOW24HOUR * conversionRate,
       volume: data.VOLUME24HOUR,
-      last: data.PRICE,
+      last: data.PRICE * conversionRate,
       volume_30day: data.VOLUME24HOUR * 30 // Mock 30d volume
     };
   } catch {
@@ -364,7 +385,7 @@ HISTORY_15M_CANDLES: ${JSON.stringify(history)}.
 STATS_24H: ${JSON.stringify(stats24h)}.
 CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `You are an ELITE SCALPING AI specializing in Gold (XAU), Oil (WTI), and Pound (GBP) on 15-minute charts.
+        systemInstruction: `You are an ELITE SCALPING AI specializing in Bitcoin (BTC), Ethereum (ETH), and Gold (PAXG) on 15-minute charts.
 Your goal: Identify 2-3 high-quality trades per day with 80%+ confidence.
 
 CORE STRATEGY (Triple Confirmation):
@@ -491,11 +512,32 @@ async function monitorPositionsAI() {
     for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
       const pos = ghostState.activePositions[i];
       try {
-        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${pos.symbol}&tsym=EUR&limit=60`, { timeout: 8000 });
+        let tsym = 'EUR';
+        let fsym = pos.symbol.toUpperCase().trim();
+        
+        // Commodity Mapping
+        if (fsym === 'XAU') fsym = 'PAXG';
+        if (fsym === 'WTI') fsym = 'OIL';
+        
+        if (fsym === 'PAXG' || fsym === 'OIL') tsym = 'USD';
+
+        let apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${fsym}&tsym=${tsym}&limit=60`;
+        let res = await axios.get(apiUrl, { timeout: 8000 });
+        
+        if (res.data?.Response === 'Error' && tsym === 'EUR') {
+          tsym = 'USD';
+          apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${fsym}&tsym=USD&limit=60`;
+          res = await axios.get(apiUrl, { timeout: 8000 });
+        }
+
         const candles = res.data?.Data?.Data || [];
         if (candles.length === 0) continue;
         
-        const price = candles[candles.length - 1].close;
+        let price = candles[candles.length - 1].close;
+        if (tsym === 'USD') {
+          price = price / 1.08; // Convert to EUR
+        }
+
         const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
         
         if (analysis && analysis.side === 'SELL') {
@@ -598,23 +640,37 @@ async function scanWatchlist() {
       if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) continue;
 
       try {
-        let tsym = 'EUR';
-        if (symbol === 'XAU' || symbol === 'WTI') tsym = 'USD';
+        let fsym = symbol.toUpperCase().trim();
+        let tsym = (fsym === 'XAU' || fsym === 'WTI') ? 'USD' : 'EUR';
         
-        let apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=${tsym}&limit=60&aggregate=15`;
-        console.log(`[SCAN] Fetching data for ${symbol}: ${apiUrl}`);
+        // Fallback for Gold: Use PAXG (Gold-backed crypto) which has much better API support
+        if (fsym === 'XAU') {
+          console.log(`[SCAN] Using PAXG as a reliable proxy for XAU (Gold)`);
+          fsym = 'PAXG';
+          tsym = 'USD';
+        }
+        
+        // Fallback for Oil: Use OIL index
+        if (fsym === 'WTI') {
+          console.log(`[SCAN] Using OIL as a reliable proxy for WTI (Oil)`);
+          fsym = 'OIL';
+          tsym = 'USD';
+        }
+
+        let apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${fsym}&tsym=${tsym}&limit=60&aggregate=15`;
+        console.log(`[SCAN] Fetching data for ${symbol} (as ${fsym}): ${apiUrl}`);
         let res = await axios.get(apiUrl, { timeout: 8000 });
         
-        if (res.data?.Response === 'Error' && tsym === 'EUR') {
-          console.log(`[SCAN] EUR pair failed for ${symbol}, trying USD fallback...`);
-          tsym = 'USD';
-          apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=${tsym}&limit=60&aggregate=15`;
+        // If still error, try without aggregate or different tsym
+        if (res.data?.Response === 'Error') {
+          console.log(`[SCAN] Primary fetch failed for ${fsym}, trying simple minute data...`);
+          apiUrl = `https://min-api.cryptocompare.com/data/histominute?fsym=${fsym}&tsym=USD&limit=60`;
           res = await axios.get(apiUrl, { timeout: 8000 });
         }
 
-        const candles = res.data?.Data?.Data || [];
+        const candles = res.data?.Data?.Data || res.data?.Data || [];
         
-        if (candles.length === 0) {
+        if (candles.length === 0 || res.data?.Response === 'Error') {
           console.warn(`[SCAN] No candle data for ${symbol}. API Response:`, JSON.stringify(res.data).substring(0, 200));
           continue;
         }
@@ -788,13 +844,40 @@ async function monitor() {
     }
 
     if (ghostState.activePositions.length === 0) return;
-    const symbols = ghostState.activePositions.map((p) => p.symbol).join(',');
+    const symbolsList = ghostState.activePositions.map((p) => p.symbol);
+    
     try {
-      const res = await axios.get(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${symbols}&tsyms=EUR`, { timeout: 8000 });
-      const prices = res.data;
+      // Prepare symbols for price fetching
+      const mappedSymbols = symbolsList.map(s => {
+        const up = s.toUpperCase().trim();
+        if (up === 'XAU') return 'PAXG';
+        if (up === 'WTI') return 'OIL';
+        return up;
+      });
+
+      const resEur = await axios.get(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${mappedSymbols.join(',')}&tsyms=EUR`, { timeout: 8000 });
+      const resUsd = await axios.get(`https://min-api.cryptocompare.com/data/pricemulti?fsyms=${mappedSymbols.join(',')}&tsyms=USD`, { timeout: 8000 });
+      
+      const pricesEur = resEur.data || {};
+      const pricesUsd = resUsd.data || {};
+
       for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
         const pos = ghostState.activePositions[i];
-        const curPrice = prices[pos.symbol]?.EUR;
+        const s = pos.symbol.toUpperCase().trim();
+        let fsym = s;
+        if (s === 'XAU') fsym = 'PAXG';
+        if (s === 'WTI') fsym = 'OIL';
+        
+        let curPrice = pricesEur[fsym]?.EUR;
+        
+        // Fallback to USD if EUR not available or if it's a commodity
+        if (!curPrice || fsym === 'PAXG' || fsym === 'OIL') {
+          const usdPrice = pricesUsd[fsym]?.USD;
+          if (usdPrice) {
+            curPrice = usdPrice / 1.08; // Convert to EUR
+          }
+        }
+
         if (!curPrice) continue;
         
         // If it's a newly adopted position, set initial prices and default targets
