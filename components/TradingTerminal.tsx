@@ -33,8 +33,8 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
       });
       setLogs(Array.isArray(data.executionLogs) ? data.executionLogs : []);
       setHoldings(Array.isArray(data.activePositions) ? data.activePositions : []);
-    } catch {
-      console.error("Failed to fetch state");
+    } catch (err: any) {
+      console.error("Failed to fetch state:", err.message || err);
     }
   };
 

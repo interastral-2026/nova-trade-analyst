@@ -47,12 +47,23 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [settings]);
 
-  const handleReconnect = () => {
-    onUpdateBridge(urlInput);
-    if (onUpdateSettings) {
-      onUpdateSettings(localSettings);
+  const handleReconnect = async () => {
+    try {
+      if (localSettings.geminiApiKey) {
+        await fetch(`${getApiBase()}/api/ghost/api-key`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: localSettings.geminiApiKey })
+        });
+      }
+      onUpdateBridge(urlInput);
+      if (onUpdateSettings) {
+        onUpdateSettings(localSettings);
+      }
+      setShowSettings(false);
+    } catch (e) {
+      console.error("Failed to update settings:", e);
     }
-    setShowSettings(false);
   };
 
   return (
@@ -155,6 +166,16 @@ const Sidebar: React.FC<SidebarProps> = ({
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               placeholder="https://..."
+              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
+            />
+          </div>
+          <div>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Gemini API Key</p>
+            <input 
+              type="password" 
+              value={localSettings.geminiApiKey || ''}
+              onChange={(e) => setLocalSettings({...localSettings, geminiApiKey: e.target.value})}
+              placeholder="AIza..."
               className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
             />
           </div>

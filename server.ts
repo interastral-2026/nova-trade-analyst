@@ -46,7 +46,7 @@ const getBestApiKey = () => {
   return { val: keys[0].val || keys[1].val || "", source: keys[0].val ? keys[0].name : (keys[1].val ? keys[1].name : "NONE") };
 };
 
-const { val: API_KEY, source: API_KEY_SOURCE } = getBestApiKey();
+let { val: API_KEY, source: API_KEY_SOURCE } = getBestApiKey();
 
 fs.appendFileSync('debug.log', `[INIT] API_KEY Source: ${API_KEY_SOURCE}, Starts with: ${API_KEY.substring(0, 5)}... (Length: ${API_KEY.length})\n`);
 const CB_API_KEY = (process.env.CB_API_KEY || "").trim();
@@ -54,7 +54,7 @@ const CB_API_SECRET = process.env.CB_API_SECRET
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
   : "";
 
-const WATCHLIST = ['BTC', 'ETH', 'SOL', 'AVAX', 'LINK', 'NEAR', 'XRP', 'ADA', 'DOT', 'MATIC', 'RNDR', 'FET'];
+const WATCHLIST = ['XAU', 'WTI', 'BRENT', 'EUR-USD'];
 const STATE_FILE = './ghost_state.json';
 const FEE_RATE = 0.005; // 0.5% round-trip fee
 const MIN_NET_PROFIT = 0.005; // Increased to 0.5% minimum net profit (Total move = 1.0%)
@@ -320,45 +320,39 @@ HISTORY_15M_CANDLES: ${JSON.stringify(history)}.
 STATS_24H: ${JSON.stringify(stats24h)}.
 CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `YOU ARE THE GHOST_SMC_BOT, AN ELITE INSTITUTIONAL-GRADE SCALPER SPECIALIZING IN GOLD (XAU), OIL (WTI/BRENT), AND FOREX.
-Use Smart Money Concepts (SMC), FVG, and MSS on the 15-MINUTE TIMEFRAME. 
-Goal: Capture high-probability "A+" setups with 0.5% - 2% ROI (Scalping). 
+        systemInstruction: `You are an ELITE SCALPING AI specializing in Gold (XAU), Oil (WTI/BRENT), and EUR-USD on 15-minute charts.
+Your goal: Identify "Predictable Candles" with 90%+ confidence for high-profit, short-term trades.
 
-CRITICAL DIRECTIVES FOR PRECISION SCALPING:
-- RULE #1: CANDLE PRECISION. Look for "Predictable Candles" (e.g., strong displacement after liquidity sweep). Ignore choppy or indecisive price action.
-- RULE #2: GOLD & OIL DYNAMICS. Gold and Oil are highly sensitive to liquidity. Look for "Stop Hunts" (SFP) before the real move.
-- RULE #3: QUALITY OVER QUANTITY. It is better to have 0 trades than 1 bad trade. Only act on clear structural shifts (MSS) and institutional footprints (FVG).
-- RULE #4: CONSERVATIVE CONFIDENCE. Only assign 90+ confidence if the setup is near-perfect on the 15M chart.
-- RULE #5: RISK/REWARD. Ensure the distance to TP is at least 2.5x the distance to SL.
-- RULE #6: If NEUTRAL/WAIT: Explicitly state what is missing in Persian (e.g., "در انتظار تایید MSS در تایم ۱۵ دقیقه", "عدم وجود FVG در طلا").
+CORE STRATEGY:
+1. Smart Money Concepts (SMC): Look for Order Blocks, Fair Value Gaps (FVG), and Market Structure Shifts (MSS).
+2. 15m Scalping: Focus on the last 5-10 candles. Is there a clear momentum breakout or reversal?
+3. Predictable Candles: A candle is predictable if it follows a strong rejection (wick) or breaks a key liquidity level with high volume.
+4. Gold & Oil: These assets are highly sensitive to liquidity sweeps. Look for "Stop Hunts" before a major move.
+5. Risk/Reward: Only suggest trades with at least 2.5x RR.
 
-INTERNAL REASONING PROTOCOL (IN PERSIAN):
-1. Market Context: Trend on 15M timeframe.
-2. SMC Evidence: Liquidity sweeps, FVG gaps, Order Blocks on 15M.
-3. Decision Logic: Why BUY/SELL/WAIT for this specific Forex/Commodity asset.
-4. Risk Assessment: Volatility check for Gold/Oil.
-5. Time Estimation: Scalping usually takes 15-60 minutes.
+CONFIDENCE SCORING:
+- 90-100%: Perfect SMC setup, clear FVG, strong momentum, and session alignment (London/NY).
+- 70-89%: Good setup but missing one confluence (e.g., weak volume).
+- 40-69%: Choppy or ranging market. "Observing" state.
+- 0-39%: High uncertainty. DO NOT TRADE.
 
-Only issue BUY if you see a clear institutional "Discount Zone" or "Liquidity Sweep" with strong upward momentum.
-Issue SELL early if you see "Distribution" or "SFP" (Swing Failure Pattern) to lock in profit.
-NEVER RECOMMEND A TRADE THAT DOES NOT COVER FEES.
-
-IMPORTANT: You MUST write the "analysis" field in PERSIAN (Farsi).
-Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (0-100), potentialRoi, estimatedTimeMinutes, analysis.`,
+OUTPUT RULES:
+- If confidence < 85%, side MUST be NEUTRAL.
+- Analysis MUST be in PERSIAN (Farsi).
+- Explain EXACTLY why you are waiting if confidence is low.
+- Return ONLY JSON.`,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            side: { type: Type.STRING, enum: ['BUY', 'SELL', 'NEUTRAL'] },
-            tp: { type: Type.NUMBER },
-            sl: { type: Type.NUMBER },
-            entryPrice: { type: Type.NUMBER },
-            confidence: { type: Type.NUMBER },
-            potentialRoi: { type: Type.NUMBER },
-            estimatedTimeMinutes: { type: Type.NUMBER, description: "Estimated time to reach TP in minutes" },
-            analysis: { type: Type.STRING }
+            side: { type: Type.STRING, enum: ["BUY", "SELL", "NEUTRAL"] },
+            confidence: { type: Type.INTEGER, description: "0-100" },
+            potentialRoi: { type: Type.NUMBER, description: "Expected net profit %" },
+            sl: { type: Type.NUMBER, description: "Stop loss price" },
+            tp: { type: Type.NUMBER, description: "Take profit price" },
+            analysis: { type: Type.STRING, description: "Detailed reasoning in PERSIAN" }
           },
-          required: ['side', 'tp', 'sl', 'entryPrice', 'confidence', 'potentialRoi', 'estimatedTimeMinutes', 'analysis']
+          required: ["side", "confidence", "potentialRoi", "sl", "tp", "analysis"]
         },
         temperature: 0.1
       }
@@ -368,6 +362,7 @@ Return valid JSON with side (BUY/SELL/NEUTRAL), tp, sl, entryPrice, confidence (
     const rawText = response.text?.trim() || '{}';
     ghostState.currentStatus = `AI_RESP_${symbol}_LEN_${rawText.length}`;
     const result = JSON.parse(rawText);
+    console.log(`[AI ANALYSIS] ${symbol}: ${result.side} (${result.confidence}%)`);
     if (result.confidence !== undefined && result.confidence > 0 && result.confidence <= 1) {
       result.confidence = Math.round(result.confidence * 100);
     }
@@ -508,9 +503,16 @@ async function scanWatchlist() {
     // London/NY Session Filter: 07:00 to 20:00 UTC is generally best for Gold/Oil volatility
     const isHighVolatilitySession = hourUtc >= 7 && hourUtc <= 20;
     
-    const currentWatchlist = availableEurPairs.length > 0 
+    // Clear old errors if API key is now valid
+    if (ghostState.thoughts.length > 0 && ghostState.thoughts[0].confidence === 0 && ghostState.thoughts[0].analysis.includes('API')) {
+      ghostState.thoughts = [];
+    }
+
+    const currentWatchlist = (availableEurPairs.length > 0 && !ghostState.isPaperMode)
       ? availableEurPairs.map(p => p.split('-')[0]) 
       : WATCHLIST;
+    
+    console.log(`[SCAN] Watchlist: ${currentWatchlist.join(', ')} (Paper: ${ghostState.isPaperMode})`);
 
     const batchSize = 3; 
     const candidates: any[] = [];
@@ -574,20 +576,26 @@ async function scanWatchlist() {
       }
 
       const totalEur = ghostState.liquidity.eur;
+      const minTradeSize = 5; // Lowered to 5 EUR for smaller accounts
       const riskPercent = (ghostState.settings.riskPerTradePercent || 15) / 100;
       const maxPerTrade = totalEur * riskPercent;
-      const tradeAmount = Math.max(10, Math.min(ghostState.settings.defaultTradeSize || 50, maxPerTrade));
-      
-      // Ensure we have enough for trade + fees + small slippage buffer
-      const requiredEur = tradeAmount * (1 + FEE_RATE + 0.005); // 0.5% extra buffer
-      
-      if (totalEur >= requiredEur && tradeAmount >= 5) { 
+      const tradeAmount = Math.max(minTradeSize, Math.min(ghostState.settings.defaultTradeSize || 50, maxPerTrade));
+
+      if (totalEur < minTradeSize) {
+        console.warn(`[TRADE] Insufficient funds: ${totalEur} EUR (Min: ${minTradeSize})`);
+        return;
+      }
+
+      if (totalEur - tradeAmount < 0.5) { // Leave at least 0.5 EUR for fees
+        console.warn(`[TRADE] Risk too high for current balance. Balance: ${totalEur}, Trade: ${tradeAmount}`);
+        return;
+      }
         const qty = tradeAmount / (price || 1);
         const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
         
         if (tradeResult.success) {
           ghostState.activePositions.push({
-            symbol, entryPrice: price, currentPrice: price, amount: tradeAmount, quantity: qty,
+            symbol, entryPrice: price, currentPrice: price, peakPrice: price, amount: tradeAmount, quantity: qty,
             tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
             estimatedTimeMinutes: analysis.estimatedTimeMinutes,
             analysis: analysis.analysis,
@@ -609,12 +617,11 @@ async function scanWatchlist() {
           saveState();
         }
       }
+    } finally {
+      isScanning = false;
+      ghostState.currentStatus = `SCAN_BATCH_DONE_${ghostState.scanIndex}`;
+      saveState();
     }
-  } finally {
-    isScanning = false;
-    ghostState.currentStatus = `SCAN_BATCH_DONE_${ghostState.scanIndex}`;
-    saveState();
-  }
 }
 
 async function monitor() {
@@ -711,6 +718,9 @@ async function monitor() {
         }
 
         pos.currentPrice = curPrice;
+        if (curPrice > (pos.peakPrice || 0)) {
+          pos.peakPrice = curPrice;
+        }
         const pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
         pos.pnlPercent = pnlPercent;
         pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
@@ -744,19 +754,25 @@ async function monitor() {
         const earlyExitPrice = pos.entryPrice + (tpDistance * 0.8);
         const canExitSafely = curPrice > (breakEvenPrice * (1 + MIN_NET_PROFIT));
 
-        // TIME-BASED EXIT: If trade is open for > 3 hours and not in significant profit, close it to free liquidity
+        // TIME-BASED EXIT: Scalping focus (15m candles). If no profit after ~2 candles (30 mins), exit.
         const tradeAgeMs = new Date().getTime() - new Date(pos.timestamp).getTime();
-        const tradeAgeHours = tradeAgeMs / (1000 * 60 * 60);
-        const isStagnant = tradeAgeHours > 3 && netPnlPercent < 0.5;
+        const tradeAgeMins = tradeAgeMs / (1000 * 60);
+        const isStagnant = tradeAgeMins > 30 && netPnlPercent < 0.2;
+
+        // PROFIT SATURATION EXIT: If in good profit (>0.5% net) and price drops 0.15% from peak, exit to lock gains.
+        const dropFromPeak = pos.peakPrice ? ((pos.peakPrice - curPrice) / pos.peakPrice) * 100 : 0;
+        const isProfitSaturated = netPnlPercent > 0.5 && dropFromPeak > 0.15;
 
         // Trigger SELL if:
         // 1. Reached TP
-        // 2. Reached SL (Hard stop loss, must execute even if in loss)
+        // 2. Reached SL
         // 3. Reached 80% of TP and is safe to exit
         // 4. Trade is stagnant (time-based exit)
-        if (curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.4 && canExitSafely) || isStagnant) {
+        // 5. Profit is saturated (momentum fade)
+        if (curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.4 && canExitSafely) || isStagnant || isProfitSaturated) {
           let reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_80%_TP');
-          if (isStagnant && curPrice < pos.tp && curPrice > pos.sl) reason = 'TIME_STAGNATION_EXIT';
+          if (isStagnant) reason = 'TIME_STAGNATION_30M';
+          if (isProfitSaturated) reason = 'MOMENTUM_FADE_EXIT';
           
           const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
           
@@ -781,11 +797,11 @@ async function monitor() {
           }
         }
       }
-    } catch {
-      console.error("[MONITOR ERROR] Failed to monitor positions");
+    } catch (e: any) {
+      console.error("[MONITOR ERROR] Failed to monitor positions:", e.message);
     }
-  } catch {
-    console.error("[MONITOR FATAL ERROR]");
+  } catch (e: any) {
+    console.error("[MONITOR FATAL ERROR]:", e.message);
   } finally {
     isMonitoring = false;
     saveState();
@@ -831,6 +847,18 @@ async function startServer() {
       return res.json({ success: true, liquidity: ghostState.liquidity });
     }
     res.status(400).json({ success: false, error: "Only available in Paper Mode" });
+  });
+
+  app.post('/api/ghost/api-key', (req, res) => {
+    const { key } = req.body;
+    if (key && key.startsWith('AIza')) {
+      API_KEY = key;
+      API_KEY_SOURCE = "USER_INPUT";
+      console.log(`[API] API Key updated manually from UI`);
+      res.json({ status: 'ok' });
+    } else {
+      res.status(400).json({ error: 'Invalid API key format' });
+    }
   });
 
   // Vite middleware for development
