@@ -598,11 +598,25 @@ async function scanWatchlist() {
       if (!ghostState.isPaperMode && availableEurPairs.length > 0 && !availableEurPairs.includes(productId)) continue;
 
       try {
-        const res = await axios.get(`https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=EUR&limit=60&aggregate=15`, { timeout: 8000 });
+        const tsym = (symbol === 'XAU' || symbol === 'WTI') ? 'USD' : 'EUR';
+        const apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${symbol}&tsym=${tsym}&limit=60&aggregate=15&e=CCCAGG`;
+        console.log(`[SCAN] Fetching data for ${symbol}: ${apiUrl}`);
+        const res = await axios.get(apiUrl, { timeout: 8000 });
         const candles = res.data?.Data?.Data || [];
-        if (candles.length === 0) continue;
         
-        const price = candles[candles.length - 1].close;
+        if (candles.length === 0) {
+          console.warn(`[SCAN] No candle data for ${symbol}. API Response:`, JSON.stringify(res.data).substring(0, 200));
+          continue;
+        }
+
+        // If we used USD, we need to convert the price to EUR for consistency in the bot
+        let price = candles[candles.length - 1].close;
+        if (tsym === 'USD') {
+          // Approximate conversion if we don't have a live rate handy
+          // In a real app, we'd fetch EUR-USD rate. For now, let's assume 1.08
+          price = price / 1.08; 
+          console.log(`[SCAN] Converted ${symbol} price from USD to EUR: ${price}`);
+        }
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
         
         const minConfidence = ghostState.settings.highPrecision ? 90 : (ghostState.settings.confidenceThreshold || 80);

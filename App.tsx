@@ -8,7 +8,7 @@ import Sidebar from './components/Sidebar.tsx';
 import SignalList from './components/SignalList.tsx';
 import TradingTerminal from './components/TradingTerminal.tsx';
 
-const WATCHLIST = ['XAU-EUR', 'WTI-EUR', 'BRENT-EUR', 'EUR-USD'];
+const WATCHLIST = ['XAU-EUR', 'WTI-EUR', 'GBP-EUR'];
 
 const App: React.FC = () => {
   const [selectedAsset, setSelectedAsset] = useState<string>('XAU-EUR');
