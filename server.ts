@@ -641,7 +641,8 @@ async function scanWatchlist() {
 
       try {
         let fsym = symbol.toUpperCase().trim();
-        let tsym = (fsym === 'XAU' || fsym === 'WTI') ? 'USD' : 'EUR';
+        // PAXG, XAU, and WTI should always use USD for maximum data reliability
+        let tsym = (fsym === 'PAXG' || fsym === 'XAU' || fsym === 'WTI') ? 'USD' : 'EUR';
         
         // Fallback for Gold: Use PAXG (Gold-backed crypto) which has much better API support
         if (fsym === 'XAU') {
