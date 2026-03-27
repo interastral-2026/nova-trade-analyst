@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "composite": true,
+      "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+      "skipLibCheck": true,
+      "module": "ESNext",
+      "moduleResolution": "Bundler",
+      "allowImportingTsExtensions": true,
+      "emitDeclarationOnly": true,
+      "noEmit": false,
+      "target": "ES2022",
+      "lib": ["ES2022", "DOM", "DOM.Iterable"],
+      "jsx": "react-jsx"
+    },
+    "include": ["vite.config.ts", "server.ts", "types.ts"]
+  }
+  

@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "target": "ES2022",
+      "module": "ESNext",
+      "moduleResolution": "Bundler",
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      "strict": true,
+      "skipLibCheck": true,
+      "outDir": "./dist",
+      "rootDir": ".",
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./src/*"]
+      },
+      "typeRoots": ["./node_modules/@types", "./types"]
+    },
+    "include": ["server.ts", "types.ts", "backend/**/*.ts", "services/**/*.ts"],
+    "exclude": ["node_modules", "dist", "src"]
+  }
+  
