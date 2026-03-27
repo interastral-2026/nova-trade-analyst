@@ -54,10 +54,10 @@ const CB_API_SECRET = process.env.CB_API_SECRET
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
   : "";
 
-const WATCHLIST = ['XAU', 'WTI', 'BRENT', 'EUR-USD'];
+const WATCHLIST = ['XAU', 'WTI', 'GBP'];
 const STATE_FILE = './ghost_state.json';
-const FEE_RATE = 0.005; // 0.5% round-trip fee
-const MIN_NET_PROFIT = 0.005; // Increased to 0.5% minimum net profit (Total move = 1.0%)
+const FEE_RATE = 0.012; // 1.2% round-trip fee (0.6% per side)
+const MIN_NET_PROFIT = 0.005; // 0.5% minimum net profit after fees
 
 let availableEurPairs: string[] = [];
 
@@ -276,6 +276,43 @@ async function executeTrade(symbol, side, amount, quantity) {
 let lastQuotaExhaustedTime = 0;
 const QUOTA_COOLDOWN_MS = 60000; // 1 minute cooldown on 429
 
+// --- TECHNICAL INDICATORS ---
+function calculateEMA(data: number[], period: number) {
+  if (data.length < period) return data[data.length - 1];
+  const k = 2 / (period + 1);
+  let ema = data[0];
+  for (let i = 1; i < data.length; i++) {
+    ema = (data[i] * k) + (ema * (1 - k));
+  }
+  return ema;
+}
+
+function calculateRSI(data: number[], period: number = 14) {
+  if (data.length <= period) return 50;
+  let gains = 0;
+  let losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const diff = data[i] - data[i - 1];
+    if (diff >= 0) gains += diff;
+    else losses -= diff;
+  }
+  let avgGain = gains / period;
+  let avgLoss = losses / period;
+  for (let i = period + 1; i < data.length; i++) {
+    const diff = data[i] - data[i - 1];
+    if (diff >= 0) {
+      avgGain = (avgGain * (period - 1) + diff) / period;
+      avgLoss = (avgLoss * (period - 1)) / period;
+    } else {
+      avgGain = (avgGain * (period - 1)) / period;
+      avgLoss = (avgLoss * (period - 1) - diff) / period;
+    }
+  }
+  if (avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - (100 / (1 + rs));
+}
+
 async function getAdvancedAnalysis(symbol, price, candles, _entryPrice = null) {
   // Add a small random delay (0-3s) to prevent simultaneous bursts
   await new Promise(r => setTimeout(r, Math.random() * 3000));
@@ -304,6 +341,12 @@ async function getAdvancedAnalysis(symbol, price, candles, _entryPrice = null) {
   }
 
   const ai = new GoogleGenAI({ apiKey: API_KEY });
+  const closes = (candles || []).map(c => c.close);
+  const rsi = calculateRSI(closes, 14);
+  const ema20 = calculateEMA(closes, 20);
+  const ema200 = calculateEMA(closes, 200);
+  const trend = price > ema200 ? "BULLISH" : "BEARISH";
+
   const history = (candles || []).slice(-60).map(c => ({ h: c.high, l: c.low, c: c.close }));
   const stats24h = await get24hStats(symbol);
   
@@ -316,28 +359,35 @@ async function getAdvancedAnalysis(symbol, price, candles, _entryPrice = null) {
     const aiPromise = ai.models.generateContent({
       model: 'gemini-3.1-flash-lite-preview', 
       contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR (15M TIMEFRAME). 
+TECHNICAL_INDICATORS: RSI=${rsi.toFixed(2)}, EMA20=${ema20.toFixed(2)}, EMA200=${ema200.toFixed(2)}, TREND=${trend}.
 HISTORY_15M_CANDLES: ${JSON.stringify(history)}. 
 STATS_24H: ${JSON.stringify(stats24h)}.
 CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `You are an ELITE SCALPING AI specializing in Gold (XAU), Oil (WTI/BRENT), and EUR-USD on 15-minute charts.
-Your goal: Identify "Predictable Candles" with 90%+ confidence for high-profit, short-term trades.
+        systemInstruction: `You are an ELITE SCALPING AI specializing in Gold (XAU), Oil (WTI), and Pound (GBP) on 15-minute charts.
+Your goal: Identify 2-3 high-quality trades per day with 80%+ confidence.
 
-CORE STRATEGY:
-1. Smart Money Concepts (SMC): Look for Order Blocks, Fair Value Gaps (FVG), and Market Structure Shifts (MSS).
-2. 15m Scalping: Focus on the last 5-10 candles. Is there a clear momentum breakout or reversal?
-3. Predictable Candles: A candle is predictable if it follows a strong rejection (wick) or breaks a key liquidity level with high volume.
-4. Gold & Oil: These assets are highly sensitive to liquidity sweeps. Look for "Stop Hunts" before a major move.
-5. Risk/Reward: Only suggest trades with at least 2.5x RR.
+CORE STRATEGY (Triple Confirmation):
+1. Trend Alignment: If price > EMA200, prefer BUY. If price < EMA200, prefer SELL.
+2. Momentum (RSI): Look for RSI reversals (oversold < 30, overbought > 70) or strong momentum (RSI > 50 for BUY).
+3. SMC Confluence: Look for Order Blocks, Fair Value Gaps (FVG), and Market Structure Shifts (MSS).
+4. Session Awareness: You are most aggressive during London (08:00-16:30 UTC) and New York (13:00-21:00 UTC) sessions.
+
+HOW YOU WORK (Explain this in your analysis):
+- You scan the 15m chart every few minutes.
+- You calculate EMA200 to determine the "Big Trend".
+- You check RSI to see if the move is exhausted or just starting.
+- You look for "Smart Money" footprints (FVG/Order Blocks) where big banks enter.
+- You only suggest a trade if all 3 confluences align.
 
 CONFIDENCE SCORING:
-- 90-100%: Perfect SMC setup, clear FVG, strong momentum, and session alignment (London/NY).
-- 70-89%: Good setup but missing one confluence (e.g., weak volume).
-- 40-69%: Choppy or ranging market. "Observing" state.
-- 0-39%: High uncertainty. DO NOT TRADE.
+- 85-100%: Perfect Triple Confirmation setup. High volume, clear trend, clear SMC entry.
+- 80-84%: Strong setup, but slightly lower volume or minor resistance nearby.
+- 60-79%: Choppy or ranging market. "Observing" state.
+- 0-59%: High uncertainty. DO NOT TRADE.
 
 OUTPUT RULES:
-- If confidence < 85%, side MUST be NEUTRAL.
+- If confidence < 80%, side MUST be NEUTRAL.
 - Analysis MUST be in PERSIAN (Farsi).
 - Explain EXACTLY why you are waiting if confidence is low.
 - Return ONLY JSON.`,
@@ -394,10 +444,10 @@ OUTPUT RULES:
 
 function loadState() {
   const defaults = {
-    isEngineActive: true, autoPilot: true, isPaperMode: false,
-    settings: { confidenceThreshold: 85, defaultTradeSize: 50.0, minRoi: 1.5, maxDailyDrawdown: -20.0 },
+    isEngineActive: true, autoPilot: true, isPaperMode: true,
+    settings: { confidenceThreshold: 80, defaultTradeSize: 100.0, minRoi: 1.5, maxDailyDrawdown: -50.0, dailyProfitTargetPercent: 5.0, riskPerTradePercent: 100 },
     thoughts: [], executionLogs: [], activePositions: [],
-    liquidity: { eur: 0, usdc: 0 }, actualBalances: {}, 
+    liquidity: { eur: 1000, usdc: 1000 }, actualBalances: {}, 
     dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
     totalProfit: 0,
     currentStatus: "INITIALIZING", scanIndex: 0
@@ -500,12 +550,25 @@ async function scanWatchlist() {
     const now = new Date();
     const hourUtc = now.getUTCHours();
     
-    // London/NY Session Filter: 07:00 to 20:00 UTC is generally best for Gold/Oil volatility
-    const isHighVolatilitySession = hourUtc >= 7 && hourUtc <= 20;
+    // London Session: 08:00 - 16:30 UTC
+    // New York Session: 13:00 - 21:00 UTC
+    // Overlap: 13:00 - 16:30 UTC (Highest Volatility)
+    const isLondon = hourUtc >= 8 && hourUtc <= 16;
+    const isNewYork = hourUtc >= 13 && hourUtc <= 21;
+    const isHighVolatilitySession = isLondon || isNewYork;
     
     // Clear old errors if API key is now valid
     if (ghostState.thoughts.length > 0 && ghostState.thoughts[0].confidence === 0 && ghostState.thoughts[0].analysis.includes('API')) {
       ghostState.thoughts = [];
+    }
+
+    // Check Daily Profit Target
+    const totalBalance = (ghostState.liquidity.eur || 0) + (ghostState.activePositions.reduce((sum, p) => sum + (p.amount || 0), 0));
+    const profitTarget = totalBalance * ((ghostState.settings.dailyProfitTargetPercent || 2.0) / 100);
+    if (ghostState.dailyStats.profit >= profitTarget && ghostState.dailyStats.profit > 0) {
+      console.log(`[SCAN] Daily profit target reached (${ghostState.dailyStats.profit.toFixed(2)} EUR). Resting for today.`);
+      ghostState.currentStatus = "DAILY_TARGET_REACHED";
+      return;
     }
 
     const currentWatchlist = (availableEurPairs.length > 0 && !ghostState.isPaperMode)
@@ -542,7 +605,7 @@ async function scanWatchlist() {
         const price = candles[candles.length - 1].close;
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
         
-        const minConfidence = ghostState.settings.highPrecision ? 90 : (ghostState.settings.confidenceThreshold || 85);
+        const minConfidence = ghostState.settings.highPrecision ? 90 : (ghostState.settings.confidenceThreshold || 80);
         const minNetProfit = ghostState.settings.highPrecision ? 0.008 : MIN_NET_PROFIT;
 
         if (analysis && analysis.side === 'BUY' && analysis.confidence >= minConfidence) {

@@ -215,6 +215,15 @@ const Sidebar: React.FC<SidebarProps> = ({
               className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
             />
           </div>
+          <div>
+            <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest mb-1">Daily Profit Target (%)</p>
+            <input 
+              type="number" 
+              value={localSettings.dailyProfitTargetPercent || 2.0}
+              onChange={(e) => setLocalSettings({...localSettings, dailyProfitTargetPercent: parseFloat(e.target.value)})}
+              className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-mono text-white outline-none focus:border-cyan-500 transition-all mb-2"
+            />
+          </div>
           <button 
             onClick={handleReconnect}
             className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[8px] font-black uppercase rounded-lg transition-all"
@@ -224,40 +233,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       )}
 
-      <div className="px-6 py-4 flex-1 overflow-hidden flex flex-col">
-        <div className="flex justify-between items-center mb-6">
-           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Radar Watchlist</span>
-           <span className={`text-[8px] font-black px-2 py-0.5 rounded bg-white/5 tracking-widest ${engineActive ? 'text-emerald-500' : 'text-slate-600'}`}>
-            {engineActive ? 'SCANNING' : 'IDLE'}
-           </span>
-        </div>
-        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
-          {assets.map((asset) => (
-            <button
-              key={asset.id}
-              onClick={() => onSelect(asset.id)}
-              className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all border group ${
-                selected === asset.id ? 'bg-cyan-500/10 border-cyan-500/40 shadow-lg' : 'bg-white/[0.02] border-white/5 hover:border-white/10'
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[10px] transition-all ${selected === asset.id ? 'bg-cyan-500 text-black' : 'bg-slate-800 text-slate-500'}`}>
-                  {asset.name[0]}
-                </div>
-                <div className="text-left">
-                  <h4 className="text-[11px] font-black text-white uppercase tracking-tight">{asset.id.split('-')[0]}</h4>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-[11px] font-black text-white">€{parseFloat(asset.price).toLocaleString()}</div>
-                <div className={`text-[8px] font-black ${asset.change24h >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                  {asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
     </aside>
   );
 };
