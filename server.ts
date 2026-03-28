@@ -376,7 +376,7 @@ async function getAdvancedAnalysis(symbol, price, candles, _entryPrice = null) {
   const ema200 = calculateEMA(closes, 200);
   const trend = price > ema200 ? "BULLISH" : "BEARISH";
 
-  const history = (candles || []).slice(-60).map(c => ({ h: c.high, l: c.low, c: c.close }));
+  const history = (candles || []).slice(-100).map(c => ({ h: c.high, l: c.low, c: c.close }));
   const stats24h = await get24hStats(symbol);
   
   const timeoutPromise = new Promise((_, reject) => {
@@ -393,32 +393,24 @@ HISTORY_15M_CANDLES: ${JSON.stringify(history)}.
 STATS_24H: ${JSON.stringify(stats24h)}.
 CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `You are an ELITE SCALPING AI specializing in Bitcoin (BTC), Ethereum (ETH), and Gold (PAXG) on 15-minute charts.
-Your goal: Identify 2-3 high-quality trades per day with 80%+ confidence.
+        systemInstruction: `You are an AGGRESSIVE SCALPING AI specializing in Bitcoin (BTC), Ethereum (ETH), and Gold (PAXG) on 15-minute charts.
+Your goal: Identify 4-6 high-quality scalping opportunities per day with 70%+ confidence.
 
-CORE STRATEGY (Triple Confirmation):
-1. Trend Alignment: If price > EMA200, prefer BUY. If price < EMA200, prefer SELL.
-2. Momentum (RSI): Look for RSI reversals (oversold < 30, overbought > 70) or strong momentum (RSI > 50 for BUY).
-3. SMC Confluence: Look for Order Blocks, Fair Value Gaps (FVG), and Market Structure Shifts (MSS).
-4. Session Awareness: You are most aggressive during London (08:00-16:30 UTC) and New York (13:00-21:00 UTC) sessions.
-
-HOW YOU WORK (Explain this in your analysis):
-- You scan the 15m chart every few minutes.
-- You calculate EMA200 to determine the "Big Trend".
-- You check RSI to see if the move is exhausted or just starting.
-- You look for "Smart Money" footprints (FVG/Order Blocks) where big banks enter.
-- You only suggest a trade if all 3 confluences align.
+CORE STRATEGY (SMC Scalping):
+1. Trend Alignment: If price > EMA200, look for BUY on pullbacks. If price < EMA200, look for SELL on rallies.
+2. Momentum (RSI): Use RSI to catch the start of a move (RSI crossing 50) or extreme reversals.
+3. SMC Confluence: Identify FVG (Fair Value Gaps) and Order Blocks for precise entries.
+4. Scalping Mindset: You are looking for quick 0.5% - 1.5% moves. Don't wait for "perfect" long-term setups.
 
 CONFIDENCE SCORING:
-- 85-100%: Perfect Triple Confirmation setup. High volume, clear trend, clear SMC entry.
-- 80-84%: Strong setup, but slightly lower volume or minor resistance nearby.
-- 60-79%: Choppy or ranging market. "Observing" state.
-- 0-59%: High uncertainty. DO NOT TRADE.
+- 85-100%: Strong momentum + SMC confluence + Trend alignment.
+- 70-84%: Good setup with clear direction, even if one indicator is lagging.
+- 60-69%: Ranging/Choppy. Only trade if a clear breakout is imminent.
+- 0-59%: High uncertainty.
 
 OUTPUT RULES:
-- If confidence < 80%, side MUST be NEUTRAL.
+- If confidence < 70%, side MUST be NEUTRAL.
 - Analysis MUST be in PERSIAN (Farsi).
-- Explain EXACTLY why you are waiting if confidence is low.
 - Return ONLY JSON.`,
         responseMimeType: "application/json",
         responseSchema: {
@@ -666,14 +658,14 @@ async function scanWatchlist() {
           tsym = 'USD';
         }
 
-        let apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${fsym}&tsym=${tsym}&limit=60&aggregate=15`;
+        let apiUrl = `https://min-api.cryptocompare.com/data/v2/histominute?fsym=${fsym}&tsym=${tsym}&limit=100&aggregate=15`;
         console.log(`[SCAN] Fetching data for ${symbol} (as ${fsym}): ${apiUrl}`);
         let res = await axios.get(apiUrl, { timeout: 8000 });
         
         // If still error, try without aggregate or different tsym
         if (res.data?.Response === 'Error') {
           console.log(`[SCAN] Primary fetch failed for ${fsym}, trying simple minute data...`);
-          apiUrl = `https://min-api.cryptocompare.com/data/histominute?fsym=${fsym}&tsym=USD&limit=60`;
+          apiUrl = `https://min-api.cryptocompare.com/data/histominute?fsym=${fsym}&tsym=USD&limit=100`;
           res = await axios.get(apiUrl, { timeout: 8000 });
         }
 
@@ -694,8 +686,8 @@ async function scanWatchlist() {
         }
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
         
-        const minConfidence = ghostState.settings.highPrecision ? 90 : (ghostState.settings.confidenceThreshold || 80);
-        const minNetProfit = ghostState.settings.highPrecision ? 0.008 : MIN_NET_PROFIT;
+        const minConfidence = ghostState.settings.highPrecision ? 85 : (ghostState.settings.confidenceThreshold || 70);
+        const minNetProfit = ghostState.settings.highPrecision ? 0.006 : MIN_NET_PROFIT;
 
         if (analysis && analysis.side === 'BUY' && analysis.confidence >= minConfidence) {
           const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (minNetProfit * 100));
