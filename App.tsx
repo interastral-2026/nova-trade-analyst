@@ -31,6 +31,15 @@ const App: React.FC = () => {
         return;
       }
       
+      // Validate JSON response
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Expected JSON response but got:", contentType);
+        setLiveActivity("BRIDGE_OFFLINE");
+        setStatus(AnalysisStatus.ERROR);
+        return;
+      }
+      
       const data = await response.json();
       setThoughtHistory(data.thoughts || []);
       setIsEngineActive(!!data.isEngineActive);

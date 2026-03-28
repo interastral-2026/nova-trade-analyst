@@ -13,7 +13,12 @@ export const getApiBase = () => {
     return "http://127.0.0.1:3000";
   }
 
-  // 3. Default to relative path (works for unified server)
+  // 3. AI Studio / Cloud Run Environment: If accessed via .run.app, use relative path
+  if (window.location.hostname.endsWith('.run.app')) {
+    return "";
+  }
+
+  // 4. Default to relative path (works for unified server)
   return "";
 };
 
@@ -24,6 +29,14 @@ export const fetchAccountBalance = async (): Promise<AccountBalance[]> => {
       headers: { 'Accept': 'application/json' }
     });
     if (!response.ok) return [];
+    
+    // Validate JSON response
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      console.error("Expected JSON response but got:", contentType);
+      return [];
+    }
+    
     const data = await response.json();
     return [
       { currency: 'EUR', available: Number(data.liquidity?.eur) || 0, total: Number(data.liquidity?.eur) || 0 },
