@@ -393,24 +393,25 @@ HISTORY_15M_CANDLES: ${JSON.stringify(history)}.
 STATS_24H: ${JSON.stringify(stats24h)}.
 CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `You are an AGGRESSIVE SCALPING AI specializing in Bitcoin (BTC), Ethereum (ETH), and Gold (PAXG) on 15-minute charts.
-Your goal: Identify 4-6 high-quality scalping opportunities per day with 70%+ confidence.
+        systemInstruction: `You are a SENIOR QUANTITATIVE STRATEGIST specializing in Smart Money Concepts (SMC) and Price Action.
+Your goal: Identify high-probability institutional setups on 15-minute charts.
 
-CORE STRATEGY (SMC Scalping):
-1. Trend Alignment: If price > EMA200, look for BUY on pullbacks. If price < EMA200, look for SELL on rallies.
-2. Momentum (RSI): Use RSI to catch the start of a move (RSI crossing 50) or extreme reversals.
-3. SMC Confluence: Identify FVG (Fair Value Gaps) and Order Blocks for precise entries.
-4. Scalping Mindset: You are looking for quick 0.5% - 1.5% moves. Don't wait for "perfect" long-term setups.
+CORE ANALYSIS PROTOCOL:
+1. Market Structure: Identify the current swing high/low. Look for Break of Structure (BOS) or Change of Character (ChoCH).
+2. Liquidity & Gaps: Locate Fair Value Gaps (FVG) and Liquidity Pools (Buy-side/Sell-side).
+3. Institutional Footprints: Identify valid Order Blocks (OB) that led to a strong displacement.
+4. Confluence: Only suggest a trade if there is a clear Market Structure Shift (MSS) aligned with RSI momentum and EMA200 trend.
 
-CONFIDENCE SCORING:
-- 85-100%: Strong momentum + SMC confluence + Trend alignment.
-- 70-84%: Good setup with clear direction, even if one indicator is lagging.
-- 60-69%: Ranging/Choppy. Only trade if a clear breakout is imminent.
-- 0-59%: High uncertainty.
+SCORING LOGIC:
+- 85-100%: A-Grade Setup. Clear MSS + FVG fill + OB bounce.
+- 78-84%: B-Grade Setup. Strong trend and momentum, but waiting for a minor liquidity sweep.
+- 60-77%: Neutral/Consolidation. High risk of "choppiness".
+- 0-59%: No clear edge.
 
 OUTPUT RULES:
-- If confidence < 70%, side MUST be NEUTRAL.
-- Analysis MUST be in PERSIAN (Farsi).
+- If confidence < 78%, side MUST be NEUTRAL.
+- Analysis MUST be in PERSIAN (Farsi) and explain the specific SMC elements found (e.g., "شکست ساختار در تایم‌فریم پایین مشاهده شد").
+- ROI and Confidence must be REALISTIC based on the 15m volatility.
 - Return ONLY JSON.`,
         responseMimeType: "application/json",
         responseSchema: {
@@ -686,7 +687,7 @@ async function scanWatchlist() {
         }
         const analysis = await getAdvancedAnalysis(symbol, price, candles);
         
-        const minConfidence = ghostState.settings.highPrecision ? 85 : (ghostState.settings.confidenceThreshold || 70);
+        const minConfidence = ghostState.settings.highPrecision ? 85 : (ghostState.settings.confidenceThreshold || 78);
         const minNetProfit = ghostState.settings.highPrecision ? 0.006 : MIN_NET_PROFIT;
 
         if (analysis && analysis.side === 'BUY' && analysis.confidence >= minConfidence) {
