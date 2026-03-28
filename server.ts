@@ -13,6 +13,16 @@ import dotenv from 'dotenv';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Global Error Handlers for Diagnostics
+process.on('uncaughtException', (err) => {
+  fs.appendFileSync('debug.log', `[CRASH] Uncaught Exception: ${err.stack}\n`);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  fs.appendFileSync('debug.log', `[CRASH] Unhandled Rejection: ${reason}\n`);
+});
+
 // Load environment variables
 const envPaths = [
   path.join(process.cwd(), '.env.local'),
@@ -53,6 +63,8 @@ const CB_API_KEY = (process.env.CB_API_KEY || "").trim();
 const CB_API_SECRET = process.env.CB_API_SECRET 
   ? process.env.CB_API_SECRET.replace(/^"|"$/g, '').replace(/\\n/g, '\n').trim() 
   : "";
+
+fs.appendFileSync('debug.log', `[INIT] Coinbase API Key: ${CB_API_KEY ? 'PRESENT' : 'MISSING'}, Secret: ${CB_API_SECRET ? 'PRESENT' : 'MISSING'}\n`);
 
 const WATCHLIST = ['BTC', 'ETH', 'PAXG'];
 const STATE_FILE = './ghost_state.json';
@@ -386,14 +398,14 @@ async function getAdvancedAnalysis(symbol, price, candles, _entryPrice = null) {
   try {
     ghostState.currentStatus = `AI_REQ_${symbol}`;
     const aiPromise = ai.models.generateContent({
-      model: 'gemini-3.1-flash-lite-preview', 
+      model: 'gemini-3.1-flash-preview', 
       contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR (15M TIMEFRAME). 
 TECHNICAL_INDICATORS: RSI=${rsi.toFixed(2)}, EMA20=${ema20.toFixed(2)}, EMA200=${ema200.toFixed(2)}, TREND=${trend}.
 HISTORY_15M_CANDLES: ${JSON.stringify(history)}. 
 STATS_24H: ${JSON.stringify(stats24h)}.
 CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `You are a SENIOR QUANTITATIVE STRATEGIST specializing in Smart Money Concepts (SMC) and Price Action.
+        systemInstruction: `You are a SENIOR QUANTITATIVE STRATEGIST specializing in Smart Money Concepts (SMC) and Institutional Order Flow.
 Your goal: Identify high-probability institutional setups on 15-minute charts.
 
 CORE ANALYSIS PROTOCOL:
@@ -411,7 +423,8 @@ SCORING LOGIC:
 OUTPUT RULES:
 - If confidence < 78%, side MUST be NEUTRAL.
 - Analysis MUST be in PERSIAN (Farsi) and explain the specific SMC elements found (e.g., "شکست ساختار در تایم‌فریم پایین مشاهده شد").
-- ROI and Confidence must be REALISTIC based on the 15m volatility.
+- ROI and Confidence must be REALISTIC based on the 15m volatility. 
+- potentialRoi MUST be calculated as: ((tp - price) / price) * 100 for BUY, or ((price - tp) / price) * 100 for SELL.
 - Return ONLY JSON.`,
         responseMimeType: "application/json",
         responseSchema: {
@@ -432,6 +445,7 @@ OUTPUT RULES:
 
     const response: any = await Promise.race([aiPromise, timeoutPromise]);
     const rawText = response.text?.trim() || '{}';
+    fs.appendFileSync('debug.log', `[AI_RAW] ${symbol}: ${rawText.substring(0, 150)}...\n`);
     ghostState.currentStatus = `AI_RESP_${symbol}_LEN_${rawText.length}`;
     const result = JSON.parse(rawText);
     console.log(`[AI ANALYSIS] ${symbol}: ${result.side} (${result.confidence}%)`);
@@ -465,6 +479,7 @@ OUTPUT RULES:
 }
 
 function loadState() {
+  fs.appendFileSync('debug.log', `[INIT] Loading state from ${STATE_FILE}...\n`);
   const defaults = {
     isEngineActive: true, autoPilot: true, isPaperMode: true,
     settings: { confidenceThreshold: 80, defaultTradeSize: 100.0, minRoi: 1.5, maxDailyDrawdown: -50.0, dailyProfitTargetPercent: 5.0, riskPerTradePercent: 100 },
@@ -476,14 +491,19 @@ function loadState() {
   };
   try { 
     if (fs.existsSync(STATE_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      const content = fs.readFileSync(STATE_FILE, 'utf8');
+      const parsed = JSON.parse(content);
+      fs.appendFileSync('debug.log', `[INIT] State file loaded successfully.\n`);
       return { 
         ...defaults, 
         ...parsed,
         settings: { ...defaults.settings, ...(parsed.settings || {}) }
       };
+    } else {
+      fs.appendFileSync('debug.log', `[INIT] State file not found, using defaults.\n`);
     }
-  } catch {
+  } catch (e: any) {
+    fs.appendFileSync('debug.log', `[INIT] Error loading state: ${e.message}\n`);
     console.error("Failed to load state");
   }
   return defaults;
@@ -985,16 +1005,25 @@ function saveState() { try { fs.writeFileSync(STATE_FILE, JSON.stringify(ghostSt
 // --- SERVER SETUP ---
 
 async function startServer() {
+  fs.appendFileSync('debug.log', `[STARTUP] Starting server initialization...\n`);
   const app = express();
-  const PORT = Number(process.env.PORT) || 3000;
+  const PORT = 3000;
 
-  app.use(cors());
+  app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+  }));
   app.use(express.json());
+
+  fs.appendFileSync('debug.log', `[STARTUP] Middleware and routes configured.\n`);
+  // ...
 
   // API Routes
   app.get('/api/ping', (req, res) => res.json({ status: 'pong', timestamp: new Date().toISOString() }));
   app.get('/api/ghost/state', (req, res) => res.json(ghostState));
   app.get('/api/ghost/pending-analysis', (req, res) => res.json([]));
+  
   app.post('/api/ghost/toggle', (req, res) => {
     if (req.body.engine !== undefined) ghostState.isEngineActive = !!req.body.engine;
     if (req.body.auto !== undefined) ghostState.autoPilot = !!req.body.auto;
@@ -1033,14 +1062,32 @@ async function startServer() {
     }
   });
 
+  app.post('/api/trade', async (req, res) => {
+    const { symbol, side, amount_eur } = req.body;
+    const result = await executeTrade(symbol, side, amount_eur, 0);
+    res.json(result);
+  });
+
+  // Catch-all for /api routes that don't match
+  app.all('/api/*', (req, res) => {
+    res.status(404).json({ error: `API route not found: ${req.method} ${req.path}` });
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
+    fs.appendFileSync('debug.log', `[STARTUP] Initializing Vite middleware...\n`);
+    try {
+      const { createServer: createViteServer } = await import('vite');
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: "spa",
+      });
+      app.use(vite.middlewares);
+      fs.appendFileSync('debug.log', `[STARTUP] Vite middleware initialized.\n`);
+    } catch (e: any) {
+      fs.appendFileSync('debug.log', `[FATAL] Vite initialization failed: ${e.message}\n`);
+      throw e;
+    }
   } else {
     app.use(express.static(path.join(__dirname, 'dist')));
     app.get('*', (req, res) => {
@@ -1053,6 +1100,7 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 UNIFIED SERVER RUNNING ON PORT ${PORT}`);
+    fs.appendFileSync('debug.log', `[STARTUP] Unified server listening on port ${PORT}\n`);
     
     // Start trading engine
     listAvailableProducts();
@@ -1067,4 +1115,8 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch(err => {
+  fs.appendFileSync('debug.log', `[FATAL] Startup failed: ${err.stack}\n`);
+  console.error("Startup failed:", err);
+  process.exit(1);
+});

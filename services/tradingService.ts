@@ -4,21 +4,33 @@ import { TradeSignal, AccountBalance, ExecutionLog } from "../types";
 export const getApiBase = () => {
   if (typeof window === 'undefined') return "";
   
-  // 1. Check localStorage (User override)
-  const savedUrl = localStorage.getItem('NOVA_BRIDGE_URL');
-  if (savedUrl) return savedUrl.endsWith('/') ? savedUrl.slice(0, -1) : savedUrl;
+  const { hostname, port, protocol } = window.location;
 
-  // 2. Localhost fallback: If on port 5173 (Vite), point to 3000 (Express)
-  if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port === '5173') {
+  // 1. Localhost fallback: If on port 5173 (Vite), point to 3000 (Express)
+  if ((hostname === 'localhost' || hostname === '127.0.0.1') && port === '5173') {
     return "http://127.0.0.1:3000";
   }
 
-  // 3. AI Studio / Cloud Run Environment: If accessed via .run.app, use relative path
-  if (window.location.hostname.endsWith('.run.app')) {
+  // 2. AI Studio / Cloud Run Environment: 
+  // If the hostname contains "-5173", it's likely a Vite-specific URL.
+  // We should try to hit the -3000 URL which is the unified server.
+  if (hostname.includes('-5173') && hostname.endsWith('.run.app')) {
+    const targetHostname = hostname.replace('-5173', '-3000');
+    return `${protocol}//${targetHostname}`;
+  }
+
+  // 3. General .run.app check: If on the correct port already, use relative path
+  if (hostname.endsWith('.run.app')) {
     return "";
   }
 
-  // 4. Default to relative path (works for unified server)
+  // 4. Check localStorage (User override) - ONLY if it looks like a valid URL
+  const savedUrl = localStorage.getItem('NOVA_BRIDGE_URL');
+  if (savedUrl && (savedUrl.startsWith('http://') || savedUrl.startsWith('https://'))) {
+    return savedUrl.endsWith('/') ? savedUrl.slice(0, -1) : savedUrl;
+  }
+
+  // 5. Default to relative path
   return "";
 };
 

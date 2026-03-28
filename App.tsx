@@ -23,6 +23,7 @@ const App: React.FC = () => {
 
   const syncWithServer = useCallback(async () => {
     const base = getApiBase();
+    console.log("[SYNC] Syncing with base:", base || "RELATIVE");
     try {
       const response = await fetch(`${base}/api/ghost/state`);
       if (!response.ok) {
@@ -53,7 +54,8 @@ const App: React.FC = () => {
         { currency: 'USDC', available: Number(data.liquidity?.usdc) || 0, total: Number(data.liquidity?.usdc) || 0 }
       ]);
       setStatus(AnalysisStatus.IDLE);
-    } catch {
+    } catch (err: any) {
+      console.error("Sync Error:", err.message);
       setLiveActivity("BRIDGE_OFFLINE");
       setStatus(AnalysisStatus.ERROR);
     }
