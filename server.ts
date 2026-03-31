@@ -19,7 +19,7 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason, _promise) => {
   fs.appendFileSync('debug.log', `[CRASH] Unhandled Rejection: ${reason}\n`);
 });
 
@@ -66,10 +66,10 @@ const CB_API_SECRET = process.env.CB_API_SECRET
 
 fs.appendFileSync('debug.log', `[INIT] Coinbase API Key: ${CB_API_KEY ? 'PRESENT' : 'MISSING'}, Secret: ${CB_API_SECRET ? 'PRESENT' : 'MISSING'}\n`);
 
-const WATCHLIST = ['BTC', 'ETH', 'PAXG'];
-const STATE_FILE = './ghost_state.json';
-const FEE_RATE = 0.012; // 1.2% round-trip fee (0.6% per side)
-const MIN_NET_PROFIT = 0.005; // 0.5% minimum net profit after fees
+const WATCHLIST = ['BTC', 'ETH', 'SOL', 'ADA', 'DOT', 'LINK', 'MATIC', 'XRP', 'AVAX', 'LTC'];
+const STATE_FILE = path.join(process.cwd(), 'ghost_state.json');
+const FEE_RATE = 0.008; // 0.8% round-trip fee (0.4% per side)
+const MIN_NET_PROFIT = 0.003; // 0.3% minimum net profit after fees
 
 let availableEurPairs: string[] = [];
 
@@ -315,7 +315,7 @@ async function executeTrade(symbol, side, amount, quantity) {
 }
 
 let lastQuotaExhaustedTime = 0;
-const QUOTA_COOLDOWN_MS = 60000; // 1 minute cooldown on 429
+const QUOTA_COOLDOWN_MS = 120000; // 2 minute cooldown on 429
 
 // --- TECHNICAL INDICATORS ---
 function calculateEMA(data: number[], period: number) {
@@ -398,7 +398,7 @@ async function getAdvancedAnalysis(symbol, price, candles, _entryPrice = null) {
   try {
     ghostState.currentStatus = `AI_REQ_${symbol}`;
     const aiPromise = ai.models.generateContent({
-      model: 'gemini-3.1-flash-preview', 
+      model: 'gemini-3.1-flash-lite-preview', 
       contents: [{ parts: [{ text: `SMC_ANALYSIS_SCAN: ${symbol} @ ${price} EUR (15M TIMEFRAME). 
 TECHNICAL_INDICATORS: RSI=${rsi.toFixed(2)}, EMA20=${ema20.toFixed(2)}, EMA200=${ema200.toFixed(2)}, TREND=${trend}.
 HISTORY_15M_CANDLES: ${JSON.stringify(history)}. 
@@ -406,24 +406,24 @@ STATS_24H: ${JSON.stringify(stats24h)}.
 CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
         systemInstruction: `You are a SENIOR QUANTITATIVE STRATEGIST specializing in Smart Money Concepts (SMC) and Institutional Order Flow.
-Your goal: Identify high-probability institutional setups on 15-minute charts.
+Your goal: Identify high-probability institutional setups on 15-minute charts for short-term profitable trades.
 
 CORE ANALYSIS PROTOCOL:
 1. Market Structure: Identify the current swing high/low. Look for Break of Structure (BOS) or Change of Character (ChoCH).
 2. Liquidity & Gaps: Locate Fair Value Gaps (FVG) and Liquidity Pools (Buy-side/Sell-side).
 3. Institutional Footprints: Identify valid Order Blocks (OB) that led to a strong displacement.
-4. Confluence: Only suggest a trade if there is a clear Market Structure Shift (MSS) aligned with RSI momentum and EMA200 trend.
+4. Confluence: Suggest a trade if there is a clear Market Structure Shift (MSS) aligned with RSI momentum and EMA200 trend.
 
 SCORING LOGIC:
-- 85-100%: A-Grade Setup. Clear MSS + FVG fill + OB bounce.
-- 78-84%: B-Grade Setup. Strong trend and momentum, but waiting for a minor liquidity sweep.
-- 60-77%: Neutral/Consolidation. High risk of "choppiness".
-- 0-59%: No clear edge.
+- 80-100%: A-Grade Setup. Clear MSS + FVG fill + OB bounce.
+- 70-79%: B-Grade Setup. Strong trend and momentum, good for quick scalps.
+- 50-69%: Neutral/Consolidation. High risk of "choppiness".
+- 0-49%: No clear edge.
 
 OUTPUT RULES:
-- If confidence < 78%, side MUST be NEUTRAL.
-- Analysis MUST be in PERSIAN (Farsi) and explain the specific SMC elements found (e.g., "شکست ساختار در تایم‌فریم پایین مشاهده شد").
-- ROI and Confidence must be REALISTIC based on the 15m volatility. 
+- If confidence < 70%, side MUST be NEUTRAL.
+- Analysis MUST be in PERSIAN (Farsi) and explain the specific SMC elements found.
+- ROI and Confidence must be REALISTIC based on the 15m volatility. Aim for at least 1.5% ROI.
 - potentialRoi MUST be calculated as: ((tp - price) / price) * 100 for BUY, or ((price - tp) / price) * 100 for SELL.
 - Return ONLY JSON.`,
         responseMimeType: "application/json",
@@ -466,6 +466,7 @@ OUTPUT RULES:
     }
     
     console.error(`[AI ERROR] ${symbol}:`, errorMsg);
+    fs.appendFileSync('debug.log', `[AI ERROR] ${symbol}: ${errorMsg} | Original: ${e.message}\n`);
     return {
       side: "NEUTRAL",
       analysis: `خطا در تحلیل هوش مصنوعی برای ${symbol}: ${errorMsg}`,
@@ -482,7 +483,7 @@ function loadState() {
   fs.appendFileSync('debug.log', `[INIT] Loading state from ${STATE_FILE}...\n`);
   const defaults = {
     isEngineActive: true, autoPilot: true, isPaperMode: true,
-    settings: { confidenceThreshold: 80, defaultTradeSize: 100.0, minRoi: 1.5, maxDailyDrawdown: -50.0, dailyProfitTargetPercent: 5.0, riskPerTradePercent: 100 },
+    settings: { confidenceThreshold: 75, defaultTradeSize: 100.0, minRoi: 1.5, maxDailyDrawdown: -50.0, dailyProfitTargetPercent: 5.0, riskPerTradePercent: 100 },
     thoughts: [], executionLogs: [], activePositions: [],
     liquidity: { eur: 1000, usdc: 1000 }, actualBalances: {}, 
     dailyStats: { trades: 0, profit: 0, dailyGoal: 50.0, lastResetDate: "" },
@@ -531,6 +532,7 @@ async function monitorPositionsAI() {
   
   try {
     for (let i = ghostState.activePositions.length - 1; i >= 0; i--) {
+      if (i < ghostState.activePositions.length - 1) await new Promise(r => setTimeout(r, 5000));
       const pos = ghostState.activePositions[i];
       try {
         let tsym = 'EUR';
@@ -644,7 +646,7 @@ async function scanWatchlist() {
     const candidates: any[] = [];
 
     for (let i = 0; i < batchSize; i++) {
-      if (i > 0) await new Promise(r => setTimeout(r, 2000));
+      if (i > 0) await new Promise(r => setTimeout(r, 5000));
       
       const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
       ghostState.scanIndex++;
@@ -1009,6 +1011,11 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  app.use((req, res, next) => {
+    fs.appendFileSync('debug.log', `[REQ] ${req.method} ${req.url} from ${req.ip}\n`);
+    next();
+  });
+
   app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -1016,15 +1023,24 @@ async function startServer() {
   }));
   app.use(express.json());
 
-  fs.appendFileSync('debug.log', `[STARTUP] Middleware and routes configured.\n`);
-  // ...
+  // API Router
+  const apiRouter = express.Router();
 
-  // API Routes
-  app.get('/api/ping', (req, res) => res.json({ status: 'pong', timestamp: new Date().toISOString() }));
-  app.get('/api/ghost/state', (req, res) => res.json(ghostState));
-  app.get('/api/ghost/pending-analysis', (req, res) => res.json([]));
+  apiRouter.use((req, res, next) => {
+    fs.appendFileSync('debug.log', `[API_REQ] ${req.method} ${req.url} from ${req.ip}\n`);
+    next();
+  });
+
+  apiRouter.get('/ping', (req, res) => res.json({ status: 'pong', timestamp: new Date().toISOString() }));
   
-  app.post('/api/ghost/toggle', (req, res) => {
+  apiRouter.get(['/ghost/state', '/ghost/state/'], (req, res) => {
+    fs.appendFileSync('debug.log', `[API] GET /api/ghost/state from ${req.ip}\n`);
+    res.json(ghostState);
+  });
+
+  apiRouter.get(['/ghost/pending-analysis', '/ghost/pending-analysis/'], (req, res) => res.json([]));
+  
+  apiRouter.post(['/ghost/toggle', '/ghost/toggle/'], (req, res) => {
     if (req.body.engine !== undefined) ghostState.isEngineActive = !!req.body.engine;
     if (req.body.auto !== undefined) ghostState.autoPilot = !!req.body.auto;
     if (req.body.paper !== undefined) ghostState.isPaperMode = !!req.body.paper;
@@ -1032,7 +1048,7 @@ async function startServer() {
     res.json({ success: true });
   });
 
-  app.post('/api/ghost/settings', (req, res) => {
+  apiRouter.post(['/ghost/settings', '/ghost/settings/'], (req, res) => {
     if (req.body.settings) {
       ghostState.settings = { ...ghostState.settings, ...req.body.settings };
       saveState();
@@ -1040,7 +1056,7 @@ async function startServer() {
     res.json({ success: true, settings: ghostState.settings });
   });
 
-  app.post('/api/ghost/refill', (req, res) => {
+  apiRouter.post(['/ghost/refill', '/ghost/refill/'], (req, res) => {
     if (ghostState.isPaperMode) {
       ghostState.liquidity.eur = 1000;
       ghostState.liquidity.usdc = 1000;
@@ -1050,7 +1066,7 @@ async function startServer() {
     res.status(400).json({ success: false, error: "Only available in Paper Mode" });
   });
 
-  app.post('/api/ghost/api-key', (req, res) => {
+  apiRouter.post(['/ghost/api-key', '/ghost/api-key/'], (req, res) => {
     const { key } = req.body;
     if (key && key.startsWith('AIza')) {
       API_KEY = key;
@@ -1062,15 +1078,30 @@ async function startServer() {
     }
   });
 
-  app.post('/api/trade', async (req, res) => {
+  apiRouter.post(['/trade', '/trade/'], async (req, res) => {
     const { symbol, side, amount_eur } = req.body;
     const result = await executeTrade(symbol, side, amount_eur, 0);
     res.json(result);
   });
 
   // Catch-all for /api routes that don't match
-  app.all('/api/*', (req, res) => {
+  apiRouter.all('*', (req, res) => {
     res.status(404).json({ error: `API route not found: ${req.method} ${req.path}` });
+  });
+
+  app.use('/api', apiRouter);
+
+  fs.appendFileSync('debug.log', `[STARTUP] Middleware and routes configured.\n`);
+
+  // Global Error Handler for API
+  app.use('/api', (err: any, req: any, res: any, _next: any) => {
+    console.error(`[API ERROR HANDLER] ${req.method} ${req.url}:`, err);
+    fs.appendFileSync('debug.log', `[API ERROR HANDLER] ${req.method} ${req.url}: ${err.message}\n`);
+    res.status(err.status || 500).json({ 
+      error: 'Internal Server Error', 
+      message: err.message,
+      path: req.url
+    });
   });
 
   // Vite middleware for development
@@ -1108,10 +1139,10 @@ async function startServer() {
     monitorPositionsAI();
     scanWatchlist();
     
-    setInterval(monitor, 3000);           // Hard TP/SL check (3s)
-    setInterval(monitorPositionsAI, 45000); // AI Position Analysis (45s)
-    setInterval(scanWatchlist, 45000);      // New Signal Scanning (45s)
-    setInterval(listAvailableProducts, 300000); // Refresh products every 5m
+    setInterval(monitor, 5000);           // Hard TP/SL check (5s)
+    setInterval(monitorPositionsAI, 120000); // AI Position Analysis (2m)
+    setInterval(scanWatchlist, 120000);      // New Signal Scanning (2m)
+    setInterval(listAvailableProducts, 600000); // Refresh products every 10m
   });
 }
 

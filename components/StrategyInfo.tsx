@@ -15,7 +15,7 @@ const StrategyInfo: React.FC = () => {
           <span>استراتژی تأیید سه‌گانه (Triple Confirmation)</span>
         </h3>
         <p className="text-sm leading-relaxed mb-4 text-slate-400" dir="rtl">
-          این ربات از یک سیستم تأیید سه‌گانه برای شناسایی تریدهای با کیفیت (روزی ۲ تا ۳ ترید) استفاده می‌کند تا سود روزانه شما را با کمترین ریسک حفظ کند.
+          این ربات از یک سیستم تأیید هوشمند برای شناسایی تریدهای سودآور در تایم‌فریم ۱۵ دقیقه استفاده می‌کند. استراتژی جدید برای تعادل بین تهاجم و صبر بهینه‌سازی شده تا تریدهای بیشتری با سود بالای ۱.۵٪ انجام دهد.
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -79,7 +79,7 @@ const StrategyInfo: React.FC = () => {
         <div className="space-y-4 text-[11px] text-slate-400 leading-relaxed" dir="rtl">
           <div className="flex items-start space-x-3 space-x-reverse">
             <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full mt-1.5 shrink-0"></div>
-            <p>**رصد مداوم:** هر ۴۵ ثانیه چارت ۱۵ دقیقه‌ای طلا، نفت و پوند را اسکن می‌کند.</p>
+            <p>**رصد مداوم:** هر ۱۲۰ ثانیه چارت ۱۵ دقیقه‌ای ارزهای برتر بازار را اسکن می‌کند.</p>
           </div>
           <div className="flex items-start space-x-3 space-x-reverse">
             <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full mt-1.5 shrink-0"></div>
@@ -87,11 +87,11 @@ const StrategyInfo: React.FC = () => {
           </div>
           <div className="flex items-start space-x-3 space-x-reverse">
             <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full mt-1.5 shrink-0"></div>
-            <p>**ورود هدفمند:** فقط زمانی وارد ترید می‌شود که اطمینان بالای ۸۰٪ داشته باشد و سود پیش‌بینی شده کارمزد صرافی را پوشش دهد.</p>
+            <p>**ورود هدفمند:** فقط زمانی وارد ترید می‌شود که اطمینان بالای ۷۵٪ داشته باشد و سود پیش‌بینی شده بالای ۱.۵٪ باشد تا سود خالص قابل لمس باشد.</p>
           </div>
           <div className="flex items-start space-x-3 space-x-reverse">
             <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full mt-1.5 shrink-0"></div>
-            <p>**حفظ سود:** به محض رسیدن به هدف سود روزانه، برای جلوگیری از ریسک اضافی، فعالیتش را تا روز بعد متوقف می‌کند.</p>
+            <p>**حفظ سود:** به محض رسیدن به هدف سود روزانه یا حد ضرر روزانه، فعالیتش را برای حفظ سرمایه متوقف می‌کند.</p>
           </div>
         </div>
       </div>

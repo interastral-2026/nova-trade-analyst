@@ -3,7 +3,7 @@
   "autoPilot": true,
   "isPaperMode": true,
   "settings": {
-    "confidenceThreshold": 80,
+    "confidenceThreshold": 75,
     "defaultTradeSize": 100,
     "minRoi": 1.5,
     "maxDailyDrawdown": -50,
@@ -13,30 +13,69 @@
   "thoughts": [
     {
       "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای ETH: {\"error\":{\"code\":404,\"message\":\"models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.\",\"status\":\"NOT_FOUND\"}}",
-      "symbol": "ETH",
-      "timestamp": "2026-03-29T01:44:34.184Z",
-      "confidence": 0,
+      "confidence": 55,
       "potentialRoi": 0,
-      "id": "4bb46fbc-85af-46b2-89bd-bebb1b5b5155"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای BTC: {\"error\":{\"code\":404,\"message\":\"models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.\",\"status\":\"NOT_FOUND\"}}",
-      "symbol": "BTC",
-      "timestamp": "2026-03-29T01:44:31.470Z",
-      "confidence": 0,
-      "potentialRoi": 0,
-      "id": "d04df533-62bb-4dee-8fbf-d9691e6f01c6"
-    },
-    {
-      "side": "NEUTRAL",
-      "analysis": "خطا در تحلیل هوش مصنوعی برای PAXG: {\"error\":{\"code\":404,\"message\":\"models/gemini-3.1-flash-preview is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.\",\"status\":\"NOT_FOUND\"}}",
+      "sl": 4685,
+      "tp": 4620,
+      "analysis": "ساختار بازار در تایم‌فریم ۱۵ دقیقه نشان‌دهنده نوسانات شدید و عدم وجود جهت‌گیری مشخص (Consolidation) است. قیمت در حال حاضر زیر EMA200 قرار دارد که نشان‌دهنده فشار فروش در بلندمدت است، اما با توجه به داده‌های اخیر، قیمت در یک محدوده رنج گیر کرده و هیچ شکست ساختار (BOS) یا تغییر کاراکتر (ChoCH) معتبری که تاییدکننده ورود به معامله باشد، مشاهده نمی‌شود. نقدینگی در هر دو سمت بازار به صورت پراکنده است و ریسک ورود به معامله در این شرایط بسیار بالا ارزیابی می‌شود. توصیه می‌شود تا زمان تثبیت قیمت و مشاهده یک الگوی بازگشتی یا شکست قاطع از محدوده فعلی، از انجام معامله خودداری شود.",
+      "id": "cbed7942-a168-4d54-82ac-5874130e02aa",
       "symbol": "PAXG",
-      "timestamp": "2026-03-29T01:44:28.281Z",
-      "confidence": 0,
+      "timestamp": "2026-03-31T20:48:11.940Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 65,
       "potentialRoi": 0,
-      "id": "e654662b-eec4-49c7-bc6f-404ab1771635"
+      "sl": 1835.38,
+      "tp": 1805,
+      "analysis": "ساختار بازار در تایم‌فریم ۱۵ دقیقه در حال حاضر در یک محدوده رنج (Consolidation) قرار دارد. قیمت در نزدیکی EMA200 در حال نوسان است که نشان‌دهنده عدم تصمیم‌گیری قطعی بازار است. با وجود روند نزولی کلی، قیمت موفق به شکست سقف‌های اخیر شده اما قدرت کافی برای تثبیت بالای سطوح کلیدی را نشان نداده است. فقدان یک شکست ساختار (BOS) واضح و عدم وجود FVG معتبر در جهت روند، ریسک ورود به معامله را بالا می‌برد. توصیه می‌شود تا زمان مشاهده یک تغییر شخصیت (ChoCH) یا تثبیت قیمت زیر EMA200 صبر کنید.",
+      "id": "313e9e21-3510-4e6a-a855-466acfd621b7",
+      "symbol": "ETH",
+      "timestamp": "2026-03-31T20:48:02.814Z"
+    },
+    {
+      "side": "SELL",
+      "confidence": 82,
+      "potentialRoi": 1.25,
+      "sl": 59250,
+      "tp": 58200,
+      "analysis": "ساختار بازار در تایم‌فریم ۱۵ دقیقه نشان‌دهنده یک روند نزولی غالب است که با قرارگیری قیمت زیر EMA200 تایید می‌شود. قیمت اخیراً در یک ناحیه عرضه (Supply Zone) در محدوده ۵۹۰۰۰ واکنش نشان داده و شکست ساختار (BOS) به سمت پایین در حال شکل‌گیری است. با توجه به نقدینگی موجود در سطوح پایین‌تر و عدم توانایی قیمت برای تثبیت بالای EMA200، انتظار می‌رود یک حرکت اصلاحی به سمت اوردر بلاک (OB) در محدوده ۵۸۲۰۰ داشته باشیم. این یک موقعیت فروش با ریسک به ریوارد مناسب است.",
+      "id": "aeb27f4e-e2a6-4da3-8bbf-72fb3a92d81b",
+      "symbol": "BTC",
+      "timestamp": "2026-03-31T20:47:54.060Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 55,
+      "potentialRoi": 0,
+      "sl": 4685,
+      "tp": 4630,
+      "analysis": "ساختار بازار در تایم‌فریم ۱۵ دقیقه نشان‌دهنده نوسانات شدید و عدم وجود یک روند جهت‌دار مشخص است. قیمت در حال حاضر زیر EMA200 قرار دارد که نشان‌دهنده فشار فروش در میان‌مدت است، اما قیمت فعلی با داده‌های تاریخی ارائه شده در لیست کندل‌ها (که در محدوده ۴۶۰۰ هستند) تفاوت فاحشی دارد. با توجه به عدم انطباق قیمت لحظه‌ای با داده‌های کندل‌های اخیر و نبود یک الگوی شکست ساختار (MSS) واضح یا ناحیه نقدینگی معتبر، ورود به معامله در این شرایط ریسک بسیار بالایی دارد. توصیه می‌شود تا زمان تثبیت قیمت و مشاهده یک واکنش معتبر به نواحی عرضه (Supply Zones) صبر کنید.",
+      "id": "e6b65ba7-33b7-479b-8a3d-4240cf099ce9",
+      "symbol": "PAXG",
+      "timestamp": "2026-03-31T20:43:13.612Z"
+    },
+    {
+      "side": "NEUTRAL",
+      "confidence": 65,
+      "potentialRoi": 0,
+      "sl": 1835.38,
+      "tp": 1805,
+      "analysis": "ساختار بازار در تایم‌فریم ۱۵ دقیقه در وضعیت رنج و بلاتکلیف قرار دارد. قیمت در نزدیکی EMA200 در حال نوسان است که نشان‌دهنده فقدان مومنتوم جهت‌دار قوی است. اگرچه روند کلی نزولی است، اما قیمت موفق به شکست سقف‌های اخیر شده و در حال حاضر در یک ناحیه تعادلی (Consolidation) قرار دارد. عدم وجود یک شکست ساختار (BOS) واضح به سمت پایین و نبود FVG معتبر در جهت روند، ریسک ورود به معامله را بالا می‌برد. پیشنهاد می‌شود تا زمان مشاهده یک تغییر شخصیت (ChoCH) یا شکست قاطع زیر سطح ۱۸۰۵ یورو صبر کنید.",
+      "id": "e232cb72-c1a3-4531-beb5-ce39268e667a",
+      "symbol": "ETH",
+      "timestamp": "2026-03-31T20:43:04.575Z"
+    },
+    {
+      "side": "SELL",
+      "confidence": 82,
+      "potentialRoi": 1.25,
+      "sl": 59250,
+      "tp": 58123,
+      "analysis": "ساختار بازار در تایم‌فریم ۱۵ دقیقه نشان‌دهنده یک روند نزولی غالب است که با قرارگیری قیمت زیر EMA200 تایید می‌شود. قیمت در حال حاضر در یک ناحیه عرضه (Supply Zone) قرار دارد و پس از تلاش ناموفق برای شکست سقف‌های اخیر، شاهد تشکیل یک الگوی بازگشتی هستیم. با توجه به عدم توانایی خریداران در حفظ سطوح بالای ۵۹۰۰۰، انتظار می‌رود قیمت به سمت نقدینگی موجود در سطوح پایین‌تر (Sell-side Liquidity) حرکت کند. ورود به معامله فروش پس از تایید شکست ساختار در تایم‌فریم پایین‌تر و با هدف قرار دادن FVGهای ایجاد شده در مسیر نزولی پیشنهاد می‌شود.",
+      "id": "b823d997-297e-40de-b762-91b86b845b96",
+      "symbol": "BTC",
+      "timestamp": "2026-03-31T20:42:54.811Z"
     }
   ],
   "executionLogs": [],
@@ -50,9 +89,9 @@
     "trades": 0,
     "profit": 0,
     "dailyGoal": 50,
-    "lastResetDate": "2026-03-29"
+    "lastResetDate": "2026-03-31"
   },
   "totalProfit": 0,
-  "currentStatus": "SCAN_BATCH_DONE_3446",
-  "scanIndex": 3446
+  "currentStatus": "SCAN_BATCH_DONE_6",
+  "scanIndex": 6
 }
