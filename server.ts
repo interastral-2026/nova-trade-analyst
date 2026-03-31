@@ -9,6 +9,7 @@ import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from 'dotenv';
+import { GhostState } from './types.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -89,8 +90,8 @@ async function listAvailableProducts() {
     });
     const products = response.data?.products || [];
     availableEurPairs = products
-      .filter(p => p.quote_currency_id === 'EUR' && p.is_disabled === false)
-      .map(p => p.product_id);
+      .filter((p: any) => p.quote_currency_id === 'EUR' && p.is_disabled === false)
+      .map((p: any) => p.product_id);
     console.log("--------------------------------------------------");
     console.log("✅ VALID EUR TRADING PAIRS FOR YOUR ACCOUNT:");
     console.log(availableEurPairs.join(', '));
@@ -100,7 +101,7 @@ async function listAvailableProducts() {
   }
 }
 
-function generateCoinbaseJWT(request_method, request_path) {
+function generateCoinbaseJWT(request_method: string, request_path: string) {
   if (!CB_API_KEY || !CB_API_SECRET) return null;
   try {
     const request_host = 'api.coinbase.com';
@@ -118,7 +119,7 @@ function generateCoinbaseJWT(request_method, request_path) {
       nonce: crypto.randomBytes(16).toString("hex"),
     };
     return jwt.sign(payload, CB_API_SECRET, { algorithm: 'ES256', header });
-  } catch (e) {
+  } catch (e: any) {
     console.error("JWT Error:", e.message);
     return null;
   }
@@ -192,13 +193,13 @@ async function syncCoinbaseBalance() {
     ghostState.actualBalances = newBalances;
     console.log(`[SYNC] Coinbase Balance Updated. EUR: ${ghostState.liquidity.eur}, Assets: ${Object.keys(newBalances).join(', ')}`);
     return true;
-  } catch (e) {
+  } catch (e: any) {
     console.error("[SYNC ERROR] Failed to fetch Coinbase balances:", e.message);
     return false;
   }
 }
 
-async function executeTrade(symbol, side, amount, quantity) {
+async function executeTrade(symbol: string, side: string, amount: number, quantity: number) {
   if (ghostState.isPaperMode) {
     console.log(`[PAPER TRADE SUCCESS] ${side} ${symbol} (Amount: ${amount}, Qty: ${quantity})`);
     return { success: true };
@@ -354,7 +355,7 @@ function calculateRSI(data: number[], period: number = 14) {
   return 100 - (100 / (1 + rs));
 }
 
-async function getAdvancedAnalysis(symbol, price, candles, _entryPrice = null) {
+async function getAdvancedAnalysis(symbol: string, price: number, candles: any[], _entryPrice: number | null = null) {
   // Add a small random delay (0-3s) to prevent simultaneous bursts
   await new Promise(r => setTimeout(r, Math.random() * 3000));
 
@@ -479,9 +480,9 @@ OUTPUT RULES:
   }
 }
 
-function loadState() {
+function loadState(): GhostState {
   fs.appendFileSync('debug.log', `[INIT] Loading state from ${STATE_FILE}...\n`);
-  const defaults = {
+  const defaults: GhostState = {
     isEngineActive: true, autoPilot: true, isPaperMode: true,
     settings: { confidenceThreshold: 75, defaultTradeSize: 100.0, minRoi: 1.5, maxDailyDrawdown: -50.0, dailyProfitTargetPercent: 5.0, riskPerTradePercent: 100 },
     thoughts: [], executionLogs: [], activePositions: [],
@@ -563,21 +564,30 @@ async function monitorPositionsAI() {
 
         const analysis = await getAdvancedAnalysis(pos.symbol, price, candles, pos.entryPrice);
         
-        if (analysis && analysis.side === 'SELL') {
-          const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
-          const isProfitable = price > (breakEvenPrice * (1 + MIN_NET_PROFIT));
+        const isOppositeSignal = (pos.side === 'BUY' && analysis.side === 'SELL') || (pos.side === 'SELL' && analysis.side === 'BUY');
+
+        if (analysis && isOppositeSignal) {
+          const pnlPercent = pos.side === 'SELL'
+            ? ((pos.entryPrice - price) / pos.entryPrice) * 100
+            : ((price - pos.entryPrice) / pos.entryPrice) * 100;
           
-          // AI SELL SIGNAL: Exit if profitable or if confidence is very high for a drop (emergency exit)
-          // Be more aggressive: if confidence > 80, cut the loss to free liquidity.
+          const netPnlPercent = pnlPercent - (FEE_RATE * 100);
+          const isProfitable = netPnlPercent > MIN_NET_PROFIT;
+          
+          // AI OPPOSITE SIGNAL: Exit if profitable or if confidence is very high (emergency exit)
           if (isProfitable || analysis.confidence >= 80) {
-            const tradePnl = (price - pos.entryPrice) * pos.quantity;
-            const netPnl = tradePnl - (pos.amount * FEE_RATE);
-            console.log(`[AI-MONITOR] AI SELL for ${pos.symbol}. Net PNL: ${netPnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
+            const tradePnl = pos.side === 'SELL'
+              ? (pos.entryPrice - price) * pos.quantity
+              : (price - pos.entryPrice) * pos.quantity;
             
-            const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
+            console.log(`[AI-MONITOR] AI ${analysis.side} (Exit) for ${pos.symbol} ${pos.side}. Net PNL: ${tradePnl.toFixed(2)} EUR. Reason: ${analysis.analysis}`);
+            
+            const exitSide = pos.side === 'BUY' ? 'SELL' : 'BUY';
+            const tradeResult = await executeTrade(pos.symbol, exitSide, 0, pos.quantity);
             if (tradeResult.success) {
               ghostState.dailyStats.profit += tradePnl;
               ghostState.totalProfit += tradePnl;
+              ghostState.liquidity.eur += (pos.amount + tradePnl);
               ghostState.executionLogs.unshift({
                 id: crypto.randomUUID(),
                 symbol: pos.symbol,
@@ -628,7 +638,7 @@ async function scanWatchlist() {
     }
 
     // Check Daily Profit Target
-    const totalBalance = (ghostState.liquidity.eur || 0) + (ghostState.activePositions.reduce((sum, p) => sum + (p.amount || 0), 0));
+    const totalBalance = (ghostState.liquidity.eur || 0) + (ghostState.activePositions.reduce((sum: number, p) => sum + (p.amount || 0), 0));
     const profitTarget = totalBalance * ((ghostState.settings.dailyProfitTargetPercent || 2.0) / 100);
     if (ghostState.dailyStats.profit >= profitTarget && ghostState.dailyStats.profit > 0) {
       console.log(`[SCAN] Daily profit target reached (${ghostState.dailyStats.profit.toFixed(2)} EUR). Resting for today.`);
@@ -712,7 +722,7 @@ async function scanWatchlist() {
         const minConfidence = ghostState.settings.highPrecision ? 85 : (ghostState.settings.confidenceThreshold || 78);
         const minNetProfit = ghostState.settings.highPrecision ? 0.006 : MIN_NET_PROFIT;
 
-        if (analysis && analysis.side === 'BUY' && analysis.confidence >= minConfidence) {
+        if (analysis && (analysis.side === 'BUY' || analysis.side === 'SELL') && analysis.confidence >= minConfidence) {
           const isProfitableEnough = analysis.potentialRoi >= ((FEE_RATE * 100) + (minNetProfit * 100));
           if (isProfitableEnough) {
             candidates.push({ symbol, price, analysis });
@@ -723,7 +733,7 @@ async function scanWatchlist() {
           ghostState.thoughts.unshift(analysis);
           if (ghostState.thoughts.length > 50) ghostState.thoughts.pop();
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error(`[SCAN ERROR] ${symbol}:`, e.message);
       }
     }
@@ -758,23 +768,29 @@ async function scanWatchlist() {
         return;
       }
         const qty = tradeAmount / (price || 1);
-        const tradeResult = await executeTrade(symbol, 'BUY', tradeAmount, qty);
+        const tradeResult = await executeTrade(symbol, analysis.side, tradeAmount, qty);
         
         if (tradeResult.success) {
           ghostState.activePositions.push({
-            symbol, entryPrice: price, currentPrice: price, peakPrice: price, amount: tradeAmount, quantity: qty,
+            symbol, side: analysis.side, entryPrice: price, currentPrice: price, peakPrice: price, amount: tradeAmount, quantity: qty,
             tp: analysis.tp, sl: analysis.sl, confidence: analysis.confidence, potentialRoi: analysis.potentialRoi,
             estimatedTimeMinutes: analysis.estimatedTimeMinutes,
             analysis: analysis.analysis,
             pnl: 0, pnlPercent: 0, isPaper: ghostState.isPaperMode, timestamp: new Date().toISOString()
           });
           
-          ghostState.liquidity.eur -= tradeAmount;
+          if (analysis.side === 'BUY') {
+            ghostState.liquidity.eur -= tradeAmount;
+          } else {
+            // For SELL (Short), we technically "borrow" or sell first. 
+            // In spot, this is complex, but for the bot's logic, we track it.
+            ghostState.liquidity.eur -= tradeAmount; 
+          }
 
           ghostState.executionLogs.unshift({ 
             id: crypto.randomUUID(), 
             symbol, 
-            action: 'BUY', 
+            action: analysis.side, 
             price, 
             status: 'SUCCESS', 
             details: `BEST_CANDIDATE_CONF_${analysis.confidence}%`,
@@ -849,8 +865,10 @@ async function monitor() {
             console.log(`[RECONCILE] Adopting position: ${symbol} (${qty})`);
             ghostState.activePositions.push({
               symbol,
+              side: 'BUY',
               entryPrice: 0, 
               currentPrice: 0,
+              peakPrice: 0,
               amount: 0,
               quantity: qty,
               tp: 0,
@@ -912,67 +930,84 @@ async function monitor() {
         }
 
         pos.currentPrice = curPrice;
-        if (curPrice > (pos.peakPrice || 0)) {
-          pos.peakPrice = curPrice;
-        }
-        const pnlPercent = ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
-        pos.pnlPercent = pnlPercent;
-        pos.pnl = (curPrice - pos.entryPrice) * pos.quantity;
         
-        const breakEvenPrice = pos.entryPrice * (1 + FEE_RATE);
+        // Update peak price for trailing stop logic
+        if (pos.side === 'SELL') {
+          if (curPrice < (pos.peakPrice || Infinity)) pos.peakPrice = curPrice;
+        } else {
+          if (curPrice > (pos.peakPrice || 0)) pos.peakPrice = curPrice;
+        }
+
+        const pnlPercent = pos.side === 'SELL'
+          ? ((pos.entryPrice - curPrice) / (pos.entryPrice || 1)) * 100
+          : ((curPrice - pos.entryPrice) / (pos.entryPrice || 1)) * 100;
+        
+        pos.pnlPercent = pnlPercent;
+        pos.pnl = pos.side === 'SELL'
+          ? (pos.entryPrice - curPrice) * pos.quantity
+          : (curPrice - pos.entryPrice) * pos.quantity;
+        
+        const breakEvenPrice = pos.side === 'SELL'
+          ? pos.entryPrice * (1 - FEE_RATE)
+          : pos.entryPrice * (1 + FEE_RATE);
+        
         const netPnlPercent = pnlPercent - (FEE_RATE * 100);
+        
+        // Define isStagnant: Trade open > 30m with minimal movement
+        const startTime = new Date(pos.timestamp).getTime();
+        const elapsedMinutes = (Date.now() - startTime) / 60000;
+        const isStagnant = elapsedMinutes > 30 && Math.abs(netPnlPercent) < 0.1;
 
         // Dynamic Trailing Stop & Break Even (Aggressive for Scalping)
-        if (netPnlPercent > 0.15 && pos.sl < breakEvenPrice) {
-          pos.sl = breakEvenPrice * (1 + 0.001); // BE + 0.1% profit buffer
-          console.log(`[MONITOR] Break-Even activated for ${pos.symbol} @ ${pos.sl.toFixed(2)}`);
-        }
-
-        if (netPnlPercent > 0.4) {
-          const newSl = curPrice * 0.9985; // 0.15% trailing stop once in 0.4% net profit
-          if (newSl > pos.sl) {
-            pos.sl = newSl;
-            console.log(`[MONITOR] Aggressive Trailing Stop moved for ${pos.symbol} @ ${newSl.toFixed(2)}`);
+        if (netPnlPercent > 0.15) {
+          if (pos.side === 'BUY' && pos.sl < breakEvenPrice) {
+            pos.sl = breakEvenPrice * (1 + 0.001); // BE + 0.1% profit buffer
+            console.log(`[MONITOR] Break-Even activated for ${pos.symbol} BUY @ ${pos.sl.toFixed(2)}`);
+          } else if (pos.side === 'SELL' && pos.sl > breakEvenPrice) {
+            pos.sl = breakEvenPrice * (1 - 0.001); // BE + 0.1% profit buffer
+            console.log(`[MONITOR] Break-Even activated for ${pos.symbol} SELL @ ${pos.sl.toFixed(2)}`);
           }
         }
 
-        if (netPnlPercent > 1.0) {
-          const newSl = curPrice * 0.995; // 0.5% trailing stop once in 1% net profit
-          if (newSl > pos.sl) {
+        if (netPnlPercent > 0.4) {
+          const newSl = pos.side === 'SELL' ? curPrice * 1.0015 : curPrice * 0.9985;
+          if ((pos.side === 'BUY' && newSl > pos.sl) || (pos.side === 'SELL' && newSl < pos.sl)) {
             pos.sl = newSl;
+            console.log(`[MONITOR] Aggressive Trailing Stop moved for ${pos.symbol} ${pos.side} @ ${newSl.toFixed(2)}`);
           }
         }
 
         // EARLY EXIT: If price reaches 80% of TP
-        const tpDistance = pos.tp - pos.entryPrice;
-        const earlyExitPrice = pos.entryPrice + (tpDistance * 0.8);
+        const tpDistance = Math.abs(pos.tp - pos.entryPrice);
+        const earlyExitPrice = pos.side === 'SELL' 
+          ? pos.entryPrice - (tpDistance * 0.8)
+          : pos.entryPrice + (tpDistance * 0.8);
+        
         const canExitSafely = curPrice > (breakEvenPrice * (1 + MIN_NET_PROFIT));
 
-        // TIME-BASED EXIT: Scalping focus (15m candles). If no profit after ~2 candles (30 mins), exit.
-        const tradeAgeMs = new Date().getTime() - new Date(pos.timestamp).getTime();
-        const tradeAgeMins = tradeAgeMs / (1000 * 60);
-        const isStagnant = tradeAgeMins > 30 && netPnlPercent < 0.2;
-
-        // PROFIT SATURATION EXIT: If in good profit (>0.5% net) and price drops 0.15% from peak, exit to lock gains.
-        const dropFromPeak = pos.peakPrice ? ((pos.peakPrice - curPrice) / pos.peakPrice) * 100 : 0;
+        // PROFIT SATURATION EXIT
+        const dropFromPeak = pos.peakPrice 
+          ? (Math.abs(pos.peakPrice - curPrice) / pos.peakPrice) * 100 
+          : 0;
         const isProfitSaturated = netPnlPercent > 0.5 && dropFromPeak > 0.15;
 
-        // Trigger SELL if:
-        // 1. Reached TP
-        // 2. Reached SL
-        // 3. Reached 80% of TP and is safe to exit
-        // 4. Trade is stagnant (time-based exit)
-        // 5. Profit is saturated (momentum fade)
-        if (curPrice >= pos.tp || curPrice <= pos.sl || (tpDistance > 0 && curPrice >= earlyExitPrice && netPnlPercent > 0.4 && canExitSafely) || isStagnant || isProfitSaturated) {
-          let reason = curPrice >= pos.tp ? 'TAKE_PROFIT' : (curPrice <= pos.sl ? 'STOP_LOSS' : 'EARLY_EXIT_80%_TP');
+        // Trigger Exit if:
+        const isTpReached = pos.side === 'SELL' ? curPrice <= pos.tp : curPrice >= pos.tp;
+        const isSlReached = pos.side === 'SELL' ? curPrice >= pos.sl : curPrice <= pos.sl;
+        const isEarlyExitReached = pos.side === 'SELL' ? curPrice <= earlyExitPrice : curPrice >= earlyExitPrice;
+
+        if (isTpReached || isSlReached || (tpDistance > 0 && isEarlyExitReached && netPnlPercent > 0.4 && canExitSafely) || isStagnant || isProfitSaturated) {
+          let reason = isTpReached ? 'TAKE_PROFIT' : (isSlReached ? 'STOP_LOSS' : 'EARLY_EXIT_80%_TP');
           if (isStagnant) reason = 'TIME_STAGNATION_30M';
           if (isProfitSaturated) reason = 'MOMENTUM_FADE_EXIT';
           
-          const tradeResult = await executeTrade(pos.symbol, 'SELL', 0, pos.quantity);
+          const exitSide = pos.side === 'BUY' ? 'SELL' : 'BUY';
+          const tradeResult = await executeTrade(pos.symbol, exitSide, 0, pos.quantity);
           
           if (tradeResult.success) {
             ghostState.dailyStats.profit += pos.pnl;
             ghostState.totalProfit += pos.pnl;
+            ghostState.liquidity.eur += (pos.amount + pos.pnl); // Return capital + profit
             ghostState.executionLogs.unshift({ 
               id: crypto.randomUUID(), 
               symbol: pos.symbol, 

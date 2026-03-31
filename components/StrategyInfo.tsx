@@ -18,7 +18,17 @@ const StrategyInfo: React.FC = () => {
           این ربات از یک سیستم تأیید هوشمند برای شناسایی تریدهای سودآور در تایم‌فریم ۱۵ دقیقه استفاده می‌کند. استراتژی جدید برای تعادل بین تهاجم و صبر بهینه‌سازی شده تا تریدهای بیشتری با سود بالای ۱.۵٪ انجام دهد.
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
+            <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center space-x-2">
+              <i className="fas fa-arrows-alt-v text-[10px]"></i>
+              <span>جهت معامله (Direction)</span>
+            </h4>
+            <p className="text-[11px] text-slate-400" dir="rtl">
+              قابلیت باز کردن پوزیشن‌های **Long (خرید)** و **Short (فروش)** برای سودآوری در هر دو جهت بازار.
+            </p>
+          </div>
+          
           <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
             <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center space-x-2">
               <i className="fas fa-search-dollar text-[10px]"></i>

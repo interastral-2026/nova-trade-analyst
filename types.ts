@@ -6,6 +6,11 @@ export interface GhostState {
   settings: {
     confidenceThreshold: number;
     defaultTradeSize: number;
+    minRoi?: number;
+    maxDailyDrawdown?: number;
+    dailyProfitTargetPercent?: number;
+    riskPerTradePercent?: number;
+    highPrecision?: boolean;
   };
   thoughts: TradeSignal[];
   executionLogs: ExecutionLog[];
@@ -21,6 +26,7 @@ export interface GhostState {
     dailyGoal: number;
     lastResetDate: string;
   };
+  totalProfit: number;
   currentStatus: string;
   scanIndex: number;
 }
@@ -67,8 +73,10 @@ export interface AccountBalance {
 
 export interface ActivePosition {
   symbol: string;
+  side: 'BUY' | 'SELL';
   entryPrice: number;
   currentPrice: number;
+  peakPrice?: number;
   amount: number;
   quantity: number;
   tp: number;

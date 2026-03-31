@@ -22,6 +22,12 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
     try {
       const res = await fetch(`${getApiBase()}/api/ghost/state`);
       if (!res.ok) return;
+      
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        return;
+      }
+
       const data = await res.json();
       setStats({ 
         eur: Number(data.liquidity?.eur) || 0, 
@@ -166,7 +172,10 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
                             <div>
                                <div className="flex items-center space-x-3 mb-1">
                                  <h4 className="text-xl lg:text-2xl font-black text-white tracking-tighter uppercase">{pos.symbol}</h4>
-                                 <span className="bg-indigo-500/10 text-indigo-400 text-[8px] px-2 py-0.5 rounded font-black border border-indigo-500/20 uppercase tracking-widest">SMC_ACTIVE</span>
+                                 <span className={`text-[8px] px-2 py-0.5 rounded font-black border uppercase tracking-widest ${pos.side === 'SELL' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'}`}>
+                                   {pos.side || 'BUY'}
+                                 </span>
+                                 <span className="bg-white/5 text-slate-400 text-[8px] px-2 py-0.5 rounded font-black border border-white/10 uppercase tracking-widest">SMC_ACTIVE</span>
                                </div>
                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
                                  {getSafeNum(pos.confidence)}% Conf. | {getSafeNum(pos.potentialRoi).toFixed(1)}% ROI
