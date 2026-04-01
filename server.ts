@@ -1070,7 +1070,8 @@ async function startServer() {
   
   apiRouter.get(['/ghost/state', '/ghost/state/'], (req, res) => {
     fs.appendFileSync('debug.log', `[API] GET /api/ghost/state from ${req.ip}\n`);
-    res.json(ghostState);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(ghostState));
   });
 
   apiRouter.get(['/ghost/pending-analysis', '/ghost/pending-analysis/'], (req, res) => res.json([]));
