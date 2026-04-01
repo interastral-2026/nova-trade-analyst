@@ -406,17 +406,17 @@ HISTORY_15M_CANDLES: ${JSON.stringify(history)}.
 STATS_24H: ${JSON.stringify(stats24h)}.
 CURRENT_DAILY_PROFIT: ${ghostState.dailyStats.profit} EUR.` }] }],
       config: {
-        systemInstruction: `You are a SENIOR QUANTITATIVE STRATEGIST specializing in Smart Money Concepts (SMC) and Institutional Order Flow.
-Your goal: Identify high-probability institutional setups on 15-minute charts for short-term profitable trades.
+        systemInstruction: `You are a SENIOR QUANTITATIVE STRATEGIST specializing in Smart Money Concepts (SMC) and Micro-Scalping.
+Your goal: Identify high-probability institutional setups on 15-minute charts for ultra short-term profitable trades (10-15 minutes hold time).
 
 CORE ANALYSIS PROTOCOL:
-1. Market Structure: Identify the current swing high/low. Look for Break of Structure (BOS) or Change of Character (ChoCH).
-2. Liquidity & Gaps: Locate Fair Value Gaps (FVG) and Liquidity Pools (Buy-side/Sell-side).
+1. Market Structure: Identify the current swing high/low. Look for immediate Break of Structure (BOS) or Change of Character (ChoCH) on the micro level.
+2. Liquidity & Gaps: Locate Fair Value Gaps (FVG) that are likely to be filled in the next 1-2 candles.
 3. Institutional Footprints: Identify valid Order Blocks (OB) that led to a strong displacement.
 4. Confluence: Suggest a trade if there is a clear Market Structure Shift (MSS) aligned with RSI momentum and EMA200 trend.
 
 SCORING LOGIC:
-- 80-100%: A-Grade Setup. Clear MSS + FVG fill + OB bounce.
+- 80-100%: A-Grade Setup. Clear MSS + FVG fill + OB bounce. Perfect for a quick 10-minute scalp.
 - 70-79%: B-Grade Setup. Strong trend and momentum, good for quick scalps.
 - 50-69%: Neutral/Consolidation. High risk of "choppiness".
 - 0-49%: No clear edge.
@@ -424,7 +424,7 @@ SCORING LOGIC:
 OUTPUT RULES:
 - If confidence < 70%, side MUST be NEUTRAL.
 - Analysis MUST be in PERSIAN (Farsi) and explain the specific SMC elements found.
-- ROI and Confidence must be REALISTIC based on the 15m volatility. Aim for at least 1.5% ROI.
+- ROI and Confidence must be REALISTIC based on the 15m volatility. Aim for 0.5% to 1.5% ROI for these quick scalps.
 - potentialRoi MUST be calculated as: ((tp - price) / price) * 100 for BUY, or ((price - tp) / price) * 100 for SELL.
 - Return ONLY JSON.`,
         responseMimeType: "application/json",
@@ -953,24 +953,25 @@ async function monitor() {
         
         const netPnlPercent = pnlPercent - (FEE_RATE * 100);
         
-        // Define isStagnant: Trade open > 30m with minimal movement
+        // Define isStagnant: Trade open > 15m with minimal movement (Micro-Scalping)
         const startTime = new Date(pos.timestamp).getTime();
         const elapsedMinutes = (Date.now() - startTime) / 60000;
-        const isStagnant = elapsedMinutes > 30 && Math.abs(netPnlPercent) < 0.1;
+        const isStagnant = elapsedMinutes > 15 && Math.abs(netPnlPercent) < 0.2;
+        const isTimeLimitReached = elapsedMinutes > 30; // Hard exit after 30 mins
 
         // Dynamic Trailing Stop & Break Even (Aggressive for Scalping)
-        if (netPnlPercent > 0.15) {
+        if (netPnlPercent > 0.1) {
           if (pos.side === 'BUY' && pos.sl < breakEvenPrice) {
-            pos.sl = breakEvenPrice * (1 + 0.001); // BE + 0.1% profit buffer
+            pos.sl = breakEvenPrice * (1 + 0.0005); // BE + 0.05% profit buffer
             console.log(`[MONITOR] Break-Even activated for ${pos.symbol} BUY @ ${pos.sl.toFixed(2)}`);
           } else if (pos.side === 'SELL' && pos.sl > breakEvenPrice) {
-            pos.sl = breakEvenPrice * (1 - 0.001); // BE + 0.1% profit buffer
+            pos.sl = breakEvenPrice * (1 - 0.0005); // BE + 0.05% profit buffer
             console.log(`[MONITOR] Break-Even activated for ${pos.symbol} SELL @ ${pos.sl.toFixed(2)}`);
           }
         }
 
-        if (netPnlPercent > 0.4) {
-          const newSl = pos.side === 'SELL' ? curPrice * 1.0015 : curPrice * 0.9985;
+        if (netPnlPercent > 0.3) {
+          const newSl = pos.side === 'SELL' ? curPrice * 1.001 : curPrice * 0.999;
           if ((pos.side === 'BUY' && newSl > pos.sl) || (pos.side === 'SELL' && newSl < pos.sl)) {
             pos.sl = newSl;
             console.log(`[MONITOR] Aggressive Trailing Stop moved for ${pos.symbol} ${pos.side} @ ${newSl.toFixed(2)}`);
@@ -989,16 +990,17 @@ async function monitor() {
         const dropFromPeak = pos.peakPrice 
           ? (Math.abs(pos.peakPrice - curPrice) / pos.peakPrice) * 100 
           : 0;
-        const isProfitSaturated = netPnlPercent > 0.5 && dropFromPeak > 0.15;
+        const isProfitSaturated = netPnlPercent > 0.3 && dropFromPeak > 0.1;
 
         // Trigger Exit if:
         const isTpReached = pos.side === 'SELL' ? curPrice <= pos.tp : curPrice >= pos.tp;
         const isSlReached = pos.side === 'SELL' ? curPrice >= pos.sl : curPrice <= pos.sl;
         const isEarlyExitReached = pos.side === 'SELL' ? curPrice <= earlyExitPrice : curPrice >= earlyExitPrice;
 
-        if (isTpReached || isSlReached || (tpDistance > 0 && isEarlyExitReached && netPnlPercent > 0.4 && canExitSafely) || isStagnant || isProfitSaturated) {
+        if (isTpReached || isSlReached || (tpDistance > 0 && isEarlyExitReached && netPnlPercent > 0.2 && canExitSafely) || isStagnant || isProfitSaturated || isTimeLimitReached) {
           let reason = isTpReached ? 'TAKE_PROFIT' : (isSlReached ? 'STOP_LOSS' : 'EARLY_EXIT_80%_TP');
-          if (isStagnant) reason = 'TIME_STAGNATION_30M';
+          if (isStagnant) reason = 'TIME_STAGNATION_15M';
+          if (isTimeLimitReached) reason = 'TIME_LIMIT_30M';
           if (isProfitSaturated) reason = 'MOMENTUM_FADE_EXIT';
           
           const exitSide = pos.side === 'BUY' ? 'SELL' : 'BUY';
