@@ -132,20 +132,39 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
 
           {isPaperMode && (
-            <button 
-              onClick={async () => {
-                try {
-                  await fetch(`${getApiBase()}/api/ghost/refill`, { method: 'POST' });
-                  window.location.reload();
-                } catch {
-                  console.error("Failed to refill funds");
-                }
-              }}
-              className="w-full py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase rounded-lg border border-amber-500/20 transition-all"
-            >
-              <i className="fas fa-gas-pump mr-2"></i>
-              Refill Paper Funds (1000 EUR)
-            </button>
+            <div className="space-y-2">
+              <button 
+                onClick={async () => {
+                  try {
+                    await fetch(`${getApiBase()}/api/ghost/refill`, { method: 'POST' });
+                    window.location.reload();
+                  } catch {
+                    console.error("Failed to refill funds");
+                  }
+                }}
+                className="w-full py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-[8px] font-black uppercase rounded-lg border border-amber-500/20 transition-all"
+              >
+                <i className="fas fa-gas-pump mr-2"></i>
+                Refill Paper Funds (1000 EUR)
+              </button>
+              
+              <button 
+                onClick={async () => {
+                  if (window.confirm("Are you sure you want to reset ALL bot state? This will clear profit, logs, and active positions.")) {
+                    try {
+                      await fetch(`${getApiBase()}/api/ghost/reset`, { method: 'POST' });
+                      window.location.reload();
+                    } catch {
+                      console.error("Failed to reset bot");
+                    }
+                  }
+                }}
+                className="w-full py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[8px] font-black uppercase rounded-lg border border-rose-500/20 transition-all"
+              >
+                <i className="fas fa-trash-alt mr-2"></i>
+                Reset Bot State (Hard Reset)
+              </button>
+            </div>
           )}
         </div>
       </div>

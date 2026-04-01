@@ -1069,9 +1069,13 @@ async function startServer() {
   apiRouter.get('/ping', (req, res) => res.json({ status: 'pong', timestamp: new Date().toISOString() }));
   
   apiRouter.get(['/ghost/state', '/ghost/state/'], (req, res) => {
-    fs.appendFileSync('debug.log', `[API] GET /api/ghost/state from ${req.ip}\n`);
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(ghostState));
+    try {
+      fs.appendFileSync('debug.log', `[API] GET /api/ghost/state - Sending response\n`);
+      res.json(ghostState);
+    } catch (err: any) {
+      fs.appendFileSync('debug.log', `[API_ERROR] Failed to send ghost state: ${err.message}\n`);
+      res.status(500).json({ error: 'Internal Server Error', message: err.message });
+    }
   });
 
   apiRouter.get(['/ghost/pending-analysis', '/ghost/pending-analysis/'], (req, res) => res.json([]));
@@ -1100,6 +1104,21 @@ async function startServer() {
       return res.json({ success: true, liquidity: ghostState.liquidity });
     }
     res.status(400).json({ success: false, error: "Only available in Paper Mode" });
+  });
+
+  apiRouter.post(['/ghost/reset', '/ghost/reset/'], (req, res) => {
+    ghostState.totalProfit = 0;
+    ghostState.dailyStats.profit = 0;
+    ghostState.dailyStats.trades = 0;
+    ghostState.executionLogs = [];
+    ghostState.thoughts = [];
+    ghostState.activePositions = []; // Also clear active positions to start fresh
+    if (ghostState.isPaperMode) {
+      ghostState.liquidity.eur = 1000;
+      ghostState.liquidity.usdc = 1000;
+    }
+    saveState();
+    res.json({ success: true });
   });
 
   apiRouter.post(['/ghost/api-key', '/ghost/api-key/'], (req, res) => {

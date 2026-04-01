@@ -69,6 +69,9 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
     return isNaN(n) ? 0 : n;
   };
 
+  const unrealizedPnl = holdings.reduce((sum, pos) => sum + getSafeNum(pos.pnl), 0);
+  const totalEquity = stats.eur + stats.usdc + holdings.reduce((sum, pos) => sum + getSafeNum(pos.amount), 0) + unrealizedPnl;
+
   return (
     <div className="flex flex-col space-y-6 h-full font-mono bg-black/50">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -94,12 +97,19 @@ const TradingTerminal: React.FC<TradingTerminalProps> = ({
         
         <div className="bg-[#080812] border border-white/10 p-7 rounded-[2.2rem] flex flex-col justify-center shadow-lg">
            <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">TOTAL_PROFIT</p>
-           <h2 className="text-2xl font-black text-white tracking-tighter">€{formatPrice(stats.totalProfit)}</h2>
+           <h2 className={`text-2xl font-black tracking-tighter ${stats.totalProfit >= 0 ? 'text-white' : 'text-rose-500'}`}>
+             €{formatPrice(stats.totalProfit)}
+           </h2>
+           {unrealizedPnl !== 0 && (
+             <p className={`text-[9px] font-bold mt-1 ${unrealizedPnl >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+               Unrealized: €{unrealizedPnl.toFixed(2)}
+             </p>
+           )}
         </div>
 
         <div className="bg-[#080812] border border-white/10 p-7 rounded-[2.2rem] flex flex-col justify-center shadow-lg">
-           <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">LIQUIDITY_EUR</p>
-           <h2 className="text-2xl font-black text-white tracking-tighter">€{formatPrice(stats.eur)}</h2>
+           <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">EQUITY_VALUE</p>
+           <h2 className="text-2xl font-black text-white tracking-tighter">€{formatPrice(totalEquity)}</h2>
         </div>
 
         <div className="bg-[#080812] border border-white/10 p-7 rounded-[2.2rem] flex flex-col justify-center relative overflow-hidden shadow-lg">
