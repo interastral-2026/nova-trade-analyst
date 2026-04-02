@@ -652,11 +652,11 @@ async function scanWatchlist() {
     
     console.log(`[SCAN] Watchlist: ${currentWatchlist.join(', ')} (Paper: ${ghostState.isPaperMode})`);
 
-    const batchSize = 3; 
+    const batchSize = 2; 
     const candidates: any[] = [];
 
     for (let i = 0; i < batchSize; i++) {
-      if (i > 0) await new Promise(r => setTimeout(r, 5000));
+      if (i > 0) await new Promise(r => setTimeout(r, 8000));
       
       const symbol = currentWatchlist[ghostState.scanIndex % currentWatchlist.length];
       ghostState.scanIndex++;
@@ -1198,7 +1198,7 @@ async function startServer() {
     
     setInterval(monitor, 5000);           // Hard TP/SL check (5s)
     setInterval(monitorPositionsAI, 120000); // AI Position Analysis (2m)
-    setInterval(scanWatchlist, 120000);      // New Signal Scanning (2m)
+    setInterval(scanWatchlist, 300000);      // New Signal Scanning (5m)
     setInterval(listAvailableProducts, 600000); // Refresh products every 10m
   });
 }
